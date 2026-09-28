@@ -4,9 +4,9 @@
 
    - On every page: the rail cards the engine renders as dead href="#"
      anchors become real navigation. Two modes:
-       * SPA mode (index.html, window.__ASSEMBLY_SPA = true): a rail click
-         swaps the board IN PLACE through the §8 260ms crossfade, with NO
-         history push (B9 bypassed) and the active card indicated.
+       * SPA mode (index.html): a rail click swaps the board IN PLACE through
+         the §8 260ms crossfade, with NO history push (B9 bypassed) and the
+         active card indicated.
        * Deep-link mode (the five static pages): a rail click navigates to
          that board's own page — ordinary navigation, one history entry,
          the same rule any multi-page site follows.
@@ -29,11 +29,6 @@
   var CROSSFADE_MS = 260; // §8
   var FADE_HALF = CROSSFADE_MS / 2;
 
-  function cardForBoard(board) {
-    var el = document.querySelector('.rail-card[data-board-id="' + board.id + '"]');
-    return el || null;
-  }
-
   /* Mark exactly one rail card active (aria-current speaks to AT as well). */
   function markActive(board) {
     document.querySelectorAll('.rail-card').forEach(function (a) {
@@ -55,12 +50,25 @@
       root.classList.add('is-fading');
       // Half the crossfade out, re-render, half back in.
       window.setTimeout(function () {
-        BoardEngine.renderBoard(board, root);
-        BoardEngine.fit(root);
-        // The landing board's parking-lot entry is the contact form — it is
-        // destroyed by every re-render and must come back with the board.
-        if (board === landing) mountContactForm(root);
-        root.classList.remove('is-fading');
+        try {
+          BoardEngine.renderBoard(board, root);
+          BoardEngine.fit(root);
+          // The landing board's parking-lot entry is the contact form — it is
+          // destroyed by every re-render and must come back with the board.
+          if (board === landing) mountContactForm(root);
+        } finally {
+          // The crossfade must end whether or not the mount succeeds: a board
+          // left at .is-fading (opacity: 0) is a blank stage. The throw guard
+          // inside mountContactForm is kept — a missing parking-lot row is a
+          // real data problem, not noise to swallow.
+          root.classList.remove('is-fading');
+          if (board === landing && !root.querySelector('#lot-contact-form')) {
+            // Surface the failure the way the page-level catchers do: on the
+            // title, visibly — not to console alone.
+            var t = document.getElementById('board-title');
+            if (t) t.textContent = 'Contact form could not be mounted';
+          }
+        }
       }, FADE_HALF);
     }
 
@@ -206,7 +214,6 @@
         'Expected exactly one board titled ' + JSON.stringify(title) +
         ', found ' + hits.length);
       return hits[0];
-    },
-    PAGES: PAGES
+    }
   };
 })(window);

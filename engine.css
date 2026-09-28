@@ -24,6 +24,7 @@
   --chrome: #020812;
   --ink-dark: #031019;
   --ink-light: #f4f5f1;
+  --ink-light-rgb: 244 245 241;   /* --ink-light re-spelled for rgb(var() alpha reads */
   --accent-page: #6d9cb0;
   --accent-restore: #b6dee2;
   --accent-copy: #698ebf;
@@ -193,16 +194,16 @@ body {
   white-space: pre-wrap;           /* unframed stacked text (§4.4) — no frame, ever */
 }
 .lot-item--complete {
-  color: rgb(var(--ink-light-rgb, 244 245 241) / 0.12);  /* buried text (§4.3) */
+  color: rgb(var(--ink-light-rgb) / 0.12);  /* buried text (§4.3) */
   position: relative;
 }
 /* Strike: three stroke families at 0.62 light ink — texture, not colour (§4.3) */
 .lot-item--complete::after {
   content: ""; position: absolute; inset: 4px 0;
   background:
-    repeating-linear-gradient(105deg, rgb(244 245 241 / 0.62) 0 1px, transparent 1px 6px),
-    repeating-linear-gradient(75deg,  rgb(244 245 241 / 0.62) 0 1px, transparent 1px 7px),
-    repeating-linear-gradient(90deg,  rgb(244 245 241 / 0.62) 0 1px, transparent 1px 9px);
+    repeating-linear-gradient(105deg, rgb(var(--ink-light-rgb) / 0.62) 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(75deg,  rgb(var(--ink-light-rgb) / 0.62) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(90deg,  rgb(var(--ink-light-rgb) / 0.62) 0 1px, transparent 1px 9px);
   pointer-events: none;
 }
 

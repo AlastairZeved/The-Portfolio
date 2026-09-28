@@ -15,24 +15,6 @@
   <link rel="stylesheet" href="assembly.css">
 </head>
 <body>
-  <aside id="rail" aria-label="Board index">
-    <div class="rail-group" data-cat="todo">
-      <h2 class="rail-head">To Do</h2>
-      <div class="rail-cards" data-slot="todo"></div>
-    </div>
-    <div class="rail-group" data-cat="note">
-      <h2 class="rail-head">Notes</h2>
-      <div class="rail-cards" data-slot="note"></div>
-    </div>
-    <div class="rail-group" data-cat="learning">
-      <h2 class="rail-head">Learning</h2>
-      <div class="rail-cards" data-slot="learning"></div>
-    </div>
-    <div class="rail-group" data-cat="idea">
-      <h2 class="rail-head">Ideas</h2>
-      <div class="rail-cards" data-slot="idea"></div>
-    </div>
-  </aside>
   <main id="stage">
     <div id="board" data-cat="todo" class="on-dark">
       <section id="band" aria-label="Components and requirements">
@@ -54,14 +36,15 @@
   <script>
     (function () {
       'use strict';
-      // The landing board, matched exactly as stored (literal newline).
-      var LANDING = 'The Life of\nRobert Gregory';
+      // The landing board, keyed on its stable id (issue #5, finding 2) —
+      // never the title, which carries a literal newline.
+      var LANDING_ID = 'fa246b33-d8c8-4ec2-9073-2915de0d5764';
 
       fetch('assets/content-of-boards.json')
         .then(function (r) { return r.json(); })
         .then(function (data) {
           window.__boards = data.boards;
-          var landing = Assembly.findBoard(data.boards, LANDING);
+          var landing = Assembly.findBoardById(data.boards, LANDING_ID);
           Assembly.bootSpa(data.boards, landing);
         })
         .catch(function (err) {

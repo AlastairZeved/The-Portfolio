@@ -22,25 +22,6 @@
   <link rel="stylesheet" href="assembly.css">
 </head>
 <body>
-  <!-- §13.1 B78 rail: four fixed groups, each wearing its own ladder via [data-cat] -->
-  <aside id="rail" aria-label="Board index">
-    <div class="rail-group" data-cat="todo">
-      <h2 class="rail-head">To Do</h2>
-      <div class="rail-cards" data-slot="todo"></div>
-    </div>
-    <div class="rail-group" data-cat="note">
-      <h2 class="rail-head">Notes</h2>
-      <div class="rail-cards" data-slot="note"></div>
-    </div>
-    <div class="rail-group" data-cat="learning">
-      <h2 class="rail-head">Learning</h2>
-      <div class="rail-cards" data-slot="learning"></div>
-    </div>
-    <div class="rail-group" data-cat="idea">
-      <h2 class="rail-head">Ideas</h2>
-      <div class="rail-cards" data-slot="idea"></div>
-    </div>
-  </aside>
   <main id="stage">
     <!-- Static mount: data-cat="todo" happens to be this board's own ladder —
          BoardEngine.renderBoard() re-derives it from the data either way. -->
@@ -62,36 +43,9 @@
   <script src="board-engine.js"></script>
   <script src="assembly.js"></script>
   <script>
-    (function () {
-      'use strict';
-
-      // The export's boards[4]: the title carries a literal newline — matched
-      // exactly as stored, never normalised.
-      var BOARD_TITLE = 'The Life of\nRobert Gregory';
-
-      fetch('assets/content-of-boards.json')
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          var boards = data.boards;
-          window.__boards = boards;
-          var board = boards.find(function (b) { return b.title === BOARD_TITLE; });
-          if (!board) throw new Error('Board not found in export: ' + JSON.stringify(BOARD_TITLE));
-          var root = document.getElementById('board');
-          BoardEngine.renderRail(boards);
-          BoardEngine.renderBoard(board, root);
-          BoardEngine.fit(root);
-          window.addEventListener('resize', function () { BoardEngine.fit(root); });
-          Assembly.mountContactForm(root);
-          // Assembly: rail cards navigate between the five pages; this page is marked active.
-          Assembly.wireStaticPage(board);
-        })
-        .catch(function (err) {
-          // Meaningful failure, not a blank board: surface it where a human looks.
-          document.getElementById('board-title').textContent = 'Failed to load board: ' + err.message;
-          console.error(err);
-        });
-
-    })();
+    // This page's only job: boot the landing board (boards[4]) — the one whose
+    // parking-lot entry is the §12 contact form, mounted by Assembly.boot.
+    Assembly.boot('fa246b33-d8c8-4ec2-9073-2915de0d5764');
   </script>
 </body>
 </html>

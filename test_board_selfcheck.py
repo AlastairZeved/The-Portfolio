@@ -11,7 +11,7 @@ Issue #5 finding 5 additionally asserts on RENDERED behaviour, not spelling:
 the six pages are booted in headless Chromium over a loopback http.server and
 the lot geometry, link endpoints, font face and chrome surface are asserted
 on as computed by the browser. `python3 test_board_selfcheck.py --prove-gates`
-re-runs the gate against three deliberate regressions and proves each fails.
+re-runs the gate against four deliberate regressions and proves each fails.
 
 No framework, no fixtures. Exit 0 on green, raise AssertionError loudly on red.
 """
@@ -107,12 +107,12 @@ REMEASURE_GUARD = (
 # after the text render has started the font load), NOT at document start:
 # Chromium creates the ready promise on access, and an early capture resolves at
 # document-load-complete WITHOUT waiting for the swap font (measured t≈33ms,
-# status 'loading', stale endpoints — exactly the §4.6 defect shape). Chained on
-# the real promise, the callback first clears the row min-heights renderLot's
-# FIRST (fallback-face) measurement wrote (the issue #6 ratchet: a second
-# measurement reads its own write and cannot move the number), then runs the
-# engine's re-measure — restoring the invariant §4.6 promises everywhere else:
-# the last measurement under the settled document wins.
+# status 'loading', stale endpoints — exactly the §4.6 defect shape). The
+# bridge is now pass-through: since the issue #6 fix, board-engine.js strips
+# each row's min-height itself at the top of measureAndDraw, and this bridge
+# must NOT pre-clear those pins — doing so hid the ratchet from the rendered
+# gate (QA's PR #12 finding: a faithful ratchet installed under the bridge
+# went GREEN because the bridge erased the pins it should have tripped over).
 BRIDGE_JS = r"""
 (() => {
   const fontSet = document.fonts;
@@ -123,11 +123,7 @@ BRIDGE_JS = r"""
     configurable: true,
     get() {
       if (!chained) {
-        chained = realDesc.get.call(fontSet).then(() => {
-          document.querySelectorAll('#lot-items .lot-item').forEach(r => {
-            r.style.minHeight = '';
-          });
-        });
+        chained = realDesc.get.call(fontSet);
       }
       return {
         then: (fn) => chained.then(fn),
@@ -148,7 +144,10 @@ PAGE_EVAL_JS = r"""
   const lot = document.getElementById('lot');
   const rows = [...document.querySelectorAll('#lot-items .lot-item')];
 
-  // §3.2 model on the CURRENT (settled, ratchet-cleared) layout.
+  // §3.2 model on the CURRENT (settled) layout, computed from the NATURAL row
+  // heights (inline min-height zeroed, offsetHeight read back) — issue #6: a
+  // model taken from the pinned rows would reward a ratchet that measures its
+  // own write-back. rowNatural is now ASSERTED on, not just collected.
   const rowOffset = rows.map(r => r.offsetHeight);
   const rowMin = rows.map(r => parseFloat(getComputedStyle(r).minHeight) || 0);
   const rowNatural = rows.map(r => {
@@ -156,7 +155,7 @@ PAGE_EVAL_JS = r"""
     const h = r.offsetHeight; r.style.minHeight = m; return h;
   });
   let sum = 0;
-  for (const h of rowOffset) sum += Math.max(44, h);
+  for (const h of rowNatural) sum += Math.max(44, h);
   let expectedLot = 34 + Math.max(88, sum);
   const ceiling = Math.ceil(0.5 * rh);
   if (expectedLot > ceiling) expectedLot = ceiling;
@@ -389,21 +388,25 @@ def assert_rendered_behaviour(rendered):
             f"{page_name}: transform {d['transform']!r} does not apply the composite paint scale"
 
         # -- §3.2 lot geometry on the SETTLED face ---------------------------
-        # The lot height must equal the §3.2 model of the settled layout, with
-        # the #6 min-height ratchet removed. If renderLot's fonts.ready
-        # re-measure is removed/neutered, the lot stays at its fallback-face
-        # measurement and this goes RED (see --prove-gates).
+        # The lot height must equal the §3.2 model of the settled layout,
+        # computed from the SETTLED NATURAL row heights (rowNatural), not from
+        # the pinned rows. A ratchet that measures its own min-height
+        # write-back cannot satisfy this by coincidence: its pinned rows read
+        # the fallback-face heights, which the settled natural layout moves.
+        # If renderLot's fonts.ready re-measure is removed/neutered, the lot
+        # stays at its fallback-face measurement and this goes RED.
         assert d["lotStyle"] == f"{d['expectedLot']}px", \
-            (f"{page_name}: lot height {d['lotStyle']} != §3.2 settled model "
-             f"{d['expectedLot']}px — renderLot's fonts.ready re-measure is "
-             f"missing, neutered, or the #6 min-height ratchet re-masks it")
-        # The same re-measure must have rewritten the row min-heights from the
-        # settled offsetHeights (a stale ratchet shows here first).
-        for i, (mn, off) in enumerate(zip(d["rowMin"], d["rowOffset"])):
-            assert mn == max(44, off), (
+            (f"{page_name}: lot height {d['lotStyle']} != §3.2 settled-natural "
+             f"model {d['expectedLot']}px — renderLot's fonts.ready re-measure "
+             f"is missing, neutered, or the #6 min-height ratchet re-masks it")
+        # The pinned min-heights must equal max(44, settled NATURAL height):
+        # the pin is written from a clean read, never from the pin itself.
+        for i, (mn, nat) in enumerate(zip(d["rowMin"], d["rowNatural"])):
+            assert mn == max(44, nat), (
                 f"{page_name}: lot row {i} min-height {mn}px != settled "
-                f"max(44, offsetHeight)={max(44, off)}px — renderLot's "
-                f"fonts.ready re-measure did not run under the settled font")
+                f"natural max(44, {nat})={max(44, nat)}px — the #6 min-height "
+                f"ratchet is back (renderLot's re-measure reads its own "
+                f"write-back instead of stripping before measuring)")
 
         # -- §4.6 endpoints drawn where the settled notes actually are --------
         assert len(d["drawn"]) == len(d["expectedLines"]), \
@@ -448,6 +451,19 @@ def _mutate_neuter_lot_remeasure(src):
     return src[:second] + "    /* PROVE-GATE: renderLot re-measure removed */" + src[second + len(REMEASURE_GUARD):]
 
 
+def _mutate_reinstate_lot_ratchet(src):
+    # The issue #6 defect, faithfully reinstated on the FIXED source: the
+    # document.fonts guard stays INTACT, but measureAndDraw stops stripping
+    # the previous pass's write-back — so the settled re-measure reads its own
+    # pinned rows and can only ever move the measurement up. This is the
+    # behavioural regression the rendered gate must catch now that the gate
+    # no longer pre-clears the pins.
+    strip = "        row.style.minHeight = '';\n"
+    assert src.count(strip) == 1, \
+        "board-engine.js drifted: the strip-before-measure line is not unique"
+    return src.replace(strip, "")
+
+
 def _mutate_mono_face(src):
     # A monospace face back on a rendered surface (the 2026-09-27 regression).
     return src + "\n/* PROVE-GATE regression */ #board, #board * { font-family: 'Courier New', monospace; }\n"
@@ -470,6 +486,9 @@ def prove_gates():
         ("strip-list token (!important) introduced in assembly.js",
          {"assembly.js": _mutate_assembly_strip_token},
          r"inline !important"),
+        ("the #6 min-height ratchet reinstated in renderLot's measurement",
+         {"board-engine.js": _mutate_reinstate_lot_ratchet},
+         r"min-height ratchet"),
     ]
     for label, mutations, pattern in variants:
         # apply each mutation to the CURRENT file source: the override map
@@ -506,7 +525,7 @@ def lum(hexs):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--prove-gates", action="store_true",
-                    help="run the rendered gate against three deliberate "
+                    help="run the rendered gate against four deliberate "
                          "regressions and prove each goes RED, then exit.")
     args = ap.parse_args()
     if args.prove_gates:

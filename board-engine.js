@@ -194,6 +194,14 @@
     function measureAndDraw() {
       var sum = 0;
       Array.prototype.forEach.call(items.children, function (row) {
+        // (a) strip before measuring (issue #6): the input to this pass must
+        // never be this pass's own previous output. Reading offsetHeight
+        // immediately after the clear forces a reflow, so `h` is the row's
+        // NATURAL height under the current face — the settled pass can move
+        // the measurement down as well as up. The pin is then re-written from
+        // that clean read, preserving §3.2's reserve so nothing reflows under
+        // the reader.
+        row.style.minHeight = '';
         var h = Math.max(LOT_ROW_MIN, row.offsetHeight);
         row.style.minHeight = h + 'px';
         sum += h;

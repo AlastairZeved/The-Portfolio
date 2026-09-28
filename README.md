@@ -111,9 +111,11 @@ Every number below was measured in headless Chromium at 2560×1440, not asserted
 
 ## Deployment
 
-**Not deployed. No domain chosen, and none is assumed here.** No Netlify, no
-GitHub Pages, no CI. The repo is set up so a first deploy is a hosting choice
-rather than a code change.
+Deployed on Netlify at <https://razgregory.netlify.app>. Every push to `main`
+auto-deploys; the deploy configuration lives in the repo as `netlify.toml` —
+the publish directory is the repo root (`index.html` sits at the top level)
+and there is no build command. No custom domain is chosen; the site serves
+from its `netlify.app` subdomain.
 
 ## Build record
 

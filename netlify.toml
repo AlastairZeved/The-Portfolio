@@ -1,0 +1,15 @@
+# Netlify deploy configuration for this repository.
+#
+# The site root IS the repo root: index.html sits at the top level, and the
+# site (razgregory, https://razgregory.netlify.app) auto-deploys every push
+# to main. This file makes those two decisions reviewable in the repo
+# instead of living only in the Netlify UI.
+#
+# Deliberately absent: [build.command] — there is no build step, and any
+# command here would either fail the deploy or blank the site. Also absent:
+# [build.processing] — the site's processing settings (html.pretty_urls,
+# ignore_html_forms) are set in the Netlify UI; a toml override would change
+# every URL shape on the site for no requested reason.
+
+[build]
+  publish = "."

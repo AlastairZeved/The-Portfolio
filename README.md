@@ -11,12 +11,12 @@ Five boards from the *Zeved Boards* app, rendered read-only on the web:
 
 | Page | Board | Notes | Links | Lot |
 |---|---|---|---|---|
-| `index.html` | The Life of Robert Gregory (landing) | 24 | 15 | 1 |
+| `index.html` | The Life of Robert Gregory (landing) | 23 | 15 | 1 |
 | `todays-to-do.html` | Today's To Do | 9 | 7 | 0 |
 | `portfolio-project-ideas.html` | Portfolio Project Ideas | 13 | 10 | 1 |
 | `how-does-ai-inference-math-work.html` | How does AI inference math work? | 15 | 7 | 0 |
 | `public-space-mini-grant.html` | Public Space Mini Grant | 13 | 5 | 2 |
-| | **Total** | **74** | **44** | **4** |
+| | **Total** | **73** | **44** | **4** |
 
 `index.html` boots the landing board and swaps boards from the sidebar with a
 260ms crossfade and no history push. The five static pages remain as deep links.
@@ -39,7 +39,7 @@ Then open <http://127.0.0.1:8000/>. To stop: `Ctrl+C`, or
 Verify the data contract at any time:
 
 ```bash
-python3 test_board_selfcheck.py     # expects 74 / 44 / 4 / 0
+python3 test_board_selfcheck.py     # expects 73 / 44 / 4 / 0
 ```
 
 ## How it's built
@@ -94,7 +94,7 @@ HTTP 200, `{"ok":true}`.
 
 Every number below was measured in headless Chromium at 2560×1440, not asserted:
 
-- 74 notes / 44 connectors / 4 parking-lot entries / 0 orphan links
+- 73 notes / 44 connectors / 4 parking-lot entries / 0 orphan links
 - 28/28 token hex values byte-identical to §2.2.2
 - `k = 0.9954213387699626`, `paintScale = 1.4334067278287461`
 - note frame 11.84:1, note text 11.84:1, band tab 5.70:1, hover glow 5.95:1 (WCAG 2.2 AA)
@@ -125,4 +125,4 @@ that was lost and rebuilt, and the two orchestrator errors that lost it. A build
 record listing only successes misrepresents how the build went.
 
 Source data: `assets/content-of-boards.json`, exported from the app, 5 boards /
-74 notes / 44 links / 4 parking-lot entries / 0 orphans.
+73 notes / 44 links / 4 parking-lot entries / 0 orphans.

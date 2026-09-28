@@ -270,13 +270,27 @@ pass) — a check that exists but is not wired to the criterion is not a gate.
 
 The Portfolio Project Ideas page (`t_3b092945`) was destroyed mid-write when
 its branch and worktree were deleted by a concurrent cleanup that the
-orchestrator had authorised. Two errors, both the orchestrator's:
+orchestrator had authorised. Two errors, both the orchestrator's, and both are recorded here because the
+build record is only useful if it names the real cause:
 
-1. **Ruling ambiguity** — the card's write boundary did not forbid deleting
-   other cards' branches/worktrees, so the cleanup agent did not know it was
-   destroying live work.
-2. **Merge-before-authorised** — the orchestrator merged a page card while its
-   QA was still pending, then the cleanup raced the unfinished work.
+1. **Duplicated dispatch.** When the corrected Cleaner completed, the three
+   original page cards auto-promoted. The orchestrator did not check, and
+   created three *replacement* cards for pages already being built — two
+   workers per page in one shared working tree, for several minutes. The
+   duplicates were stopped by comment before either wrote a page file.
+2. **A destructive instruction issued into a live tree.** The orchestrator told
+   the stranded-page card to delete a junk branch alias as part of its merge
+   step, while three workers were live in the same repository. That deletion
+   removed a *live* worker's branch and worktree, and its in-progress page was
+   lost — unrecoverable: no dangling commits, no stash, no surviving copy on
+   disk. **The authorisation was the orchestrator's; the worker was following
+   the instruction it was given.**
+
+The root condition underneath both: `workspace_kind: dir` gives one shared
+*working tree*, not one shared *repo* — git state was never isolated between
+cards. The recovery was to freeze all workers, commit each page on its own
+branch, and land everything in one controlled pass with the orchestrator
+holding merge authority.
 
 Rebuilt cleanly as `t_7530fde6` → commit `472ca4b` (13 notes, 10 links, 1
 parking-lot entry, IDEA ladder, verified in headless Chromium at 2560×1440).

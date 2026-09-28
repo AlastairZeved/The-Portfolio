@@ -30,6 +30,7 @@
   --accent-copy: #698ebf;
   --danger: #e2a08c;
   --highlight: #f2d64b;
+  --note-click: #699a00;
 
   /* To-Do ladder is :root (§2.2.2: To-Do is what the page shows before JS speaks) */
   --deep: #020812;
@@ -281,6 +282,26 @@ body {
   box-shadow:
     0 0 0 1px var(--frame),        /* the ring — geometry, not hue */
     0 0 10px 2px var(--frame);     /* the glow */
+}
+
+/* ---------- Issue #24: the linked note and its clicked state ---------- */
+/* A note carrying a `link` property is interactive: affordance first, so the
+   hover ruling's own signal is also its resting signal — the ring at rest,
+   ring + halo on hover. The pointer affordance is the ring (shape), not hue. */
+.note--link {
+  cursor: pointer;
+  box-shadow: 0 0 0 1px var(--frame);   /* the ring — geometry, not hue */
+}
+/* The clicked state extends Owner ruling 2: the glow's hue turns lime green
+   (--note-click, luminance-matched to the hover ring's --frame) and the ring
+   WIDENS to 2px — a second, shape/edge channel, so the state is never colour
+   alone (§12). Applied while pressed (:active, the no-JS fallback) and
+   persisted after activation (board-engine.js adds .is-clicked on click). */
+.note--link:active,
+.note--link.is-clicked {
+  box-shadow:
+    0 0 0 2px var(--note-click),   /* the wider ring — the shape channel */
+    0 0 10px 2px var(--note-click); /* the green halo — the glow */
 }
 
 /* ---------- §4.6 The SVG connector layer ---------- */

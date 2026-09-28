@@ -7,6 +7,12 @@ It also asserts the ladder hexes are byte-identical to issue §2 (§2.2.2), that
 no monospace face exists anywhere in the engine, and that the §7 strip-list
 chrome is absent from the built sources — asserted, not eyeballed.
 
+Issue #21: README.md is IN CONTRACT — its per-board table (every non-total
+cell and the Total row) and every prose count are asserted cell-by-cell
+against the JSON-derived totals. `docs/issues/0001-board-engine.md` is
+explicitly OUT OF CONTRACT: it is the dated acceptance record of a completed
+issue, and its numbers must never be asserted.
+
 Issue #5 finding 5 additionally asserts on RENDERED behaviour, not spelling:
 the six pages are booted in headless Chromium over a loopback http.server and
 the lot geometry, link endpoints, font face and chrome surface are asserted
@@ -88,6 +94,12 @@ BROWSER_PAGES = [
     ("index.html", "fa246b33-d8c8-4ec2-9073-2915de0d5764"),
 ]
 LANDING_ID = "fa246b33-d8c8-4ec2-9073-2915de0d5764"
+
+# Issue #21: the five page rows the README's table must list, keyed on the
+# backticked page filename in column 1. the-life-of-robert-gregory.html is NOT
+# a README row (index.html is the landing presentation of that board).
+README_PAGES = frozenset(p for p, _ in BROWSER_PAGES
+                         if p != "the-life-of-robert-gregory.html")
 
 VIEWPORT = (2560, 1440)   # the wireframes' §3 reference viewport
 FONT_DELAY_MS = 250       # cold-load: font-display:swap's fallback phase is the
@@ -475,6 +487,162 @@ def _mutate_assembly_strip_token(src):
     return src + "\n/* PROVE-GATE regression */ document.body.style.setProperty('margin', '0', 'important');\n"
 
 
+# ---------------------------------------------------------------------------
+# Issue #21 — the README gate. README.md is IN CONTRACT: the per-board table
+# is asserted cell by cell (including the Total row) and every prose count is
+# swept against the JSON-derived truth. docs/issues/0001-board-engine.md is
+# explicitly OUT OF CONTRACT — it is the dated acceptance record of completed
+# issue 0001 (its lines 157-158, 179, 224, 301-302 carry these counts); that
+# history must never be asserted, or it would falsify the moment a count
+# legitimately moves again. Do not add a docs/ scan.
+# ---------------------------------------------------------------------------
+
+# Prose shapes carrying the four counts. Shapes, not pinned sentences: the
+# next drifted sentence must still be caught, whatever its wording.
+README_PROSE_PATTERNS = [
+    (re.compile(r"(\d+)\s+notes\b"), ("notes",)),
+    (re.compile(r"(\d+)\s+(?:links|connectors)\b"), ("links",)),
+    (re.compile(r"(\d+)\s+(?:parking-lot entries|lot entries)\b"), ("lot",)),
+    (re.compile(r"(\d+)\s+(?:orphan links|orphans)\b"), ("orphans",)),
+    (re.compile(r"\bexpects (\d+) / (\d+) / (\d+) / (\d+)"),
+     ("notes", "links", "lot", "orphans")),
+]
+
+
+def assert_readme_counts(readme_text, per_board, totals):
+    """The README gate (issue #21) — pure over the README text.
+
+    readme_text: full README.md content, read at runtime (never cached).
+    per_board:   {page filename: (notes, links, lot)} from the JSON, keyed via
+                 BROWSER_PAGES (index.html maps to the landing board id).
+    totals:      (notes, links, lot, orphans) as already computed and asserted
+                 in main() — no second copy of the numbers lives here.
+    """
+    notes, links, lot, orphans = totals
+    expected = {"notes": notes, "links": links, "lot": lot, "orphans": orphans}
+
+    # --- the table: the ONLY markdown table, lines 12-19 --------------------
+    table_rows = [ln for ln in readme_text.splitlines()
+                  if ln.lstrip().startswith("|")]
+    assert len(table_rows) == 8, \
+        f"README table drifted: expected 8 pipe rows (header, separator, " \
+        f"5 pages, Total), found {len(table_rows)}"
+    cells = [[c.strip() for c in row.strip().strip("|").split("|")]
+             for row in table_rows]
+
+    def _num(cell):
+        # Presentation bolding (**73**) is not data; strip it before parsing.
+        return int(cell.strip("*").strip())
+
+    # Row set must be EXACTLY the five README pages, keyed on the backticked
+    # page filename in column 1. A missing row, an extra row, or an
+    # unrecognised page name is a fail — not a sample.
+    seen_pages = []
+    for row in cells[2:-1]:
+        m = re.fullmatch(r"`([^`]+)`", row[0])
+        page = m.group(1) if m else None
+        assert page in README_PAGES, \
+            f"README table row {row[0]!r} is not a recognised page filename"
+        seen_pages.append(page)
+        page_counts = per_board[page]
+        got = tuple(_num(c) for c in row[2:5])
+        assert got == page_counts, \
+            f"README table row for {page}: notes/links/lot {got} != JSON " \
+            f"truth {page_counts} (issue #21: every non-total cell, not just the Total row)"
+    assert set(seen_pages) == README_PAGES, \
+        f"README table row set {sorted(seen_pages)} != expected pages " \
+        f"{sorted(README_PAGES)} (missing: {sorted(README_PAGES - set(seen_pages))}, " \
+        f"extra: {sorted(set(seen_pages) - README_PAGES)})"
+
+    total_row = cells[-1]
+    assert "Total" in total_row[1], \
+        f"README table's last row is not the Total row: {table_rows[-1]!r}"
+    got_totals = tuple(_num(c) for c in total_row[2:5])
+    assert got_totals == (notes, links, lot), \
+        f"README Total row {got_totals} != JSON totals {(notes, links, lot)}"
+
+    # --- the prose sweep: EVERY number in EVERY matching shape --------------
+    hits = 0
+    for line_no, line in enumerate(readme_text.splitlines(), start=1):
+        for pattern, keys in README_PROSE_PATTERNS:
+            for m in pattern.finditer(line):
+                got = tuple(int(g) for g in m.groups())
+                want = tuple(expected[k] for k in keys)
+                assert got == want, \
+                    f"README.md:{line_no} prose count {got} != expected {want} " \
+                    f"(shape {pattern.pattern!r})"
+                hits += 1
+    assert hits >= 3, \
+        f"README prose sweep matched only {hits} counts — the prose drifted " \
+        f"away from the known number shapes entirely (issue #21: the sweep " \
+        f"exists precisely to catch that)"
+    print(f"README gate: 5 table rows cell-asserted + Total row; "
+          f"prose sweep matched {hits} counts, all correct")
+
+
+def _mutate_readme_cell(text):
+    # The exact bug of issue #18/#21: a NON-total table cell goes stale while
+    # the Total row stays right (the 24-vs-23 shape on the landing board).
+    good = "| `index.html` | The Life of Robert Gregory (landing) | 23 | 15 | 1 |"
+    assert good in text, "README drifted: the landing table row is not where the proof expects"
+    return text.replace(good,
+                        "| `index.html` | The Life of Robert Gregory (landing) | 24 | 15 | 1 |")
+
+
+def _mutate_readme_row_deleted(text):
+    # A whole table row disappears: the row-set check must fail, not just a
+    # cell comparison (the Total row is untouched, so a totals-only check
+    # would stay green — the exact blind spot of issue #21).
+    row = "| `public-space-mini-grant.html` | Public Space Mini Grant | 13 | 5 | 2 |\n"
+    assert row in text, "README drifted: the mini-grant table row is not where the proof expects"
+    return text.replace(row, "")
+
+
+def _mutate_readme_prose(text):
+    # A prose count goes stale (line 97's "73 notes" shape).
+    good = "- 73 notes / 44 connectors / 4 parking-lot entries / 0 orphan links"
+    assert good in text, "README drifted: the §Verification prose line is not where the proof expects"
+    return text.replace(good,
+                        "- 74 notes / 44 connectors / 4 parking-lot entries / 0 orphan links")
+
+
+def prove_readme_gates(per_board, totals):
+    """Issue #21's proof: the README gate must bite, in process.
+
+    --prove-gates serves engine overrides over the loopback http server; the
+    README is not a served asset, so these variants call the gate directly on
+    mutated README text read at runtime. The UNRELATED-error guard from
+    prove_gates is reused verbatim: a broken gate must not masquerade as a
+    bite.
+    """
+    readme = (ROOT / "README.md").read_text()
+    variants = [
+        ("a non-total README table cell made stale (24-vs-23 shape)",
+         _mutate_readme_cell,
+         r"README table row for index\.html"),
+        ("a README table row deleted (mini-grant)",
+         _mutate_readme_row_deleted,
+         r"README table (row set|drifted)"),
+        ("a README prose count made stale (74 notes)",
+         _mutate_readme_prose,
+         r"README\.md:\d+ prose count"),
+    ]
+    for label, mutate, pattern in variants:
+        try:
+            assert_readme_counts(mutate(readme), per_board, totals)
+        except AssertionError as e:
+            if re.search(pattern, str(e)):
+                print(f"README GATE PROOF OK (RED as required): {label}\n    -> {e}")
+            else:
+                raise AssertionError(
+                    f"README gate proof for {label!r} failed with an UNRELATED "
+                    f"error (the gate is broken, not the build): {e}") from e
+        else:
+            raise AssertionError(
+                f"README gate proof FAILED: {label!r} went GREEN — "
+                f"the README gate cannot catch this regression")
+
+
 def prove_gates():
     variants = [
         ("renderLot's document.fonts re-measure removed from renderLot",
@@ -529,7 +697,23 @@ def main():
                          "regressions and prove each goes RED, then exit.")
     args = ap.parse_args()
     if args.prove_gates:
+        # The README gate (issue #21) is proven in process: parse the JSON
+        # truth the same way the green run does, then prove each mutated
+        # README variant goes RED for the right reason.
+        data = json.loads(DATA.read_text())
+        board_counts = {b["id"]: (len(b.get("notes", [])),
+                                  len(b.get("links", [])),
+                                  len(b.get("parkingLot", [])))
+                        for b in data["boards"]}
+        per_board = {page: board_counts[board_id]
+                     for page, board_id in BROWSER_PAGES}
+        # Sum over UNIQUE board ids — index.html and the-life-of-robert-
+        # gregory.html are the same landing board and must count once.
+        totals = tuple(sum(c[i] for c in board_counts.values()) for i in range(3))
+        # orphans is asserted == 0 by the green run; the prose sweep needs it.
+        totals = totals + (0,)
         prove_gates()
+        prove_readme_gates(per_board, totals)
         return
 
     # --- source integrity ---
@@ -603,6 +787,21 @@ def main():
     assert total_links == 44, f"total links {total_links} != 44"
     assert total_lot == 4, f"total lot entries {total_lot} != 4"
     assert orphans == 0, f"orphan links {orphans} != 0"
+
+    # --- issue #21: the README gate ------------------------------------------
+    # README.md is the second presentation of the same four numbers; the gate
+    # must see it or the table can contradict its own Total row and ship
+    # green (exactly what happened in issue #18). Per-board truth is keyed on
+    # the backticked page filename via BROWSER_PAGES; totals come straight
+    # from the asserts above — no second copy of the numbers.
+    board_counts = {b["id"]: (len(b.get("notes", [])),
+                              len(b.get("links", [])),
+                              len(b.get("parkingLot", [])))
+                    for b in boards}
+    per_board_page = {page: board_counts[board_id]
+                      for page, board_id in BROWSER_PAGES}
+    assert_readme_counts((ROOT / "README.md").read_text(),
+                         per_board_page, (total_notes, total_links, total_lot, orphans))
 
     # --- §3 scale law, exercised at the wireframes' 2560x1440 ---
     rw, rh = 1576.6634522661525, 1000.0  # the export's board canvas, every note carries it
@@ -731,6 +930,7 @@ def main():
     print("SELF-CHECK GREEN: 73 notes / 44 links / 4 lot entries / 0 orphans; "
           "ladders byte-identical; strip-list and monospace absent; scale law holds; "
           "§4.6 fonts.ready re-measure present in renderLinks; "
+          "README.md asserted (table cell-by-cell + prose sweep; docs/ out of contract); "
           "rendered gate: §3.2 settled lot geometry, §4.6 settled endpoints, "
           "computed faces, §7 chrome, §12 form verified in-browser on all 6 pages.")
 

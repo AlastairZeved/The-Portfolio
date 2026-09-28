@@ -1,6 +1,6 @@
 # Issue 0001 — Board engine: fixed-scale board, four token ladders, shared chrome
 
-**Status:** open
+**Status:** closed
 **Filed:** 2026-09-27 by Hermes (orchestrator)
 **Repo:** `~/.hermes/Strombolis-Workshop/robert-gregory-portfolio-website/site` (local, no remote)
 **Read-only source material (already committed, do not modify):** `assets/`, `UIUX.md`
@@ -189,3 +189,42 @@ you did not test is a defect in the report, not a caveat.
 - Wireframes (2560×1440): `../Portfolio-wireframes/*.png`. **Calibration of one
   dimension is never a style spec** — use them to check proportion and
   placement, never to sample a colour or measure a note.
+
+---
+
+## CLOSED — 2026-09-28, merge gate (Cleaner card t_d4bed8a7)
+
+**Audit trail — both verdicts recorded:**
+
+1. **QA FAIL** (card t_9c51430c) against `7e84a78`, the first implementation
+   committed directly to `master` instead of a feature branch — no branch
+   existed to merge. Three measured defects:
+   - board painted ~69% of frame width, ~691px dead space right / ~445px bottom
+     (composite scale missing from `fit()`);
+   - note frame border contrast 1.48:1, below the §3.1-style 3:1 floor
+     (border ink not rebound to `--ink-dark`);
+   - scratch-out coverage 34.6% of the note box, below the ≥90% floor of §4.3.
+2. **Fix** on feature branch `fix-0001-render-and-contrast`
+   (`b1a0cd8` composite paint scale `paintScale = k × renderScale` +
+   `data-paint-scale`; note frame ink rebind to `var(--ink-dark)`; strike
+   cross-hatch widened to three unioned families; self-check extended with the
+   three new machine-tested numbers). Follow-up `da8bf5f` renamed the composite
+   to `paintScale`/`data-paint-scale` and documented strike measurement.
+3. **Re-QA PASS** (card t_1e0f86b4), measured in a fresh headless Chromium at
+   2560×1440: painted board 2259.99×1433.41 in a 2260×1440 stage, 100.0% width
+   fill, 0.01px right / 6.59px bottom dead space, single uniform top-left
+   transform, no pan/zoom; note frame 11.835–12.214:1 by decoded pixels across
+   all four ladders (floor 3:1), note text undisturbed at 11.84:1; interior
+   strike coverage 94.98% against the 90% floor. Standing note: §4.3 rests on
+   one complete note in the export — the smallest — so coverage is a single
+   data point at the least favourable size.
+4. **Merge** — `3361c72` merges `fix-0001-render-and-contrast` into `master`
+   (local-only, `git remote -v` empty, nothing pushed, no deploy).
+5. **Post-merge self-check re-run on `master` at `3361c72`:** SELF-CHECK GREEN —
+   74 notes / 44 links / 4 lot entries / 0 orphans; ladders byte-identical;
+   strip-list and monospace absent; scale law holds. New numbers:
+   `renderScale=1.4400`, `k=0.9954`, **composite paint scale k×renderScale =
+   1.433407**, painted 2260.0×1433.4 (stage 2260×1440); **note frame
+   --ink-dark on --note = 11.84:1 on all four ladders** (todo / idea / note /
+   learning, floor 3:1); **strike coverage (geometric model of 3 families) =
+   95.2%** (floor 90%). Exit code 0.

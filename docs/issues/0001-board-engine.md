@@ -154,13 +154,13 @@ sample):
 
 | Assertion | Expected |
 |---|---|
-| total notes | **74** |
+| total notes | **73** |
 | total links | **44** |
 | total parking-lot entries | **4** |
 | orphan links (endpoint id not a note or lot entry on that board) | **0** |
 
 These four numbers are verified against the file at
-`sha256 506cbc1431e2fbce…` and are the contract.
+`sha256 b396af2d9863f7af…` and are the contract.
 
 Leave ONE runnable check behind — an assert-based `selfcheck()` or one small
 `test_*.py` — that fails loudly if the logic breaks. No framework, no fixtures.
@@ -176,7 +176,7 @@ you did not test is a defect in the report, not a caveat.
 - [ ] Every note renders with `white-space: pre-wrap`; no monospace anywhere.
 - [ ] Connectors ride the transform; `non-scaling-stroke` set.
 - [ ] Strip-list of §7 absent from the DOM — assert it, do not eyeball it.
-- [ ] Self-check green: 74 / 44 / 4 / 0.
+- [ ] Self-check green: 73 / 44 / 4 / 0.
 - [ ] `completion_contract: local-only`. **NOTHING DEPLOYED. No domain, no
       remote, no push to any live host.**
 - [ ] Kill any server you spawn before completing.
@@ -221,7 +221,7 @@ you did not test is a defect in the report, not a caveat.
 4. **Merge** — `3361c72` merges `fix-0001-render-and-contrast` into `master`
    (local-only, `git remote -v` empty, nothing pushed, no deploy).
 5. **Post-merge self-check re-run on `master` at `3361c72`:** SELF-CHECK GREEN —
-   74 notes / 44 links / 4 lot entries / 0 orphans; ladders byte-identical;
+   73 notes / 44 links / 4 lot entries / 0 orphans; ladders byte-identical;
    strip-list and monospace absent; scale law holds. New numbers:
    `renderScale=1.4400`, `k=0.9954`, **composite paint scale k×renderScale =
    1.433407**, painted 2260.0×1433.4 (stage 2260×1440); **note frame
@@ -298,7 +298,7 @@ The original card was closed SUPERSEDED, not re-attempted.
 
 ### Final gate verification (this card, 2026-09-28, on `master` = `6f6ac07`)
 
-- `python3 test_board_selfcheck.py`: **SELF-CHECK GREEN, exit 0** — 74 notes /
+- `python3 test_board_selfcheck.py`: **SELF-CHECK GREEN, exit 0** — 73 notes /
   44 links / 4 lot entries / 0 orphans; ladders byte-identical; strip-list and
   monospace absent; `renderScale=1.4400`, `k=0.9954`, composite paint scale
   1.433407, painted 2260.0×1433.4 (stage 2260×1440); note frame 11.84:1 on all

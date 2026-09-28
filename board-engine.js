@@ -14,14 +14,12 @@
   var REFERENCE_SHEET = { w: 900, h: 1000 }; // §3: the reference sheet — NOT the live logical sheet
   var RAIL_W = 300;                          // §3: offX, the desktop rail
   var NOTE_MIN_W = 132;                      // §4.5
-  var NOTE_FONT = 17;                        // §4
   var LOT_ROW_MIN = 44;                      // §3.2 row floor
   var LOT_PAD_TOP = 34;                      // §3.2: 34 + max(2*44, Σrows)
   var BAND_PAD_TOP = 14;                     // §3.1: rule-y = 14 + max(2,lines)*19.5 + 8
   var BAND_LINE = 19.5;
   var BAND_PAD_BOT = 8;
 
-  var GROUP_OF = { todo: 'todo', note: 'note', learning: 'learning', idea: 'idea' };
   // A record with no category reads as a Note board (§2.2.2, the `unsorted` bucket)
   var LADDER_OF = { todo: 'todo', idea: 'idea', note: 'note', learning: 'learning', unsorted: 'note' };
 
@@ -68,7 +66,7 @@
       el.innerHTML = '';
     });
     boards.forEach(function (b) {
-      var slot = slots[GROUP_OF[catOf(b)]];
+      var slot = slots[catOf(b)];
       if (!slot) return;
       var a = document.createElement('a');
       a.className = 'rail-card';
@@ -103,9 +101,6 @@
     root.querySelector('#zone-requirements').textContent = board.requirements || '';
     var h = bandHeight(board.components, board.requirements);
     root.querySelector('#band').style.height = h + 'px';
-    // The tab hangs below the rule at top:100% — its zone is centred on the sheet
-    var tab = root.querySelector('#band-tab');
-    tab.style.left = '50%';
   }
 
   /* ---- §4 Notes ---- */
@@ -192,17 +187,29 @@
       if (item.state === 'complete') el.classList.add('lot-item--complete'); // §4.3 on the water
       items.appendChild(el);
     });
-    // Measure the real rows, then apply the §3.2 formula.
-    var sum = 0;
-    Array.prototype.forEach.call(items.children, function (row) {
-      var h = Math.max(LOT_ROW_MIN, row.offsetHeight);
-      row.style.minHeight = h + 'px';
-      sum += h;
-    });
-    var h = LOT_PAD_TOP + Math.max(2 * LOT_ROW_MIN, sum);
-    var ceiling = Math.ceil(0.5 * rh);
-    if (h > ceiling) h = ceiling; // §3.2: a runaway lot cannot swallow the canvas
-    root.querySelector('#lot').style.height = h + 'px';
+    // §3.2 measurement, extracted so the same document.fonts pass that
+    // re-measures renderLinks' endpoints (§4.6) can re-run it: row heights
+    // read here are laid out in the `font-display: swap` fallback face on
+    // the synchronous pass and re-wrap when Montserrat Alternates arrives.
+    function measureAndDraw() {
+      var sum = 0;
+      Array.prototype.forEach.call(items.children, function (row) {
+        var h = Math.max(LOT_ROW_MIN, row.offsetHeight);
+        row.style.minHeight = h + 'px';
+        sum += h;
+      });
+      var h = LOT_PAD_TOP + Math.max(2 * LOT_ROW_MIN, sum);
+      var ceiling = Math.ceil(0.5 * rh);
+      if (h > ceiling) h = ceiling; // §3.2: a runaway lot cannot swallow the canvas
+      root.querySelector('#lot').style.height = h + 'px';
+    }
+
+    measureAndDraw();
+    // Guard identical to renderLinks': older engines without the Font
+    // Loading API just keep the fallback measurements.
+    if (document.fonts && document.fonts.ready && document.fonts.status !== 'loaded') {
+      document.fonts.ready.then(measureAndDraw);
+    }
     // Keep the action-row plane above the lot's top edge? No — this is a read-only
     // portfolio: no board-action row is built (owner ruling 1).
   }

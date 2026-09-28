@@ -11,13 +11,13 @@ No framework, no fixtures. Exit 0 on green, raise AssertionError loudly on red.
 """
 import hashlib
 import json
+import math
 import pathlib
 import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
 DATA = ROOT / "assets" / "content-of-boards.json"
-SOURCES = ["index.html", "engine.css", "board-engine.js"]
 
 EXPECTED_SHA256 = "506cbc1431e2fbce7a6fde339b851b4dfb1f8243448cb846e2a3bf26d313e6d4"
 
@@ -52,6 +52,13 @@ MONO_TOKENS = ["monospace", "mono,", "Courier", "Consolas", "Menlo", "JetBrains"
 
 def sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def lum(hexs):
+    r, g, b = (int(hexs[i:i+2], 16) / 255 for i in (1, 3, 5))
+    f = lambda c: c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+    r, g, b = f(r), f(g), f(b)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
 
 
 def main():
@@ -146,11 +153,6 @@ def main():
     # The engine.css declaration must bind --ink on .note, not rely on inheritance.
     assert re.search(r"\.note\s*\{[^}]*--ink:\s*var\(--ink-dark\)", css, re.S), \
         ".note does not rebind --ink to --ink-dark (frame falls on the wrong pole)"
-    def lum(hexs):
-        r, g, b = (int(hexs[i:i+2], 16) / 255 for i in (1, 3, 5))
-        f = lambda c: c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
-        r, g, b = f(r), f(g), f(b)
-        return 0.2126 * r + 0.7152 * g + 0.0722 * b
     for cat, rungs in LADDERS.items():
         for surface, hexv in (("note", rungs["note"]), ("highlight", FIXED_TOKENS["highlight"])):
             ratio = (max(lum(FIXED_TOKENS["ink-dark"]), lum(hexv)) + 0.05) / \
@@ -182,7 +184,6 @@ def main():
         r"\s+\d+(?:\.\d+)?px\s+(\d+(?:\.\d+)?)px\)",
         strike_block.group(1))
     assert len(families) >= 3, f"expected ≥3 stroke families, parsed {len(families)}"
-    import math
     TILE_W, TILE_H, STEP = 63.0, 45.0, 0.25  # tile >> all periods; fine sampling
     covered = total = 0
     for gx in range(int(TILE_W / STEP)):

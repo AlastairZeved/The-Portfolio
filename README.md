@@ -11,7 +11,7 @@ Five boards from the *Zeved Boards* app, rendered read-only on the web:
 
 | Page | Board | Notes | Links | Lot |
 |---|---|---|---|---|
-| `index.html` | The Life of Robert Gregory (landing) | 24 | 15 | 1 |
+| `index.html` | The Life of Robert Gregory (landing) | 23 | 15 | 1 |
 | `todays-to-do.html` | Today's To Do | 9 | 7 | 0 |
 | `portfolio-project-ideas.html` | Portfolio Project Ideas | 13 | 10 | 1 |
 | `how-does-ai-inference-math-work.html` | How does AI inference math work? | 15 | 7 | 0 |

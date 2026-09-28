@@ -195,10 +195,16 @@
     var rw = Number(root.getAttribute('data-rw'));
     var rh = Number(root.getAttribute('data-rh'));
     var f = computeFit(vw, vh, rw, rh);
-    // The board occupies only the stage (right of the rail); scale(k) maps the
-    // logical sheet into the frame — slack falls right and bottom as open canvas.
-    root.style.transform = 'scale(' + f.k + ')';
-    root.setAttribute('data-k', f.k);
+    // The paint scale is the COMPOSITE: k maps the logical sheet to the stored
+    // canvas, renderScale maps the stored canvas to the stage. §3 divides
+    // LOGICAL_W by renderScale precisely so renderScale is the logical→device
+    // mapping — both factors belong in the one uniform transform. Applied alone,
+    // k leaves 691px dead right and 445px dead bottom at 2560x1440.
+    var paintScale = f.k * f.renderScale;
+    root.style.transform = 'scale(' + paintScale + ')';
+    root.setAttribute('data-k', f.k);                 // §11 figure, reported as-is
+    root.setAttribute('data-render-scale', f.renderScale); // §3 factor itself
+    root.setAttribute('data-paint-scale', paintScale);     // the composite paint scale
     return f;
   }
 

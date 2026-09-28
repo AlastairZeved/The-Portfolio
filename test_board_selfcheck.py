@@ -2,7 +2,7 @@
 """test_board_selfcheck.py — issue 0001 §9 acceptance gate, run with plain python3.
 
 Parses EVERY board in assets/content-of-boards.json (no sampling) and asserts:
-    total notes = 73 · total links = 44 · total lot entries = 4 · orphan links = 0
+    total notes = 72 · total links = 43 · total lot entries = 4 · orphan links = 0
 It also asserts the ladder hexes are byte-identical to issue §2 (§2.2.2), that
 no monospace face exists anywhere in the engine, and that the §7 strip-list
 chrome is absent from the built sources — asserted, not eyeballed.
@@ -38,7 +38,7 @@ import time
 ROOT = pathlib.Path(__file__).resolve().parent
 DATA = ROOT / "assets" / "content-of-boards.json"
 
-EXPECTED_SHA256 = "b396af2d9863f7af36883cf30b0b8e65d8b6d24096b555e2e9f979f34fb4aba8"
+EXPECTED_SHA256 = "5ccb39a587bbb59a8205b0669e8948edaaa2bf57fa607b939f9ca431b0ddb255"
 
 # §2.2.2 ladder, byte-identical (issue §2 was verified against source by the orchestrator)
 LADDERS = {
@@ -263,6 +263,27 @@ PAGE_EVAL_JS = r"""
     railGroups: document.querySelectorAll('#rail .rail-group').length,
     railCards: [...document.querySelectorAll('#rail .rail-card')].map(a => a.textContent.trim()),
     notesCount: document.querySelectorAll('#notes .note').length,
+    // -- issue #24: the linked note, its href/target, the deleted note,
+    //    and the persisted clicked-state hook, all as RENDERED facts.
+    linkNote: (() => {
+      const el = [...document.querySelectorAll('#notes .note')]
+        .find(n => n.textContent.trim() === 'Community Life');
+      if (!el) return null;
+      return { tag: el.tagName, href: el.getAttribute('href'),
+               target: el.getAttribute('target'),
+               rel: el.getAttribute('rel'),
+               classes: el.className };
+    })(),
+    deletedNoteTexts: [...document.querySelectorAll('#notes .note')]
+      .map(n => n.textContent.trim())
+      .filter(t => t.includes('Earp Street Park')),
+    clickedAfterSyntheticClick: (() => {
+      const el = [...document.querySelectorAll('#notes .note')]
+        .find(n => n.textContent.trim() === 'Community Life');
+      if (!el) return false;
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+      return el.classList.contains('is-clicked');
+    })(),
   };
 }
 """
@@ -452,6 +473,46 @@ def assert_rendered_behaviour(rendered):
         assert d["formPresent"] == is_landing, (
             f"{page_name}: §12 contact form present={d['formPresent']} "
             f"(landing={is_landing}) — mountContactForm ran on the wrong pages")
+
+        # -- issue #24: the linked note, its deletion, and its clicked state --
+        # (a) "Community Life" renders as an <a> with target=_blank and the
+        #     verified href, carrying the note--link marker class.
+        if board_id == LANDING_ID:
+            ln_ = d["linkNote"]
+            assert ln_ is not None, (
+                f"{page_name}: the 'Community Life' note did not render at all")
+            assert ln_["tag"] == "A", (
+                f"{page_name}: 'Community Life' rendered as <{ln_['tag']}>, "
+                "not an <a> — the note link mechanism (issue #24) is missing or "
+                "neutered (data 'link' property not honoured by renderNotes)")
+            assert ln_["href"] == "https://earp-street-park.netlify.app/", (
+                f"{page_name}: 'Community Life' href {ln_['href']!r} != the "
+                "expected https://earp-street-park.netlify.app/")
+            assert ln_["target"] == "_blank", (
+                f"{page_name}: 'Community Life' target={ln_['target']!r} != '_blank' "
+                "(the note must open in a new tab)")
+            assert ln_["rel"] == "noopener noreferrer", (
+                f"{page_name}: 'Community Life' rel={ln_['rel']!r} != 'noopener noreferrer'")
+            assert "note--link" in (ln_["classes"] or "").split(), (
+                f"{page_name}: 'Community Life' lacks the note--link marker class "
+                f"(classes: {ln_['classes']!r})")
+            # (d) the clicked state PERSISTS after activation: a synthetic click
+            #     must add .is-clicked, and it must still be present afterwards.
+            assert d["clickedAfterSyntheticClick"], (
+                f"{page_name}: clicking 'Community Life' did not persist the "
+                ".is-clicked state — the clicked glow would vanish on pointer-up "
+                "and :active alone does not satisfy issue #24")
+            # (e) the deleted note is gone from the RENDERED board.
+            assert not d["deletedNoteTexts"], (
+                f"{page_name}: 'The Earp Street Park project' still renders on the "
+                f"board: {d['deletedNoteTexts'][:2]} — the deletion (issue #24) is "
+                "incomplete")
+            # (f) the deleted note's connector line is gone: drawn == expected at
+            #     the new count is already asserted above; this pins the count.
+            assert len(d["drawn"]) == 14, (
+                f"{page_name}: {len(d['drawn'])} connector lines drawn on the "
+                "landing board, expected 14 after the deletion of the Earp Street "
+                "Park note and its single link")
         print(f"behaviour {page_name.ljust(38)} lot={d['lotHeight']:4} "
               f"k={d['dataK']:.4f} lines={len(d['drawn']):2} "
               f"mono=0 chrome=0 endpoint-drift={worst:.2f}px")
@@ -490,6 +551,26 @@ def _mutate_assembly_strip_token(src):
     # The criterion's exact scenario: a banned token inside assembly.js — a
     # file the pre-finding-5 guards never read — reaching the RENDERED surface.
     return src + "\n/* PROVE-GATE regression */ document.body.style.setProperty('margin', '0', 'important');\n"
+
+
+def _mutate_neuter_note_anchor(src):
+    # Issue #24's regression shape: the data carries the `link` property but
+    # renderNotes ignores it and renders every note as a div. The #24 rendered
+    # assertion (tag == 'A') must go RED, and for THAT reason.
+    anchor = "var el = document.createElement(n.link ? 'a' : 'div');"
+    assert src.count(anchor) == 1, \
+        "board-engine.js drifted: the note-anchor createElement is not where the proof expects"
+    return src.replace(anchor, "var el = document.createElement('div');")
+
+
+def _mutate_drop_clicked_state(src):
+    # Issue #24's persistence regression: the click handler that adds the
+    # persisted .is-clicked marker is removed. The synthetic-click assertion
+    # must go RED, and for THAT reason.
+    marker = "el.classList.add('is-clicked');"
+    assert src.count(marker) == 1, \
+        "board-engine.js drifted: the is-clicked marker write is not where the proof expects"
+    return src.replace(marker, "/* PROVE-GATE: clicked-state persistence removed */")
 
 
 # ---------------------------------------------------------------------------
@@ -635,6 +716,12 @@ def prove_gates():
         ("the #6 min-height ratchet reinstated in renderLot's measurement",
          {"board-engine.js": _mutate_reinstate_lot_ratchet},
          r"min-height ratchet"),
+        ("the Community Life note anchor neutered (rendered as a div)",
+         {"board-engine.js": _mutate_neuter_note_anchor},
+         r"not an <a>"),
+        ("the persisted clicked state removed from the note's click handler",
+         {"board-engine.js": _mutate_drop_clicked_state},
+         r"\.is-clicked"),
     ]
     for label, mutations, pattern in variants:
         # apply each mutation to the CURRENT file source: the override map
@@ -665,15 +752,15 @@ def prove_gates():
     readme = (ROOT / "README.md").read_text()
     per_board, totals = _readme_truth()
     readme_variants = [
-        ("a stale non-total README table cell (the 24-vs-23 shape)",
-         lambda r: r.replace("| 23 | 15 | 1 |", "| 24 | 15 | 1 |"),
+        ("a stale non-total README table cell (the 22-vs-23 shape)",
+         lambda r: r.replace("| 22 | 14 | 1 |", "| 23 | 14 | 1 |"),
          r"README table cell mismatch"),
         ("a deleted README table row",
          lambda r: "\n".join(l for l in r.splitlines()
                              if "`todays-to-do.html`" not in l) + "\n",
          r"README table rows"),
         ("a stale prose count in README.md",
-         lambda r: r.replace("73 notes", "74 notes"),
+         lambda r: r.replace("72 notes", "73 notes"),
          r"README prose"),
         ("a README row whose page maps to no board",
          lambda r: r.replace("`todays-to-do.html`", "`no-such-board.html`"),
@@ -788,8 +875,8 @@ def main():
     print("-" * 60)
     print(f"TOTALS                             {total_notes:5} {total_links:5} {total_lot:3} {orphans:6}")
 
-    assert total_notes == 73, f"total notes {total_notes} != 73"
-    assert total_links == 44, f"total links {total_links} != 44"
+    assert total_notes == 72, f"total notes {total_notes} != 72"
+    assert total_links == 43, f"total links {total_links} != 43"
     assert total_lot == 4, f"total lot entries {total_lot} != 4"
     assert orphans == 0, f"orphan links {orphans} != 0"
 
@@ -897,6 +984,32 @@ def main():
         assert ratio >= 3.0, f"glow ring {cat}: {ratio:.2f}:1 below 3:1"
         print(f"glow ring {cat.ljust(9)} --frame on --deep: {ratio:.2f}:1 (≥3:1)")
 
+    # --- issue #24: the --note-click token — a fixed token, a green, measured.
+    # The clicked glow must be bound to a TOKEN in engine.css's fixed-token
+    # block (a raw hex in a rule is a FAIL) and must clear the same ≥3:1
+    # non-text floor against --deep on every ladder that the hover ring meets.
+    m_tok = re.search(r"--note-click:\s*(#[0-9a-fA-F]{6})\b", css)
+    assert m_tok, ("--note-click token missing from engine.css — the clicked "
+                   "state must be a token, not a raw hex in a rule")
+    note_click = m_tok.group(1)
+    in_root = re.search(r":root\s*\{[^}]*--note-click:", css, re.S)
+    assert in_root, "--note-click must live in :root's fixed-token block"
+    for cat, rungs in LADDERS.items():
+        ratio = (max(lum(note_click), lum(rungs["deep"])) + 0.05) / \
+                (min(lum(note_click), lum(rungs["deep"])) + 0.05)
+        assert ratio >= 3.0, \
+            f"clicked glow {cat}: --note-click {note_click} at {ratio:.2f}:1 below 3:1 vs --deep"
+        print(f"clicked glow {cat.ljust(9)} --note-click {note_click} on --deep: "
+              f"{ratio:.2f}:1 (≥3:1)")
+    # and the clicked rule must actually USE the token (not a raw hex)
+    m_clicked = re.search(r"\.note--link\.is-clicked\s*\{(.*?)\}", css, re.S)
+    assert m_clicked, ".note--link.is-clicked rule missing from engine.css"
+    assert "var(--note-click)" in m_clicked.group(1), \
+        ".note--link.is-clicked does not bind the glow to var(--note-click)"
+    assert "0 0 0 2px" in m_clicked.group(1), \
+        ("the clicked state's ring does not widen beyond the hover ring's 1px — "
+         "§12: the state must have a shape/edge channel, not colour alone")
+
     # --- FIX 4 (§4.6): connector endpoints must be measured with the REAL face.
     # First-load defect: renderLinks() read offsetWidth in the same synchronous
     # pass as the note append, measuring the `font-display: swap` fallback; the
@@ -926,7 +1039,7 @@ def main():
     print(f"rendered gate: 6 pages booted headless, "
           f"{time.perf_counter() - t_browser:.1f}s")
 
-    print("SELF-CHECK GREEN: 73 notes / 44 links / 4 lot entries / 0 orphans; "
+    print("SELF-CHECK GREEN: 72 notes / 43 links / 4 lot entries / 0 orphans; "
           "README.md asserted (per-board table, every cell, prose sweep; docs/ "
           "explicitly out of contract); "
           "ladders byte-identical; strip-list and monospace absent; scale law holds; "

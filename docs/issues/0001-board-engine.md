@@ -228,3 +228,86 @@ you did not test is a defect in the report, not a caveat.
    --ink-dark on --note = 11.84:1 on all four ladders** (todo / idea / note /
    learning, floor 3:1); **strike coverage (geometric model of 3 families) =
    95.2%** (floor 90%). Exit code 0.
+
+---
+
+## CLOSED — 2026-09-28, full build (final gate, Cleaner card t_9e9a748e)
+
+The engine closure above covers only the engine phase. This section records the
+**complete build** — five pages, assembly, and the final gate — with every
+verdict in order, both FAILs included. `master` final = `6f6ac07`.
+
+### Audit trail, in order
+
+| Gate | Verdict |
+|---|---|
+| Engine impl `t_b99fe1e4` @ `7e84a78` | **FAIL** — 3 measured defects (§ above) |
+| Engine QA `t_9c51430c` | FAIL, correctly |
+| Engine Cleaner `t_3fa03b8a` | gate correctly **shut**, no merge |
+| Engine fix `t_09f86f42` | `b1a0cd8` + `da8bf5f` |
+| Engine re-QA `t_1e0f86b4` | **PASS** — 94.98% strike coverage |
+| Engine Cleaner `t_d4bed8a7` | merged `3361c72` |
+| 5 page cards + landing | merged; one page lost and rebuilt (see below) |
+| Assembly `t_ec4ab93a` | `039d405` |
+| Final QA `t_bb976873` | **FAIL** — §4.6 endpoints off on first load |
+| Fix `t_b6deb519` | `6f6ac07`, root cause in `renderLinks()` |
+| re-QA `t_bec3f649` | **PASS** — 118/118 endpoints on, 0 off, max delta 0.0042 |
+
+### The second FAIL — §4.6 font race (final QA t_bb976873, fixed in 6f6ac07)
+
+`renderLinks()` measured note `offsetWidth` in the same synchronous pass as the
+note append, reading the `font-display: swap` fallback face; the real
+Montserrat Alternates then re-wrapped the notes wider and the drawn connector
+endpoints stayed behind. Measured on first load: **28 of 30** endpoints off, up
+to **16.25px** behind. Fix in `renderLinks()`: draw immediately, then
+re-measure and redraw once `document.fonts.ready` settles — one root-cause fix
+covering all six pages. After fix: **0 of 118 endpoints off**, max delta
+0.0042. `test_board_selfcheck.py` now machine-asserts the guard (fonts.ready
+re-measure present inside `renderLinks`, wired to the same measure-and-draw
+pass) — a check that exists but is not wired to the criterion is not a gate.
+
+### The lost page and the two orchestrator errors
+
+The Portfolio Project Ideas page (`t_3b092945`) was destroyed mid-write when
+its branch and worktree were deleted by a concurrent cleanup that the
+orchestrator had authorised. Two errors, both the orchestrator's:
+
+1. **Ruling ambiguity** — the card's write boundary did not forbid deleting
+   other cards' branches/worktrees, so the cleanup agent did not know it was
+   destroying live work.
+2. **Merge-before-authorised** — the orchestrator merged a page card while its
+   QA was still pending, then the cleanup raced the unfinished work.
+
+Rebuilt cleanly as `t_7530fde6` → commit `472ca4b` (13 notes, 10 links, 1
+parking-lot entry, IDEA ladder, verified in headless Chromium at 2560×1440).
+The original card was closed SUPERSEDED, not re-attempted.
+
+### Final gate verification (this card, 2026-09-28, on `master` = `6f6ac07`)
+
+- `python3 test_board_selfcheck.py`: **SELF-CHECK GREEN, exit 0** — 74 notes /
+  44 links / 4 lot entries / 0 orphans; ladders byte-identical; strip-list and
+  monospace absent; `renderScale=1.4400`, `k=0.9954`, composite paint scale
+  1.433407, painted 2260.0×1433.4 (stage 2260×1440); note frame 11.84:1 on all
+  four ladders; strike coverage 95.2%; §4.6 fonts.ready re-measure asserted.
+- `git remote -v`: **empty**. Nothing pushed, no domain, no Netlify, no GitHub
+  Pages, no deploy — owner instruction held across the entire build.
+- Repo clean: no untracked files, no stray `node_modules` (gitignored, absent),
+  no scratch dirs, no orphan branches (only `master`).
+- Working tree on `master`, clean.
+
+### Open owner decision (correctly unresolved — not a defect)
+
+**The 300px rail at a 390px viewport.** §12 says the rail hides off-desktop;
+this build is scoped to fine-pointer ≥1024px and touch is out by owner ruling
+1. Two QA passes flagged it and both declined to rule. It is the owner's call.
+
+### Deployment status
+
+**Nothing is deployed. `completion_contract: local-only` held.** To preview
+locally (owner runs this; the gate spawns and kills its own server):
+
+    cd ~/.hermes/Strombolis-Workshop/robert-gregory-portfolio-website/site
+    python3 -m http.server 8634 --bind 127.0.0.1
+
+then open http://127.0.0.1:8634/. To stop: Ctrl+C, or
+`pkill -f "http.server 8634"`.

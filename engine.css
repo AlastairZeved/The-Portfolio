@@ -215,6 +215,12 @@ body {
   min-width: 132px;                /* NOTE_MIN_W (§4.5) — max-content wraps-capped by JS inline max-width */
   font-size: 17px; line-height: 1.4;
   padding: 10px 12px;
+  /* §2.3 ink rebinding: the frame ink is rebound DARK on the note surface.
+     Without this the border inherits --ink-light from #board.on-dark and lands
+     at 1.48:1 on the --note fill — under the 3:1 WCAG 2.2 AA non-text floor,
+     and §2.5 names this frame the only separator between overlapping notes.
+     The text colour stays var(--ink-dark) (11.84:1 — already passing). */
+  --ink: var(--ink-dark);
   border: 2px solid var(--ink);
   border-radius: 3px;              /* near-square: a geometric constraint, not taste (§4) */
   background: var(--note);
@@ -241,13 +247,18 @@ body {
 /* §4.3 The scratch-out — struck, not hidden. Three stroke families at 0.62 dark
    ink (≥90% coverage); the underlying text is buried to 12% ink. */
 .note--complete { color: rgb(3 16 25 / 0.12); }
+/* Strike: dense cross-hatch — wide strokes, tight periods. Three 1px families
+   at 6/7/9px cover only ~35% of the box (measured 34.6% vs the ≥90% floor of
+   §4.3). Widening the duty per family to 4/6, 4/7, 6/9 and unioning three
+   angles puts real coverage at ~96% while the scattered gaps keep it reading
+   as a hand scratch-out — texture, not a highlighter block (§4.3). */
 .note--complete::after {
   content: ""; position: absolute; inset: 0;
   border-radius: inherit;          /* the radius tracks the note's (§4.3) */
   background:
-    repeating-linear-gradient(105deg, rgb(3 16 25 / 0.62) 0 1px, transparent 1px 6px),
-    repeating-linear-gradient(75deg,  rgb(3 16 25 / 0.62) 0 1px, transparent 1px 7px),
-    repeating-linear-gradient(90deg,  rgb(3 16 25 / 0.62) 0 1px, transparent 1px 9px);
+    repeating-linear-gradient(105deg, rgb(3 16 25 / 0.62) 0 4px, transparent 4px 6px),
+    repeating-linear-gradient(75deg,  rgb(3 16 25 / 0.62) 0 4px, transparent 4px 7px),
+    repeating-linear-gradient(90deg,  rgb(3 16 25 / 0.62) 0 6px, transparent 6px 9px);
   pointer-events: none;
 }
 

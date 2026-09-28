@@ -160,7 +160,7 @@ body {
 
 /* The title compartment overhangs the band by 22px and occludes the rule (B38) */
 .band-title {
-  position: absolute; top: 0; left: 16px;
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
   min-width: 120px; max-width: 40%;
   padding: 8px 12px 6px;
   border: 2px solid var(--frame); border-bottom: none;

@@ -139,28 +139,46 @@
   /* ---- §4.6 Links: 1px --frame hairlines between plain note centres ---- */
   // Endpoints are board-logical note centres measured off the laid-out notes
   // (their offsetWidth/Height are logical px — the scale(k) transform is paint-only).
+  //
+  // §4.6 first-load defect: with `font-display: swap` the notes are laid out in
+  // the fallback face on the synchronous pass, then re-wrap wider when
+  // Montserrat Alternates arrives — the drawn endpoints would stay where the
+  // fallback put them (up to ~16 logical px off). Fix at the single root cause:
+  // draw immediately (so the board is never blank), then re-measure and redraw
+  // once document.fonts settles. Covers every page through this one call path;
+  // no per-page workaround.
   function renderLinks(board, root) {
     var svg = root.querySelector('#link-layer');
     var notes = root.querySelector('#notes');
-    svg.innerHTML = '';
-    if (!board.links || !board.links.length) return;
-    var byId = {};
-    Array.prototype.forEach.call(notes.children, function (el) {
-      var n = board.notes[Number(el.getAttribute('data-idx'))];
-      if (n) byId[n.id] = {
-        cx: n.x + (el.offsetWidth * n.scale) / 2,
-        cy: n.y + (el.offsetHeight * n.scale) / 2
-      };
-    });
-    board.links.forEach(function (link) {
-      var a = byId[link.a], b = byId[link.b];
-      if (!a || !b) return; // orphan links are reported by the self-check, not drawn
-      var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', a.cx); line.setAttribute('y1', a.cy);
-      line.setAttribute('x2', b.cx); line.setAttribute('y2', b.cy);
-      line.setAttribute('vector-effect', 'non-scaling-stroke'); // §4.6: crisp 1px at any scale
-      svg.appendChild(line);
-    });
+
+    function measureAndDraw() {
+      svg.innerHTML = '';
+      if (!board.links || !board.links.length) return;
+      var byId = {};
+      Array.prototype.forEach.call(notes.children, function (el) {
+        var n = board.notes[Number(el.getAttribute('data-idx'))];
+        if (n) byId[n.id] = {
+          cx: n.x + (el.offsetWidth * n.scale) / 2,
+          cy: n.y + (el.offsetHeight * n.scale) / 2
+        };
+      });
+      board.links.forEach(function (link) {
+        var a = byId[link.a], b = byId[link.b];
+        if (!a || !b) return; // orphan links are reported by the self-check, not drawn
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', a.cx); line.setAttribute('y1', a.cy);
+        line.setAttribute('x2', b.cx); line.setAttribute('y2', b.cy);
+        line.setAttribute('vector-effect', 'non-scaling-stroke'); // §4.6: crisp 1px at any scale
+        svg.appendChild(line);
+      });
+    }
+
+    measureAndDraw();
+    // Redraw with the real face's metrics once fonts are in. Guarded: older
+    // engines without the Font Loading API just keep the fallback measurements.
+    if (document.fonts && document.fonts.ready && document.fonts.status !== 'loaded') {
+      document.fonts.ready.then(measureAndDraw);
+    }
   }
 
   /* ---- §3.2 Parking Lot: measured height, two-row floor, half-sheet ceiling ---- */

@@ -213,8 +213,27 @@ def main():
         assert ratio >= 3.0, f"glow ring {cat}: {ratio:.2f}:1 below 3:1"
         print(f"glow ring {cat.ljust(9)} --frame on --deep: {ratio:.2f}:1 (≥3:1)")
 
+    # --- FIX 4 (§4.6): connector endpoints must be measured with the REAL face.
+    # First-load defect: renderLinks() read offsetWidth in the same synchronous
+    # pass as the note append, measuring the `font-display: swap` fallback; the
+    # real Montserrat Alternates then re-wrapped the notes wider and the drawn
+    # endpoints stayed behind (up to ~16 logical px). The fix lives in the
+    # engine's renderLinks(): draw immediately, then re-measure and redraw once
+    # document.fonts settles. Assert the guard exists INSIDE renderLinks, so a
+    # refactor that drops the re-measure fails here loudly.
+    m_links = re.search(r"function renderLinks\(board, root\) \{(.*?)\n  \}", js, re.S)
+    assert m_links, "renderLinks() not found in board-engine.js"
+    body = m_links.group(1)
+    assert "document.fonts" in body and "document.fonts.ready" in body, \
+        "renderLinks does not await document.fonts.ready before re-measuring endpoints (§4.6)"
+    assert "measureAndDraw()" in body and body.count("measureAndDraw") >= 2, \
+        "renderLinks must draw immediately AND re-measure/draw after fonts.ready"
+    assert "fonts.ready.then(measureAndDraw)" in body, \
+        "the fonts.ready redraw is not wired to the same measure-and-draw pass"
+
     print("SELF-CHECK GREEN: 74 notes / 44 links / 4 lot entries / 0 orphans; "
-          "ladders byte-identical; strip-list and monospace absent; scale law holds.")
+          "ladders byte-identical; strip-list and monospace absent; scale law holds; "
+          "§4.6 fonts.ready re-measure present in renderLinks.")
 
 
 if __name__ == "__main__":

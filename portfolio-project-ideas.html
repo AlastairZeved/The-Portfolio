@@ -21,6 +21,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Robert Gregory — Portfolio Project Ideas</title>
   <link rel="stylesheet" href="engine.css">
+  <link rel="stylesheet" href="assembly.css">
 </head>
 <body>
   <!-- §13.1 B78 rail: four fixed groups, each wearing its own ladder via [data-cat] -->
@@ -62,6 +63,7 @@
     </div>
   </main>
   <script src="board-engine.js"></script>
+  <script src="assembly.js"></script>
   <script>
     // This page's only job: load the export, render boards[1] — "Portfolio
     // Project Ideas" (category "idea" → IDEA ladder via catOf) — and fit it.
@@ -79,6 +81,8 @@
         BoardEngine.renderBoard(board, root);
         BoardEngine.fit(root);
         window.addEventListener('resize', function () { BoardEngine.fit(root); });
+        // Assembly: rail cards navigate between the five pages; this page is marked active.
+        Assembly.wireStaticPage(board);
       })
       .catch(function (err) {
         // Meaningful failure, not a blank board: surface it where a human looks.

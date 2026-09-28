@@ -1,4 +1,5 @@
-/* assembly.js — the assembly layer (task t_ec4ab93a).
+/* assembly.js — the assembly layer (task t_ec4ab93a; refactored by issue #5
+   findings 1+2: one boot path, PAGES keyed on stable board id).
    Sits ON TOP of the frozen engine (board-engine.js); it never redefines it.
    It gives the five merged pages one shared integration behaviour:
 
@@ -10,21 +11,58 @@
        * Deep-link mode (the five static pages): a rail click navigates to
          that board's own page — ordinary navigation, one history entry,
          the same rule any multi-page site follows.
-   - On every page: the current board's rail card gets .is-active.
-
-   Page map is data, not magic: keys are the export's board titles, matched
-   exactly as stored (the landing title carries a literal newline). */
+   - On every page: the current board's rail card gets .is-active. */
 
 (function (global) {
   'use strict';
 
-  var PAGES = {
-    "Today's To Do09/27/26": 'todays-to-do.html',
-    'Portfolio Project Ideas': 'portfolio-project-ideas.html',
-    'How does AI inference math work?': 'how-does-ai-inference-math-work.html',
-    'Public Space Mini Grant': 'public-space-mini-grant.html',
-    'The Life of\nRobert Gregory': 'the-life-of-robert-gregory.html'
-  };
+  /* Page map is data, not magic: keys are the export's STABLE board ids —
+      never the rendered titles (issue #5, finding 2). Titles carry a jammed
+      date ("Today's To Do09/27/26") and a literal newline; ids do not. */
+   var PAGES = {
+     '12d0f2de-6879-43da-ab74-11fdfd054692': 'todays-to-do.html',
+     '9e5526ca-9991-4743-9e3e-db65b1572361': 'portfolio-project-ideas.html',
+     'b92ceff2-ff76-4280-bc39-9e430ccab19c': 'how-does-ai-inference-math-work.html',
+     'ba0c4910-e43e-40fc-886a-d3730c42c897': 'public-space-mini-grant.html',
+     'fa246b33-d8c8-4ec2-9073-2915de0d5764': 'the-life-of-robert-gregory.html'
+   };
+
+   /* The landing board (the one that carries the §12 contact form in its
+      parking lot). Keyed on id, like PAGES. */
+   var LANDING_ID = 'fa246b33-d8c8-4ec2-9073-2915de0d5764';
+
+   /* §13.1 B78 rail scaffolding: the four fixed groups BoardEngine.renderRail
+      fills. Runtime-built once per page (issue #5, finding 1) so no page
+      ships a byte-duplicated <aside> — previously all six pages carried the
+      identical block, md5 647b787117c6. */
+   var RAIL_GROUPS = [
+     { cat: 'todo', head: 'To Do' },
+     { cat: 'note', head: 'Notes' },
+     { cat: 'learning', head: 'Learning' },
+     { cat: 'idea', head: 'Ideas' }
+   ];
+
+   function buildRailScaffolding() {
+     if (document.querySelectorAll('.rail-cards').length) return; // already present
+     var aside = document.createElement('aside');
+     aside.id = 'rail';
+     aside.setAttribute('aria-label', 'Board index');
+     RAIL_GROUPS.forEach(function (g) {
+       var group = document.createElement('div');
+       group.className = 'rail-group';
+       group.setAttribute('data-cat', g.cat);
+       var h = document.createElement('h2');
+       h.className = 'rail-head';
+       h.textContent = g.head;
+       var slot = document.createElement('div');
+       slot.className = 'rail-cards';
+       slot.setAttribute('data-slot', g.cat);
+       group.appendChild(h);
+       group.appendChild(slot);
+       aside.appendChild(group);
+     });
+     document.body.insertBefore(aside, document.body.firstChild);
+   }
 
   var CROSSFADE_MS = 260; // §8
   var FADE_HALF = CROSSFADE_MS / 2;
@@ -90,7 +128,7 @@
     document.querySelectorAll('.rail-card').forEach(function (a) {
       var id = a.getAttribute('data-board-id');
       var board = window.__boards.filter(function (b) { return String(b.id) === id; })[0];
-      var page = board && PAGES[board.title];
+      var page = board && PAGES[board.id];
       if (!page) return; // an unknown board keeps the engine's inert link
       if (currentBoard && board === currentBoard) return; // this page IS that board
       a.setAttribute('href', page);
@@ -189,11 +227,28 @@
     row.appendChild(status);
   }
 
+  /* ---- The jammed-date title split (todays-to-do wireframe) ----
+     The export jams the MM/DD/YY date onto the title with no separator
+     ("Today's To Do09/27/26"). The wireframe renders it on two lines, date
+     beneath. The raw string is NOT repaired — the split is display-only,
+     using .band-title's engine-owned pre-wrap. Only boards whose title
+     actually ends in MM/DD/YY are affected. */
+  var DATE_TAIL = /\d{2}\/\d{2}\/\d{2}$/;
+
+  function applyTitleFormatting(board) {
+    var m = String(board.title || '').match(DATE_TAIL);
+    if (!m) return;
+    var t = document.getElementById('board-title');
+    if (!t) return;
+    t.textContent = board.title.slice(0, m.index) + '\n' + m[0];
+  }
+
   /* ---- Boot ---- */
   global.Assembly = {
     /* SPA: index.html calls this with the loaded data. */
     bootSpa: function (boards, landingBoard) {
       var root = document.getElementById('board');
+      buildRailScaffolding();
       BoardEngine.renderRail(boards);
       BoardEngine.renderBoard(landingBoard, root);
       BoardEngine.fit(root);
@@ -206,12 +261,41 @@
       markActive(currentBoard || null);
       wireLinks(currentBoard);
     },
+    /* ---- Static boot (issue #5, finding 1) ----
+       The five static pages used to repeat this fetch→find→render→fit→wire
+       sequence character for character. Each now calls Assembly.boot(id)
+       once; the page's own failure surface is preserved exactly: on any
+       error the catch writes 'Failed to load board: …' into #board-title. */
+    boot: function (boardId) {
+      fetch('assets/content-of-boards.json')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var boards = data.boards;
+          window.__boards = boards;
+          var board = Assembly.findBoardById(boards, boardId);
+          buildRailScaffolding();
+          var root = document.getElementById('board');
+          BoardEngine.renderRail(boards);
+          BoardEngine.renderBoard(board, root);
+          applyTitleFormatting(board);
+          BoardEngine.fit(root);
+          window.addEventListener('resize', function () { BoardEngine.fit(root); });
+          if (String(board.id) === LANDING_ID) mountContactForm(root);
+          Assembly.wireStaticPage(board);
+        })
+        .catch(function (err) {
+          // Meaningful failure, not a blank board: surface it where a human looks.
+          document.getElementById('board-title').textContent =
+            'Failed to load board: ' + err.message;
+          console.error(err);
+        });
+    },
     /* The landing board's parking-lot form — shared by both modes. */
     mountContactForm: mountContactForm,
-    findBoard: function (boards, title) {
-      var hits = boards.filter(function (b) { return b.title === title; });
+    findBoardById: function (boards, id) {
+      var hits = boards.filter(function (b) { return String(b.id) === String(id); });
       if (hits.length !== 1) throw new Error(
-        'Expected exactly one board titled ' + JSON.stringify(title) +
+        'Expected exactly one board with id ' + JSON.stringify(id) +
         ', found ' + hits.length);
       return hits[0];
     }

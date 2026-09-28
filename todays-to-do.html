@@ -23,25 +23,6 @@
   <link rel="stylesheet" href="assembly.css">
 </head>
 <body>
-  <!-- §13.1 B78 rail: four fixed groups, each wearing its own ladder via [data-cat] -->
-  <aside id="rail" aria-label="Board index">
-    <div class="rail-group" data-cat="todo">
-      <h2 class="rail-head">To Do</h2>
-      <div class="rail-cards" data-slot="todo"></div>
-    </div>
-    <div class="rail-group" data-cat="note">
-      <h2 class="rail-head">Notes</h2>
-      <div class="rail-cards" data-slot="note"></div>
-    </div>
-    <div class="rail-group" data-cat="learning">
-      <h2 class="rail-head">Learning</h2>
-      <div class="rail-cards" data-slot="learning"></div>
-    </div>
-    <div class="rail-group" data-cat="idea">
-      <h2 class="rail-head">Ideas</h2>
-      <div class="rail-cards" data-slot="idea"></div>
-    </div>
-  </aside>
   <main id="stage">
     <!-- Static mount: renderBoard() re-sets data-cat from the board record
          (todo → the TODO ladder), so the page carries no ladder of its own. -->
@@ -63,40 +44,10 @@
   <script src="board-engine.js"></script>
   <script src="assembly.js"></script>
   <script>
-    // This page's only job: load the export, render board 0 — "Today's
-    // To Do09/27/26" (category "todo" → TODO ladder via catOf) — split its
-    // jammed title onto two lines, and fit it. No routing, no build step,
-    // no page-local styling (issue 0001 / assembly card owns routing).
-    var BOARD_TITLE = "Today's To Do09/27/26";
-    // Trailing MM/DD/YY date, jammed on with no separator in the export.
-    var DATE_TAIL = /\d{2}\/\d{2}\/\d{2}$/;
-    fetch('assets/content-of-boards.json')
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        var boards = data.boards;
-        window.__boards = boards;
-        var board = boards.find(function (b) { return b.title === BOARD_TITLE; });
-        if (!board) throw new Error('Board not found in export: ' + BOARD_TITLE);
-        var root = document.getElementById('board');
-        BoardEngine.renderRail(boards);
-        BoardEngine.renderBoard(board, root);
-        // Wireframe: title on two lines, date beneath — in the engine's
-        // title compartment, using its own pre-wrap; no CSS is touched here.
-        var m = board.title.match(DATE_TAIL);
-        if (m) {
-          document.getElementById('board-title').textContent =
-            board.title.slice(0, m.index) + '\n' + m[0];
-        }
-        BoardEngine.fit(root);
-        window.addEventListener('resize', function () { BoardEngine.fit(root); });
-        // Assembly: rail cards navigate between the five pages; this page is marked active.
-        Assembly.wireStaticPage(board);
-      })
-      .catch(function (err) {
-        // Meaningful failure, not a blank board: surface it where a human looks.
-        document.getElementById('board-title').textContent = 'Failed to load board: ' + err.message;
-        console.error(err);
-      });
+    // This page's only job: boot board 0 — the landing is elsewhere; the todo
+    // board's jammed date title is split by Assembly (wireframe: two lines,
+    // date beneath). No routing, no build step, no page-local styling.
+    Assembly.boot('12d0f2de-6879-43da-ab74-11fdfd054692');
   </script>
 </body>
 </html>

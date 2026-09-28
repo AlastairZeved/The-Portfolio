@@ -109,8 +109,19 @@
     mount.innerHTML = '';
     board.notes.forEach(function (n, i) {
       if (!n.text) return; // §4: no empty frame ever exists — transparent before the first character
-      var el = document.createElement('div');
+      // A note carrying a `link` property renders as an <a>, following the
+      // rail-card precedent (renderRail): the site is read-only (no drag
+      // conflict) and an anchor is keyboard-reachable where an onclick div
+      // is not. className stays 'note' so every existing rule applies, plus
+      // the marker class 'note--link' for the clicked state (issue #24).
+      var el = document.createElement(n.link ? 'a' : 'div');
       el.className = 'note';
+      if (n.link) {
+        el.classList.add('note--link');
+        el.href = n.link;
+        el.target = '_blank';                 // opens in a new tab
+        el.rel = 'noopener noreferrer';       // never leak the opener
+      }
       el.setAttribute('data-idx', String(i));
       el.textContent = n.text;
       el.style.left = n.x + 'px';
@@ -128,6 +139,16 @@
         el.appendChild(t);
       }
       mount.appendChild(el);
+      // Issue #24: the clicked state PERSISTS after activation ("once the
+      // card is clicked/tapped") — the marker class is added from the click
+      // handler, not from :active, which only exists while the pointer is
+      // down. Wired after mount, engine-side, so both boot paths (SPA and
+      // static) inherit it with the render.
+      if (n.link) {
+        el.addEventListener('click', function () {
+          el.classList.add('is-clicked');
+        });
+      }
     });
   }
 

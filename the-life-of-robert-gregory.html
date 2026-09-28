@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<!-- The Life of Robert Gregory — landing page (the portfolio's front door).
+     Mounts the shared board engine (engine.css + board-engine.js, issue 0001).
+     Nothing here redefines the engine: tokens, note component, scale law,
+     connector layer, rail, band and Parking Lot are engine-owned.
+     Data: assets/content-of-boards.json → boards[4], title "The Life of\nRobert
+     Gregory" — the export carries a literal newline and the band renders it as
+     two lines (white-space: pre-wrap is engine CSS). Category "todo" → the
+     TO DO ladder and the rail's "To Do" group; BoardEngine performs both
+     mappings, the mount never hardcodes them.
+     The one element this page owns is the contact form (issue §12): the
+     parking-lot entry's ASCII box is the wireframe of that form, not copy —
+     it is replaced at runtime with a real labelled <textarea> and a
+     <button type="submit"> posting to the verified Formspree endpoint. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Robert Gregory — The Life of Robert Gregory</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="engine.css">
+  <style>
+    /* — Page-owned: the contact form ONLY. The engine ships no form styles and
+       this page may not edit engine.css, so the form's box lives here — scoped
+       to the form, built entirely from engine tokens (§2.2.2/§2.2): no hex
+       values, no transforms, nothing engine-owned redefined. The dashed box,
+       the field above, and Submit at its bottom right reproduce the wireframe
+       footprint of the parking-lot entry. */
+    .lot-form {
+      box-sizing: border-box;
+      width: 220px;   /* the label fits one line: 26ch of 13px Montserrat ≈ 190px */
+      padding: 2px 10px 0;
+      border: 1px dashed var(--frame);
+      border-radius: 3px;
+      background: var(--card);
+      color: var(--ink-light);
+    }
+    .lot-form-label {
+      display: block;
+      font-size: 13px;
+      line-height: 1.3;
+      margin: 0 0 3px;
+      color: var(--ink-light);
+    }
+    .lot-form-textarea {
+      display: block;
+      box-sizing: border-box;
+      width: 100%;
+      height: 104px;
+      padding: 4px 8px;
+      font: inherit;                 /* Montserrat Alternates, like every note */
+      line-height: 1.3;
+      color: var(--ink-light);
+      background: transparent;
+      border: 1px dashed var(--frame);
+      border-radius: 3px;
+      resize: none;                  /* the footprint is fixed; long text scrolls inside */
+    }
+    .lot-form-actions {
+      display: flex;
+      justify-content: flex-end;     /* Submit at the box's bottom right (wireframe) */
+      margin: 4px 0 2px;
+    }
+    .lot-form-submit {
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.3;
+      padding: 4px 12px;
+      border: 1px solid var(--ink-dark);
+      border-radius: 3px;
+      background: var(--frame);
+      color: var(--ink-dark);        /* 5.70:1 on --frame — the band tab's own measurement */
+      cursor: pointer;
+    }
+    /* Clickability idiom of ruling 2, on the engine's terms: a 1px ring (the
+       shape/edge change "never colour alone" requires) + the soft glow. */
+    .lot-form-submit:hover {
+      box-shadow: 0 0 0 1px var(--ink-dark), 0 0 10px 2px var(--frame);
+    }
+    .lot-form-status {
+      display: none;
+      font-size: 13px;
+      line-height: 1.3;
+      color: var(--ink-light);
+    }
+    .lot-form-status.is-visible { display: block; }
+  </style>
+</head>
+<body>
+  <!-- §13.1 B78 rail: four fixed groups, each wearing its own ladder via [data-cat] -->
+  <aside id="rail" aria-label="Board index">
+    <div class="rail-group" data-cat="todo">
+      <h2 class="rail-head">To Do</h2>
+      <div class="rail-cards" data-slot="todo"></div>
+    </div>
+    <div class="rail-group" data-cat="note">
+      <h2 class="rail-head">Notes</h2>
+      <div class="rail-cards" data-slot="note"></div>
+    </div>
+    <div class="rail-group" data-cat="learning">
+      <h2 class="rail-head">Learning</h2>
+      <div class="rail-cards" data-slot="learning"></div>
+    </div>
+    <div class="rail-group" data-cat="idea">
+      <h2 class="rail-head">Ideas</h2>
+      <div class="rail-cards" data-slot="idea"></div>
+    </div>
+  </aside>
+  <main id="stage">
+    <!-- Static mount: data-cat="todo" happens to be this board's own ladder —
+         BoardEngine.renderBoard() re-derives it from the data either way. -->
+    <div id="board" data-cat="todo" class="on-dark">
+      <section id="band" aria-label="Components and requirements">
+        <div class="band-title" id="board-title"></div>
+        <div class="band-zone" id="zone-components" role="textbox" aria-multiline="true" aria-label="Components"></div>
+        <div class="band-zone" id="zone-requirements" role="textbox" aria-multiline="true" aria-label="Requirements"></div>
+        <div class="band-rule" id="band-rule"></div>
+        <div class="band-tab on-light" id="band-tab">Components / Requirements</div>
+      </section>
+      <section id="lot" class="on-dark" aria-label="Parking lot">
+        <div id="lot-items"></div>
+      </section>
+      <svg id="link-layer" aria-hidden="true"></svg>
+      <div id="notes"></div>
+    </div>
+  </main>
+  <script src="board-engine.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      // The export's boards[4]: the title carries a literal newline — matched
+      // exactly as stored, never normalised.
+      var BOARD_TITLE = 'The Life of\nRobert Gregory';
+      // The lot entry's lead line. The ASCII box beneath it in the export is
+      // the wireframe of the contact form, not copy — the form replaces it.
+      var LOT_LEAD = 'Have a question? Ask away:';
+      // Verified live by the orchestrator (probed 2026-09-27): POST returns
+      // {"next":"/thanks","ok":true} and delivers to robertazgregory@gmail.com.
+      var FORMSPREE = 'https://formspree.io/f/mbglkalb';
+
+      fetch('assets/content-of-boards.json')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var boards = data.boards;
+          window.__boards = boards;
+          var board = boards.find(function (b) { return b.title === BOARD_TITLE; });
+          if (!board) throw new Error('Board not found in export: ' + JSON.stringify(BOARD_TITLE));
+          var root = document.getElementById('board');
+          BoardEngine.renderRail(boards);
+          BoardEngine.renderBoard(board, root);
+          BoardEngine.fit(root);
+          window.addEventListener('resize', function () { BoardEngine.fit(root); });
+          mountContactForm(root);
+        })
+        .catch(function (err) {
+          // Meaningful failure, not a blank board: surface it where a human looks.
+          document.getElementById('board-title').textContent = 'Failed to load board: ' + err.message;
+          console.error(err);
+        });
+
+      /* ---- The contact form (§12) ----
+         Swaps the parking-lot row's ASCII box for real markup: a labelled
+         <textarea name="question"> above a <button type="submit"> anchored
+         bottom-right. The engine has already measured the lot against the
+         entry's rendered rows (§3.2) — the ASCII box occupies ~10 text rows,
+         and the form is built to that same footprint, so it lands inside the
+         measured lot with no engine change and no re-measure. */
+      function mountContactForm(root) {
+        var row = root.querySelector('#lot-items .lot-item');
+        if (!row) throw new Error('Parking-lot entry missing after render');
+        row.textContent = '';
+
+        var form = document.createElement('form');
+        form.id = 'lot-contact-form';
+        form.className = 'lot-form';
+        form.action = FORMSPREE;      // the one endpoint; never empty
+        form.method = 'POST';
+
+        var label = document.createElement('label');
+        label.className = 'lot-form-label';
+        label.htmlFor = 'lot-question';
+        label.textContent = LOT_LEAD;
+
+        var textarea = document.createElement('textarea');
+        textarea.id = 'lot-question';
+        textarea.className = 'lot-form-textarea';
+        textarea.name = 'question';   // Formspree rejects unnamed fields
+        textarea.required = true;     // native validation speaks before any JS
+
+        var actions = document.createElement('div');
+        actions.className = 'lot-form-actions';
+        var submit = document.createElement('button');
+        submit.type = 'submit';
+        submit.className = 'lot-form-submit';
+        submit.textContent = 'Submit'; // reads as a button by shape + label, not fill alone
+        actions.appendChild(submit);
+
+        // Honeypot per Formspree's own recipe: invisible to people, catnip to bots.
+        var gotcha = document.createElement('input');
+        gotcha.type = 'text';
+        gotcha.name = '_gotcha';
+        gotcha.tabIndex = -1;
+        gotcha.autocomplete = 'off';
+        gotcha.setAttribute('aria-hidden', 'true');
+        gotcha.style.display = 'none';
+
+        form.appendChild(label);
+        form.appendChild(textarea);
+        form.appendChild(actions);
+        form.appendChild(gotcha);
+
+        // §12 toast: a polite status region for the confirmation.
+        var status = document.createElement('p');
+        status.id = 'lot-form-status';
+        status.className = 'lot-form-status';
+        status.setAttribute('role', 'status');
+
+        // Fetch first so the reader never leaves the board; if the request
+        // cannot complete (offline, blocked), fall back to the form's own
+        // native POST — the same endpoint, which navigates to Formspree's
+        // /thanks. Constraint validation has already passed by the time this
+        // handler runs, so the fallback carries a valid message.
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          submit.disabled = true;
+          fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'Accept': 'application/json' }
+          })
+            .then(function (r) {
+              if (!r.ok) throw new Error('HTTP ' + r.status);
+              return r.json();
+            })
+            .then(function (j) {
+              if (!j.ok) throw new Error('Formspree rejected the submission');
+              form.hidden = true;
+              status.textContent = 'Thanks — your question is on its way.';
+              status.classList.add('is-visible');
+            })
+            .catch(function (err) {
+              // Native submission is the honest fallback: real POST, real page.
+              console.error('Falling back to native form POST:', err);
+              form.submit();
+            });
+        });
+
+        row.appendChild(form);
+        row.appendChild(status);
+      }
+    })();
+  </script>
+</body>
+</html>

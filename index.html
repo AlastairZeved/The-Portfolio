@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<!-- Portfolio board — page 1 (board engine demo mount). Engine files: engine.css, board-engine.js -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Robert Gregory — Boards</title>
+  <link rel="stylesheet" href="engine.css">
+</head>
+<body>
+  <aside id="rail" aria-label="Board index">
+    <!-- Four groups (§13.1 B78), each filled by its own ladder via [data-cat] scope -->
+    <div class="rail-group" data-cat="todo">
+      <h2 class="rail-head">To Do</h2>
+      <div class="rail-cards" data-slot="todo"></div>
+    </div>
+    <div class="rail-group" data-cat="note">
+      <h2 class="rail-head">Notes</h2>
+      <div class="rail-cards" data-slot="note"></div>
+    </div>
+    <div class="rail-group" data-cat="learning">
+      <h2 class="rail-head">Learning</h2>
+      <div class="rail-cards" data-slot="learning"></div>
+    </div>
+    <div class="rail-group" data-cat="idea">
+      <h2 class="rail-head">Ideas</h2>
+      <div class="rail-cards" data-slot="idea"></div>
+    </div>
+  </aside>
+  <main id="stage">
+    <div id="board" data-cat="todo" class="on-dark">
+      <!-- Static furniture (band, rule, tab, lot) lives in board-logical space inside #board -->
+      <section id="band" aria-label="Components and requirements">
+        <div class="band-title" id="board-title"></div>
+        <div class="band-zone" id="zone-components" role="textbox" aria-multiline="true" aria-label="Components"></div>
+        <div class="band-zone" id="zone-requirements" role="textbox" aria-multiline="true" aria-label="Requirements"></div>
+        <div class="band-rule" id="band-rule"></div>
+        <div class="band-tab on-light" id="band-tab">Components / Requirements</div>
+      </section>
+      <section id="lot" class="on-dark" aria-label="Parking lot">
+        <div id="lot-items"></div>
+      </section>
+      <svg id="link-layer" aria-hidden="true"></svg>
+      <div id="notes"></div>
+    </div>
+  </main>
+  <script src="board-engine.js"></script>
+  <script>
+    // Boot: load the board data, render board 0 (Today's To Do) through the engine.
+    fetch('assets/content-of-boards.json')
+      .then(r => r.json())
+      .then(data => {
+        window.__boards = data.boards;
+        BoardEngine.renderRail(data.boards);
+        BoardEngine.renderBoard(data.boards[0], document.getElementById('board'));
+        BoardEngine.fit(document.getElementById('board'));
+        window.addEventListener('resize', () => BoardEngine.fit(document.getElementById('board')));
+      });
+  </script>
+</body>
+</html>

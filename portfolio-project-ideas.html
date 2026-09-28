@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!-- Portfolio Project Ideas — board page (portfolio page 5 of 5).
+     Mounts the shared board engine (engine.css + board-engine.js, issue 0001).
+     Nothing here redefines the engine: tokens, note component, scale law,
+     connector layer, rail, band, header tab, Parking Lot and hover glow are
+     engine-owned. Data: assets/content-of-boards.json → boards[1], title
+     "Portfolio Project Ideas", category "idea" → the IDEA ladder (--deep
+     #000a06 / card #001a0e / frame #52997f / note #b9d2b2) and rail group
+     "Ideas" — BoardEngine.catOf() performs that mapping; the mount below
+     never hardcodes it.
+     Note states in this board's data (engine renders, page does nothing):
+     - one note with state "complete" ("Could be designed like a tree?",
+       scale 0.549 — the smallest note in the export) → struck, not hidden (§4.3).
+     - one parking-lot entry, verbatim — a question to self, not contact copy;
+       the only form on the site stays on the landing page.
+     No reminders and no highlighted notes in this board's data; the engine's
+     reminder stripping (§7, read-only portfolio) is a no-op here. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Robert Gregory — Portfolio Project Ideas</title>
+  <link rel="stylesheet" href="engine.css">
+  <link rel="stylesheet" href="assembly.css">
+</head>
+<body>
+  <!-- §13.1 B78 rail: four fixed groups, each wearing its own ladder via [data-cat] -->
+  <aside id="rail" aria-label="Board index">
+    <div class="rail-group" data-cat="todo">
+      <h2 class="rail-head">To Do</h2>
+      <div class="rail-cards" data-slot="todo"></div>
+    </div>
+    <div class="rail-group" data-cat="note">
+      <h2 class="rail-head">Notes</h2>
+      <div class="rail-cards" data-slot="note"></div>
+    </div>
+    <div class="rail-group" data-cat="learning">
+      <h2 class="rail-head">Learning</h2>
+      <div class="rail-cards" data-slot="learning"></div>
+    </div>
+    <div class="rail-group" data-cat="idea">
+      <h2 class="rail-head">Ideas</h2>
+      <div class="rail-cards" data-slot="idea"></div>
+    </div>
+  </aside>
+  <main id="stage">
+    <!-- Static mount: data-cat is set per-board by BoardEngine.renderBoard()
+         (catOf: idea → the IDEA ladder), so this page carries no ladder of
+         its own. -->
+    <div id="board" data-cat="idea" class="on-dark">
+      <section id="band" aria-label="Components and requirements">
+        <div class="band-title" id="board-title"></div>
+        <div class="band-zone" id="zone-components" role="textbox" aria-multiline="true" aria-label="Components"></div>
+        <div class="band-zone" id="zone-requirements" role="textbox" aria-multiline="true" aria-label="Requirements"></div>
+        <div class="band-rule" id="band-rule"></div>
+        <div class="band-tab on-light" id="band-tab">Components / Requirements</div>
+      </section>
+      <section id="lot" class="on-dark" aria-label="Parking lot">
+        <div id="lot-items"></div>
+      </section>
+      <svg id="link-layer" aria-hidden="true"></svg>
+      <div id="notes"></div>
+    </div>
+  </main>
+  <script src="board-engine.js"></script>
+  <script src="assembly.js"></script>
+  <script>
+    // This page's only job: load the export, render boards[1] — "Portfolio
+    // Project Ideas" (category "idea" → IDEA ladder via catOf) — and fit it.
+    // No routing, no build step, no page-local styling (issue 0001 / assembly).
+    var BOARD_TITLE = 'Portfolio Project Ideas';
+    fetch('assets/content-of-boards.json')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var boards = data.boards;
+        window.__boards = boards;
+        var board = boards.find(function (b) { return b.title === BOARD_TITLE; });
+        if (!board) throw new Error('Board not found in export: ' + BOARD_TITLE);
+        var root = document.getElementById('board');
+        BoardEngine.renderRail(boards);
+        BoardEngine.renderBoard(board, root);
+        BoardEngine.fit(root);
+        window.addEventListener('resize', function () { BoardEngine.fit(root); });
+        // Assembly: rail cards navigate between the five pages; this page is marked active.
+        Assembly.wireStaticPage(board);
+      })
+      .catch(function (err) {
+        // Meaningful failure, not a blank board: surface it where a human looks.
+        document.getElementById('board-title').textContent = 'Failed to load board: ' + err.message;
+        console.error(err);
+      });
+  </script>
+</body>
+</html>

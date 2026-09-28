@@ -1,0 +1,102 @@
+/* assembly.css — integration layer ONLY (task t_ec4ab93a).
+   The engine (engine.css / board-engine.js) is frozen; this file adds the
+   shared chrome the assembled site needs on top of it, without redefining
+   any engine rule or token:
+     - rail-card hover glow (owner ruling 2: 1px ring + soft halo, so it
+       reads as a shape change and survives a greyscale check — §12)
+     - the active-board indication on the rail card
+     - the 260ms crossfade the board swap rides (§8, no history push, B9
+       bypassed). prefers-reduced-motion is already handled globally by the
+       engine's `transition: none !important` rule. */
+
+/* Ruling 2 on the rail: same ring+glow idiom the engine uses on .note:hover. */
+.rail-card:hover {
+  box-shadow:
+    0 0 0 1px var(--frame),
+    0 0 10px 2px var(--frame);
+}
+
+/* Active board: a 2px ring (heavier than hover's 1px — a state, not a hover)
+   plus a filled face. Ring + fill = geometry, not colour alone. */
+.rail-card.is-active {
+  box-shadow: 0 0 0 2px var(--frame);
+  background: var(--frame);
+  color: var(--ink-dark);
+  font-weight: 800;
+}
+
+/* §8 crossfade: the swap fades the board out, re-renders, fades back. */
+#board.is-fading {
+  opacity: 0;
+  transition: opacity 130ms ease-in;
+}
+#board {
+  transition: opacity 130ms ease-out;
+}
+
+/* ---- The contact form (§12) ----
+   The engine ships no form component, so the assembly layer owns the form's
+   styling — scoped to the form, built entirely from engine tokens (§2.2.2/§2.2):
+   no hex values, no transforms, nothing engine-owned redefined. The dashed
+   box, the field above, and Submit at its bottom right reproduce the
+   wireframe footprint of the parking-lot entry. Shared by index.html (SPA)
+   and the-life-of-robert-gregory.html (static) — one copy, both modes. */
+.lot-form {
+  box-sizing: border-box;
+  width: 220px;   /* the label fits one line: 26ch of 13px Montserrat ≈ 190px */
+  padding: 2px 10px 0;
+  border: 1px dashed var(--frame);
+  border-radius: 3px;
+  background: var(--card);
+  color: var(--ink-light);
+}
+.lot-form-label {
+  display: block;
+  font-size: 13px;
+  line-height: 1.3;
+  margin: 0 0 3px;
+  color: var(--ink-light);
+}
+.lot-form-textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 104px;
+  padding: 4px 8px;
+  font: inherit;                 /* Montserrat Alternates, like every note */
+  line-height: 1.3;
+  color: var(--ink-light);
+  background: transparent;
+  border: 1px dashed var(--frame);
+  border-radius: 3px;
+  resize: none;                  /* the footprint is fixed; long text scrolls inside */
+}
+.lot-form-actions {
+  display: flex;
+  justify-content: flex-end;     /* Submit at the box's bottom right (wireframe) */
+  margin: 4px 0 2px;
+}
+.lot-form-submit {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  padding: 4px 12px;
+  border: 1px solid var(--ink-dark);
+  border-radius: 3px;
+  background: var(--frame);
+  color: var(--ink-dark);        /* 5.70:1 on --frame — the band tab's own measurement */
+  cursor: pointer;
+}
+/* Clickability idiom of ruling 2, on the engine's terms: a 1px ring (the
+   shape/edge change "never colour alone" requires) + the soft glow. */
+.lot-form-submit:hover {
+  box-shadow: 0 0 0 1px var(--ink-dark), 0 0 10px 2px var(--frame);
+}
+.lot-form-status {
+  display: none;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--ink-light);
+}
+.lot-form-status.is-visible { display: block; }

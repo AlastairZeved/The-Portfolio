@@ -125,13 +125,77 @@ def main():
     assert abs(logical_h - 1000) < 1e-9, "LOGICAL_H != 1000 at 2560x1440"
     assert 0.9954 < k < 0.9956, f"k {k} not ≈0.9955 at 2560x1440"
 
-    # --- hover glow ring: measured, not asserted (§12). The 1px ring is drawn in
-    # --frame on the --deep ground; non-text contrast must clear 3:1 per ladder.
+    # --- FIX 1 (§3 + §11): the PAINT scale is the composite k × renderScale.
+    # The engine must apply both factors in the one uniform transform and report
+    # the composite separately (data-render-scale) while data-k keeps §11's k.
+    composite = k * render_scale
+    painted_w, painted_h = rw * composite, rh * composite
+    print(f"composite paint scale @2560x1440: k*renderScale={composite:.6f} "
+          f"painted={painted_w:.1f}x{painted_h:.1f} (stage 2260x1440)")
+    assert abs(painted_w - (vw - 300)) < 1.0, \
+        f"painted width {painted_w:.1f} does not fill the 2260px stage"
+    assert re.search(r"k\s*\*\s*f\.renderScale", js), \
+        "fit() does not multiply the composite k * renderScale"
+    assert "data-paint-scale" in js, "composite paint scale not exposed as data-paint-scale"
+    assert "data-render-scale" in js, "§3's renderScale factor not exposed as data-render-scale"
+    assert "'data-k', f.k" in js, "data-k must keep reporting §11's k itself"
+
+    # --- FIX 2 (§4 + §2.5 + §12): the note's 2px frame is rebound DARK ink on
+    # the note surface — ≥3:1 non-text contrast on every ladder's --note fill,
+    # and on the fixed --highlight fill (highlighted notes keep the same frame).
+    # The engine.css declaration must bind --ink on .note, not rely on inheritance.
+    assert re.search(r"\.note\s*\{[^}]*--ink:\s*var\(--ink-dark\)", css, re.S), \
+        ".note does not rebind --ink to --ink-dark (frame falls on the wrong pole)"
     def lum(hexs):
         r, g, b = (int(hexs[i:i+2], 16) / 255 for i in (1, 3, 5))
         f = lambda c: c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
         r, g, b = f(r), f(g), f(b)
         return 0.2126 * r + 0.7152 * g + 0.0722 * b
+    for cat, rungs in LADDERS.items():
+        for surface, hexv in (("note", rungs["note"]), ("highlight", FIXED_TOKENS["highlight"])):
+            ratio = (max(lum(FIXED_TOKENS["ink-dark"]), lum(hexv)) + 0.05) / \
+                    (min(lum(FIXED_TOKENS["ink-dark"]), lum(hexv)) + 0.05)
+            assert ratio >= 3.0, \
+                f"note frame {cat} on --{surface}: {ratio:.2f}:1 below the 3:1 floor"
+            if surface == "note":
+                print(f"note frame {cat.ljust(9)} --ink-dark on --note: {ratio:.2f}:1 (≥3:1)")
+
+    # --- FIX 3 (§4.3): strike coverage ≥90%, modelled geometrically from the
+    # DECLARED gradients in engine.css (parsed, not hardcoded) — a pixel is
+    # covered when any stroke family darkens it.
+    strike_block = re.search(r"\.note--complete::after\s*\{(.*?)\}", css, re.S)
+    assert strike_block, ".note--complete::after missing"
+    families = re.findall(
+        r"repeating-linear-gradient\((\d+(?:\.\d+)?)deg,\s*"
+        r"rgb\(3 16 25 / 0\.62\) 0 (\d+(?:\.\d+)?)px,\s*transparent"
+        r"\s+\d+(?:\.\d+)?px\s+(\d+(?:\.\d+)?)px\)",
+        strike_block.group(1))
+    assert len(families) >= 3, f"expected ≥3 stroke families, parsed {len(families)}"
+    import math
+    TILE_W, TILE_H, STEP = 63.0, 45.0, 0.25  # tile >> all periods; fine sampling
+    covered = total = 0
+    for gx in range(int(TILE_W / STEP)):
+        for gy in range(int(TILE_H / STEP)):
+            x, y = gx * STEP, gy * STEP
+            hit = False
+            for deg, stroke, period in families:
+                t = math.radians(float(deg))
+                # CSS gradient line: 0deg points up (screen y grows downward);
+                # project the pixel onto the gradient direction, mod the period.
+                proj = (x * math.sin(t) - y * math.cos(t)) % float(period)
+                if proj < float(stroke):
+                    hit = True
+                    break
+            covered += hit
+            total += 1
+    coverage = covered / total
+    print(f"strike coverage (geometric model of {len(families)} families): "
+          f"{coverage * 100:.1f}% (floor 90%)")
+    assert coverage >= 0.90, f"strike coverage {coverage * 100:.1f}% below the 90% floor"
+
+    # --- hover glow ring: measured, not asserted (§12). The 1px ring is drawn in
+    # --frame on the --deep ground; non-text contrast must clear 3:1 per ladder.
+    # (lum is defined above, in the FIX 2 block.)
     for cat, rungs in LADDERS.items():
         ratio = (max(lum(rungs["frame"]), lum(rungs["deep"])) + 0.05) / \
                 (min(lum(rungs["frame"]), lum(rungs["deep"])) + 0.05)

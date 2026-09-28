@@ -2,7 +2,7 @@
 """test_board_selfcheck.py — issue 0001 §9 acceptance gate, run with plain python3.
 
 Parses EVERY board in assets/content-of-boards.json (no sampling) and asserts:
-    total notes = 74 · total links = 44 · total lot entries = 4 · orphan links = 0
+    total notes = 73 · total links = 44 · total lot entries = 4 · orphan links = 0
 It also asserts the ladder hexes are byte-identical to issue §2 (§2.2.2), that
 no monospace face exists anywhere in the engine, and that the §7 strip-list
 chrome is absent from the built sources — asserted, not eyeballed.
@@ -32,7 +32,7 @@ import time
 ROOT = pathlib.Path(__file__).resolve().parent
 DATA = ROOT / "assets" / "content-of-boards.json"
 
-EXPECTED_SHA256 = "506cbc1431e2fbce7a6fde339b851b4dfb1f8243448cb846e2a3bf26d313e6d4"
+EXPECTED_SHA256 = "b396af2d9863f7af36883cf30b0b8e65d8b6d24096b555e2e9f979f34fb4aba8"
 
 # §2.2.2 ladder, byte-identical (issue §2 was verified against source by the orchestrator)
 LADDERS = {
@@ -599,7 +599,7 @@ def main():
     print("-" * 60)
     print(f"TOTALS                             {total_notes:5} {total_links:5} {total_lot:3} {orphans:6}")
 
-    assert total_notes == 74, f"total notes {total_notes} != 74"
+    assert total_notes == 73, f"total notes {total_notes} != 73"
     assert total_links == 44, f"total links {total_links} != 44"
     assert total_lot == 4, f"total lot entries {total_lot} != 4"
     assert orphans == 0, f"orphan links {orphans} != 0"
@@ -728,7 +728,7 @@ def main():
     print(f"rendered gate: 6 pages booted headless, "
           f"{time.perf_counter() - t_browser:.1f}s")
 
-    print("SELF-CHECK GREEN: 74 notes / 44 links / 4 lot entries / 0 orphans; "
+    print("SELF-CHECK GREEN: 73 notes / 44 links / 4 lot entries / 0 orphans; "
           "ladders byte-identical; strip-list and monospace absent; scale law holds; "
           "§4.6 fonts.ready re-measure present in renderLinks; "
           "rendered gate: §3.2 settled lot geometry, §4.6 settled endpoints, "

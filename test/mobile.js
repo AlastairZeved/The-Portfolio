@@ -15,10 +15,27 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.goto(URL, { waitUntil: 'networkidle' });
 
-  // title card, B17 text
+  // title card, B17/B19 text
   const title = await page.locator('#anchor-title').innerText();
   ok('title card line 1 "The Portfolio of"', title.includes('The Portfolio of'));
   ok('title card line 2 name', title.includes('Robert Alastair Zeved Gregory'));
+
+  // title card, B19: single font size and borders hug the text
+  const titleSizes = await page.locator('#anchor-title .title-eyebrow, #anchor-title .title-pinned')
+    .evaluateAll(els => els.map(el => getComputedStyle(el).fontSize));
+  ok('title card single font size (both lines equal)', titleSizes.length === 2 && titleSizes[0] === titleSizes[1] && !!titleSizes[0]);
+  const titleBox = await page.locator('#anchor-title').boundingBox();
+  // B19: borders close in on the text — card width = widest line + horizontal padding + borders
+  const hug = await page.evaluate(() => {
+    const card = document.querySelector('#anchor-title');
+    const padX = parseFloat(getComputedStyle(card).paddingLeft) + parseFloat(getComputedStyle(card).paddingRight);
+    const bdrX = parseFloat(getComputedStyle(card).borderLeftWidth) + parseFloat(getComputedStyle(card).borderRightWidth);
+    const widest = Math.max(...[...card.querySelectorAll('.title-eyebrow, .title-pinned')]
+      .map(el => el.getBoundingClientRect().width));
+    return Math.abs(card.getBoundingClientRect().width - (widest + padX + bdrX));
+  });
+  ok('title card borders hug text', titleBox && hug < 2);
+  ok('title card stays centred', titleBox && Math.abs((titleBox.x + titleBox.width / 2) - 390 / 2) < 2);
 
   // six door-cards, each a real new-tab anchor
   const cards = await page.locator('a.door-card').count();

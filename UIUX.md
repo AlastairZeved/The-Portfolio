@@ -1,28 +1,53 @@
-# UIUX.md — To-Do Boards
+# UIUX.md — The Portfolio
 
-**Status:** v2. This is the rendering authority — the document `app.js`,
-`styles.css` and `DECISIONS.md` have cited as `UIUX §x` since the first commit,
-written down for the first time.
+**Status:** v2. This is the rendering authority for this repository — the
+document `engine.css`, `board-engine.js`, `assembly.css`, `assembly.js` and
+`docs/DECISIONS.md` cite as `UIUX §x`.
 
-**How to read this with the other records.** `PRD.md` says what the product is
-and what it must do; this says what it looks like and how it behaves under the
-hand. Where the two disagree about a rendering decision, **this document wins** —
-that is what "rendering authority" means, and `DECISIONS.md` A1 already resolved
-one such conflict that way. `DECISIONS.md` remains the v1 reasoning history;
-where §§ below supersede a numbered ruling, they say so by number.
+**Provenance — this is its own document.** The design system recorded here was
+derived from AlastairZeved/TheBoards ("Zeved Boards", titled "To-Do Boards" in
+the source record), and the derivation is one-time and complete. Per the
+owner's ruling (`docs/DECISIONS.md` B2) this document is **not tied to
+TheBoards at all**: it is never synced to TheBoards, never pinned against it,
+never diffed with it, and it is **NEVER stale** — it changes only by a ruling
+of record in this repo.
+
+**How to read this with the other records.** `docs/PRD.md` says what the site
+is and what it must do; this says what it renders, and in what values. Where
+the two disagree about a rendering decision, **this document wins** — that is
+what "rendering authority" means, and TheBoards' `DECISIONS.md` A1 resolved
+one such conflict that way in the source repo. `docs/DECISIONS.md` is this
+repo's own append-only rulings of record (B1+); where §§ below supersede a
+numbered ruling, they say so by number.
+
+**External citations.** The history recorded below is TheBoards', and it is
+marked: every `TheBoards' DECISIONS.md B<n>` cites a ruling in
+AlastairZeved/TheBoards' record, every `TheBoards' issue #n` an issue in that
+repo, every `TheBoards' PRD §x` a section of that repo's PRD, and every
+`TheBoards' <path>` a file in that repo. All of it is external historical
+provenance — never a pointer into this repository.
+
+**Scope note — the read-only subset.** Sections describing the source app's
+interactive behaviour — editing chrome, gestures, menus, the calendar view,
+undo, export, the service worker — are provenance for the shared design
+system. This repo ships the read-only subset: visitors navigate; nothing is
+editable (`docs/PRD.md`). Where such a section states a value that renders
+here — a token, a ratio, a geometry, a duration — the value is law here
+exactly as written.
 
 Sections §1–§12 keep the meanings the code already cites. New v2 material is
 numbered §13 and up, so no existing citation moves.
 
-**The rendered reference.** This system was settled by rendered specimen sheets,
-not prose — seven proof rounds, run outside the repo. The final sheet, **proof
-sheet 7, "A Well, Swapped"**, is committed at
-`proofs/proof-7-a-well-swapped.html`; its own verification table records the
-swap that ended the process (the band takes `#020812` and is the deepest surface
-on the page; the card takes `#08152c` and separates by its border — 5.39:1 on the
-card, 5.95:1 on the band). The three `fonts/` files are extracted from that
-sheet's embedded faces. Where this document and that render disagree, the render
-is the earlier authority and the disagreement is a defect *here*.
+**The rendered reference.** This system was settled by rendered specimen
+sheets, not prose — seven proof rounds, run outside the repo. The final
+sheet, **proof sheet 7, "A Well, Swapped"**, is committed in this repo at
+`docs/proofs/proof-7-a-well-swapped.html`; its own verification table records
+the swap that ended the process (the band takes `#020812` and is the deepest
+surface on the page; the card takes `#08152c` and separates by its border —
+5.39:1 on the card, 5.95:1 on the band). The three `assets/fonts/` files are
+extracted from that sheet's embedded faces. Where this document and that
+render disagree, the render is the earlier authority and the disagreement is
+a defect *here*.
 
 ---
 
@@ -63,7 +88,7 @@ The imagery is **calm water** — and note the register carefully: water at dept
 and at dusk, not noon glare. That is why the palette is dark. Deep water is
 peaceful; a bright white productivity surface is not. The page reads top to
 bottom as one scene — water closing each end of the sheet, the deep between —
-and the note is the one lit thing on the deep (B58, ruled from the rendered
+and the note is the one lit thing on the deep (TheBoards' DECISIONS.md B58, ruled from the rendered
 what-if the way every scene decision before it was ruled).
 
 This does not license decoration. Peace is produced by restraint, depth and
@@ -77,10 +102,10 @@ wrong and should be removed.
 ### §2.1 One theme
 
 **The app is dark-only.** The light/dark pair driven by `prefers-color-scheme`
-(B16) is retired — the whole light `:root` and the `prefers-color-scheme: dark`
+(TheBoards' DECISIONS.md B16) is retired — the whole light `:root` and the `prefers-color-scheme: dark`
 block are **removed, not overridden**.
 
-This is not a default with an escape hatch. `PRD §1.2` forbids the setting: the
+This is not a default with an escape hatch. `TheBoards' PRD §1.2` forbids the setting: the
 app asks nothing of the person, and a theme is a question. One identity, no
 choice to make.
 
@@ -93,22 +118,22 @@ a midpoint.
 
 | Token | Value | What it is | Rel. luminance |
 |---|---|---|---|
-| `--deep` | `#020812` | the canvas — the deepest surface on the page (B58) | 0.0023 |
-| `--chrome` | `#020812` | the room behind the page — the ground under the menu, the toast, the board list and the desktop rail. The deep's value doing a second job, off the page (B52/B58) | 0.0023 |
+| `--deep` | `#020812` | the canvas — the deepest surface on the page (TheBoards' DECISIONS.md B58) | 0.0023 |
+| `--chrome` | `#020812` | the room behind the page — the ground under the menu, the toast, the board list and the desktop rail. The deep's value doing a second job, off the page (TheBoards' DECISIONS.md B52/B58) | 0.0023 |
 | `--card` | `#08152c` | the title compartment, sitting just above the deep | 0.0077 |
 | `--water` | `#34697f` → `#255265` → `#163646` | **the water, as a field** — the band and the Parking Lot, closing both ends of the sheet (§2.8) | 0.1237 … 0.0325 |
-| `--frame` | `#698ebf` | the card's border and both full-width rules — §2.5, B61 | 0.2611 |
+| `--frame` | `#698ebf` | the card's border and both full-width rules — §2.5, TheBoards' DECISIONS.md B61 | 0.2611 |
 | `--note` | `#a0d4da` | the note | 0.5962 |
 
-**The hexes above are the To-Do board's.** Since B67 (and B74, issue #112) the
+**The hexes above are the To-Do board's.** Since TheBoards' DECISIONS.md B67 (and TheBoards' DECISIONS.md B74, TheBoards' issue #112) the
 ladder has four bindings — one per board type, the same seven rungs at four
 hues, each rung holding the luminance in the right-hand column exactly. §2.2.2
 gives the other three. Every ratio in this document is computed from that
 column, so every ratio in this document holds on all four; where a number is
 genuinely per-ladder, it is printed per-ladder (§4.3 is the only such table).
 
-`--furniture` was retired by B46; `--band` and the `--shelf` texture are
-retired by B58 — the second swap renamed the deep's token honestly
+`--furniture` was retired by TheBoards' DECISIONS.md B46; `--band` and the `--shelf` texture are
+retired by TheBoards' DECISIONS.md B58 — the second swap renamed the deep's token honestly
 (`--band` → `--deep`, the field's stops → `--water-*`) and removed the sand
 from the application entirely (its fates are in §16.2). `--line` was already
 deleted (§2.3).
@@ -126,24 +151,24 @@ value would be a rung with no adjacency to earn it. It shares the canvas's
 value — a summoned surface over the deep separates by its elevation, which is
 elevation's whole job (§2.4) — a rail card's fill (the water's own top stop)
 holds 3.32:1 behind its 0.40 hairline edge, and light ink reads at 18.33:1.
-**`--chrome` does not rotate with the board type** (B67): there is one room,
+**`--chrome` does not rotate with the board type** (TheBoards' DECISIONS.md B67): there is one room,
 and it is behind all four boards at once, so it keeps `#020812` — the To-Do
 deep's value — whichever board is open. Taken deliberately, the consequence is
 that a green board's OS chrome, menu, toast and board list are still the blue.
-Settled by proof rounds 8–9 (B52) and carried through the swap (B58); the
-rendered references are `proofs/proof-9-a-well-furnished.html` and
-`proofs/proof-10-the-second-swap.html`. **The platform edge is the same
-room** (B55): the one `theme-color` meta and `manifest.json`'s
+Settled by proof rounds 8–9 (TheBoards' DECISIONS.md B52) and carried through the swap (TheBoards' DECISIONS.md B58); the
+rendered references are `docs/proofs/proof-9-a-well-furnished.html` and
+`docs/proofs/proof-10-the-second-swap.html`. **The platform edge is the same
+room** (TheBoards' DECISIONS.md B55): the one `theme-color` meta and TheBoards' `manifest.json`'s
 `background_color`/`theme_color` all wear `#020812`.
 
 > **The note is the brightest surface on the page — without qualification,
-> for the first time.** B46 had to scope the claim to the water because the
-> sand outshone the note at 0.6576; B58 retired the sand, and at 0.5962 over
+> for the first time.** TheBoards' DECISIONS.md B46 had to scope the claim to the water because the
+> sand outshone the note at 0.6576; TheBoards' DECISIONS.md B58 retired the sand, and at 0.5962 over
 > the deep's 0.0023 the note reads at **12.36:1** — the strongest the note
 > has ever been. The old sentence — "the note is the brightest thing on the
 > board because it is the only thing the person *placed*" — is simply true
-> now (`PRD §1.4`, `PRD §9.2`). Transient chrome is above the page, not part
-> of the scene (B52), so nothing summoned counts against it.
+> now (`TheBoards' PRD §1.4`, `TheBoards' PRD §9.2`). Transient chrome is above the page, not part
+> of the scene (TheBoards' DECISIONS.md B52), so nothing summoned counts against it.
 
 **The desk is not a surface, and there is no desk token.** Earlier drafts
 carried one, with an OLED rationale — and it described a condition that does not
@@ -163,14 +188,14 @@ a law, and the values above are its output:
 
 1. **One axis: luminance.** A surface's position in the app is its position on
    the ladder. **Within one scene, nothing is distinguished from another
-   surface by hue alone.** The qualifier is B67's, and it narrows nothing this
+   surface by hue alone.** The qualifier is TheBoards' DECISIONS.md B67's, and it narrows nothing this
    rule ever governed: the rule is about *rungs* — what tells the card from the
    deep, the water from the canvas — and the answer must stay luminance,
    because hue is the one channel a person's eyes may not deliver. §2.2.2
    rotates the whole ladder at once, every rung together, holding each rung's
    luminance to the 4dp printed above; it therefore distinguishes *scenes*,
    not surfaces, and no reading of the page depends on it.
-2. **One hue family for the page, with a job per depth** (B58 collapsed the
+2. **One hue family for the page, with a job per depth** (TheBoards' DECISIONS.md B58 collapsed the
    second). Everything on the page is one blue family: the deep and the card
    as the recessed ground, the water as the sections that close the sheet, the
    note as the lit thing. Sand held the second family while the shelf was
@@ -197,8 +222,8 @@ enough apart to read as two depths, when their job is to read as one.
 
 ### §2.2.2 The ladder rotates with the board type
 
-**A board type is a whole scene, not a rung on one** (B67, issue #96; a fourth
-scene added by B74, issue #112). To-Do boards keep the water blue above. Idea
+**A board type is a whole scene, not a rung on one** (TheBoards' DECISIONS.md B67, TheBoards' issue #96; a fourth
+scene added by TheBoards' DECISIONS.md B74, TheBoards' issue #112). To-Do boards keep the water blue above. Idea
 boards take a deep hunter green, Note boards a deep violet, Learning boards a
 pale rose — and each is *the same ladder*, rotated in hue and in nothing else.
 
@@ -256,19 +281,19 @@ does not exist in sRGB, and no amount of searching will find one.
 
 > **Because luminance is preserved, every ratio this document publishes is
 > preserved.** §2.3's five ink pairings, §2.5's seven adjacencies, §2.7's ring
-> table and §2.3.1's crossover are all functions of luminance alone, and B67
-> moved no luminance (B74 added a fourth ladder the same way). `test/tokens.js`
+> table and §2.3.1's crossover are all functions of luminance alone, and TheBoards' DECISIONS.md B67
+> moved no luminance (TheBoards' DECISIONS.md B74 added a fourth ladder the same way). TheBoards' `test/tokens.js`
 > asserts each of them against **all four** ladders with a single expected
 > number, so a hue that drags a rung off its luminance fails the suite rather
 > than the eye.
 
 **§2.2.1 rule 4 is satisfied for all twenty-one new values** (fourteen from
-B67, seven more from B74's Learning rose). Every one is outside §2.3.2's
+TheBoards' DECISIONS.md B67, seven more from TheBoards' DECISIONS.md B74's Learning rose). Every one is outside §2.3.2's
 forbidden band (0.163–0.196), every ground below §2.3.1's 0.1788 crossover
 still takes `--ink-light`, and every note still takes `--ink-dark` —
 necessarily, since each sits at its To-Do rung's luminance.
 
-**What does not rotate:** `--chrome` (§2.2 — one room, B55), the two ink poles
+**What does not rotate:** `--chrome` (§2.2 — one room, TheBoards' DECISIONS.md B55), the two ink poles
 (§2.3 — ink is per surface, not per app, and rotating it would move the
 crossover), and the three accents (§2.6 — they live on chrome). Rotating the
 ink would also break §2.7's ring, whose whole claim is that the two poles are
@@ -278,22 +303,22 @@ complementary on every ground.
 — the flat `var(--deep)` fill, the dither over it, the band's radial vignette
 over its three-stop fall, and the Parking Lot mirroring it — and all four read
 the tokens through `var()`. Rebinding the *names* under a `[data-cat]` scope
-therefore carries the hue into all four at once, which is what issue #96's
+therefore carries the hue into all four at once, which is what TheBoards' issue #96's
 "same stylization and graphic effects" asks for; pointing a background at a new
 `--board-bg` token would have recoloured the fill and left the furniture blue.
 The list and rail cards rotate with the section they sit in, since a card is a
-small rendering of what it names (§10); since B72 the section's own tray rotates
+small rendering of what it names (§10); since TheBoards' DECISIONS.md B72 the section's own tray rotates
 too, drawing its `--card` rung as its ground and its `--frame` rung as an inset
 frame, so these two rungs now have a render site in the list and rail and not
 only on the board (§10).
 
 **A board with no category reads as a Note board**, violet — because `catOf()`
 is a read-site default and a record without a category *is* the third bucket
-everywhere (B21's idiom, storage key `unsorted`). That is the same bucket the
+everywhere (TheBoards' DECISIONS.md B21's idiom, storage key `unsorted`). That is the same bucket the
 list files it in, and the agreement is the point: a card that opens a violet
 board must itself be violet. It applies to every pre-#58 legacy record and to
 the board `newBoardRecord()` makes on a fresh install, neither of which writes
-a category. To-Do is what the page shows for the instant *before* app.js has
+a category. To-Do is what the page shows for the instant *before* TheBoards' `app.js` has
 spoken, because To-Do is `:root` and carries no `[data-cat]` block.
 
 ### §2.3 Ink — one per surface, not one per app
@@ -335,7 +360,7 @@ inherited downward:
 ```
 
 `#board`, `#menu`, `#toast`, `#pane`, `#anchor-title`, the band zones and —
-since B58 put it on the water — `#lot` carry `.on-dark`; the note is the one
+since TheBoards' DECISIONS.md B58 put it on the water — `#lot` carry `.on-dark`; the note is the one
 `.on-light` island left. Everything downstream — text, caret, rules,
 hairlines, borders, the scratch-out — keeps reading `var(--ink)` and
 `var(--ink-a)` unchanged.
@@ -446,14 +471,14 @@ Three consequences worth stating out loud:
 
 - **The note's 2px frame is the only thing separating two overlapping notes**
   (1.00:1 fill — they are the same colour). Free overlap with no snapping is a
-  core behaviour (`PRD §1.2`, P2), so the frame is not chrome around the note; it is
+  core behaviour (`TheBoards' PRD §1.2`, P2), so the frame is not chrome around the note; it is
   what makes overlap legible. This is §1's "identity from structure" doing real
   work rather than asserting itself.
 - **The card's border is the second load-bearing edge.** At 1.10:1 the card does
   not separate from the deep by fill at all, by design — it is meant to be quiet.
   Its border carries the whole separation, which is why `--frame` is a token and
   not a decoration.
-- **The band's rule became the third load-bearing edge** (B58 inverted this
+- **The band's rule became the third load-bearing edge** (TheBoards' DECISIONS.md B58 inverted this
   clause). The band's water darkens to its bottom stop at the rule, meeting
   the deep at 1.58:1 — under the fill floor — so the rule now *carries* that
   seam, clearing 5.95:1 on the deep and 3.77:1 on the water's darkest stop.
@@ -461,14 +486,14 @@ Three consequences worth stating out loud:
   water's lightest stop, and that seam separates by fill at 3.32:1.
 
 **`--frame` `#698ebf`.** One token for the card's border and both full-width
-rules (B61): the two ends of the sheet close with the same line, the same
+rules (TheBoards' DECISIONS.md B61): the two ends of the sheet close with the same line, the same
 idiom at both ends (§3.1). It is a lift of the deep's own hue, so the linework
 belongs to the page rather than being applied to it. Clears 5.39:1 on the
 card, 5.95:1 on the deep, 3.77:1 on the water's darkest stop.
 
 > **Ratified.** `#698ebf` arrived as the frame carried by the "A Well"
 > specimen, kept deliberately by proof sheet 7 against rendered alternatives,
-> and extended to the lot's rule by Rob's B61 pick — both ends matching —
+> and extended to the lot's rule by Rob's TheBoards' DECISIONS.md B61 pick — both ends matching —
 > from the rendered pair on the second-swap round.
 
 **Hairlines.** A separator is that surface's ink at the lowest alpha clearing
@@ -486,7 +511,7 @@ and therefore not earning its place at that weight.
 |---|---|---|---|---|---|
 | `--accent-restore` | `#b6dee2` | Complete / Restore / Undo | 13.90:1 | 12.60:1 | 13.31:1 |
 | `--danger` | `#E2A08C` | Delete | 9.22:1 | 8.35:1 | 8.83:1 |
-| `--accent-page` | `#6d9cb0` | the primary (B59), rail pager, drop target | 6.72:1 | 6.09:1 | 6.44:1 |
+| `--accent-page` | `#6d9cb0` | the primary (TheBoards' DECISIONS.md B59), rail pager, drop target | 6.72:1 | 6.09:1 | 6.44:1 |
 
 > **An accent is text only on a near-black ground — `--chrome`, `--deep` or
 > `--card`. Anywhere else it is a fill carrying `--ink-dark`.**
@@ -495,7 +520,7 @@ Each value is derived from a family the scene already keeps: `--accent-restore`
 is the note's own hue and saturation lifted 74 → 80 — the derivation `--frame`
 used on the deep — because what restores is kin to what returns;
 `--accent-page` is the water's hue at the old value's depth, because the accent
-about boards is cut from the board's own water — which is why B59 put it on
+about boards is cut from the board's own water — which is why TheBoards' DECISIONS.md B59 put it on
 the one control that *makes* a board, when the sand left and took the old
 primary fill with it; `--danger` re-derived to its own value and holds it.
 
@@ -510,8 +535,8 @@ over a narrow reach of the fall — recorded in §16.1); a Complete fill clears
 drop-target frame live on `--chrome` at 6.72:1. The placement rule keeps
 every accent on a ground where it works.
 
-`--danger` is **the only warm hue in the application** — B58 returned the
-sentence to its original, unqualified form. B46 had to add "saturated" because
+`--danger` is **the only warm hue in the application** — TheBoards' DECISIONS.md B58 returned the
+sentence to its original, unqualified form. TheBoards' DECISIONS.md B46 had to add "saturated" because
 the sand was warm ground; the sand is retired, so among everything the app
 draws, the one thing that destroys is the one thing that isn't cool water,
 full stop.
@@ -519,13 +544,13 @@ full stop.
 > **Ratified.** The whole family was re-derived against the deep-dusk grounds
 > in proof round 8 — candidates rendered beside the round-1 values, every
 > ratio against its worst extreme — and rendered whole in round 9
-> (`proofs/proof-9-a-well-furnished.html`). The round-1 restore and page
+> (`docs/proofs/proof-9-a-well-furnished.html`). The round-1 restore and page
 > values were hue 177°, the retired teal's kin; the new values belong to the
 > note's and the field's families. `--danger` re-verified clean against every
 > ground it lands on and kept its value — re-chosen, not inherited. Recorded
-> as B52, where the superseded hexes live.
+> as TheBoards' DECISIONS.md B52, where the superseded hexes live.
 
-### §2.6.1 The highlight wash (B71)
+### §2.6.1 The highlight wash (TheBoards' DECISIONS.md B71)
 
 | Token | Value | Role | text on it (`--ink-dark`) | vs. the note families (hue) |
 |---|---|---|---|---|
@@ -548,7 +573,7 @@ unchanged — the note already binds `--ink` to `--ink-dark` on its `.on-light`
 surface (§2.3), which holds on amber at 13.27:1. Unlike the ladder, `--highlight`
 does **not** rotate with board type: an emphasis the user places means the same
 thing on a To-Do, a Note, a Learning and an Idea board, so it is one constant value.
-Since B85, `--highlight` also serves as the Highlight tab's **identity fill** on the
+Since TheBoards' DECISIONS.md B85, `--highlight` also serves as the Highlight tab's **identity fill** on the
 note toolbar (§4.5), alongside a fixed blue sibling `--accent-copy` `#698ebf` for the
 Copy tab — both fixed like this wash, and both chrome that names *which action*, never
 the note's state.
@@ -578,16 +603,16 @@ the two sections:
 | `--water`, darkest stop | 11.62 | 1.51 | **11.62** |
 | `--note` | 1.48 | 11.84 | **11.84** |
 
-This is B15's "robustness from geometry, not hue," carried into the new palette
+This is TheBoards' DECISIONS.md B15's "robustness from geometry, not hue," carried into the new palette
 and made total. The water's lightest stop is the only ground where *both* tones
 clear 3:1 at once, which is a margin rather than a problem. **Geometry, not
-hue, is also why the table survives B67 untouched:** the ring is built from the
+hue, is also why the table survives TheBoards' DECISIONS.md B67 untouched:** the ring is built from the
 two poles, the poles do not rotate, and the grounds keep their luminances — so
 every row above holds identically on the Idea and Note ladders (§2.2.2).
 
 ### §2.8 The water is a field, not a value
 
-Since B58 the field belongs to the two sections that close the sheet — the
+Since TheBoards' DECISIONS.md B58 the field belongs to the two sections that close the sheet — the
 band and the Parking Lot — while the canvas between them is the flat deep.
 A flat fill could not carry §1.1's register alone; the water carries the
 depth, and each of its layers holds a job or it comes out (§1):
@@ -602,7 +627,7 @@ depth, and each of its layers holds a job or it comes out (§1):
    rather than as two flat strips.
 3. **Dither** — noise at anti-banding amplitude over the sections' ramps,
    which an 8-bit panel would otherwise band. On the deep between, it is the
-   grain the ratified render carries (B58) — the canvas is flat by value,
+   grain the ratified render carries (TheBoards' DECISIONS.md B58) — the canvas is flat by value,
    textured by repair.
 
 **The field is authored as opaque stops**, so its extremes are exactly the
@@ -614,10 +639,10 @@ where the water must part from the deep.
 
 ### §2.9 The sand is retired
 
-The Parking Lot wore warm sand with turbulence weather from B46 to B58, and
-B58's swap retired the family entirely (the six superseded hexes live in that
-entry, as B52's precedent has it): the lot takes the water (§2.8),
-the primary control takes `--accent-page` (B59), and no sand value survives
+The Parking Lot wore warm sand with turbulence weather from TheBoards' DECISIONS.md B46 to B58, and
+TheBoards' DECISIONS.md B58's swap retired the family entirely (the six superseded hexes live in that
+entry, as TheBoards' DECISIONS.md B52's precedent has it): the lot takes the water (§2.8),
+the primary control takes `--accent-page` (TheBoards' DECISIONS.md B59), and no sand value survives
 anywhere in the application. The full fate table is §16.2. What §2.9 carried
 that outlives the sand is its craft note, which applies to the water's own
 weather wherever a ramp meets a quantiser:
@@ -634,7 +659,7 @@ weather wherever a ramp meets a quantiser:
 The board is a fixed, bounded logical coordinate space rendered through a single
 uniform `transform: scale()`. It never pans and never zooms; browser pinch-zoom
 is disabled at the platform level because the two-finger pinch belongs to the
-note (B12).
+note (TheBoards' DECISIONS.md B12).
 
 | | Touch | Fine pointer ≥1024px |
 |---|---|---|
@@ -653,11 +678,11 @@ Two rendering facts belong alongside it:
 - **The scale is uniform.** Note frames stay square and the decoupled hit maths
   (§6) stays exact. A *cover* fit would crop edge furniture; an axis-decoupled
   *stretch* would distort the frame. Neither is available.
-- **Band geometry is sized by the type it holds, not by the sheet** (B37).
+- **Band geometry is sized by the type it holds, not by the sheet** (TheBoards' DECISIONS.md B37).
   Across is a fraction of the sheet, because it holds the sheet's own divisions.
   Down is set by the type.
 
-> The band has been ruled on five times: B33 → B35 → B36 → B37 → B38. Read that
+> The band has been ruled on five times: TheBoards' DECISIONS.md B33 → B35 → B36 → B37 → B38. Read that
 > chain before changing band geometry. Each ruling corrected a regression the
 > previous one caused. **§13.2's measurement gate is now discharged** — the
 > results are there.
@@ -673,17 +698,17 @@ Reading down: **Components / Requirements content, then the rule, then the
 header hanging just below it.** The header is **centred in its zone as a tight
 tab whose top edge lands on the rule** (`top: 100%`), filled in the rule's own
 colour (`--frame`) so the line and the label read as one cohesive unit, at
-13px/600 (B76, issue #111; supersedes B47/B54's label-*above*-the-rule, closing
+13px/600 (TheBoards' DECISIONS.md B76, TheBoards' issue #111; supersedes TheBoards' DECISIONS.md B47/B54's label-*above*-the-rule, closing
 §13.2's question). The tab is `width: max-content` with `padding: 2px 6px` and
 `border-radius: 0 0 3px 3px` (only the corners that exist below the rule); its
 ink rebinds to `--ink-dark` via `.on-light` at **5.70:1** on the `--frame`
 fill — the same pairing the board-action tab wears at the sheet's other end
-(§2.5, §3.3/B83; it was the compartment handle's, B65, until B83 retired it). In the PDF export the
+(§2.5, §3.3/TheBoards' DECISIONS.md B83; it was the compartment handle's, TheBoards' DECISIONS.md B65, until TheBoards' DECISIONS.md B83 retired it). In the PDF export the
 rule is dark (`PDF_INK`, not the mid-light screen `--frame`), so the tab fills
 `PDF_INK` and its label reverses to the paper tone (`PDF_PAPER`).
 
 **Both rules run the full width of the sheet** — `left: 0; right: 0`, not inset
-to the gutter. **This supersedes B35 and B38's gutter-inset rule.**
+to the gutter. **This supersedes TheBoards' DECISIONS.md B35 and B38's gutter-inset rule.**
 
 **The band sizes to its tallest zone, from a two-line floor:**
 
@@ -692,7 +717,7 @@ rule-y = 14 + max(2, lines) × 19.5 + 8
        = 61px at the floor, 81px at three lines
 ```
 
-The label term (`+ 16.9 + 10`) is gone from the budget: since B76 the header
+The label term (`+ 16.9 + 10`) is gone from the budget: since TheBoards' DECISIONS.md B76 the header
 hangs below the rule, so it no longer reserves height above it.
 
 A fill has to have a bottom edge and the band's content does not have a fixed
@@ -702,7 +727,7 @@ is deliberately **the same law the Parking Lot uses**, stated once and applied t
 both pieces of furniture rather than two schemes that drift apart.
 
 **The title compartment overhangs the band by 22px and occludes the rule.** That
-is B38 and it has never been in question. The sheet's own top edge is its fourth
+is TheBoards' DECISIONS.md B38 and it has never been in question. The sheet's own top edge is its fourth
 side, so only three are drawn. It is the one deliberate exception to "no empty
 frames" (§4) — that rule protects the free canvas; the compartment is permanent
 furniture and is always drawn.
@@ -711,7 +736,7 @@ furniture and is always drawn.
 
 **Full-bleed**: `left: 0; right: 0; bottom: 0`, with its *content* still on the
 gutter. It lives as a section of the page rather than a box bolted onto it.
-**This supersedes B32's "the sheet keeps one left margin"** as it applied to the
+**This supersedes TheBoards' DECISIONS.md B32's "the sheet keeps one left margin"** as it applied to the
 lot.
 
 **Its height follows its *measured* contents, from a two-row floor:**
@@ -725,27 +750,27 @@ wraps). Empty, one row and two single lines all draw the same two-row section �
 furniture, not a by-product of content. Beyond that the lot grows *upward*
 (the section is anchored to the sheet's bottom edge) to fit whatever its rows
 occupy, wrapped lines included — the same law the band already follows by
-measuring its tallest zone, so a multi-line item is never cut off (issue #106).
+measuring its tallest zone, so a multi-line item is never cut off (TheBoards' issue #106).
 A **ceiling of half the sheet** survives so a runaway lot cannot swallow the
 canvas; content past it is clipped (`#lot-items { overflow: hidden }`). **This
-supersedes B37's whole-row budget and B47/B57's row-count ceiling** (B73),
+supersedes TheBoards' DECISIONS.md B37's whole-row budget and TheBoards' DECISIONS.md B47/B57's row-count ceiling** (TheBoards' DECISIONS.md B73),
 which sized the lot by item *count* at a fixed 44px each and cut wrapped lines.
 
-### §3.3 The board-action row (B83; three tabs since B92; four since B95; two on desktop, three on tablet since B100, issue #157)
+### §3.3 The board-action row (TheBoards' DECISIONS.md B83; three tabs since TheBoards' DECISIONS.md B92; four since TheBoards' DECISIONS.md B95; two on desktop, three on tablet since TheBoards' DECISIONS.md B100, TheBoards' issue #157)
 
 The board's board-level actions — **All** (the toggle), **Export**,
-**Import**, and, since issue #145, **Calendar** — are declared as a row of
+**Import**, and, since TheBoards' issue #145, **Calendar** — are declared as a row of
 flat tabs **hovering just above the Parking Lot**, the mirror at the sheet's
-other end of the band's header tabs. This replaced the `Menu` handle of B65,
+other end of the band's header tabs. This replaced the `Menu` handle of TheBoards' DECISIONS.md B65,
 whose only route was still a control the reader had to notice; the actions
-now name themselves, in place, on both platforms. B92 retires the anchor
+now name themselves, in place, on both platforms. TheBoards' DECISIONS.md B92 retires the anchor
 long-press/right-click menu outright: with Import joining the row, every
 board-level route is a visible tab, and the hidden menu duplicated doors the
-reader was already standing in front of. B95 re-grammars the labels so four
+reader was already standing in front of. TheBoards' DECISIONS.md B95 re-grammars the labels so four
 tabs fit a phone (R7.2): side padding 12→6px and gap 8→6px — vertical
-padding and type are untouched, so B86's finger box and §6's collar-height
-math hold. B99 retires the Calendar **tab on wide** — the standing rail
-(§3.4) is the calendar's entry there. B100 retires the **All tab on desktop**
+padding and type are untouched, so TheBoards' DECISIONS.md B86's finger box and §6's collar-height
+math hold. TheBoards' DECISIONS.md B99 retires the Calendar **tab on wide** — the standing rail
+(§3.4) is the calendar's entry there. TheBoards' DECISIONS.md B100 retires the **All tab on desktop**
 (`html.desktop #action-boards { display: none }`) — the left rail (§10)
 already lists every category with every board, so the tab was a second door
 to the same room. The row is **two tabs on desktop** (Export · Import),
@@ -755,8 +780,8 @@ Import · Calendar): the grammar each platform speaks, nothing held in
 reserve.
 
 **Placement.** `#board-actions` is `left: 0; right: 0`, a **left-anchored** flex
-cluster (`gap: 8px`, `justify-content: flex-start`, B88) at `bottom: var(--lot-h)`
-— **flush on the lot's top edge** (B87 removed the 8px gap). Its four tab corners
+cluster (`gap: 8px`, `justify-content: flex-start`, TheBoards' DECISIONS.md B88) at `bottom: var(--lot-h)`
+— **flush on the lot's top edge** (TheBoards' DECISIONS.md B87 removed the 8px gap). Its four tab corners
 stay round; it tracks `--lot-h`, riding up as
 the lot grows. `z-index: 1` (the furniture plane; notes at `z-2` stay above).
 The container is `pointer-events: none` — a positioning frame exactly like a
@@ -767,13 +792,13 @@ recognizer and captures a note; only the tabs are live.
 
 ```css
 .board-action {
-  padding: 8px 6px;                 /* vertical: the band label's box (§3.1), finger-size (B86);
-                                       sides trimmed 12→6 for the four-tab row (B95, R7.2) */
+  padding: 8px 6px;                 /* vertical: the band label's box (§3.1), finger-size (TheBoards' DECISIONS.md B86);
+                                       sides trimmed 12→6 for the four-tab row (TheBoards' DECISIONS.md B95, R7.2) */
   border: none; border-radius: 3px; /* symmetric — it hangs beneath no rule */
-  background: var(--frame);         /* the band tab's fill (B76) — rotates per #board[data-cat] */
+  background: var(--frame);         /* the band tab's fill (TheBoards' DECISIONS.md B76) — rotates per #board[data-cat] */
   color: var(--ink);               /* --ink-dark at 5.70:1, rebound by .on-light */
   font-size: 14px; font-weight: 600; line-height: 1.3;
-  gap: 6px;                        /* the drawn mark to its label; mark at 16px (B86) */
+  gap: 6px;                        /* the drawn mark to its label; mark at 16px (TheBoards' DECISIONS.md B86) */
 }
 ```
 
@@ -781,36 +806,36 @@ recognizer and captures a note; only the tabs are live.
 file explorer through a hidden `<input type="file"
 accept=".json,application/json">`. The input is never visible, never focusable
 as a route, and never named in copy — the visible tab declares the act, the
-dialog is what "Import" does (B92).
+dialog is what "Import" does (TheBoards' DECISIONS.md B92).
 
-**The Export choice menu (B92).** Pressing **Export** opens the app's one menu
+**The Export choice menu (TheBoards' DECISIONS.md B92).** Pressing **Export** opens the app's one menu
 species (`buildMenu`/`#menu`, §7) **anchored at the pressed tab** — the tab's
 own bounding box (`r.left`, `r.bottom`), not the pointer, because the menu is
 the tab's next state rather than a context menu that happens to be nearby. Two
 leaves, the menu's one-word grammar: **PDF** (the board you're looking at, as
 §15's sheet) and **JSON** (the whole-library backup). The choice itself
-commits nothing (it runs raw, B81's navigation side); each leaf commits — a
+commits nothing (it runs raw, TheBoards' DECISIONS.md B81's navigation side); each leaf commits — a
 file leaves the device — and takes `commitAction`'s drop-guard itself.
 
 **The hit collar.** The flat tab is well under §6's floor, so it carries the
-note's decoupled `--hit` collar (B7) — set on `#board-actions` in
+note's decoupled `--hit` collar (TheBoards' DECISIONS.md B7) — set on `#board-actions` in
 `updateBoardGeometry`, measured off the row (its width spans the sheet, so only
 the height term binds), sized so `(tab-height + 2 × hit) × renderScale` clears
 **44px on touch and 24px on desktop**. The collar is **asymmetric — spent
 entirely upward**, onto the canvas, because downward is the Parking Lot's own
 furniture; where a note (`z-2`) overlaps it the note wins, and a bare-canvas tap
-into it fires the tab (the same reading B65's collar had). Interactive states
+into it fires the tab (the same reading TheBoards' DECISIONS.md B65's collar had). Interactive states
 are visible without the tactile shadow: a transient `filter: brightness` on
 hover/press on §8's curve (the kill-switch drops it to instant), and §2.7's
 two-tone ring on focus. State is never colour (§1) — the **All boards ⇄ This
-board** toggle states its act in its label (B43/B71's grammar), so no
+board** toggle states its act in its label (TheBoards' DECISIONS.md B43/B71's grammar), so no
 `aria-pressed` rides alongside.
 
-### §3.4 The calendar view (B95, issue #145; tier shipped by B96, issue #155; events editable by B97, issue #152; standing rail by B99, issue #158)
+### §3.4 The calendar view (TheBoards' DECISIONS.md B95, TheBoards' issue #145; tier shipped by TheBoards' DECISIONS.md B96, TheBoards' issue #155; events editable by TheBoards' DECISIONS.md B97, TheBoards' issue #152; standing rail by TheBoards' DECISIONS.md B99, TheBoards' issue #158)
 
 The third screen. Full-screen on mobile (`html:not(.wide)`). On any wide
 screen — desktop or tablet (`html.wide`) — the calendar is **standing
-furniture** (B99, issue #158): a 40px rail pinned to the viewport's right
+furniture** (TheBoards' DECISIONS.md B99, TheBoards' issue #158): a 40px rail pinned to the viewport's right
 edge, always visible, its label **Calendar Board** reading vertically
 (`vertical-rl`, 12px/600, .18em caps) over today's date (9px/600) and a
 6px **lit dot** — the aperture: lit iff today carries events. The rail
@@ -820,27 +845,27 @@ leftward into the panel docked at the right edge (320 unscaled px,
 `--frame` border) and the board reflows beside it — the R6 squeeze,
 entered from the rail; the panel's **Back** is the collapse arrow, and on
 collapse the board renders exactly where it was. The rail commits
-nothing and pushes no history (B81: navigation runs raw). The Calendar
+nothing and pushes no history (TheBoards' DECISIONS.md B81: navigation runs raw). The Calendar
 tab retires on wide (`html.wide #action-calendar { display: none }`) —
 mobile keeps the four-tab row and the tab-driven full-screen view, unchanged.
-B100 retires desktop's **All Boards** R1 button too (`html.desktop #cal-boards
+TheBoards' DECISIONS.md B100 retires desktop's **All Boards** R1 button too (`html.desktop #cal-boards
 { display: none }`, with the handler guarding): the rail names every board,
 and the panel's row is **Back + Export**, Export taking the right anchor
 (`margin-left: auto`) — which is what mockup 6 drew. The tablet tier renders
-this same rail + panel arrangement under the touch grammar (B96; B103's
+this same rail + panel arrangement under the touch grammar (TheBoards' DECISIONS.md B96; TheBoards' DECISIONS.md B103's
 final gate: **one width floor, `min-width: 744px`, orientation-blind** —
 unfolded foldables, iPads, and Android tablets take this arrangement in
-PORTRAIT and landscape alike; B96's landscape-only widths and B101's shape
+PORTRAIT and landscape alike; TheBoards' DECISIONS.md B96's landscape-only widths and TheBoards' DECISIONS.md B101's shape
 leg are superseded), its All tab kept.
 
 **The R1 top row.** `--frame` flat tabs in the row-control species. On
 mobile, three, anchored left / center / right: **Back** (the board-action
 glyph mirrored — a page turn back), **All Boards**, **Export**. On desktop,
-two: **Back + Export** (B100). Back pops the view's pushed History state; it
+two: **Back + Export** (TheBoards' DECISIONS.md B100). Back pops the view's pushed History state; it
 is the always-visible exit, with the OS gesture as the second route, never
 the only one. Each tab renders its act — drawn mark
 (22px) beside its label (`15px/600`) — in a frame that clears §6's touch
-floor **as drawn** (B98: `padding: 14px 16px`, ≈ 48px tall on touch), with
+floor **as drawn** (TheBoards' DECISIONS.md B98: `padding: 14px 16px`, ≈ 48px tall on touch), with
 the §6 decoupled collar (`--hit` on `#cal-top`, set at render) topping up
 the width where the row is tight; the collar is spent upward, into the
 row's chrome margin. Hover, press, and keyboard focus state themselves
@@ -857,10 +882,10 @@ luminance, never icons.
 **Capture.** Each day's zone closes with the `+` row — the calendar edition
 of §6.2: tap and type, the caret arrives with the tap. Commit-on-blur writes
 the event and its linked board's mirror line together; an empty commit
-discards (B8). Completed events strike through at .55. An **existing** event
-line is editable in place (B97): its own tap opens the same editor — focused,
+discards (TheBoards' DECISIONS.md B8). Completed events strike through at .55. An **existing** event
+line is editable in place (TheBoards' DECISIONS.md B97): its own tap opens the same editor — focused,
 caret always at the end of the text, inside the tap gesture; a second tap
-while editing does nothing (B81's re-arm guard); the commit touches text
+while editing does nothing (TheBoards' DECISIONS.md B81's re-arm guard); the commit touches text
 only, so a completed event keeps its strike through an edit.
 
 ---
@@ -880,18 +905,18 @@ only, so a completed event keeps its strike through an edit.
 .note-text:empty { background: transparent; border-color: transparent; }
 ```
 
-**The text is centred in its frame** (B62, issue #82). Alignment moves glyphs,
+**The text is centred in its frame** (TheBoards' DECISIONS.md B62, TheBoards' issue #82). Alignment moves glyphs,
 not the box: the note is `width: max-content` capped at the sheet's right edge
-(B39), so `text-align` changes no dimension — the wrap cap, the hit collar and
+(TheBoards' DECISIONS.md B39), so `text-align` changes no dimension — the wrap cap, the hit collar and
 every stored position measure exactly as before. A single-line note
 shrink-wraps to its own text and centres invisibly; the change is legible
 wherever a line falls short of the box's widest — a cap-wrapped note's soft
 lines, or a short hard line beside a longer one — each held in the middle of
 the frame. The export draws the same centring in the same content box
-(§15, B34/B39), measured sans trailing spaces because `pre-wrap` hangs them.
+(§15, TheBoards' DECISIONS.md B34/B39), measured sans trailing spaces because `pre-wrap` hangs them.
 
 **No empty frame ever exists.** The frame draws itself on the first character and
-is transparent before it — enforced at blur (B8) and again on every render (B31).
+is transparent before it — enforced at blur (TheBoards' DECISIONS.md B8) and again on every render (TheBoards' DECISIONS.md B31).
 A note earns its frame the way it earns persistence.
 
 **The radius stays near-square.** Notes scale 0.5–2.0 and `NOTE_MIN_W` is 132
@@ -905,7 +930,7 @@ new 2px frame; `EXPORT_GEO.radius` mirrors it by hand (§15).
 ### §4.1 Transform origin
 
 `transform-origin: top left` throughout, so stored `x`/`y` stay truthful and
-there is no drift to compensate (B4). Positions are data (`PRD §1.2`, P3); a
+there is no drift to compensate (TheBoards' DECISIONS.md B4). Positions are data (`TheBoards' PRD §1.2`, P3); a
 rendering choice that required correcting them would be rewriting them.
 
 ### §4.2 States
@@ -927,13 +952,13 @@ Nothing here is colour alone (§1): every state has a geometry.
 Completing does not delete and does not hide. Three families of ruled strokes at
 ≥90% coverage (93.6% measured) — **texture, not colour** — in the surface's own
 ink at **0.62**, with the underlying text destroyed to **12% ink** so no
-screenshot or zoom recovers it. The radius tracks the note's. B53's pair
-proved pole-independent under B58's swap: the note strikes in dark ink at
+screenshot or zoom recovers it. The radius tracks the note's. TheBoards' DECISIONS.md B53's pair
+proved pole-independent under TheBoards' DECISIONS.md B58's swap: the note strikes in dark ink at
 4.53:1; the lot now strikes in light ink on the water at 3.19:1 / 4.08:1 /
 5.47:1 against the fall's three stops — a mark above the 3:1 floor at every
 extreme, on either pole, and no longer a bar anywhere.
 
-**This is the one published table B67 moves, and it moves in the second
+**This is the one published table TheBoards' DECISIONS.md B67 moves, and it moves in the second
 decimal.** A strike is an *alpha composite*, so its ratio is a function of the
 ground's three channels rather than of its luminance alone: rotating the hue
 (§2.2.2) re-quantises the mix at 8 bits and the number shifts. The values are
@@ -960,7 +985,7 @@ declared stops precisely because the falloff can only darken below the
 threshold of a ratio — so nothing above depends on it. Named here so the next
 value derived from the band's real ground is derived per ladder.
 
-**The veil and the burial are one decision** (B53). The old 0.97/0.40 pair was
+**The veil and the burial are one decision** (TheBoards' DECISIONS.md B53). The old 0.97/0.40 pair was
 tuned for a mid ground: a near-opaque veil destroyed what was under it, and the
 burial only had to kill the 10% showing in the gaps. Thin the veil and the words
 come back *through* the strokes — so as the strike's alpha fell to 0.62, the
@@ -972,21 +997,21 @@ strike out.
 
 Completion is reversible. In the PDF export a completed item is drawn scratched
 out and **emits no text object at all** — the on-screen promise becomes a
-property of the bytes (B34).
+property of the bytes (TheBoards' DECISIONS.md B34).
 
 ### §4.4 Lot lines are never framed
 
 Parking Lot items are unframed stacked text lines: the one place in the app where
 text carries no frame. That is the visual expression of the structural fact that
-a lot item has no coordinates (`PRD §4`).
+a lot item has no coordinates (`TheBoards' PRD §4`).
 
 The one override is narrow and scoped: on desktop, a selected row draws an
-`outline` with its actions inline at the row's right edge (B25). Selected, on
+`outline` with its actions inline at the row's right edge (TheBoards' DECISIONS.md B25). Selected, on
 desktop, and nowhere else.
 
 ### §4.5 The note's action toolbar
 
-*New in v2 (B84, issue #126).* A note's four actions — Complete/Restore ·
+*New in v2 (TheBoards' DECISIONS.md B84, TheBoards' issue #126).* A note's four actions — Complete/Restore ·
 Highlight · Copy · Delete — sit on a row the note wears, in the menu's order
 (§7): the destructive tab last, in `--danger`. It replaces the note long-press
 menu and the desktop right-click note menu; on desktop it also replaces the
@@ -1007,52 +1032,52 @@ Components and Requirements), not pills and not the `.sel-btn` raised control:
 
 ```css
 .note-tb-btn {
-  padding: 7px 6px;                    /* the band-label tab (§3.1), finger-size (B86) */
+  padding: 7px 6px;                    /* the band-label tab (§3.1), finger-size (TheBoards' DECISIONS.md B86) */
   border-radius: 3px;                  /* tracks the note's own (§4) */
-  background: var(--frame);            /* Complete's ground: the board's frame hue, rotates per type (B67) */
-  color: var(--ink);                   /* .on-light → --ink-dark, 5.70:1 (B76) */
+  background: var(--frame);            /* Complete's ground: the board's frame hue, rotates per type (TheBoards' DECISIONS.md B67) */
+  color: var(--ink);                   /* .on-light → --ink-dark, 5.70:1 (TheBoards' DECISIONS.md B76) */
   font-size: 13px; font-weight: 600;
 }
-.note-tb-btn svg   { width: 18px; height: 18px; }        /* the mark, grown from 16px (B86) */
+.note-tb-btn svg   { width: 18px; height: 18px; }        /* the mark, grown from 16px (TheBoards' DECISIONS.md B86) */
 .note-tb-delete    { background: var(--danger); }        /* --danger fill carrying --ink-dark, 8.83:1 (§2.6) */
-.note-tb-highlight { background: var(--highlight); }     /* fixed amber identity fill (B85) */
-.note-tb-copy      { background: var(--accent-copy); }   /* fixed blue identity fill, --accent-copy #698ebf (B85) */
+.note-tb-highlight { background: var(--highlight); }     /* fixed amber identity fill (TheBoards' DECISIONS.md B85) */
+.note-tb-copy      { background: var(--accent-copy); }   /* fixed blue identity fill, --accent-copy #698ebf (TheBoards' DECISIONS.md B85) */
 ```
 
 The marks are `GLYPH`'s own drawn SVG (§13.3), each SVG `aria-hidden` with the
 label on the button for AT. The row is a **child of the note**, so it scales with
 the note and is never wider than it. It sits **flush on the note's top edge**
-(`bottom: 100%`, B87 — the 12px gap removed) and **left-anchored, far left**
-(`left: 0`, no `translateX`, B88), flipping to just inside the top edge near the
+(`bottom: 100%`, TheBoards' DECISIONS.md B87 — the 12px gap removed) and **left-anchored, far left**
+(`left: 0`, no `translateX`, TheBoards' DECISIONS.md B88), flipping to just inside the top edge near the
 sheet top where there is no room above (`reflectToolbarFlip`, whose `TB_ROW_H`
 threshold is now 32 for the gapless row). Each tab keeps a 44px-tall hit target
-expanded upward (§6, B7's decoupled-hit idiom) so a row of four never overlaps a
+expanded upward (§6, TheBoards' DECISIONS.md B7's decoupled-hit idiom) so a row of four never overlaps a
 neighbour. Focus wears the two-tone ring (§2.7).
 
 **Shown only on select/focus** (the owner's call — not always drawn), by the same
-state that raises the resize frame: `.note.selected` on desktop (B22); on mobile a
+state that raises the resize frame: `.note.selected` on desktop (TheBoards' DECISIONS.md B22); on mobile a
 first tap adds `.note.engaged` — the select step, toolbar shown with no keyboard
-(B90) — and editing (a second tap) then makes the note `:focus-within`. It
+(TheBoards' DECISIONS.md B90) — and editing (a second tap) then makes the note `:focus-within`. It
 hides while the note is picked up (`.pressed`). The show/hide is the §8 fade —
 `opacity`/`visibility`, `200ms` on §8's curve — and degrades under the reduced-motion
 kill-switch. **State is never colour alone (§1):** the Complete tab flips its mark
 (check ⇄ undo) and label; the Highlight tab flips its label and shows an inset border
-while the note wears the `--highlight` wash (B71) — the wash is the state, the tab
+while the note wears the `--highlight` wash (TheBoards' DECISIONS.md B71) — the wash is the state, the tab
 only triggers and names it. The Highlight and Copy tabs also carry their own **fixed
-identity fills** (amber and `--accent-copy` blue, B85) the way Delete carries
+identity fills** (amber and `--accent-copy` blue, TheBoards' DECISIONS.md B85) the way Delete carries
 `--danger`: the fill says *which action* — chrome, not state — so the four tabs are
 told apart by fill **and** glyph. Unlike Complete's rotating `--frame`, these two do
 not change with board type (on a To-Do board Copy's blue equals the frame, the
 owner's accepted call).
 
-### §4.6 Note links (B91)
+### §4.6 Note links (TheBoards' DECISIONS.md B91)
 
-A **link** is a relationship the user asserts between two notes (issue #142): a
+A **link** is a relationship the user asserts between two notes (TheBoards' issue #142): a
 thin line between their centres, no label and no arrowhead. It is the board's first
-inter-note structure — *relationships asserted not inferred* (PRD §1) made visible.
+inter-note structure — *relationships asserted not inferred* (TheBoards' PRD §1) made visible.
 
 **The line.** 1px `--frame` — the board's own rule idiom (§2.5), so it rotates hue
-per board type for free (B67, `#board[data-cat]`). It is held to a crisp 1px at any
+per board type for free (TheBoards' DECISIONS.md B67, `#board[data-cat]`). It is held to a crisp 1px at any
 render scale by `vector-effect: non-scaling-stroke`, so it does not thin out under
 the desktop scale the way an ordinary scaled hairline would. No fill, no cap
 decoration, no marker.
@@ -1066,7 +1091,7 @@ above the board furniture**: `z-index: 1` (notes are `z-index: 2`) plus DOM orde
 after the static furniture. The issue's "z-index: 1.5" is that intent; a literal
 `1.5` is invalid CSS and is not used.
 
-**Arming and completing** (the gesture, B91): a note's long-press (mobile) or
+**Arming and completing** (the gesture, TheBoards' DECISIONS.md B91): a note's long-press (mobile) or
 right-click (desktop) opens a one-item menu, **Link** (§7); the next tap on a
 *different* note connects it, a tap on an already-linked note removes it (toggle),
 and a tap elsewhere / a drag / Escape cancels. While armed, a persistent hint toast
@@ -1085,34 +1110,34 @@ link` (the armed hint, mobile / desktop); `Linked` / `Unlinked` (the undo captio
 ## §5 Gestures
 
 One custom recognizer drives both grammars, branching inline on `isDesktop` — a
-live capability test, never a width or UA test (B19). There is no separate
+live capability test, never a width or UA test (TheBoards' DECISIONS.md B19). There is no separate
 desktop code path.
 
 | | Mobile | Desktop |
 |---|---|---|
 | Create | tap empty canvas | click empty canvas (nothing selected) |
-| Select | tap (reveals the toolbar, no keyboard, B90) | click |
+| Select | tap (reveals the toolbar, no keyboard, TheBoards' DECISIONS.md B90) | click |
 | Move | drag | drag |
 | Scale | two-finger pinch | drag the selection frame |
-| Edit | tap again, on the engaged note (B90) | double-click, or `Enter` |
+| Edit | tap again, on the engaged note (TheBoards' DECISIONS.md B90) | double-click, or `Enter` |
 | Menu | long-press (500ms) | right-click |
-| Caret on edit | at the end (B90 — was the touch point, B14) | at the end (B26) |
+| Caret on edit | at the end (TheBoards' DECISIONS.md B90 — was the touch point, TheBoards' DECISIONS.md B14) | at the end (TheBoards' DECISIONS.md B26) |
 | Boards | full-screen list | always-visible rail |
 
 `MOVE_THRESHOLD = 16px` of slop before a drag begins or a long-press cancels
-(B29). `LONGPRESS_MS = 500`; any release before that with movement under
-threshold commits as a tap (B5).
+(TheBoards' DECISIONS.md B29). `LONGPRESS_MS = 500`; any release before that with movement under
+threshold commits as a tap (TheBoards' DECISIONS.md B5).
 
 **Instant commit, guarded against re-fire.** Every committing action lands on
-release with no latency (B81) — the instant result is its own acknowledgement.
-What survives from the retired 400ms window (B18) is only its drop-guard: a
+release with no latency (TheBoards' DECISIONS.md B81) — the instant result is its own acknowledgement.
+What survives from the retired 400ms window (TheBoards' DECISIONS.md B18) is only its drop-guard: a
 *consequence* (Complete/Restore, Copy, Delete, Undo, a menu item, board
 create/delete) commits at once and then holds a re-fire guard for `ACTION_DELAY`
 (400ms), so an impatient double-tap is **dropped, not doubled**. First tap wins.
 
 Navigation (opening a menu, swapping boards, entering an editor) and **capture**
 (a note or lot line) commit nothing a stray second tap could duplicate — a
-double-create self-heals when the second blurs the first empty frame (B8) — so
+double-create self-heals when the second blurs the first empty frame (TheBoards' DECISIONS.md B8) — so
 they take no guard at all and run raw, on desktop as on mobile.
 
 There is no window left to fill: the `.tapped` weight/fill on content and
@@ -1125,13 +1150,13 @@ controls, and the empty-canvas `.tap-ghost`, are **retired**.
 **44 CSS px physical on mobile** (WCAG 2.5.5 AAA). Because notes scale, this
 cannot be a fixed padding: each note carries a computed `--hit` inset on a
 transparent `::before`, sized so that `inset × scale × renderScale ≥ 44px`
-physical (B7). **The hit area expands; the visual frame does not.**
+physical (TheBoards' DECISIONS.md B7). **The hit area expands; the visual frame does not.**
 
 On desktop the floor is 24px (WCAG 2.5.8 AA, pointer-appropriate) — a 44px collar
-swallows dismiss clicks (B23). The 44px floor stands on touch.
+swallows dismiss clicks (TheBoards' DECISIONS.md B23). The 44px floor stands on touch.
 
 **A collar is not obliged to be symmetric.** The note's is, because a note is
-surrounded by paper on all sides. The board-action row (§3.3, B83) spends its
+surrounded by paper on all sides. The board-action row (§3.3, TheBoards' DECISIONS.md B83) spends its
 whole collar *upward*, onto the canvas, because downward is the Parking Lot's
 own furniture — the direction a collar grows in is part of the decision, not a
 consequence of `inset`.
@@ -1141,11 +1166,11 @@ consequence of `inset`.
 ## §7 The menu
 
 Long-press (mobile) or right-click (desktop). The anchor menu's two items —
-**All boards** and **Export** — are *also* the **board-action row** (§3.3, B83):
+**All boards** and **Export** — are *also* the **board-action row** (§3.3, TheBoards' DECISIONS.md B83):
 two flat tabs above the Parking Lot that invoke them directly, on both
-platforms. That row replaces the `Menu` handle of B65, and is why removing the
-handle costs desktop nothing — no long-press is armed there (B19/issue #4), and
-desktop `contextmenu` now opens a **note's** Link menu (B91, §4.6). Since B100
+platforms. That row replaces the `Menu` handle of TheBoards' DECISIONS.md B65, and is why removing the
+handle costs desktop nothing — no long-press is armed there (TheBoards' DECISIONS.md B19/TheBoards' issue #4), and
+desktop `contextmenu` now opens a **note's** Link menu (TheBoards' DECISIONS.md B91, §4.6). Since TheBoards' DECISIONS.md B100
 desktop's route to All boards is the **rail** (the tab is retired); Export
 stays a tab there. The mobile anchor long-press still opens the anchor menu
 below.
@@ -1153,16 +1178,16 @@ below.
 | Menu | Items |
 |---|---|
 | Anchor | All boards · Export |
-| Note (B91) | Link |
+| Note (TheBoards' DECISIONS.md B91) | Link |
 | Board row / rail card | Export · Delete |
 | Desktop selection | Complete/Restore · Highlight/Remove highlight · Delete |
 
 Ordering is **navigation first, then the item's own actions in rising severity**
-(B43, superseding A1). The destructive action is **always last, in `--danger`,
+(TheBoards' DECISIONS.md B43, superseding A1). The destructive action is **always last, in `--danger`,
 behind a hairline** — and never distinguished by colour alone (§1): position and
 the divider carry the meaning independently.
 
-**Highlight** (issue #105, B71) is a note-only toggle: it washes the whole note
+**Highlight** (TheBoards' issue #105, TheBoards' DECISIONS.md B71) is a note-only toggle: it washes the whole note
 in `--highlight` (§2.6.1) and, chosen again, returns it to the board's default
 note surface. Its label states the act it will perform — **Highlight** on a plain
 note, **Remove highlight** on a lit one — the same Complete→Restore grammar it
@@ -1172,14 +1197,14 @@ the Complete item flips), with the plural **Highlight all** / **Remove
 highlights**. The Parking Lot has no surface to wash, so it is not offered there.
 
 Every menu says "All boards", and that is now the only place the word is
-written: the list view carries no visible page heading (B66 supersedes B43's
+written: the list view carries no visible page heading (TheBoards' DECISIONS.md B66 supersedes TheBoards' DECISIONS.md B43's
 heading clause) — its three category heads say where you are, and the screen's
 accessible name lives on `#list-view`'s `aria-label`.
 
 No long-press timer is armed over bare canvas or lot background — the release
 still captures — and the `pointerdown` that dismisses an open menu is inert and
 creates nothing, because dismissal is a retraction, not a choice of what was
-underneath (B30).
+underneath (TheBoards' DECISIONS.md B30).
 
 ---
 
@@ -1202,7 +1227,7 @@ lengthen from v1's 120/150ms because §1.1 argues for a water-like settle, and a
 **The set does not grow.** No new motion has earned its place. Two things stay
 instant and are not candidates:
 
-- **Note capture** (§5, B27) — the caret must arrive with the tap.
+- **Note capture** (§5, TheBoards' DECISIONS.md B27) — the caret must arrive with the tap.
 - **The control press-translate** (§14) — a control that lags feels broken, not
   calm.
 
@@ -1223,86 +1248,86 @@ The toast sits on `--chrome` with `--elevation` (§2.4) and a light edge (§2.5)
 Its Undo is `--accent-restore` text distinguished by **underline** — not colour
 (§1).
 
-A save-failure toast must never clobber a pending Undo (B13).
+A save-failure toast must never clobber a pending Undo (TheBoards' DECISIONS.md B13).
 
 ---
 
 ## §10 The board list and the rail
 
-**"All boards" is a category picker, not the boards themselves** (B74, issue
+**"All boards" is a category picker, not the boards themselves** (TheBoards' DECISIONS.md B74, issue
 #112). Choosing "All boards" raises the four category buttons — To Do, Notes,
 Learning, Ideas — and a board list lives on that category's **own drilled
 screen**, reached by choosing its button. Routing is two levels of History API
 state (`{v:'list'}` the picker, `{v:'cat',cat}` a drill, `{v:'cal'}` the calendar
-(B95)) specifically so the OS back gesture returns through every level
+(TheBoards' DECISIONS.md B95)) specifically so the OS back gesture returns through every level
 (drill → picker → board; calendar → board). Back is never intercepted,
-shadowed or disabled — and B95's top row makes the calendar's route
+shadowed or disabled — and TheBoards' DECISIONS.md B95's top row makes the calendar's route
 visible, so the gesture is a second way, never the only way. **The picker is
-the Parking Lot turned into the 2×2 grid wherever it exists** (B100, issue
+the Parking Lot turned into the 2×2 grid wherever it exists** (TheBoards' DECISIONS.md B100, issue
 #157): on mobile and tablet, the two surfaces that carry the All-boards tab.
 
 **Mobile and tablet:** the picker is not a screen of its own — it is the
 **Parking Lot turned into a 2×2 grid** of the four category buttons, drawn over
 the lot at its current height (expanded with it) and dismissed back to the lot
-without ever touching the board's parking-lot data (B74; tablet joined by
-B100, its tier admitted by B103's one width floor — 744px, any orientation). The grid reads clockwise from the
+without ever touching the board's parking-lot data (TheBoards' DECISIONS.md B74; tablet joined by
+TheBoards' DECISIONS.md B100, its tier admitted by TheBoards' DECISIONS.md B103's one width floor — 744px, any orientation). The grid reads clockwise from the
 top-left: To Do, Notes, Learning, Ideas. A drilled category is then a **panel
-that rises from the Parking Lot to a third of the viewport** (B82, issue #125),
+that rises from the Parking Lot to a third of the viewport** (TheBoards' DECISIONS.md B82, TheBoards' issue #125),
 most recently updated first, opening straight onto that one section — the board
 stays visible above it, where a full-screen list once replaced it. **There is no
-page heading** (B66): the category head says where you are. The panel's height is
+page heading** (TheBoards' DECISIONS.md B66): the category head says where you are. The panel's height is
 `⌊viewport / 3⌋`, measured in JS off `window.innerHeight` and published as
 `--list-panel-h` — never a CSS `vh`, so the soft keyboard (which moves only the
-visual viewport, B28) does not drag it. The rise is the toast's `translateY`
+visual viewport, TheBoards' DECISIONS.md B28) does not drag it. The rise is the toast's `translateY`
 idiom on §8's one 200ms curve, degrading to instant under reduced-motion; its
 top edge is the Parking Lot's own `--frame` rule, rounded and on `--elevation`
 as the transient surface it is (§2.4).
 
-**Desktop:** an always-visible 300px rail (B24) — **sunken, not floating** (§2.4),
+**Desktop:** an always-visible 300px rail (TheBoards' DECISIONS.md B24) — **sunken, not floating** (§2.4),
 sitting outside `#board` so the recognizer never sees its events, listing all
 four categories at once. Cards are the water's upper fall on `--chrome`, compact.
-**The rail IS desktop's all-boards surface** (B100, issue #157): the All-boards
+**The rail IS desktop's all-boards surface** (TheBoards' DECISIONS.md B100, TheBoards' issue #157): the All-boards
 tab is retired there — `display:none` on both the board-action row and the
 calendar's R1 row, the rail already naming every category with every board —
 so `#list-view` has no entry path on desktop and never shows. The drill's
-B82 split survives as code (rising panel under `html:not(.desktop)`), simply
+TheBoards' DECISIONS.md B82 split survives as code (rising panel under `html:not(.desktop)`), simply
 unreachable on desktop; wide's board row is **two tabs** (Export · Import) and
 the calendar's R1 row is **Back + Export**.
 
-**Both surfaces order a section by last touch, newest first** (B69, superseding
-B24's immutable slot): the key is the later of `updatedAt` (written on every
+**Both surfaces order a section by last touch, newest first** (TheBoards' DECISIONS.md B69, superseding
+TheBoards' DECISIONS.md B24's immutable slot): the key is the later of `updatedAt` (written on every
 committing action) and `catStamp` (written by a drop or a create), floored at
 `createdAt`, with `createdAt` desc + an `id` tiebreak closing it so the sort is
 total and no card can change slots between two renders of the same data. A card's
 slot therefore **does** move — editing a board returns it to the top of its
-section, which is the cost B69 accepted.
+section, which is the cost TheBoards' DECISIONS.md B69 accepted.
 
-The four categories are **To-Do / Notes / Learning / Ideas** (B74, issue #112;
-"Notes" keeps its storage key `unsorted` and its B63 relabel, Learning is the
+The four categories are **To-Do / Notes / Learning / Ideas** (TheBoards' DECISIONS.md B74, TheBoards' issue #112;
+"Notes" keeps its storage key `unsorted` and its TheBoards' DECISIONS.md B63 relabel, Learning is the
 new bucket, §2.2.2). On the **desktop rail** — the one surface that still shows
 every category at once — a pointer-drag moves a card between sections with the
 target section framing itself in `--accent-page` (over its resting frame,
 below). The mobile drill shows one category alone, so it re-files by opening a
 board rather than by dragging between sections. **A card wears its own
-section's water** (B67): the cards are the water's upper fall, and since B67
+section's water** (TheBoards' DECISIONS.md B67): the cards are the water's upper fall, and since TheBoards' DECISIONS.md B67
 that fall is per board type, so a card previews the board it opens rather than
-describing a board that no longer looks like it. Since B72 the section itself is
+describing a board that no longer looks like it. Since TheBoards' DECISIONS.md B72 the section itself is
 a framed, tinted tray in the same family (its `--card` ground, its `--frame`
 frame — see below), so each category reads as its own enclosed place; the drag
 ghost carries the scope too, so a card does not change hue in the air. `--chrome`
-remains the one room behind all four trays — it does not rotate (B55) — showing
+remains the one room behind all four trays — it does not rotate (TheBoards' DECISIONS.md B55) — showing
 through the list's padding and the gaps between sections. Overflow **pages**
 rather than scrolling, and a single page hides its own pager: no state, no
-statement (B42).
+statement (TheBoards' DECISIONS.md B42).
 
-**Each section lays out as one grid, on both surfaces** (B63): a head row —
+**Each section lays out as one grid, on both surfaces** (TheBoards' DECISIONS.md B63): a head row —
 the category's display label left, and the section's **own `New board`
 control** right, the two boxes one height — then the cards, then the pager
 row **below the cards, centred**. The header sits at §13.1's display step —
-**21px on mobile, 15px on the rail**, at `letter-spacing: 0.02em` (B74 re-tuned
-these down from B63's 24/18 at 0.05em: the fourth, longest name, "Learning
+**21px on mobile, 15px on the rail**, at `letter-spacing: 0.02em` (TheBoards' DECISIONS.md B74 re-tuned
+these down from TheBoards' DECISIONS.md B63's 24/18 at 0.05em: the fourth, longest name, "Learning
 Boards", would not otherwise keep its whole self beside the control in the
-narrow rail — B63's own criterion, extended to the fourth category). The
+narrow rail — TheBoards' DECISIONS.md B63's own criterion, extended to the fourth category). The
 furniture rows are **44px** on mobile — §6's floor exactly, the
 control *is* the row — with the control's label at 14px, and **32px** on
 desktop (a 32px control, its label at 13px). The global New board controls
@@ -1310,34 +1335,34 @@ are **removed** — creation lives in the categories: a section's control
 writes `category` (+ `catStamp`, so the new card lands first, like a drop)
 and **opens the new board at once**.
 
-**A card is 44px and the gaps are two values** (B68). The row height is
+**A card is 44px and the gaps are two values** (TheBoards' DECISIONS.md B68). The row height is
 `§6`'s touch floor and stops there: a card is a tap target, and what makes it
 read as a discrete object with its own edge is the hairline and the water
 fill, never the height. **4px** separates card from card inside a section;
 **8px** separates section from section. This is the height on the **rail and the
 desktop drill**; the **mobile drilled-list card** stands taller — **76px** — for
-the two extra things B82 puts on it (below).
+the two extra things TheBoards' DECISIONS.md B82 puts on it (below).
 
 **The mobile drilled-list card carries a two-line title and a Last Updated
-stamp** (B82, issue #125). In the third-height slide-up panel the card gives up
+stamp** (TheBoards' DECISIONS.md B82, TheBoards' issue #125). In the third-height slide-up panel the card gives up
 the sheet's width — **three to a row** (below) — so the title **clamps to two
 lines** and then indicates truncation with `…`, and a **`Last Updated:
 MM/DD/YY`** line sits **bottom-right** of every card (zero-padded month and day,
 two-digit year). The stamp is the record's own `updatedAt` — already written on
-every committing action (B69) — so nothing new persists. The rail and the
+every committing action (TheBoards' DECISIONS.md B69) — so nothing new persists. The rail and the
 desktop drill keep the single-line 44px card, with the same `Last Updated` line
 laid **inline** at the card's right; only the phone's panel restacks it under a
 two-line title. The card is `76px` (`LIST_CARD_H`) and `catPageCap` budgets the
 panel against it, the rail against its own 44px.
 
-**Each section is a framed, tinted tray in its own family** (B72, issue #107).
+**Each section is a framed, tinted tray in its own family** (TheBoards' DECISIONS.md B72, TheBoards' issue #107).
 The 8px gap alone left the categories reading as one run of buttons, so a
 section now draws its own scene, not only its cards': its **`--card`** rung as
 the tray ground and its **`--frame`** rung as a **2px inset frame**, both
 rotated with the board type (§2.2.2). The card fill still sits **3.01:1** above
 the `--card` tray (§2.5), so a card stays a discrete raised object on it, and
 the frame reads **5.39:1** on the tray, **5.95:1** on the chrome around it
-(§2.5). `--chrome` stays the one room behind — it does not rotate (B55) and
+(§2.5). `--chrome` stays the one room behind — it does not rotate (TheBoards' DECISIONS.md B55) and
 still shows through the list's padding and the section gaps — so the trays are
 four enclosed places *within* one room. To-Do's tray is the quietest (its
 `--card` is the chrome's own hue, one step up at 1.10:1); the frame is what
@@ -1345,32 +1370,32 @@ separates it, by design (§2.5 — its border separates, not its fill). The thre
 of ground, frame and radius are all layout-free, so the measured card budget
 below is unchanged.
 
-**The All-Boards picker button wears the board's water field** (B89, issue #135).
-A category button — a tile in the lot-grid picker (the one picker, B100) —
+**The All-Boards picker button wears the board's water field** (TheBoards' DECISIONS.md B89, TheBoards' issue #135).
+A category button — a tile in the lot-grid picker (the one picker, TheBoards' DECISIONS.md B100) —
 grounds in its family's water gradient `linear-gradient(180deg,
 var(--water-top), var(--water-mid))` — the same fill the board's own list cards wear
 — inside its `--frame` inset frame, the category name centred on it. Its ground was
 the section tray's near-black `--card` before, which read dull; the water lets a tile
 preview its board. The `--water-*` stops are re-asserted per family on
 `.cat-button[data-cat]` so a tile carries its OWN board's water, not the surrounding
-board's (the mobile grid lives inside `#board[data-cat]`) — the B77 leak, closed for
+board's (the mobile grid lives inside `#board[data-cat]`) — the TheBoards' DECISIONS.md B77 leak, closed for
 the tiles too. So the picker, the drill and the rail still read as one design
 language, four families told apart by hue exactly as the boards are.
 
-**An empty category collapses to its head row** (B68): its label and its own
+**An empty category collapses to its head row** (TheBoards' DECISIONS.md B68): its label and its own
 New board control stay — it is still somewhere to create, and still a target
 to drop onto, one furniture row tall (44px on mobile, §6's floor; 32px on the
-rail, past §6's B23 pointer floor) — and its cards and pager slots go to the
+rail, past §6's TheBoards' DECISIONS.md B23 pointer floor) — and its cards and pager slots go to the
 sections that have boards. The pager's slot is reserved wherever cards are
 drawn, even when a single page hides the pager, so the budget cannot flap
 between one- and many-page states.
 
-**The per-page budget is measured, never a constant** (B42, restated B68,
+**The per-page budget is measured, never a constant** (TheBoards' DECISIONS.md B42, restated TheBoards' DECISIONS.md B68,
 B74, B82): the surface's real content height, less every *drawn* section's
 furniture, in whole rows — **times the cards a row holds**. The mobile list
-puts **three** to a row (B82 took it from B70's two); the rail keeps one,
+puts **three** to a row (TheBoards' DECISIONS.md B82 took it from TheBoards' DECISIONS.md B70's two); the rail keeps one,
 because `PANE_W` is 300 and two would be narrower than the titles they name.
-Since B74 a mobile drill shows **one** category; since B82 it shows it in a
+Since TheBoards' DECISIONS.md B74 a mobile drill shows **one** category; since TheBoards' DECISIONS.md B82 it shows it in a
 panel a third of the viewport tall, so `catPageCap` is told one section is drawn
 and measures the panel's real height — roughly **six** cards on a 384×846 phone
 (three across, two rows), the density the shorter panel trades for keeping the
@@ -1380,10 +1405,10 @@ the measurement falls short of what is asked for, the pager states it — a numb
 that clipped off the bottom of a short phone would be a lie about the height.
 
 **Truncation is always indicated** — `text-overflow: ellipsis` on the single-line
-card, a **two-line `-webkit-line-clamp`** on the mobile drilled card (B82), never
+card, a **two-line `-webkit-line-clamp`** on the mobile drilled card (TheBoards' DECISIONS.md B82), never
 a hard cut.
 
-A rail board swap is a 260ms crossfade (§8) with **no history push** — B9 is
+A rail board swap is a 260ms crossfade (§8) with **no history push** — TheBoards' DECISIONS.md B9 is
 bypassed, not touched.
 
 ---
@@ -1394,23 +1419,23 @@ One logical page, one render scale. Stored coordinates are converted for display
 and **never mutated by a layout change** — a rotation, a fold or a window drag
 changes how a position renders, never what it is.
 
-**The mapping is a similarity transform (ruled B64; issues #65, #75).** Each
+**The mapping is a similarity transform (ruled TheBoards' DECISIONS.md B64; issues #65, #75).** Each
 note renders through one uniform ratio `k = min(LOGICAL_W/rw, LOGICAL_H/rh)`
 — the smaller of the two frame ratios — applied to `x`, `y` **and** size, so
 a fold, a rotation or a window drag maps the arrangement as a figure: pairwise
 angles and distance ratios are preserved, and `min` keeps every authored
 position on the page by construction. The figure is anchored top-left, never
-centred; slack falls to the right and bottom as open canvas. Pre-B32 notes
-carry no legacy branch: B93's one-time boot migration adopts every rh-less
+centred; slack falls to the right and bottom as open canvas. Pre-TheBoards' DECISIONS.md B32 notes
+carry no legacy branch: TheBoards' DECISIONS.md B93's one-time boot migration adopts every rh-less
 note onto this path by writing the position it already renders, so no note
-reaching the renderer lacks `rh` (B93).
+reaching the renderer lacks `rh` (TheBoards' DECISIONS.md B93).
 
 ---
 
 ## §12 Accessibility
 
 Non-negotiable. The target is **WCAG 2.2 AA**, with AAA where the product already
-reaches it. This section is the specification; `PRD §9.6` states only the parts
+reaches it. This section is the specification; `TheBoards' PRD §9.6` states only the parts
 a test can prove.
 
 - Every editable region carries `role="textbox"` / `aria-multiline`.
@@ -1436,9 +1461,9 @@ a test can prove.
 **Montserrat Alternates**, self-hosted, **no CDN**.
 
 A CDN font is a network dependency and an uncacheable hole in an offline-first
-shell (`PRD §3.2`, `PRD §3.3`). The three weight files are committed in
-`fonts/`, extracted from proof sheet 7's embedded faces, declared with
-`@font-face`, listed in `sw.js`'s `ASSETS`, and subject to the cache bump —
+shell (`TheBoards' PRD §3.2`, `TheBoards' PRD §3.3`). The three weight files are committed in
+`assets/fonts/`, extracted from proof sheet 7's embedded faces, declared with
+`@font-face`, listed in TheBoards' `sw.js`'s `ASSETS`, and subject to the cache bump —
 wired when the system shipped, exactly as this section ordered.
 
 **Three weights** — 400, 600, 800 — as Latin-subset `woff2`, with
@@ -1449,15 +1474,15 @@ label.
 
 Size scale is retained: 11 · 12 · 13 · 14 · 15 · 16 · 17 · 18px; line-heights
 1.3 / 1.4 / 1.45 — and one display step above it: **21px** (the mobile category
-header, B63's step re-tuned down by B74; the rail's header takes the scale's own
-**15**, likewise down from 18). The category names are short (B78 — "To Do",
+header, TheBoards' DECISIONS.md B63's step re-tuned down by TheBoards' DECISIONS.md B74; the rail's header takes the scale's own
+**15**, likewise down from 18). The category names are short (TheBoards' DECISIONS.md B78 — "To Do",
 "Notes", "Learning", "Ideas"), so the header clears its control with room to
 spare; the re-tuned sizes are kept.
 
 ### §13.2 The band measurement gate
 
 Montserrat Alternates has a different apparent x-height from `system-ui`. The
-band is **sized by the type it holds** (B37, §3), so changing the type changes
+band is **sized by the type it holds** (TheBoards' DECISIONS.md B37, §3), so changing the type changes
 the band. **The gate is discharged.** Measurements taken from the font's own
 `hmtx` advances, with no kerning applied, so every figure is a conservative
 upper bound on what a browser draws:
@@ -1471,22 +1496,22 @@ upper bound on what a browser draws:
 x-height is 0.534em and cap height 0.700em at 1000 units per em.
 
 > **The gate clears, and the pixel it opened is taken: the label is 13px**
-> (B54). B38 set the label to 12px because that was "the largest whole px at
+> (TheBoards' DECISIONS.md B54). TheBoards' DECISIONS.md B38 set the label to 12px because that was "the largest whole px at
 > which the widest measured *Requirements* (~118px at 15px) fits the 100px
 > column" — a measurement taken in `system-ui`. In Montserrat Alternates the
-> same word sets **95.2px at 13px**, so B38's own rule applied to the face the
+> same word sets **95.2px at 13px**, so TheBoards' DECISIONS.md B38's own rule applied to the face the
 > app owns returns 13, and keeping 12 would have inherited a dead face's
-> measurement. The band is sized by the type it holds (B37), so the formula's
+> measurement. The band is sized by the type it holds (TheBoards' DECISIONS.md B37), so the formula's
 > label term moves 15.6 → 16.9 and the band grows by exactly the pixel: 88 at
 > the floor, 107 at three lines (§3.1). Rendered at both sizes on proof sheet
-> 8; the ratified render is `proofs/proof-9-a-well-furnished.html`.
+> 8; the ratified render is `docs/proofs/proof-9-a-well-furnished.html`.
 
-**Superseded by B76 (issue #111):** the label no longer sits above the rule, so
+**Superseded by TheBoards' DECISIONS.md B76 (TheBoards' issue #111):** the label no longer sits above the rule, so
 its `+ 16.9 + 10` term left the band budget — the band closes at **61 at the
 floor, 81 at three lines** (§3.1). The 13px measurement stands; only its place
 moved, below the rule as a tab.
 
-Still a gate for anything downstream: `test/mobile.js` asserts band and lot
+Still a gate for anything downstream: TheBoards' `test/mobile.js` asserts band and lot
 geometry, so a later font change that moves the band **fails the suite**, which
 is the correct outcome.
 
@@ -1495,7 +1520,7 @@ is the correct outcome.
 v1's glyph set — `✓ ↺ ▦ ⇩ ⧉ 🗑 « ‹ › »` — is **retired as type and redrawn as
 inline SVG** in `currentColor`.
 
-The reasoning is the one `app.js` already applies to `🗑` and then does not
+The reasoning is the one TheBoards' `app.js` already applies to `🗑` and then does not
 follow through on. Montserrat Alternates is a Latin display face: of those ten
 marks, the four guillemets are plausibly in a Latin subset. **The other six —
 `✓ ↺ ▦ ⇩ ⧉ 🗑` — fall back** to whatever the platform supplies, which is exactly
@@ -1510,7 +1535,7 @@ everywhere, in one hand. Type is the wrong medium for that job. Drawing them:
 - puts every mark in the app rather than on the platform, which is the identity
   claim §13.1 is making in the first place;
 - solves the bin structurally instead of by substitution;
-- costs no dependency and no build step — inline SVG in `app.js`'s existing
+- costs no dependency and no build step — inline SVG in TheBoards' `app.js`'s existing
   `GLYPH` map;
 - and lets the marks be drawn **at the note's own stroke weight and corner
   radius**, so the icon set is literally in the same hand as the board. That is
@@ -1525,16 +1550,16 @@ device," not `↓` (a borrowed browser-download convention) and not `📄` (whic
 restates the noun). `⧉` is "this, again, elsewhere" — two frames, one content.
 Guillemets read as "page", not "play".
 
-The **link** mark (B91, §4.6) joins the set: two small nodes joined by a diagonal
+The **link** mark (TheBoards' DECISIONS.md B91, §4.6) joins the set: two small nodes joined by a diagonal
 line — the mark *is* the thing it makes, a connection between two notes, in the
 same hand and stroke weight as the rest (no arrowhead, matching the line itself).
 
 ### §13.4 The icon
 
-B1's motif, unchanged — the note-frame, two text lines, the completion
+TheBoards' DECISIONS.md B1's motif, unchanged — the note-frame, two text lines, the completion
 stroke — drawn in what a note now *is*: `--note` `#a0d4da` behind its 2px
-`--ink-dark` frame, **on the deep** (B60, re-ruled when B58 moved the notes'
-ground; supersedes B56's water). The launcher is where the identity claim
+`--ink-dark` frame, **on the deep** (TheBoards' DECISIONS.md B60, re-ruled when TheBoards' DECISIONS.md B58 moved the notes'
+ground; supersedes TheBoards' DECISIONS.md B56's water). The launcher is where the identity claim
 meets the person first, and the claim is the canvas the note actually lives
 on — at 12.36:1, the strongest it has ever read. Generated by the committed,
 dependency-free `icons/make-icons.js` (the water kept as a `--ground` flag);
@@ -1550,10 +1575,10 @@ bleeding to the mask's edge.
 Four species. All share one tactile signature; each keeps its own fill.
 
 **Primary** (`New board` — the per-category create control, one on every
-section's head row since B63; refilled by B59 when the sand retired — the
+section's head row since TheBoards' DECISIONS.md B63; refilled by TheBoards' DECISIONS.md B59 when the sand retired — the
 accent about boards, on the controls that make one; the construction below is
 unchanged, except that the category instance sizes its label to its row:
-14px mobile, 13px desktop, B63):
+14px mobile, 13px desktop, TheBoards' DECISIONS.md B63):
 
 ```css
 .primary-btn {
@@ -1589,9 +1614,9 @@ reason:
 | `box-shadow: 0.1em 0.1em` | `… var(--ink-dark)` | unqualified it inherits `currentColor` |
 
 **Lot-row actions** (`.sel-btn` — Complete · Copy · Delete, inline on a selected
-Parking Lot row, desktop only, B25): accent fill per §2.6, or `--chrome` for Copy,
+Parking Lot row, desktop only, TheBoards' DECISIONS.md B25): accent fill per §2.6, or `--chrome` for Copy,
 `--ink-dark` label, ink border, same shadow geometry. Copy takes plain chrome
-because it changes nothing — accents mark state changes. Since B84 this is the only
+because it changes nothing — accents mark state changes. Since TheBoards' DECISIONS.md B84 this is the only
 place `.sel-btn` is drawn — a *note's* actions are the flat tabs of §4.5, not this
 raised control.
 
@@ -1602,7 +1627,7 @@ when disabled.
 fill on tap; Undo is underlined text (§9).
 
 **The board-action row** (`.board-action` — the `All boards` and `Export` tabs
-above the Parking Lot, B83, §3.3): the one control that **does not** wear §14's
+above the Parking Lot, TheBoards' DECISIONS.md B83, §3.3): the one control that **does not** wear §14's
 tactile signature. It is the band label's flat box — `--frame` fill, `--ink-dark`
 label at **5.70:1** (rebound by `.on-light`), `13px/600`, `padding: 2px 6px`,
 symmetric `border-radius: 3px` — because **All boards** navigates and **Export**
@@ -1621,10 +1646,10 @@ Its interactive feedback is a transient `filter: brightness` on hover/press
 (§8's curve, dropped to instant by the kill-switch) and §2.7's two-tone ring on
 focus; the offset shadow and press-translate are deliberately absent. Placement,
 the decoupled `--hit` collar and the **All boards ⇄ This board** toggle live in
-§3.3. This **supersedes the compartment's handle** (`#title-menu`, B65): the
+§3.3. This **supersedes the compartment's handle** (`#title-menu`, TheBoards' DECISIONS.md B65): the
 fifth species is retired with the handle it dressed, and no control on the sheet
 now wears `--frame` as a tactile chip — the fill returns to being purely the
-band tab's (B76).
+band tab's (TheBoards' DECISIONS.md B76).
 
 ---
 
@@ -1645,15 +1670,15 @@ app's.
 
 Named here so the follow-up work was scoped rather than discovered — and
 landed with the v2 release, in the shape this list ordered. Scoped in
-`PRD §9` and verified per `PRD §9.6`.
+`TheBoards' PRD §9` and verified per `TheBoards' PRD §9.6`.
 
-1. **Five colour sync points, none automated.** `styles.css :root`;
-   `index.html`'s two `theme-color` metas (which collapse to one — there is one
-   theme); `manifest.json`'s `background_color` and `theme_color`; and `app.js`'s
+1. **Five colour sync points, none automated.** TheBoards' `styles.css :root`;
+   TheBoards' `index.html`'s two `theme-color` metas (which collapse to one — there is one
+   theme); TheBoards' `manifest.json`'s `background_color` and `theme_color`; and TheBoards' `app.js`'s
    `PDF_PAPER` / `PDF_INK` / `PDF_SHADE`, which are hand-derived floats; and
-   `icons/`, whose B1 motif is drawn in the poles and must be regenerated, as
-   B16 regenerated it. Changing a token in one place silently desynchronises
-   the others. `PRD §9.6` requires a test that fails when they diverge.
+   `icons/`, whose TheBoards' DECISIONS.md B1 motif is drawn in the poles and must be regenerated, as
+   TheBoards' DECISIONS.md B16 regenerated it. Changing a token in one place silently desynchronises
+   the others. `TheBoards' PRD §9.6` requires a test that fails when they diverge.
 2. **PDF font embedding is the largest single item.** The exporter uses base-14
    Helvetica with hardcoded base-36 advance-width tables. Embedding requires
    `.ttf` (not `woff2`) for `FontFile2`; a `/FontDescriptor`; a `/Widths` array
@@ -1663,7 +1688,7 @@ landed with the v2 release, in the shape this list ordered. Scoped in
    no subsetter, so both weights embed whole — roughly 150KB per exported PDF.
    That cost is accepted deliberately.
 3. **`EXPORT_GEO.radius`** mirrors the CSS radius by hand and moves 2 → 3 (§4).
-4. **`sw.js`** `ASSETS` gains `fonts/`; `CACHE` bumps.
+4. **TheBoards' `sw.js`** `ASSETS` gains `assets/fonts/`; `CACHE` bumps.
 5. **The light theme is removed, not overridden** — the whole light `:root` and
    the `prefers-color-scheme: dark` block both go (§2.1).
 6. **`--ink` becomes per-surface and `--line` is deleted** (§2.3). This is a
@@ -1677,15 +1702,15 @@ landed with the v2 release, in the shape this list ordered. Scoped in
    a falloff plus dither (§2.8); `--shelf` becomes a base plus turbulence wisps
    (§2.9). Both are pure CSS and one inline SVG each — no dependency, no build
    step, and paint-only — the layout cost is untouched.
-10. **`test/tokens.js` cannot stay a pure function over constants.** With a
+10. **TheBoards' `test/tokens.js` cannot stay a pure function over constants.** With a
     non-flat ground every ratio is a range. The rule becomes: *a non-flat
     surface declares its extremes, and every adjacency is asserted against the
     worst one.* Tractable because the field is authored as opaque stops and
     because the falloff and dither can only darken (§2.8).
 11. **The band and the lot both size to their content** from a two-line and a
     two-row floor respectively (§3.1, §3.2), and both rules go full width. This
-    supersedes **B32**, **B35/B38** and **B37**; `EXPORT_GEO` and
-    `test/mobile.js`'s geometry assertions both move with it.
+    supersedes **TheBoards' DECISIONS.md B32**, **TheBoards' DECISIONS.md B35/B38** and **TheBoards' DECISIONS.md B37**; `EXPORT_GEO` and
+    TheBoards' `test/mobile.js`'s geometry assertions both move with it.
 
 ### §16.1 What is not settled
 
@@ -1699,13 +1724,13 @@ Recorded here so it is not mistaken for decided:
   verification; not yet ruled.
 
 Everything else this list has carried is settled and has moved into the body,
-with the proof sheets as provenance and `DECISIONS.md` as the record: the desk
+with the proof sheets as provenance and TheBoards' `DECISIONS.md` as the record: the desk
 token is retired (§2.2), the brightest-surface claim is reworded rather than
-defended (§2.2, `PRD §1.4`), the lot keeps its top rule in its own ink (§2.5),
-`--frame` is ratified (§2.5) — B46+ — and round 8's three, ruled B52–B54: the
+defended (§2.2, `TheBoards' PRD §1.4`), the lot keeps its top rule in its own ink (§2.5),
+`--frame` is ratified (§2.5) — TheBoards' DECISIONS.md B46+ — and round 8's three, ruled TheBoards' DECISIONS.md B52–B54: the
 chrome family (§2.2, §2.6), the scratch-out's pair (§4.3), and the 13px band
 label (§3.1, §13.2), rendered whole in
-`proofs/proof-9-a-well-furnished.html`.
+`docs/proofs/proof-9-a-well-furnished.html`.
 
 ### §16.2 Retiring v1's tokens
 
@@ -1717,25 +1742,25 @@ stated fate is a call site nobody knows how to edit.
 | `--paper` | 22 | **split** — as a ground → §2.2's ladder by role; as a label on a fill → `--ink-dark` (§2.3) |
 | `--ink` | 38 | **split** — `--ink-light` or `--ink-dark`, rebound at the surface (§2.3) |
 | `--ink-rgb` | 1 | **renamed** → `--ink-a`, rebound per surface (§2.3) — and corrected: v1 declared comma-separated channels and used them with slash alpha (`rgb(34, 28, 36 / 0.4)`), which CSS Color 4 rejects, so the buried-text fade (§4.3) may never have rendered. The v2 form is space-separated and valid |
-| `--ink-shadow` | 8 | **retired** — a second mid-tone has the same defect `--line` had (§2.3.2). Placeholders, dates and category heads take the ground's pole (the tap-ghost that also took it at a low alpha is itself retired, B81) |
+| `--ink-shadow` | 8 | **retired** — a second mid-tone has the same defect `--line` had (§2.3.2). Placeholders, dates and category heads take the ground's pole (the tap-ghost that also took it at a low alpha is itself retired, TheBoards' DECISIONS.md B81) |
 | `--letterbox` | 2 | **retired** — never drawn (§2.2). `html` keeps a plain black background, which is not a token |
-| `--surface-raised` | 3 | **retired** → `--chrome` — v1 raised menus *above* paper; v2 sinks them below the board (§2.2, B52) |
+| `--surface-raised` | 3 | **retired** → `--chrome` — v1 raised menus *above* paper; v2 sinks them below the board (§2.2, TheBoards' DECISIONS.md B52) |
 | `--hairline` | 6 | **retired** → `rgb(var(--ink-a) / 0.4)` — that surface's ink at the lowest alpha clearing 3:1 on it (§2.5) |
-| `--danger` | 7 | **kept**, re-derived and held (§2.6, B52) |
-| `--accent-restore` | 5 | **kept**, re-derived to the note's family (§2.6, B52) |
+| `--danger` | 7 | **kept**, re-derived and held (§2.6, TheBoards' DECISIONS.md B52) |
+| `--accent-restore` | 5 | **kept**, re-derived to the note's family (§2.6, TheBoards' DECISIONS.md B52) |
 | `--focus-ring` | 11 | **retired** — no single hue works on six grounds; replaced by the two-tone ring (§2.7) |
 | `--elevation` | 3 | **kept** (§2.4), gains an inset variant for `#pane` |
-| `--pane` | 1 | **retired** → `--chrome` (§2.2, B52) |
-| `--accent-page` | 2 | **kept**, re-derived to the field's family (§2.6, B52) |
+| `--pane` | 1 | **retired** → `--chrome` (§2.2, TheBoards' DECISIONS.md B52) |
+| `--accent-page` | 2 | **kept**, re-derived to the field's family (§2.6, TheBoards' DECISIONS.md B52) |
 
-**And the second swap's fates (B58–B61)** — the same discipline applied to the
+**And the second swap's fates (TheBoards' DECISIONS.md B58–B61)** — the same discipline applied to the
 tokens the swap moved:
 
 | Pre-swap token | Fate |
 |---|---|
 | `--band` | **renamed** → `--deep`: the value moved from the band to the canvas, and the name follows the surface it grounds (§2.2) |
 | `--board-top/-mid/-bot` (+ `-a`) | **renamed** → `--water-top/-mid/-bot` (+ `-a`): the field grounds the two sections now, not the board (§2.8) |
-| `--sand-light/-base/-dark` | **retired** — the lot takes the water (§2.8); the primary takes `--accent-page` (B59) |
+| `--sand-light/-base/-dark` | **retired** — the lot takes the water (§2.8); the primary takes `--accent-page` (TheBoards' DECISIONS.md B59) |
 | `--sand-taupe`, the three wisps | **retired with their ground** — the turbulence weather leaves with the sand (§2.9) |
 | `--chrome`, `--card`, `--frame`, `--note`, inks, accents, elevations | **kept**, unmoved — the swap trades surfaces, not values |
 
@@ -1745,16 +1770,16 @@ Per surface, what would actually fail if the words above were violated today:
 
 | Clause | Pinned by |
 |---|---|
-| §2 — every token, every ratio | `test/tokens.js` (`PRD §9.6`): every table here recomputed from the shipped hexes, each range at its worst extreme, plus the sync points, the accent placement rule, self-hosting and B53's pair |
-| §2.2.2 — four ladders, one axis | `test/tokens.js` [1b] parses the palette **per scope** (`:root`, `#board[data-cat="idea"]`, `#board[data-cat="unsorted"]`, `#board[data-cat="learning"]`), asserts each rung's luminance against the shared column, asserts the two spellings of the darkest stop agree (`--water-bot` / `--water-bot-a`), and asserts `--chrome`, the ink poles and the accents are *not* rebound. §2.3/§2.5/§2.7's tables are then run against all four ladders with one expected number each |
-| §3 — band and lot geometry | `test/mobile.js` [9c]/[11b]/[11c] and `test/desktop.js` [D8] — moved with B47/B54 when the band shipped, recomputing rule-y from the formula (88 floor / 107 at three lines); `test/mobile.js` [21] and `test/desktop.js` [D21] pin the board-action row above the lot, prove its live tabs clear the touch/pointer floor (B95's re-grammar; B100's desktop retirement means the row's two visible tabs), export a PDF, and confirm the `#title-menu` handle is gone (B83); §3.4's calendar is pinned by `test/tokens.js`'s issue-#145 block (window computed at render, one mirror writer, link coercion, squeeze as render-time state) |
-| §3/§7 — `EXPORT_GEO` agreement | `test/mobile.js` [11c] pins export geometry to the rendered board — the intended tripwire |
-| §4 — wrap, similarity render, centred text | `test/mobile.js` (B39 scenarios; [12c] pins B64's fold/rotate similarity — shape held, size uniform, storage untouched, round trip exact; [18b] computes the alignment, editing and at rest) and `test/desktop.js` [D13] (the silent cross-frame grab folds k) and [D17b] — the computed style, plus the centring inset parsed out of page 1's content stream (B62) |
-| §5 — the recognizer, both grammars | `test/mobile.js`, `test/desktop.js` |
-| §7 — menu contents and order | `test/mobile.js` [8]; the board-action row's two tabs (All boards · Export) by `test/mobile.js` [21] and `test/desktop.js` [D21], the anchor long-press menu still by `test/mobile.js` [16] (B83) |
+| §2 — every token, every ratio | TheBoards' `test/tokens.js` (`TheBoards' PRD §9.6`): every table here recomputed from the shipped hexes, each range at its worst extreme, plus the sync points, the accent placement rule, self-hosting and TheBoards' DECISIONS.md B53's pair |
+| §2.2.2 — four ladders, one axis | TheBoards' `test/tokens.js` [1b] parses the palette **per scope** (`:root`, `#board[data-cat="idea"]`, `#board[data-cat="unsorted"]`, `#board[data-cat="learning"]`), asserts each rung's luminance against the shared column, asserts the two spellings of the darkest stop agree (`--water-bot` / `--water-bot-a`), and asserts `--chrome`, the ink poles and the accents are *not* rebound. §2.3/§2.5/§2.7's tables are then run against all four ladders with one expected number each |
+| §3 — band and lot geometry | TheBoards' `test/mobile.js` [9c]/[11b]/[11c] and TheBoards' `test/desktop.js` [D8] — moved with TheBoards' DECISIONS.md B47/B54 when the band shipped, recomputing rule-y from the formula (88 floor / 107 at three lines); TheBoards' `test/mobile.js` [21] and TheBoards' `test/desktop.js` [D21] pin the board-action row above the lot, prove its live tabs clear the touch/pointer floor (TheBoards' DECISIONS.md B95's re-grammar; TheBoards' DECISIONS.md B100's desktop retirement means the row's two visible tabs), export a PDF, and confirm the `#title-menu` handle is gone (TheBoards' DECISIONS.md B83); §3.4's calendar is pinned by TheBoards' `test/tokens.js`'s issue-#145 block (window computed at render, one mirror writer, link coercion, squeeze as render-time state) |
+| §3/§7 — `EXPORT_GEO` agreement | TheBoards' `test/mobile.js` [11c] pins export geometry to the rendered board — the intended tripwire |
+| §4 — wrap, similarity render, centred text | TheBoards' `test/mobile.js` (TheBoards' DECISIONS.md B39 scenarios; [12c] pins TheBoards' DECISIONS.md B64's fold/rotate similarity — shape held, size uniform, storage untouched, round trip exact; [18b] computes the alignment, editing and at rest) and TheBoards' `test/desktop.js` [D13] (the silent cross-frame grab folds k) and [D17b] — the computed style, plus the centring inset parsed out of page 1's content stream (TheBoards' DECISIONS.md B62) |
+| §5 — the recognizer, both grammars | TheBoards' `test/mobile.js`, TheBoards' `test/desktop.js` |
+| §7 — menu contents and order | TheBoards' `test/mobile.js` [8]; the board-action row's two tabs (All boards · Export) by TheBoards' `test/mobile.js` [21] and TheBoards' `test/desktop.js` [D21], the anchor long-press menu still by TheBoards' `test/mobile.js` [16] (TheBoards' DECISIONS.md B83) |
 | §8 motion, §12 accessibility beyond floors | **nothing** |
-| §13.2 — the band under the new face | measured from `hmtx` here; the live gate is `test/mobile.js`'s geometry, now running against the shipped face |
-| §16 — that shipped CSS reaches an installed PWA | `test/sw-update.js` (B36) — its marker moved with the band: `--card-h` died with B47, so the regex now reads `--band-top: 14px` literally out of `styles.css`, and `test/tokens.js` asserts the marker matches the shipped stylesheet |
+| §13.2 — the band under the new face | measured from `hmtx` here; the live gate is TheBoards' `test/mobile.js`'s geometry, now running against the shipped face |
+| §16 — that shipped CSS reaches an installed PWA | TheBoards' `test/sw-update.js` (TheBoards' DECISIONS.md B36) — its marker moved with the band: `--card-h` died with TheBoards' DECISIONS.md B47, so the regex now reads `--band-top: 14px` literally out of TheBoards' `styles.css`, and TheBoards' `test/tokens.js` asserts the marker matches the shipped stylesheet |
 
 ---
 
@@ -1782,11 +1807,11 @@ why §1–§12 keep their v1 meanings. For completeness:
 | `UIUX §10` — the board list, truncation | §10 |
 | `UIUX §11` — scale to fit | §11 |
 | `UIUX §12` — accessibility | §12 |
-| `styles.css §1` — "identity from structure, never costume" | §1 |
+| TheBoards' `styles.css §1` — "identity from structure, never costume" | §1 |
 
-**The prefix mandate.** Every new citation names its document — `PRD §x`,
+**The prefix mandate.** Every new citation names its document — `TheBoards' PRD §x`,
 `UIUX §x`, or a `B`-number — never a bare `§x`. The codebase already carries
-bare cites that mean different documents in the same file (`styles.css` mixes
+bare cites that mean different documents in the same file (TheBoards' `styles.css` mixes
 `§6.1`, this document's anchors under PRD numbering, with `§6`, this document's
 touch floor); existing cites keep their meaning, and new ones do not add to the
 ambiguity.

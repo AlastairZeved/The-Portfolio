@@ -75,14 +75,13 @@ At 2560×1440: `renderScale 1.44`, `k 0.9954`, `paintScale 1.4334`, and the boar
 paints 2260×1433 into a 2260×1440 stage. One uniform `transform: scale()`, anchored
 top-left. The board never pans and never zooms.
 
-### Two rulings worth knowing before editing
+### Where the rulings live
 
-- **No monospace, anywhere.** Five notes on the AI-inference board are ASCII
-  column art. They render in Montserrat Alternates with ragged columns, and that
-  is intended — the wireframes are exact and show them that way. A monospace
-  face on those five is a regression, not a fix.
-- **Fonts are self-hosted** (`assets/fonts/`, three weights of Montserrat
-  Alternates). No CDN: offline-first is product law.
+Before editing, read `AGENTS.md` and grep `docs/DECISIONS.md` — the workflow
+law and the design rulings of record live there, not in this README. The two
+rulings this section used to carry (no monospace, anywhere; fonts are
+self-hosted) are argued in `docs/PRD.md`'s out-of-scope table and await owner
+ratification as `B<n>` record entries (issue #49).
 
 ## The contact form
 

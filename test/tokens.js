@@ -51,8 +51,8 @@ check('note/ink-dark 11.84', contrast(token('note'), token('ink-dark')), 11.84, 
 // §2.4/§2.5 card-state bindings present as rgb channels
 const blue = token('glow-blue').split(/\s+/).map(Number);
 const green = token('glow-green').split(/\s+/).map(Number);
-if (blue.join(',') !== '105,142,191') { failures++; console.log('FAIL --glow-blue is not #698ebf channels'); }
-else console.log('PASS --glow-blue = #698ebf (105 142 191)');
+if (blue.join(',') !== '109,156,176') { failures++; console.log('FAIL --glow-blue is not #6d9cb0 channels'); }
+else console.log('PASS --glow-blue = #6d9cb0 (109 156 176)');
 if (green.join(',') !== '185,210,178') { failures++; console.log('FAIL --glow-green is not Idea #b9d2b2 channels'); }
 else console.log('PASS --glow-green = Idea --note #b9d2b2 (185 210 178)');
 

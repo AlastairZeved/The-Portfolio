@@ -94,16 +94,32 @@ Verified contrast, each at the worst extreme of its range:
 ### §2.4 Accents (blue family)
 
 The hover glow is drawn with an **existing** blue token — no new token, no
-new colour (owner ruling, `DECISIONS.md` B14). The binding transcribed in v1:
-**hover glow = `--frame` `#698ebf`** (the card's own established blue line
-blooming). A second blue (`--accent-page` `#6d9cb0`) ships for the rail's
-fills — the **New board** button and the enabled pager pair (B24) — and is
-noted in the governing issue as the hover alternative.
+new colour (owner ruling, `DECISIONS.md` B14). The binding is **hover glow =
+`--accent-page` `#6d9cb0`** — the water's hue and the brighter of the two
+existing blues (0.3016 against `--frame`'s 0.2611; 6.72:1 against 5.95:1 on
+`--chrome`) — settled by the owner's issue #67 (`DECISIONS.md` B25). The same
+blue is the rail's primary fill — the **New board** button and the enabled
+pager pair (B24) — and the binding the governing issue names as the hover
+alternative. The v1 member, `--frame` `#698ebf`, stands below as superseded
+history.
 
 | Token | Value | Role |
 |---|---|---|
-| `--frame` (hover glow) | `#698ebf` | the card's border and rule colour, blooming on hover |
-| `--accent-page` | `#6d9cb0` | the rail's primary fill — the New board button and the enabled pager buttons (B24) |
+| `--accent-page` (hover glow) | `#6d9cb0` | the hover glow's blue, blooming on hover — the brighter existing blue on `--chrome` (B25) |
+| `--accent-page` (rail fill) | `#6d9cb0` | the rail's primary fill — the New board button and the enabled pager buttons (B24) |
+| `--frame` (superseded member) | `#698ebf` | the v1 hover-glow blue, superseded by #67 (B25); still the page's linework blue where it is drawn |
+
+The bloom's rendering values (`index.html`):
+
+```css
+--glow-blue: 109 156 176;                        /* = --accent-page #6d9cb0 */
+.door-card:hover { box-shadow: 0 0 32px 4px rgb(var(--glow-blue) / 0.9); }
+```
+
+Measured on the shipped page over `--chrome` (0.0023): 25.8× the ground at
+4px from the card's edge, 18.0× at 8px, 11.4× at 12px, 4.3× at 20px — a ≥3×
+band 23px wide, against the v1 state's 7px. The bloom is the elevation; **no
+second shadow layer on hover** (§2.6).
 
 ### §2.5 The click-state green
 
@@ -116,7 +132,7 @@ UIUX.md §2.2.2`). Pending one-word confirmation on #51.
 ### §2.6 Elevation
 
 ```css
---elevation: 0 2px 8px rgb(0 0 0 / 0.45);   /* hover glow + pressed, transient only */
+--elevation: 0 2px 8px rgb(0 0 0 / 0.45);   /* pressed, transient only — hover's elevation is the bloom, §2.4 */
 ```
 
 **Resting door-cards take no shadow** (§1). The rail is embedded in the page
@@ -231,7 +247,7 @@ legible floor wins (a card smaller than legible is never produced).
 | State | Render | Geometry partner (never colour alone) |
 |---|---|---|
 | **rest** | note surface, border in the note's own ink (`var(--ink)`), no glow, no underline | — the ink border itself is the resting edge |
-| **hover** | blue glow blooms: `--frame` `#698ebf` at `--elevation` (B14, binding **pending owner confirmation**) | the glow *is* elevation — a temporary lifting, permitted by §1 |
+| **hover** | blue bloom: `--accent-page` `#6d9cb0` at `0 0 32px 4px` / `0.9` — no second shadow layer (B14 hover member, settled by #67 → B25) | the bloom *is* the elevation — a temporary lifting, permitted by §1 |
 | **active (pressed)** | glow shifts to the Idea green `#b9d2b2` (B14, binding **pending owner confirmation**) | **1px inset** — the card presses into the page |
 | **focus-visible** | a focus ring in the surface's ink (never a tint) | the ring is the geometry; keyboard users are never left to colour alone |
 

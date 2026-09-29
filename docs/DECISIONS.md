@@ -153,6 +153,8 @@ tokens, not inventions; but the owner has neither confirmed nor overruled
 them, so they are recorded as asserted-and-pending and carry no owner source
 of their own.
 
+**Hover member superseded by B25** (#67, 2026-09-29): the hover glow is `--accent-page` `#6d9cb0`, not `--frame`; the click-state green below remains pending.
+
 **Source:** owner's answer to the grill, 2026-09-29, issue #51 — "Hover -
 blue glow appears (from the existing blue design tokens already established,
 not a new one). Click = pressed 1px inset + glow shifts to a light 'go' green
@@ -369,3 +371,8 @@ B20 stays reserved for the repair of the duplicated B18 above. Transcribed
 against `main` at `c7b47d2`. No design value changes — these two entries name
 no hex, px, ms or state; both are record-law transcriptions of rulings that
 were already being followed by the shipped page.
+
+### B25. The door-card hover glow: `--accent-page`, and a bloom that registers (#67)
+The hover glow's blue is **`--accent-page` `#6d9cb0`** — an existing palette blue (`TheBoards' UIUX.md §2.6`, the B52 accent pass: the primary, the rail pager, the drop target; 0.3016 relative luminance, 6.72:1 on `--chrome`) — superseding the v1 member `--frame` `#698ebf` (0.2611, 5.95:1), which the owner never confirmed. No new colour, no new token: both are existing tokens, per B14. Its geometry is a single bloom — **`0 0 32px 4px rgb(var(--glow-blue) / 0.9)`** — with no second shadow layer: the bloom *is* the elevation on hover (`UIUX §1`, §4.1), and the `--elevation` shadow that used to paint over the bloom's brightest band is removed from the hover state (`--elevation` remains the pressed state's). The click-state green (`--glow-green` `#b9d2b2`, `UIUX §2.5`) is **unchanged and still pending**; this ruling does not move it.
+
+**Source:** owner's issue [#67](https://github.com/AlastairZeved/The-Portfolio/issues/67), 2026-09-29 — "Hovering over a button barely emits a glow. Not enough to warrant even calling it a hover state. Either use a different blue from the palette or increase the intensity and size of the glow so it's actually visible on the dark background. It's useless as it is right now." Both doors his sentence opens are taken: the different palette blue is `--accent-page`, the intensity and size are the bloom above (a ≥3×-ground band of 23px, against 7px shipped).

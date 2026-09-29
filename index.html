@@ -115,11 +115,15 @@ body {
 /* ---- The title compartment (UIUX §3.2, B17; TheBoards #anchor-title) ---- */
 #anchor-title {
   position: absolute;
-  left: var(--card-l); width: var(--card-w);
+  left: 50%; transform: translateX(-50%);
   top: 0; min-height: calc(var(--rule-y) + 22px);
+  /* issue #59: hug the title text — the borders close in instead of
+     spanning the full card width, staying centred and comfortably padded */
+  width: max-content;
+  max-width: calc(100% - 2 * var(--gutter));
   display: flex;
   flex-direction: column; justify-content: center;
-  padding: calc(var(--band-top) + 6px) 12px 12px;
+  padding: calc(var(--band-top) + 6px) 18px 12px;
   border: 2px solid var(--frame);
   border-top: 0;
   background: var(--card);
@@ -127,7 +131,8 @@ body {
   z-index: 2;
 }
 #anchor-title .title-eyebrow {
-  font-size: 10px; font-weight: 400; line-height: 1.2;
+  /* issue #59: single font size in the card — both lines at 15px */
+  font-size: 15px; font-weight: 400; line-height: 1.2;
   color: var(--ink);
 }
 #anchor-title .title-pinned {

@@ -130,7 +130,8 @@ six door-cards in the free board space linking out to the owner's sites, and a
 Formspree contact form in the Parking Lot.
 
 - **Title card:** "The Portfolio of" / "Robert Alastair Zeved Gregory" — two
-  lines (B17, superseding B5), the same title card as TheBoards, not a link.
+  lines (B17, superseding B5), one font size, borders that hug the text
+  (B19), the same title card as TheBoards, not a link.
 - **Six door-cards** (`DECISIONS.md` B3), each a real link opening in a new
   tab: Community, Professional, Writing, Software & AI, Plants & Rocks,
   Music.
@@ -230,8 +231,8 @@ submission as spam.)
 ## §4 The regions
 
 1. **Title** — the title card: "The Portfolio of" / "Robert Alastair Zeved
-   Gregory", two lines (B17), same title card as TheBoards, never a link (B5
-   superseded).
+   Gregory", two lines (B17), one font size, borders hugging the text
+   (B19), same title card as TheBoards, never a link (B5 superseded).
 2. **Components** — a TheBoards region, present in the scene (§2.6 —
    contents not yet ruled; open question).
 3. **Requirements** — a TheBoards region, present in the scene (§2.6 —

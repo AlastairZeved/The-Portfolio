@@ -199,6 +199,18 @@ remain empty until separately scoped.
 Zeved Gregory is a board without a home ... the landing page board belongs in
 the 'To Do' boards section of the rail. Add it."
 
+### B19. Title card: single font size, borders hug the text
+The title card's two lines render at **one font size** (15px), and the
+card's left/right borders hug the title text with comfortable padding
+instead of spanning the full card width. **Supersedes the sizes quoted in
+B17.**
+
+**Source:** owner, 2026-09-29, issue #59 — "Reduce the width of the title
+card ... so that the borders hug the title text, with a bit of padding
+between them." and "Increase the font size of 'The Portfolio of' so that
+it's the same size as Robert Alastair Zeved Gregory. There should not be 2
+different font sizes in one card."
+
 ---
 
 ## The build (issue #53)

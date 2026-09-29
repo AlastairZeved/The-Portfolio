@@ -144,16 +144,34 @@ service worker.)
 Hover: a **blue glow** appears, drawn from the existing blue tokens — never a
 new colour or token. Click (pressed): the card presses **1px inset** and the
 glow shifts to a light **"go" green** pulled from the Idea boards' colour
-family — never a new colour or token. Member bindings **confirmed by the
-owner**: hover glow = `--frame` `#698ebf`; click green = Idea `--note`
-`#b9d2b2` (`UIUX §2.4`/`§2.5`).
+family — never a new colour or token.
+
+The two **member bindings are pending owner confirmation** — the hover glow
+transcribed as `--frame` `#698ebf` and the click green as the Idea ladder's
+`--note` rung `#b9d2b2` (`UIUX §2.4`/`§2.5`). Both are existing palette
+tokens, not inventions; but the owner has neither confirmed nor overruled
+them, so they are recorded as asserted-and-pending and carry no owner source
+of their own.
 
 **Source:** owner's answer to the grill, 2026-09-29, issue #51 — "Hover -
 blue glow appears (from the existing blue design tokens already established,
 not a new one). Click = pressed 1px inset + glow shifts to a light 'go' green
 on click (pull from the idea boards color family, don't invent a new color or
-design token)." — bindings confirmed on issue #51, 2026-09-29: "Confirm both:
-hover = --frame #698ebf, click = Idea --note #b9d2b2."
+design token)." — the members stand **pending**: the owner's 2026-09-29
+statement ([issue #51, comment
+5897377233](https://github.com/AlastairZeved/The-Portfolio/issues/51#issuecomment-5897377233)),
+answering a two-question choice, confirmed "both rulings" — the **monospace
+ban and the self-hosted fonts** (B22, B23) — and did **not** confirm the two
+card-state colours; on those he asked instead, "Are those colors made up or
+are they from the palette as instructed?"
+
+**Record repair, 2026-09-29 (same comment).** This entry previously said the
+bindings were "confirmed by the owner" and quoted a confirmation — "Confirm
+both: hover = --frame #698ebf, click = Idea --note #b9d2b2" — that appears in
+no owner statement anywhere in this thread or the record. The fabricated
+quote has been **deleted**; the two members were downgraded to pending and
+`UIUX §4.1` was brought into line with `UIUX §2.4`/`§2.5`. No other part of
+this entry changed, and no design value changed.
 
 ### B15. The All Boards rail: empty categories, not scoped
 The rail shows the four board categories (To Do, Notes, Learning, Ideas) with
@@ -273,3 +291,45 @@ names.)
 (Numbered B21, not B19: the title-card ruling merged as B19 via PR #66 while
 this PR was in flight, and the Parking Lot ruling already holds a duplicated
 B18. B20 stays reserved for the record-repair renumber of that duplicate.)
+
+---
+
+### B22. No monospace, anywhere
+
+The page ships **no monospace face** — not on the notes, not on the form, not
+on a label. There is one typeface, **Montserrat Alternates** (`UIUX §2.9`),
+and every rendered string wears it at every size. The ASCII column-art notes on
+the AI-inference board render **ragged** in the proportional face; the ragged
+column *is* the design, and setting those notes in a monospace face is a
+regression, not a fix.
+
+**Source:** owner, 2026-09-29, governing-records thread (issue #51) — "C:
+Confirm both rulings. Self host the font from TheBoards, no monospace. I don't
+even know why we're talking about fucking monospace fonts when we literally
+have a font to use and we're self hosting it by handrolling it into the repo.
+No dependencies." Recorded at [issue #51, comment
+5897377233](https://github.com/AlastairZeved/The-Portfolio/issues/51#issuecomment-5897377233).
+(A "no monospace anywhere" ruling of 2026-09-27 had stood **pending** owner
+confirmation; this statement is that confirmation, so it is law now.)
+
+### B23. Fonts are self-hosted from TheBoards — no CDN, no dependency
+
+The typeface is **self-hosted from TheBoards** — `assets/fonts/` there, three
+weights of **Montserrat Alternates** (400, 600, 800) — and **handrolled into
+this repo**. **No CDN, no external font request, no dependency of any kind.**
+The rendering values (three weights, Latin-subset woff2, `font-display: swap`)
+are `UIUX §2.9`'s; the single-file law (`PRD §3.3`, B12) lets the faces be
+embedded as data URIs rather than shipping a second file, which is the form
+already shipped in `index.html`.
+
+**Source:** owner, 2026-09-29, governing-records thread (issue #51) — "Self
+host the font from TheBoards, no monospace. … we literally have a font to use
+and we're self hosting it by handrolling it into the repo. No dependencies."
+Recorded at [issue #51, comment
+5897377233](https://github.com/AlastairZeved/The-Portfolio/issues/51#issuecomment-5897377233).
+
+*Numbered B22/B23, not B20/B21:* B21 is the note-card ruling (issue #58), and
+B20 stays reserved for the repair of the duplicated B18 above. Transcribed
+against `main` at `c7b47d2`. No design value changes — these two entries name
+no hex, px, ms or state; both are record-law transcriptions of rulings that
+were already being followed by the shipped page.

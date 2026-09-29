@@ -252,3 +252,24 @@ vertical space needed, make Parking Lot pane taller until Name and Email fit
 comfortably stacked" — with the critical constraints "DO NOT CHANGE THE SIZE
 OF THE 'MESSAGE' TEXT BOX" and "DO NOT ATTEMPT TO FILL THE RIGHT SIDE OF THE
 PARKING LOT PANE - let free space live free."
+
+### B21. Note-card resize constraints (issue #58)
+Door-cards remain draggable and resizable for entertainment only (B7), bounded
+so the gesture never produces an unreadable or oversized card. A card resizes
+only between a legible floor — `132×80` (room for ~3 lines of the 17px title)
+— and a ceiling of **one-fifth of the viewport** per axis (`1/5` width, `1/5`
+height). Floor and ceiling are independent per axis; where `1/5` of the
+viewport on the narrow axis would fall below the legible floor, the floor
+wins (a card smaller than legible is never produced). `UIUX §4`; pinned by
+`test/movable_resizable.js`.
+
+**Source:** owner's requirement in issue
+[The-Portfolio #58](https://github.com/AlastairZeved/The-Portfolio/issues/58) —
+"Minimum size: legible (not so small it's unreadable). Maximum size: no more
+than 1/5 of viewport size." (The 132px floor was already the shipped minimum
+width; this ruling binds the height floor and the 1/5 ceiling the issue
+names.)
+
+(Numbered B21, not B19: the title-card ruling merged as B19 via PR #66 while
+this PR was in flight, and the Parking Lot ruling already holds a duplicated
+B18. B20 stays reserved for the record-repair renumber of that duplicate.)

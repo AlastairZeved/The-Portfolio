@@ -180,12 +180,20 @@ body {
      border), so +2px re-covers the rule and +22px is the ruled overhang below
      the band's bottom edge. */
   height: calc(100% + 24px);
-  padding: 8px 12px 6px;
+  /* Vertical centring + band furniture from the reference app's title
+     compartment (TheBoards styles.css:476-498, read at da20843): the content
+     centres in a column flex, and the box opens onto the band above — no top
+     border, bottom corners only (correcting the #28 closure, which read a
+     closed box off a screenshot). */
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 20px 12px 12px;         /* = calc(--band-top 14px + 6px) 12px 12px (the reference's calc, --band-top hardcoded here) */
   border: 2px solid var(--frame);
-  border-radius: 3px;              /* a closed box rounds on all four corners */
+  border-top: 0;                   /* the card does not separate from the band above */
+  border-radius: 0 0 3px 3px;      /* only the corners that exist */
   background: var(--card);
   color: var(--ink-light);         /* card takes light ink — 16.62:1 (§2.3) */
-  font-size: 15px; font-weight: 800; line-height: 1.3;
+  font-size: 15px; font-weight: 600; line-height: 1.3;  /* weight 600 per reference (was 800) */
+  text-align: center;              /* per reference (was start via default) */
   z-index: 3;                      /* occludes the rule */
   white-space: pre-wrap;
 }
@@ -298,6 +306,7 @@ body {
    ring + halo on hover. The pointer affordance is the ring (shape), not hue. */
 .note--link {
   cursor: pointer;
+  text-decoration: none;           /* the browser default underline goes — same treatment .rail-card carries (engine.css:102) */
   box-shadow: 0 0 0 1px var(--frame);   /* the ring — geometry, not hue */
 }
 /* The clicked state extends Owner ruling 2: the glow's hue turns lime green

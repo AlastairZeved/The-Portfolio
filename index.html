@@ -306,6 +306,27 @@ html.wide #pane {
   border: 1px dashed var(--hairline);
   border-radius: 3px;
 }
+/* A board card living in a rail category (issue #60): the To-Do family's
+   established card treatment on the --chrome rail ground (UIUX §2). */
+.rail-board {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  min-height: 40px;
+  border: 1px solid var(--frame);
+  border-radius: 3px;
+  background: var(--card);
+}
+.rail-board .rb-title {
+  font-size: 11px; font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.rail-board .rb-meta {
+  font-size: 9px; font-weight: 400;
+  color: var(--ink); opacity: 0.7;
+}
 html.wide #board { left: 300px; right: 0; }
 
 /* ---- Narrow: the sheet is the whole stage ---- */
@@ -317,10 +338,15 @@ html.wide #board { left: 300px; right: 0; }
 </head>
 <body>
 
-<!-- All Boards rail: four empty board categories (B15) -->
+<!-- All Boards rail: To Do holds the Portfolio board (issue #60); the rest stay empty (B15) -->
 <aside id="pane" aria-label="All Boards">
   <div id="pane-cards">
-    <section class="rail-cat"><h3>To Do</h3><div class="rail-row" aria-label="empty"></div></section>
+    <section class="rail-cat"><h3>To Do</h3>
+      <div class="rail-board" aria-label="Portfolio board">
+        <b class="rb-title">The Portfolio of Robert Alastair Zeved Gregory</b>
+        <span class="rb-meta">Last Updated: 09/29/26</span>
+      </div>
+    </section>
     <section class="rail-cat"><h3>Notes</h3><div class="rail-row" aria-label="empty"></div></section>
     <section class="rail-cat"><h3>Learning</h3><div class="rail-row" aria-label="empty"></div></section>
     <section class="rail-cat"><h3>Ideas</h3><div class="rail-row" aria-label="empty"></div></section>

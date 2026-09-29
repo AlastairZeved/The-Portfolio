@@ -239,7 +239,8 @@ submission as spam.)
 4. **Parking Lot** — closes the sheet; holds the Formspree contact form
    (B6).
 5. **All Boards rail** — present with the four board categories (To Do,
-   Notes, Learning, Ideas), empty; contents not scoped (B15).
+   Notes, Learning, Ideas); To Do holds the Portfolio board (B18), the rest
+   stay empty (B15).
 
 The six door-cards sit **in the free board space** — the empty canvas
 between the regions — never inside Components, Requirements or the Parking

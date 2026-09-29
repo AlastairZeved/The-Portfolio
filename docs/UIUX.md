@@ -231,8 +231,8 @@ legible floor wins (a card smaller than legible is never produced).
 | State | Render | Geometry partner (never colour alone) |
 |---|---|---|
 | **rest** | note surface, border in the note's own ink (`var(--ink)`), no glow, no underline | — the ink border itself is the resting edge |
-| **hover** | blue glow blooms: `--frame` `#698ebf` at `--elevation` (B14, binding **confirmed**) | the glow *is* elevation — a temporary lifting, permitted by §1 |
-| **active (pressed)** | glow shifts to the Idea green `#b9d2b2` (B14, binding **confirmed**) | **1px inset** — the card presses into the page |
+| **hover** | blue glow blooms: `--frame` `#698ebf` at `--elevation` (B14, binding **pending owner confirmation**) | the glow *is* elevation — a temporary lifting, permitted by §1 |
+| **active (pressed)** | glow shifts to the Idea green `#b9d2b2` (B14, binding **pending owner confirmation**) | **1px inset** — the card presses into the page |
 | **focus-visible** | a focus ring in the surface's ink (never a tint) | the ring is the geometry; keyboard users are never left to colour alone |
 
 Transitions between states use TheBoards' closed motion set — short, quiet,

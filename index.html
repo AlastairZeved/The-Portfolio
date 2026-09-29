@@ -37,8 +37,8 @@
   --ink-a: 244 245 241;
   --hairline: rgb(var(--ink-a) / 0.4);
   --elevation: 0 2px 8px rgb(0 0 0 / 0.45);
-  /* hover glow: --frame's hue, transparent (B14) */
-  --glow-blue: 105 142 191;
+  /* hover glow: --accent-page's channels, transparent (B14 hover member; #67) */
+  --glow-blue: 109 156 176;
   /* click "go" green: Idea ladder --note #b9d2b2 (B14) */
   --glow-green: 185 210 178;
 
@@ -161,9 +161,9 @@ body {
   /* rest: no shadow, no glow (UIUX §1 — cards are ON the page) */
   box-shadow: none;
 }
-/* hover: the blue glow — --frame's hue blooming (B14) */
+/* hover: the blue bloom — --accent-page's channels, wide enough to register (B14 hover member; #67) */
 .door-card:hover {
-  box-shadow: var(--elevation), 0 0 18px rgb(var(--glow-blue) / 0.55);
+  box-shadow: 0 0 32px 4px rgb(var(--glow-blue) / 0.9);
 }
 /* active: pressed 1px inset; glow shifts to the Idea-family green (B14) */
 .door-card:active {

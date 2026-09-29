@@ -218,6 +218,14 @@ is ink, not `--frame`), 3px radius, `--ink-dark` text, draggable and
 resizable for the visitor's entertainment only (no persistence, no state —
 `B7`).
 
+**Resize constraints** (issue #58, `B21`): a card may be dragged anywhere on
+the sheet, and resized by its corner handle only between a **legible floor**
+and a **one-fifth-of-viewport ceiling** — never below `132×80` (enough room
+for ~3 lines of the 17px title) and never above `1/5` of the viewport width,
+`1/5` of the viewport height. The floor and ceiling are independent per axis;
+on a narrow viewport where `1/5` width falls below the legible floor, the
+legible floor wins (a card smaller than legible is never produced).
+
 ### §4.1 States
 
 | State | Render | Geometry partner (never colour alone) |
@@ -313,6 +321,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | §2's tokens, ratios, crossover | `test/tokens.js` — recomputed from shipped hexes |
 | card states, region layout, rail presence | `test/mobile.js`, `test/desktop.js` |
 | the four empty rail categories | `test/desktop.js` |
+| card drag + resize floor/ceiling, link still opens a new tab | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 
 ---

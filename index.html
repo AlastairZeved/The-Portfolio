@@ -468,11 +468,24 @@ html.wide #board { left: 300px; right: 0; }
     }
   });
 
+  function getConstraints() {
+    // 1/5 of the viewport, but never below the legible minimums.
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    return {
+      minW: 132,
+      minH: 80,  // increased for legibility (fits ~3 lines of text at 17px)
+      maxW: Math.max(132, vw / 5),
+      maxH: Math.max(80, vh / 5)
+    };
+  }
+
   window.addEventListener('pointermove', function (e) {
     if (resizing) {
       var r = resizing;
-      var nw = Math.max(132, r.w + (e.clientX - r.startX));
-      var nh = Math.max(56, r.h + (e.clientY - r.startY));
+      var c = getConstraints();
+      var nw = Math.min(c.maxW, Math.max(c.minW, r.w + (e.clientX - r.startX)));
+      var nh = Math.min(c.maxH, Math.max(c.minH, r.h + (e.clientY - r.startY)));
       r.card.style.width = nw + 'px';
       r.card.style.height = nh + 'px';
     } else if (drag) {

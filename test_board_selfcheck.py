@@ -280,6 +280,14 @@ PAGE_EVAL_JS = r"""
         cardH: el.offsetHeight, bandH: band.offsetHeight,
         bottomBorder: parseFloat(cs.borderBottomWidth),
         widest: lines.length ? Math.max(...lines.map(l => ctx.measureText(l).width)) : 0,
+        // -- issue #31: the reference app's title-compartment declarations,
+        //    as COMPUTED on the rendered card (TheBoards styles.css:476-498).
+        textAlign: cs.textAlign,
+        fontWeight: cs.fontWeight,
+        borderTopWidth: cs.borderTopWidth,
+        borderRadius: cs.borderRadius,
+        padding: cs.padding,
+        display: cs.display, flexDir: cs.flexDirection, justify: cs.justifyContent,
         compRight: comps ? comps.getBoundingClientRect().right : null,
         reqLeft: reqs ? reqs.getBoundingClientRect().left : null,
       };
@@ -296,6 +304,7 @@ PAGE_EVAL_JS = r"""
       return { tag: el.tagName, href: el.getAttribute('href'),
                target: el.getAttribute('target'),
                rel: el.getAttribute('rel'),
+               textDecorationLine: getComputedStyle(el).textDecorationLine,
                classes: el.className };
     })(),
     deletedNoteTexts: [...document.querySelectorAll('#notes .note')]
@@ -526,6 +535,14 @@ def assert_rendered_behaviour(rendered):
                 f"{page_name}: clicking 'Community Life' did not persist the "
                 ".is-clicked state — the clicked glow would vanish on pointer-up "
                 "and :active alone does not satisfy issue #24")
+            # (g) issue #31: the note link carries the repo's own anchor
+            #     treatment — the browser default underline is removed, exactly
+            #     as .rail-card carries text-decoration: none.
+            assert ln_["textDecorationLine"] == "none", (
+                f"{page_name}: 'Community Life' computed text-decoration-line "
+                f"{ln_['textDecorationLine']!r} != 'none' (issue #31 — the "
+                f"browser default underline leaks through; the repo's own "
+                f"anchor treatment removes it)")
             # (e) the deleted note is gone from the RENDERED board.
             assert not d["deletedNoteTexts"], (
                 f"{page_name}: 'The Earp Street Park project' still renders on the "
@@ -568,6 +585,36 @@ def assert_rendered_behaviour(rendered):
             ((tc["compRight"] + tc["reqLeft"]) / 2) - (tc["x"] + tc["w"] / 2)) <= 1.2, (
             f"{page_name}: title card not centred in the centre channel "
             f"(issue #16/#28)")
+        # -- issue #31: the title compartment matches the reference app —
+        #    computed text-align, weight, band furniture, and flex centring
+        #    (TheBoards styles.css:476-498, read at da20843 on a 2560x1440
+        #    Chromium: center / 600 / 20px 12px 12px / 0px top / 0 0 3px 3px /
+        #    flex column centre).
+        assert tc["textAlign"] == "center", (
+            f"{page_name}: title text computed text-align "
+            f"{tc['textAlign']!r} != 'center' (issue #31, the reference "
+            f"centres the title text)")
+        assert tc["fontWeight"] == "600", (
+            f"{page_name}: title computed font-weight "
+            f"{tc['fontWeight']!r} != '600' (issue #31, the reference sets 600)")
+        assert tc["borderTopWidth"] == "0px", (
+            f"{page_name}: title card computed border-top-width "
+            f"{tc['borderTopWidth']!r} != '0px' (issue #31, the reference "
+            f"opens the card onto the band above)")
+        assert tc["borderRadius"] == "0px 0px 3px 3px", (
+            f"{page_name}: title card computed border-radius "
+            f"{tc['borderRadius']!r} != '0px 0px 3px 3px' (issue #31, the "
+            f"reference rounds only the corners that exist)")
+        assert tc["padding"] == "20px 12px 12px", (
+            f"{page_name}: title card computed padding {tc['padding']!r} != "
+            f"'20px 12px 12px' (issue #31, the reference's "
+            f"calc(--band-top 14px + 6px) 12px 12px, hardcoded)")
+        assert (tc["display"], tc["flexDir"], tc["justify"]) == (
+            "flex", "column", "center"), (
+            f"{page_name}: title card content not flex-centred "
+            f"(display={tc['display']!r}, flexDir={tc['flexDir']!r}, "
+            f"justify={tc['justify']!r}) — issue #31, the reference centres "
+            f"the content in a column flex")
         print(f"behaviour {page_name.ljust(38)} lot={d['lotHeight']:4} "
               f"k={d['dataK']:.4f} lines={len(d['drawn']):2} "
               f"mono=0 chrome=0 endpoint-drift={worst:.2f}px")
@@ -631,14 +678,53 @@ def _mutate_open_title_card(src):
     # Issue #28 regression B: the bottom border is removed again — the card
     # stops being a closed box overhanging the rule. The rendered overhang
     # assertion (which requires the bottom border) must go RED, and for THAT
-    # reason.
+    # reason. (Updated for issue #31: the card now opens onto the band above —
+    # border-top: 0, bottom corners only — so the mutated source keeps that
+    # shape and strips the BOTTOM edge instead.)
     anchor = ("  border: 2px solid var(--frame);\n"
-              "  border-radius: 3px;")
-    assert src.count(anchor) == 1, "issue #28 border block drifted — mutate nothing"
+              "  border-top: 0;")
+    assert src.count(anchor) == 1, "issue #31 border block drifted — mutate nothing"
     return src.replace(
         anchor,
         "  border: 2px solid var(--frame); border-bottom: none;\n"
-        "  border-radius: 3px 3px 0 0;")
+        "  border-top: 0;")
+
+
+def _mutate_uncentre_title_text(src):
+    # Issue #31 regression A: the title text reverts to the browser's default
+    # start alignment. The computed text-align assertion must go RED, and for
+    # THAT reason.
+    needle = "  text-align: center;              /* per reference (was start via default) */"
+    assert src.count(needle) == 1, "issue #31 text-align rule drifted — mutate nothing"
+    return src.replace(needle, "  text-align: start;")
+
+
+def _mutate_rebold_title_text(src):
+    # Issue #31 regression B: the title reverts to the pre-reference 800
+    # weight. The computed font-weight assertion must go RED, and for THAT
+    # reason.
+    needle = "font-size: 15px; font-weight: 600; line-height: 1.3;  /* weight 600 per reference (was 800) */"
+    assert src.count(needle) == 1, "issue #31 font-weight rule drifted — mutate nothing"
+    return src.replace(needle, "font-size: 15px; font-weight: 800; line-height: 1.3;")
+
+
+def _mutate_restore_top_border(src):
+    # Issue #31 regression C: the pre-reference closed box comes back — a top
+    # border re-separating the card from the band. The computed
+    # border-top-width assertion must go RED, and for THAT reason.
+    needle = "  border-top: 0;                   /* the card does not separate from the band above */"
+    assert src.count(needle) == 1, "issue #31 border-top rule drifted — mutate nothing"
+    return src.replace(needle, "  border-top: 2px solid var(--frame);")
+
+
+def _mutate_underline_note(src):
+    # Issue #31 regression D: the note link's decoration treatment is
+    # forgotten and the browser default underline leaks back. The computed
+    # text-decoration-line assertion must go RED, and for THAT reason.
+    needle = ("  text-decoration: none;           /* the browser default underline "
+              "goes — same treatment .rail-card carries (engine.css:102) */")
+    assert src.count(needle) == 1, "issue #31 note-decoration rule drifted — mutate nothing"
+    return src.replace(needle, "")
 
 
 def _mutate_drop_clicked_state(src):
@@ -808,6 +894,18 @@ def prove_gates():
          "no longer closes over the rule",
          {"engine.css": _mutate_open_title_card},
          r"overhang the band rule"),
+        ("issue #31 regression A: the title text un-centred (back to start)",
+         {"engine.css": _mutate_uncentre_title_text},
+         r"computed text-align"),
+        ("issue #31 regression B: the title re-bolded to 800",
+         {"engine.css": _mutate_rebold_title_text},
+         r"computed font-weight"),
+        ("issue #31 regression C: the title card's top border restored",
+         {"engine.css": _mutate_restore_top_border},
+         r"computed border-top-width"),
+        ("issue #31 regression D: the note link underlined again",
+         {"engine.css": _mutate_underline_note},
+         r"text-decoration-line"),
     ]
     for label, mutations, pattern in variants:
         # apply each mutation to the CURRENT file source: the override map

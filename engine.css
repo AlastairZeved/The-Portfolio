@@ -171,10 +171,18 @@ body {
 /* The title compartment overhangs the band by 22px and occludes the rule (B38) */
 .band-title {
   position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  min-width: 120px; max-width: 40%;
+  /* B38 card box: the source measures the card's outer box at 455 painted px at
+     paintScale 1.4334 → 455 / 1.4334 ≈ 317 logical px. The card is the designed
+     compartment, NOT a shrink-wrap of its text (source ratio card:text = 2.92). */
+  width: 317px;
+  /* The card is a closed rectangle that overhangs the band by 22 logical px
+     (B38): 100% resolves to the band's PADDING box (band height − its 2px rule
+     border), so +2px re-covers the rule and +22px is the ruled overhang below
+     the band's bottom edge. */
+  height: calc(100% + 24px);
   padding: 8px 12px 6px;
-  border: 2px solid var(--frame); border-bottom: none;
-  border-radius: 3px 3px 0 0;
+  border: 2px solid var(--frame);
+  border-radius: 3px;              /* a closed box rounds on all four corners */
   background: var(--card);
   color: var(--ink-light);         /* card takes light ink — 16.62:1 (§2.3) */
   font-size: 15px; font-weight: 800; line-height: 1.3;

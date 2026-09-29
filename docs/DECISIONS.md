@@ -205,7 +205,7 @@ title. ... this is a change from the previous 'The Life of...' and we are
 replacing the term 'life' with 'Portfolio'." — and the owner's confirmation,
 same issue: "Yes, B5 superseded — new title is law."
 
-### B18. The All Boards rail: To Do holds the Portfolio board
+### B18. The All Boards rail: To Do holds the Portfolio board (SUPERSEDED by B24)
 The To Do category of the All Boards rail holds the portfolio's landing-page
 board — **"The Portfolio of Robert Alastair Zeved Gregory"** — as a filled
 board card in the To-Do blue family (`--card` ground, `--frame` edge, `--ink`
@@ -229,13 +229,49 @@ between them." and "Increase the font size of 'The Portfolio of' so that
 it's the same size as Robert Alastair Zeved Gregory. There should not be 2
 different font sizes in one card."
 
+### B24. The All Boards rail: TheBoards' To Do tray, matched to the wireframe
+The rail is TheBoards' `.board-cat` construction, ported verbatim and restyled
+to the wireframe (`image_f14f78.png`, byte-identical to `image_b1abd0.png`) at
+the To-Do ladder's own tokens. It renders a **single, paginated To Do tray** —
+not four empty category trays — with:
+
+- a `TO DO` head (21px / 600, uppercase, `--ink`) and a **New board** button
+  (`--accent-page` `#6d9cb0` fill, `--ink-dark` `#031019` label, 44px);
+- one board card `.pane-card`: 76px,
+  `linear-gradient(180deg, var(--water-top) #34697f, var(--water-mid) #255265)`,
+  hairline edge, 3px radius, titled **"The Portfolio of Robert Alastair Zeved
+  Gregory"**, title clamped to two lines, with a bottom-right "Last Updated:
+  09/29/26" stamp in `--ink`;
+- the `.cat-pager` `< ‹ 1/5 › »`: four 44px buttons; the unavailable (first
+  page) pair dimmed by `opacity: .4` over the tray's `--card` (= wireframe's
+  `#304b61`), the available pair `--accent-page` (`#6d9cb0`) bearing
+  `--ink-dark` chevrons.
+
+No dashed placeholder rows, no invented category trays. **Supersedes B15's
+"four empty categories" rendering and the four-category render of B18
+(issue #60); B15's rail-scope stance otherwise stands.**
+The `--accent-page` token (`#6d9cb0`) ships for the rail's fills (UIUX §2.4).
+
+**Source:** the owner's demand that the All Boards rail match the wireframe
+pixel-for-pixel, grounded in `image_f14f78.png` (byte-identical to
+`image_b1abd0.png`) and relayed by the orchestrator of task card t_cd8b9c6f — "PORT TheBoards' All
+Boards rail VERBATIM ... match image_b1abd0 (the correct render) ... compare
+pixel for pixel. If it differs in ANY way, fix until it matches." Precedent:
+issue #43, the owner's own rail rebuild to the wireframe ("the stylizations
+and formatting were all lost").
+
+(Numbered B24, not B18: the issue-#60 rail ruling merged as B18 via PR #63
+while this PR was in flight. B20 stays reserved for the record-repair
+renumber of the Parking Lot duplicate.)
+
 ---
 
 ## The build (issue #53)
 
 The landing page is built from these rulings in one single-file
-`index.html`. The rail shows four empty categories (B15); Components and
-Requirements render furniture only (PRD §2.6); the six door-cards sit in the
+`index.html`. The rail is the single To Do tray matched to the wireframe (B24,
+superseding B15's four empty categories); Components and Requirements render
+furniture only (PRD §2.6); the six door-cards sit in the
 free board space (B2, B3); the Parking Lot holds the Formspree form, action
 `https://formspree.io/f/xppwbrga` (B6); card states per B14. Two on-brand
 under-construction stubs (`career.html`, `plantsandrocks.html`) are built in

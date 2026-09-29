@@ -174,7 +174,7 @@ evidence of the tool it advertises. Everything else is secondary.
 | Deferred | Why it is not here |
 |---|---|
 | `razgregory.com/career` and `razgregory.com/plantsandrocks` destinations | Owner ruling (issue #51): "they just need to be stubbed for now — we build those only after the landing page is finished." The cards exist and link to stubs |
-| All Boards rail content | Owner ruling (issue #51): the rail shows the four empty board categories — "a future problem, not a right now problem." The rail is not scoped until the landing page is done |
+| All Boards rail content | Owner ruling (issue #51): "a future problem, not a right now problem" — was deferred until the landing page was done. Now scoped (B24): the rail renders the single To Do tray matched to the wireframe |
 
 ### §2.6 Not yet ruled — do not invent
 
@@ -239,9 +239,8 @@ submission as spam.)
    contents not yet ruled; open question).
 4. **Parking Lot** — closes the sheet; holds the Formspree contact form
    (B6).
-5. **All Boards rail** — present with the four board categories (To Do,
-   Notes, Learning, Ideas); To Do holds the Portfolio board (B18), the rest
-   stay empty (B15).
+5. **All Boards rail** — present with the single To Do tray carrying the
+   Portfolio board card, the New board control and the pager (B24).
 
 The six door-cards sit **in the free board space** — the empty canvas
 between the regions — never inside Components, Requirements or the Parking

@@ -96,13 +96,14 @@ Verified contrast, each at the worst extreme of its range:
 The hover glow is drawn with an **existing** blue token — no new token, no
 new colour (owner ruling, `DECISIONS.md` B14). The binding transcribed in v1:
 **hover glow = `--frame` `#698ebf`** (the card's own established blue line
-blooming). A second existing blue (`--accent-page` `#6d9cb0`) is noted in the
-governing issue as the alternative; the owner confirms in one word on #51.
+blooming). A second blue (`--accent-page` `#6d9cb0`) ships for the rail's
+fills — the **New board** button and the enabled pager pair (B24) — and is
+noted in the governing issue as the hover alternative.
 
 | Token | Value | Role |
 |---|---|---|
 | `--frame` (hover glow) | `#698ebf` | the card's border and rule colour, blooming on hover |
-| `--accent-page` (candidate) | `#6d9cb0` | the alternative hover-glow blue, pending owner pick |
+| `--accent-page` | `#6d9cb0` | the rail's primary fill — the New board button and the enabled pager buttons (B24) |
 
 ### §2.5 The click-state green
 
@@ -141,9 +142,8 @@ and takes an inset treatment, not a float shadow.
 
 TheBoards' grammar, carried whole: **near-square**. The door-card radius is
 `symmetric 3px`; the title compartment hangs beneath its rule with bottom-only
-corners (`border-radius: 0 0 3px 3px`); the rail's empty boards take the same
-3px hand. No large radii — within any scale the card can be resized to, a
-large radius would deform.
+corners (`border-radius: 0 0 3px 3px`); the rail's To Do tray takes the tray's
+6px radius (TheBoards §10.5) and its board card the 3px hand.
 
 ### §2.9 Type
 
@@ -193,7 +193,7 @@ exceeds the sheet minus the side gutters.
 | Components | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
 | Requirements | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
 | Parking Lot | water field closing the sheet; holds the contact form (§6) |
-| All Boards rail | `--chrome`-grounded side rail; To Do holds the Portfolio board as a filled `--card` board card edged in `--frame` (B18); Notes, Learning, Ideas remain empty (B15) |
+| All Boards rail | `--chrome`-grounded side rail, the single **To Do tray** — TheBoards' `.board-cat` construction carrying the Portfolio board card, the New board control and the pager `< ‹ 1/5 › »` (B24) |
 
 ### §3.4 The door-cards live in the board space
 
@@ -309,8 +309,9 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 - The title compartment is not a control and must not be announced as one.
 - Form fields carry labels; the Message field is `required` and announced so.
 - Text contrast holds to §2.3's table on every surface it lands on.
-- The rail's four empty categories are present semantics, not ghosts — an
-  empty list is still a list.
+- The rail's single To Do tray announces as one group — `aria-label="To Do,
+  page 1 of 5"` — with the visual head and pager-state spans `aria-hidden` so
+  AT hears each section once, not twice (the B63/B42 pattern from TheBoards).
 
 ---
 
@@ -320,7 +321,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 |---|---|
 | §2's tokens, ratios, crossover | `test/tokens.js` — recomputed from shipped hexes |
 | card states, region layout, rail presence | `test/mobile.js`, `test/desktop.js` |
-| the four empty rail categories | `test/desktop.js` |
+| the single To Do rail tray (B24) | `test/desktop.js` |
 | card drag + resize floor/ceiling, link still opens a new tab | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 

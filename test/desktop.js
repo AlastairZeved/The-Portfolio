@@ -1,5 +1,6 @@
-/* test/desktop.js — desktop grammar: rail visible with four empty categories,
-   card states (hover glow, pressed green, never colour alone). Black-box Playwright.
+/* test/desktop.js — desktop grammar: rail visible with the single To Do tray
+   carrying the Portfolio board (B24), card states (hover glow, pressed green,
+   never colour alone). Black-box Playwright.
    Run: node test/desktop.js   (PORTFOLIO_URL default http://localhost:8000/index.html) */
 
 const { chromium } = require('playwright');
@@ -19,21 +20,18 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   // html.wide applied
   ok('html.wide set on desktop', await page.evaluate(() => document.documentElement.classList.contains('wide')));
 
-  // rail visible with four categories (B15, B18)
+  // rail: the single To Do tray carrying the Portfolio board (B24, supersedes B15)
   ok('rail visible on desktop', await page.locator('#pane').isVisible());
-  const cats = await page.locator('.rail-cat h3').allInnerTexts();
-  ok('four categories in order', JSON.stringify(cats) === JSON.stringify(['To Do', 'Notes', 'Learning', 'Ideas']));
-
-  // To Do holds the Portfolio board (B18); other three categories stay empty (B15)
-  ok('To Do shows the Portfolio board', await page.locator('.rail-cat h3:has-text("To Do") ~ .rail-board .rb-title').first().innerText()
-    .then(t => t === 'The Portfolio of Robert Alastair Zeved Gregory').catch(() => false));
-  const emptyAfter = await page.evaluate(() =>
-    ['Notes', 'Learning', 'Ideas'].map(name => {
-      const h3 = [...document.querySelectorAll('.rail-cat h3')].find(h => h.textContent === name);
-      const sibling = h3.parentElement.querySelector(':scope > .rail-row');
-      return !sibling || sibling.getAttribute('aria-label') === 'empty';
-    }).every(Boolean));
-  ok('Notes/Learning/Ideas remain empty', emptyAfter);
+  const trayLabels = await page.locator('.board-cat .cat-head span').allTextContents();
+  ok('single To Do tray', JSON.stringify(trayLabels) === JSON.stringify(['To Do']));
+  const cardTitle = await page.locator('.pane-card .row-title').first().innerText();
+  ok('Portfolio board card in the To Do tray',
+     cardTitle.includes('The Portfolio of Robert Alastair Zeved Gregory'));
+  const date = await page.locator('.pane-card .row-date').first().innerText();
+  ok('Last Updated stamp on the card', date.includes('Last Updated') && date.includes('09/29/26'));
+  ok('pager shows four arrow buttons', await page.locator('.pager-btn').count() === 4);
+  ok('pager shows 1/5', await page.locator('.cat-pages').innerText() === '1/5');
+  ok('first two arrows disabled on page 1', await page.locator('.pager-btn:disabled').count() === 2);
 
   // card states (B14) on the first door-card
   const first = page.locator('a.door-card').first();

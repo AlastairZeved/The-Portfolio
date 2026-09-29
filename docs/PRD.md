@@ -129,8 +129,8 @@ Components, Requirements, Parking Lot** — plus the **All Boards rail**, with
 six door-cards in the free board space linking out to the owner's sites, and a
 Formspree contact form in the Parking Lot.
 
-- **Title card:** "The life of" / "Robert Alastair Zeved Gregory" — two
-  lines, the same title card as TheBoards, not a link (`DECISIONS.md` B5).
+- **Title card:** "The Portfolio of" / "Robert Alastair Zeved Gregory" — two
+  lines (B17, superseding B5), the same title card as TheBoards, not a link.
 - **Six door-cards** (`DECISIONS.md` B3), each a real link opening in a new
   tab: Community, Professional, Writing, Software & AI, Plants & Rocks,
   Music.
@@ -229,8 +229,9 @@ submission as spam.)
 
 ## §4 The regions
 
-1. **Title** — the title card: "The life of" / "Robert Alastair Zeved
-   Gregory", two lines, same title card as TheBoards, never a link (B5).
+1. **Title** — the title card: "The Portfolio of" / "Robert Alastair Zeved
+   Gregory", two lines (B17), same title card as TheBoards, never a link (B5
+   superseded).
 2. **Components** — a TheBoards region, present in the scene (§2.6 —
    contents not yet ruled; open question).
 3. **Requirements** — a TheBoards region, present in the scene (§2.6 —

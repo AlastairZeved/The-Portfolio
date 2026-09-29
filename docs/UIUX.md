@@ -174,9 +174,9 @@ overhangs the band's rule (`--frame`, full-width `left: 0; right: 0`),
 bottom corners only, centred, **not a link, not a control** (no `role`, no
 `tabindex`, no caret).
 
-Its two lines, in order (owner ruling, `B5`):
+Its two lines, in order (B17, superseding B5):
 
-1. **"The life of"** — the secondary rung the legible stamps wear: the
+1. **"The Portfolio of"** — the secondary rung the legible stamps wear: the
    ground's own pole (`var(--ink)`), 10px, `line-height: 1.2`.
 2. **"Robert Alastair Zeved Gregory"** — the title rung: 15px / **600**.
 
@@ -207,17 +207,19 @@ the Parking Lot.
 
 A door-card is a **real anchor** — `<a target="_blank"
 rel="noopener noreferrer">` — not a scripted button. It renders as a TheBoards
-note: `--note` fill, 2px `--frame` border, 3px radius, `--ink-dark` text,
-draggable and resizable for the visitor's entertainment only (no persistence,
-no state — `B7`).
+note: `--note` fill, 2px border in the **note's own ink** (`var(--ink)`,
+dark on this surface — the shipped `.note-text` border; the reference border
+is ink, not `--frame`), 3px radius, `--ink-dark` text, draggable and
+resizable for the visitor's entertainment only (no persistence, no state —
+`B7`).
 
 ### §4.1 States
 
 | State | Render | Geometry partner (never colour alone) |
 |---|---|---|
-| **rest** | note surface, `--frame` border, no shadow, no glow, no underline | — the border itself is the resting edge |
-| **hover** | blue glow blooms: `--frame` `#698ebf` at `--elevation` (B14, binding pending #51) | the glow *is* elevation — a temporary lifting, permitted by §1 |
-| **active (pressed)** | glow shifts to the Idea green `#b9d2b2` (B14, binding pending #51) | **1px inset** — the card presses into the page |
+| **rest** | note surface, border in the note's own ink (`var(--ink)`), no glow, no underline | — the ink border itself is the resting edge |
+| **hover** | blue glow blooms: `--frame` `#698ebf` at `--elevation` (B14, binding **confirmed**) | the glow *is* elevation — a temporary lifting, permitted by §1 |
+| **active (pressed)** | glow shifts to the Idea green `#b9d2b2` (B14, binding **confirmed**) | **1px inset** — the card presses into the page |
 | **focus-visible** | a focus ring in the surface's ink (never a tint) | the ring is the geometry; keyboard users are never left to colour alone |
 
 Transitions between states use TheBoards' closed motion set — short, quiet,

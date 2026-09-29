@@ -166,19 +166,36 @@ body {
   background:
     radial-gradient(ellipse at 50% 0%, rgb(0 0 0 / 0.35), transparent 70%), /* §2.8 falloff */
     linear-gradient(to bottom, var(--water-top), var(--water-mid), var(--water-bot));
+
+  /* The reference app's zone-law tokens (TheBoards styles.css:319-325, ported
+     for issue #37): the sheet's one margin, the card ↔ zone gap, and the
+     centred card's own box. The site's card width stays ITS OWN ruled value
+     (317 logical px, #28/#31) — the zones derive from the card, never the
+     reverse. 100% here is #band's width (the zones are its children). */
+  --gutter:   2.6667%;             /* 24/900: the reference sheet's one margin (B32) */
+  --card-gap: 8px;                 /* card ↔ zone */
+  --card-w:   317px;               /* the site's own ruled card width (#28/#31) */
+  --card-l:   calc(50% - var(--card-w) / 2);  /* the centred card's left edge */
 }
 .band-zone {
   position: absolute; top: 14px; height: 39px;
-  /* B76-per-section (owner ruling 2026-09-28): each zone narrows so the centred
-     title owns the centre channel — gap = 2*251 - 32 = 470px, clearing the
-     widest title (447px). Floor 96px for the 384-logical band (§3.1). */
-  width: max(96px, calc(50% - 251px));
+  /* Zone law ported from the reference (TheBoards styles.css:462-465, issue
+     #37): each section's edge sits exactly --card-gap off the card's own
+     edge, and runs to the gutter on its outer side. This supersedes the old
+     max(96px, 50% - 251px) width rule (B76-per-section), whose ~76.5-logical
+     standoff floated the section content ~110 painted px away from the card
+     toward the middle. No floor is needed here: the site's card is FIXED at
+     317 logical px (not the reference's min()-floored width), so each zone
+     stays non-negative down to ~352 logical px of band — wider than the
+     narrowest band §3.1 exercises (384 logical), asserted in the selfcheck. */
   font-size: 13px; line-height: 19.5px; font-weight: 400;
   color: var(--ink-light);
   white-space: pre-wrap; overflow: hidden;
 }
-#zone-components { left: 16px; }
-#zone-requirements { right: 16px; text-align: left; }
+#zone-components   { left: var(--gutter);
+                     right: calc(100% - var(--card-l) + var(--card-gap)); }
+#zone-requirements { left: calc(var(--card-l) + var(--card-w) + var(--card-gap));
+                     right: var(--gutter); text-align: left; }
 
 /* The rule runs full width — left:0; right:0 (§3.1, supersedes gutter-inset) */
 .band-rule { position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: var(--frame); }
@@ -197,9 +214,18 @@ body {
   font-size: 13px; font-weight: 600; line-height: 1.3;
   text-align: center;
 }
-/* Anchor each tab to its section's centre: section centre = gutter + width/2 */
-#zone-components-header { left: calc(16px + max(96px, 50% - 251px) / 2); }
-#zone-requirements-header { left: calc(100% - 16px - max(96px, 50% - 251px) / 2); }
+/* Anchor each tab to its own section's centre (the #17 ruling: each column is
+   labelled over its own column — never re-centred on the band, never pushed to
+   the band's outer extremes). The centres follow the ported zone law: the
+   components zone spans gutter → card-l − card-gap; the requirements zone
+   spans card-l + card-w + card-gap → 100% − gutter (issue #37). */
+#zone-components-header {
+  left: calc(var(--gutter) + (var(--card-l) - var(--card-gap) - var(--gutter)) / 2);
+}
+#zone-requirements-header {
+  left: calc(100% - var(--gutter)
+             - (100% - var(--card-l) - var(--card-w) - var(--card-gap) - var(--gutter)) / 2);
+}
 
 /* The title compartment overhangs the band by 22px and occludes the rule (B38) */
 .band-title {

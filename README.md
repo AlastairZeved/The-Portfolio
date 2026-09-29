@@ -3,7 +3,8 @@
 Robert A. Gregory's portfolio — five boards rendered from a single shared
 engine, built to his own working app's written design contract.
 
-**Status: built and verified. Not deployed. No domain chosen.**
+**Status: built, verified and deployed — <https://razgregory.netlify.app>. No
+custom domain chosen.**
 
 ## What this is
 
@@ -112,11 +113,19 @@ Every number below was measured in headless Chromium at 2560×1440, not asserted
 
 ## Deployment
 
-Deployed on Netlify at <https://razgregory.netlify.app>. Every push to `main`
-auto-deploys; the deploy configuration lives in the repo as `netlify.toml` —
-the publish directory is the repo root (`index.html` sits at the top level)
-and there is no build command. No custom domain is chosen; the site serves
-from its `netlify.app` subdomain.
+Deployed on Netlify at <https://razgregory.netlify.app>. Netlify publishes from
+`deploy`; `main` is the working branch and a push to it publishes nothing. The
+site changes only when a `main` -> `deploy` pull request is merged on purpose —
+that merge is the publish. The deploy configuration lives in the repo as
+`netlify.toml`: the publish directory is the repo root (`index.html` sits at the
+top level) and there is no build command. No custom domain is chosen; the site
+serves from its `netlify.app` subdomain.
+
+Both published branches are protected by the repository rule "published
+branches": a change reaches `main` or `deploy` only through a pull request,
+force-pushes are refused, and neither branch can be deleted. No approving review
+is required — on a one-author repo a self-review is a formality, and the rule's
+job is to make the merge deliberate, not to summon a second reader.
 
 ## Build record
 

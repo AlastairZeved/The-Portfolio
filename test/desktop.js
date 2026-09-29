@@ -19,10 +19,21 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   // html.wide applied
   ok('html.wide set on desktop', await page.evaluate(() => document.documentElement.classList.contains('wide')));
 
-  // rail visible with four empty categories (B15)
+  // rail visible with four categories (B15, B18)
   ok('rail visible on desktop', await page.locator('#pane').isVisible());
   const cats = await page.locator('.rail-cat h3').allInnerTexts();
   ok('four categories in order', JSON.stringify(cats) === JSON.stringify(['To Do', 'Notes', 'Learning', 'Ideas']));
+
+  // To Do holds the Portfolio board (B18); other three categories stay empty (B15)
+  ok('To Do shows the Portfolio board', await page.locator('.rail-cat h3:has-text("To Do") ~ .rail-board .rb-title').first().innerText()
+    .then(t => t === 'The Portfolio of Robert Alastair Zeved Gregory').catch(() => false));
+  const emptyAfter = await page.evaluate(() =>
+    ['Notes', 'Learning', 'Ideas'].map(name => {
+      const h3 = [...document.querySelectorAll('.rail-cat h3')].find(h => h.textContent === name);
+      const sibling = h3.parentElement.querySelector(':scope > .rail-row');
+      return !sibling || sibling.getAttribute('aria-label') === 'empty';
+    }).every(Boolean));
+  ok('Notes/Learning/Ideas remain empty', emptyAfter);
 
   // card states (B14) on the first door-card
   const first = page.locator('a.door-card').first();

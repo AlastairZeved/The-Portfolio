@@ -188,7 +188,7 @@ Its two lines, in order (B17, superseding B5):
 | Components | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
 | Requirements | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
 | Parking Lot | water field closing the sheet; holds the contact form (§6) |
-| All Boards rail | `--chrome`-grounded side rail, four empty categories (To Do, Notes, Learning, Ideas), no boards — contents not scoped (B15) |
+| All Boards rail | `--chrome`-grounded side rail; To Do holds the Portfolio board as a filled `--card` board card edged in `--frame` (B18); Notes, Learning, Ideas remain empty (B15) |
 
 ### §3.4 The door-cards live in the board space
 

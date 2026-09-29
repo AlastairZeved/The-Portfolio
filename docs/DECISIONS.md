@@ -187,6 +187,18 @@ title. ... this is a change from the previous 'The Life of...' and we are
 replacing the term 'life' with 'Portfolio'." — and the owner's confirmation,
 same issue: "Yes, B5 superseded — new title is law."
 
+### B18. The All Boards rail: To Do holds the Portfolio board
+The To Do category of the All Boards rail holds the portfolio's landing-page
+board — **"The Portfolio of Robert Alastair Zeved Gregory"** — as a filled
+board card in the To-Do blue family (`--card` ground, `--frame` edge, `--ink`
+text, 3px radius). It sits in the "To Do" category (`issue #60`). This
+supersedes B15 **for the To Do category only**: Notes, Learning, and Ideas
+remain empty until separately scoped.
+
+**Source:** owner's issue #60, 2026-09-29 — "The Portfolio of Robert Alastair
+Zeved Gregory is a board without a home ... the landing page board belongs in
+the 'To Do' boards section of the rail. Add it."
+
 ---
 
 ## The build (issue #53)

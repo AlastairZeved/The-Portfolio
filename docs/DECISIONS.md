@@ -210,3 +210,33 @@ free board space (B2, B3); the Parking Lot holds the Formspree form, action
 `https://formspree.io/f/xppwbrga` (B6); card states per B14. Two on-brand
 under-construction stubs (`career.html`, `plantsandrocks.html`) are built in
 this repo for the deferred razgregory.com destinations (B4).
+
+### B18. Parking Lot form spatial layout (issue #55)
+
+The Parking Lot form's spatial arrangement, per the owner's issue #55:
+
+- **Name** (optional) and **Email** (optional) text boxes are reduced to
+  **half their current width**.
+- **Name** sits directly under the "Parking Lot" header, anchored to the
+  left wall.
+- **Email** sits directly under **Name**, stacked vertically, also anchored
+  left.
+- **Message** moves left, anchored to the right sides of the Name and Email
+  boxes. **Its size is not changed.**
+- The **right side of the Parking Lot pane is deliberately left empty** —
+  free space lives free; it is never filled.
+- If more vertical space is needed for the stacked Name/Email pair, the
+  pane grows taller until they fit comfortably.
+
+Rendering values live in `UIUX §6`.
+
+**Source:** owner's statement in issue #55 (The-Portfolio spatial reasoning
+fix), 2026-09-29 — "Name (optional) and Email (optional) text boxes: reduce
+width to half current width … Name text box: move up to sit directly under
+'Parking Lot' header, anchored to left wall … Email text box: move left and
+sit directly under Name text box (stacked vertically) … Message text box:
+move left, anchored to right sides of Name and Email text boxes … If more
+vertical space needed, make Parking Lot pane taller until Name and Email fit
+comfortably stacked" — with the critical constraints "DO NOT CHANGE THE SIZE
+OF THE 'MESSAGE' TEXT BOX" and "DO NOT ATTEMPT TO FILL THE RIGHT SIDE OF THE
+PARKING LOT PANE - let free space live free."

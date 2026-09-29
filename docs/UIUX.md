@@ -257,6 +257,25 @@ A Formspree form with fields and protections per the owner's ruling (B6):
 | Email | no |
 | Message | **yes** |
 
+### §6.1 Spatial layout (B18)
+
+The form's userspace, per the owner's ruling `B18`, renders left-anchored:
+
+- **Name** and **Email** sit **stacked vertically** at the **left wall**,
+  directly under the "Parking Lot" header, each at **half their original
+  width** (the pre-fix three-equal-fields width halved). As a fluid grid the
+  left track is one half of the Message track (`15%` vs `30%` of the pane),
+  so the pair always reads as half-size beside it.
+- **Message** sits to their immediate right, anchored to the Name/Email right
+  edges, its **size unchanged** from the pre-fix layout (the full Message
+  track, `30%`).
+- The **Send** button and the "✱ required — protected by reCAPTCHA" note sit
+  under the Message field, also left-anchored.
+- The **right side of the pane is deliberately empty** — free space lives
+  free; it is never filled.
+- The pane's `--lot-h` grows to `180px` so the stacked pair fits
+  comfortably (from `122px` when the three fields sat side by side).
+
 - **Captcha:** Formspree's reCAPTCHA — on by default, runs on Formspree's
   side; it adds no third-party script to the page. Never add a second
   captcha.

@@ -301,13 +301,15 @@ body {
 }
 
 /* ---------- Issue #24: the linked note and its clicked state ---------- */
-/* A note carrying a `link` property is interactive: affordance first, so the
-   hover ruling's own signal is also its resting signal — the ring at rest,
-   ring + halo on hover. The pointer affordance is the ring (shape), not hue. */
+/* A note carrying a `link` property is interactive: the pointer affordance is
+   `cursor: pointer`, and the hover ruling (above) carries the clickability
+   signal — ring + halo on hover only. Issue #35: at rest the linked note wears
+   NO ring of its own — no resting border, outline, tint or shadow — so it is
+   visually indistinguishable from an unlinked note of the same category
+   (the ruled states stay: .note:hover, and the clicked state below). */
 .note--link {
   cursor: pointer;
   text-decoration: none;           /* the browser default underline goes — same treatment .rail-card carries (engine.css:102) */
-  box-shadow: 0 0 0 1px var(--frame);   /* the ring — geometry, not hue */
 }
 /* The clicked state extends Owner ruling 2: the glow's hue turns lime green
    (--note-click, luminance-matched to the hover ring's --frame) and the ring

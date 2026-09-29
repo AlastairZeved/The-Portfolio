@@ -301,11 +301,23 @@ PAGE_EVAL_JS = r"""
       const el = [...document.querySelectorAll('#notes .note')]
         .find(n => n.textContent.trim() === 'Community Life');
       if (!el) return null;
+      // Issue #35: the resting shadow of the LINKED note and of an UNLINKED
+      // neighbour — the two must be identical, so the link carries no ring of
+      // its own at rest (no substitution allowed either: any resting
+      // affordance shows up here as a non-`none` shadow/border pair).
+      const notes_ = [...document.querySelectorAll('#notes .note')];
+      const other = notes_.find(
+        n => n.textContent.trim() !== 'Community Life' &&
+             !n.classList.contains('note--link'));
       return { tag: el.tagName, href: el.getAttribute('href'),
                target: el.getAttribute('target'),
                rel: el.getAttribute('rel'),
                textDecorationLine: getComputedStyle(el).textDecorationLine,
-               classes: el.className };
+               classes: el.className,
+               restShadow: getComputedStyle(el).boxShadow,
+               restBorderWidth: getComputedStyle(el).borderWidth,
+               otherRestShadow: other ? getComputedStyle(other).boxShadow : null,
+               otherRestBorderWidth: other ? getComputedStyle(other).borderWidth : null };
     })(),
     deletedNoteTexts: [...document.querySelectorAll('#notes .note')]
       .map(n => n.textContent.trim())
@@ -543,6 +555,24 @@ def assert_rendered_behaviour(rendered):
                 f"{ln_['textDecorationLine']!r} != 'none' (issue #31 — the "
                 f"browser default underline leaks through; the repo's own "
                 f"anchor treatment removes it)")
+            # (h) issue #35: NO resting ring. At rest the linked note's
+            #     computed box-shadow must be none — identical to an unlinked
+            #     note of the same category — and its border must be the plain
+            #     .note frame, so no substitute resting affordance (border,
+            #     outline via shadow, tint) has crept in. The hover ruling
+            #     (.note:hover ring + halo) and the clicked state below stay.
+            assert ln_["restShadow"] == "none" and ln_["restShadow"] == ln_["otherRestShadow"], (
+                f"{page_name}: 'Community Life' wears a resting box-shadow "
+                f"{ln_['restShadow']!r} (unlinked neighbour: "
+                f"{ln_['otherRestShadow']!r}) — issue #35: the linked note "
+                f"carries no ring of its own at rest, and no substitute "
+                f"resting affordance may be added")
+            assert ln_["restBorderWidth"] == ln_["otherRestBorderWidth"], (
+                f"{page_name}: 'Community Life' resting border-width "
+                f"{ln_['restBorderWidth']!r} != unlinked neighbour "
+                f"{ln_['otherRestBorderWidth']!r} — a substituted resting "
+                f"affordance (border instead of the removed ring) is the same "
+                f"issue #35 defect in a new rule")
             # (e) the deleted note is gone from the RENDERED board.
             assert not d["deletedNoteTexts"], (
                 f"{page_name}: 'The Earp Street Park project' still renders on the "
@@ -727,6 +757,17 @@ def _mutate_underline_note(src):
     return src.replace(needle, "")
 
 
+def _mutate_restore_note_ring(src):
+    # Issue #35's exact defect, faithfully reinstated: the resting 1px --frame
+    # ring back on .note--link. The rendered rest assertion (computed
+    # box-shadow must be none, identical to an unlinked note) must go RED, and
+    # for THAT reason — not via the hover/clicked states, which stay intact.
+    needle = ".note--link {\n  cursor: pointer;\n"
+    assert src.count(needle) == 1, \
+        "issue #35 .note--link rule drifted — mutate nothing"
+    return src.replace(needle, ".note--link {\n  cursor: pointer;\n  box-shadow: 0 0 0 1px var(--frame);   /* PROVE-GATE: the #35 resting ring, reinstated */\n")
+
+
 def _mutate_drop_clicked_state(src):
     # Issue #24's persistence regression: the click handler that adds the
     # persisted .is-clicked marker is removed. The synthetic-click assertion
@@ -906,6 +947,10 @@ def prove_gates():
         ("issue #31 regression D: the note link underlined again",
          {"engine.css": _mutate_underline_note},
          r"text-decoration-line"),
+        ("issue #35 regression: the resting 1px --frame ring reinstated on "
+         "the linked note",
+         {"engine.css": _mutate_restore_note_ring},
+         r"resting box-shadow"),
     ]
     for label, mutations, pattern in variants:
         # apply each mutation to the CURRENT file source: the override map

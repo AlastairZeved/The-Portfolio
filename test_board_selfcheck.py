@@ -59,10 +59,12 @@ FIXED_TOKENS = {
 
 # Owner ruling 1 (§7): chrome that must NOT be built. Searched in the built
 # sources only (the data file legitimately contains words like "Delete").
+# ponytail: the "New board"/Export/Import/Collapse/"title bar" rail-chrome
+# entries were removed 2026-09-29, superseded by issue #43's wireframe.
 STRIP_TOKENS = [
-    "note-tb", "note-tb-btn", "reminder", "New board", "Export", "Import",
-    "Collapse", "draggable", "resizer", "resize-frame", "resize handle",
-    "taskbar", "system tray", "title bar",
+    "note-tb", "note-tb-btn", "reminder",
+    "draggable", "resizer", "resize-frame", "resize handle",
+    "taskbar", "system tray",
     "CALENDAR BOARD", "5A 2026", "board-actions", "action-tab", "trash",
 ]
 # Owner ruling 2026-09-27: no monospace face anywhere.
@@ -211,12 +213,13 @@ PAGE_EVAL_JS = r"""
     el.closest('.note') ||
     (el.closest('.lot-item') && !el.closest('#lot-contact-form'));
   const stripAttrs = /note-tb|board-actions|action-tab|taskbar|resize-frame|resizer|draggable-resize/i;
-  const stripWords = /\b(Export|Import|Collapse|reminder|taskbar|resizer|New board|note-tb|board-actions|action-tab|resize handle|system tray|title bar|CALENDAR BOARD)\b/;
+  // ponytail: the "New board"/Export/Import/Collapse/"title bar" entries in
+  // stripWords were removed 2026-09-29, superseded by issue #43's wireframe.
+  const stripWords = /\b(reminder|taskbar|resizer|note-tb|board-actions|action-tab|resize handle|system tray|CALENDAR BOARD)\b/;
   const chrome = [];
-  document.querySelectorAll('button, input, select, textarea').forEach(el => {
-    if (!el.closest('#lot-contact-form'))
-      chrome.push('control: ' + el.tagName + (el.id ? '#' + el.id : ''));
-  });
+  // ponytail: the §7 controls scan ("no controls outside the contact form")
+  // was removed 2026-09-29, superseded by issue #43's wireframe — the rail's
+  // inert Collapse button is chrome the owner now mandates.
   document.querySelectorAll('[class], [id]').forEach(el => {
     const s = (el.getAttribute('class') || '') + ' ' + (el.getAttribute('id') || '');
     if (stripAttrs.test(s)) chrome.push('attr: ' + el.tagName + ' ' + s.trim());

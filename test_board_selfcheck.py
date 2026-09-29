@@ -292,6 +292,31 @@ PAGE_EVAL_JS = r"""
         reqLeft: reqs ? reqs.getBoundingClientRect().left : null,
       };
     })(),
+    // -- issue #37: the band's ZONE LAW as RENDERED — each zone's own box, its
+    //    tab's box (centre = own zone's centre), and the requirements zone's
+    //    first text line's ink box (left-anchored at the zone's edge).
+    zoneLaw: (() => {
+      const rect = (el) => { const b = el.getBoundingClientRect();
+        return { left: b.left, right: b.right }; };
+      const comps = document.getElementById('zone-components');
+      const reqs = document.getElementById('zone-requirements');
+      const compsH = document.getElementById('zone-components-header');
+      const reqsH = document.getElementById('zone-requirements-header');
+      let inkLeft = null;
+      if (reqs && reqs.firstChild && reqs.textContent.trim()) {
+        const rng = document.createRange();
+        rng.selectNodeContents(reqs);
+        const line = rng.getClientRects()[0];   // the first line's ink box
+        if (line) inkLeft = line.left;
+      }
+      return {
+        comps: comps ? rect(comps) : null,
+        reqs: reqs ? rect(reqs) : null,
+        compsTab: compsH ? rect(compsH) : null,
+        reqsTab: reqsH ? rect(reqsH) : null,
+        inkLeft, reqsText: reqs ? reqs.textContent.trim() : '',
+      };
+    })(),
     railGroups: document.querySelectorAll('#rail .rail-group').length,
     railCards: [...document.querySelectorAll('#rail .rail-card')].map(a => a.textContent.trim()),
     notesCount: document.querySelectorAll('#notes .note').length,
@@ -469,6 +494,12 @@ SWEEP_EVAL_JS = r"""
   const board = document.getElementById('board');
   const band = document.getElementById('band');
   const lot = document.getElementById('lot');
+  // -- issue #37: the zones and the card, for the no-collision assertion
+  //    (the narrow-band floor: the sections must never run into the card,
+  //    at ANY viewport pair, however narrow).
+  const zoneC = document.getElementById('zone-components');
+  const zoneR = document.getElementById('zone-requirements');
+  const bandTitle = document.getElementById('board-title');
   const notes = [...document.querySelectorAll('#notes .note')].map(n => {
     const b = n.getBoundingClientRect(); return {right: b.right, bottom: b.bottom};
   });
@@ -481,6 +512,7 @@ SWEEP_EVAL_JS = r"""
     dataRw: parseFloat(board.getAttribute('data-rw')),
     dataRh: parseFloat(board.getAttribute('data-rh')),
     dataPaintScale: parseFloat(board.getAttribute('data-paint-scale')),
+    zoneComps: rect(zoneC), zoneReqs: rect(zoneR), bandTitle: rect(bandTitle),
     notes,
   };
 }
@@ -583,6 +615,16 @@ def assert_surface_sweep(swept):
         for n in d["notes"]:
             assert n["right"] <= st["right"] + 1 and n["bottom"] <= st["bottom"] + 1, \
                 f"figure not contained at {label}: note overflows the stage"
+        # -- issue #37: the narrow-band floor — the zones NEVER run into the
+        #    card, at any viewport pair however narrow. The ported zone law is
+        #    proportional to #band's own (constant 1576.66-logical) width, so
+        #    this holds structurally; it is asserted here, not assumed.
+        zc, zr, bt = d["zoneComps"], d["zoneReqs"], d["bandTitle"]
+        assert zc["right"] <= bt["left"] + 0.5 and zr["left"] >= bt["right"] - 0.5, (
+            f"zone law: at {label} the sections collide with the title card "
+            f"(components right {zc['right']:.1f} vs card left {bt['left']:.1f}, "
+            f"requirements left {zr['left']:.1f} vs card right {bt['right']:.1f}) "
+            f"— the narrow-band floor is broken (issue #37)")
         # §11's k is UNCHANGED at every pair: the reference's own arithmetic
         render_scale, k = _scale_model_any(vw, vh, d["dataRw"], d["dataRh"])
         assert abs(d["dataK"] - k) < 1e-6, \
@@ -845,6 +887,52 @@ def assert_rendered_behaviour(rendered):
             f"(display={tc['display']!r}, flexDir={tc['flexDir']!r}, "
             f"justify={tc['justify']!r}) — issue #31, the reference centres "
             f"the content in a column flex")
+        # -- issue #37: the band's ZONE LAW (the reference's own geometry) ---
+        #    Ported from TheBoards styles.css:462-465 + tokens 319-325: each
+        #    section's edge sits exactly --card-gap (8 logical px) off the
+        #    card's own edge, the section runs to the gutter on its outer
+        #    side, and the requirements content is left-anchored at its
+        #    section's edge — not floating ~110 painted px toward the middle.
+        #    (Placed AFTER the card's own box assertions above: the zones are
+        #    derived FROM the card, so a card-box regression must be reported
+        #    as the card-box failure it is, not as a zone-gap failure.)
+        zl = d["zoneLaw"]
+        assert zl["comps"] and zl["reqs"], f"{page_name}: band zones missing"
+        gap_expected = 8 * d["dataPaintScale"]      # painted = logical × paint scale
+        card_left, card_right = tc["x"], tc["x"] + tc["w"]
+        gap_components = card_left - zl["comps"]["right"]
+        gap_requirements = zl["reqs"]["left"] - card_right
+        assert abs(gap_components - gap_expected) <= 1.0, (
+            f"{page_name}: the components section starts "
+            f"{gap_components:.1f} painted px off the card's left edge, expected "
+            f"the card-gap {gap_expected:.1f} painted px (= 8 logical × paint "
+            f"scale, issue #37 / TheBoards styles.css:462-463)")
+        assert abs(gap_requirements - gap_expected) <= 1.0, (
+            f"{page_name}: the requirements section starts "
+            f"{gap_requirements:.1f} painted px off the card's right edge, expected "
+            f"the card-gap {gap_expected:.1f} painted px (= 8 logical × paint "
+            f"scale, issue #37 / TheBoards styles.css:464-465)")
+        # (b) the requirements content's INK starts at its zone's left edge:
+        #     left-anchored, not centred. A re-centred zone leaves its first
+        #     line's ink box indented from the edge and goes RED here. On the
+        #     LANDING pages (the card's criterion); zones elsewhere may
+        #     legitimately be empty (e.g. todays-to-do has no requirements).
+        if is_landing:
+            assert zl["reqsText"], f"{page_name}: the requirements zone rendered empty"
+            assert zl["inkLeft"] is not None and abs(
+                zl["inkLeft"] - zl["reqs"]["left"]) <= 1.0, (
+                f"{page_name}: the requirements content's ink starts at "
+                f"{zl['inkLeft']:.1f} but its zone's left edge is "
+                f"{zl['reqs']['left']:.1f} — the content is not left-anchored to "
+                f"its section's edge (issue #37)")
+        # (c) each tab stays centred over its OWN zone (the #17 ruling).
+        for label, tab, zone in (("components", zl["compsTab"], zl["comps"]),
+                                 ("requirements", zl["reqsTab"], zl["reqs"])):
+            tab_c = (tab["left"] + tab["right"]) / 2
+            zone_c = (zone["left"] + zone["right"]) / 2
+            assert abs(tab_c - zone_c) <= 1.0, (
+                f"{page_name}: the {label} tab's centre {tab_c:.1f} is not its "
+                f"own zone's centre {zone_c:.1f} (issue #37, the #17 ruling)")
         print(f"behaviour {page_name.ljust(38)} lot={d['lotHeight']:4} "
               f"k={d['dataK']:.4f} lines={len(d['drawn']):2} "
               f"mono=0 chrome=0 endpoint-drift={worst:.2f}px")
@@ -976,6 +1064,33 @@ def _mutate_drop_clicked_state(src):
     assert src.count(marker) == 1, \
         "board-engine.js drifted: the is-clicked marker write is not where the proof expects"
     return src.replace(marker, "/* PROVE-GATE: clicked-state persistence removed */")
+
+
+def _mutate_revert_zone_law(src):
+    # Issue #37's exact regression, faithfully reinstated: the ported zone law
+    # comes off and the old B76-per-section width rule returns — the sections
+    # float ~76.5 logical px off the card again. The rendered card-gap
+    # assertions must go RED, and for THAT reason.
+    needle = ("#zone-components   { left: var(--gutter);\n"
+              "                     right: calc(100% - var(--card-l) + var(--card-gap)); }\n"
+              "#zone-requirements { left: calc(var(--card-l) + var(--card-w) + var(--card-gap));\n"
+              "                     right: var(--gutter); text-align: left; }")
+    assert src.count(needle) == 1, \
+        "issue #37 zone rules drifted — mutate nothing"
+    return src.replace(needle,
+        "#zone-components { left: 16px; width: max(96px, calc(50% - 251px)); }\n"
+        "#zone-requirements { right: 16px; width: max(96px, calc(50% - 251px)); text-align: left; }")
+
+
+def _mutate_recentre_requirements(src):
+    # Issue #37's forbidden fix: the requirements content re-centred inside its
+    # zone. The rendered ink-anchoring assertion (ink at the zone's left edge)
+    # must go RED, and for THAT reason — not via the gap assertions.
+    needle = ("#zone-requirements { left: calc(var(--card-l) + var(--card-w) + var(--card-gap));\n"
+              "                     right: var(--gutter); text-align: left; }")
+    assert src.count(needle) == 1, \
+        "issue #37 requirements rule drifted — mutate nothing"
+    return src.replace("text-align: left; }", "text-align: center; }")
 
 
 # ---------------------------------------------------------------------------
@@ -1151,6 +1266,14 @@ def prove_gates():
          "the linked note",
          {"engine.css": _mutate_restore_note_ring},
          r"resting box-shadow"),
+        ("issue #37 regression: the zone law reverted — the sections float "
+         "~76.5 logical px off the card again (the old B76 width rule)",
+         {"engine.css": _mutate_revert_zone_law},
+         r"off the card's (left|right) edge"),
+        ("issue #37 regression: the requirements content re-centred inside "
+         "its zone (the forbidden 'fix')",
+         {"engine.css": _mutate_recentre_requirements},
+         r"not left-anchored"),
     ]
     for label, mutations, pattern in variants:
         # apply each mutation to the CURRENT file source: the override map

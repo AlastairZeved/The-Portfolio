@@ -431,6 +431,206 @@ def _scale_model(rw, rh):
     return render_scale, k
 
 
+# ---------------------------------------------------------------------------
+# Issue #32 — the surface sweep. The strip is an ASPECT condition, so the
+# gate sweeps ≥24 viewport pairs spanning both directions (stage wider than
+# the canvas aspect -> bare strip on the right; stage taller -> strip at the
+# bottom), and at every pair asserts that the SURFACE fills the stage by
+# construction: #surface is 100% of the stage, the band-fill's water and the
+# lot-fill's water reach the stage's right edge, and the lot-fill reaches
+# the stage's bottom edge, within 1px. Also asserts §11's k is unchanged at
+# every pair (0.995421 at 2560x1440, exactly 1.0 at 3440x1440 — the
+# reference's own arithmetic) and that the figure stays contained.
+# ---------------------------------------------------------------------------
+SWEEP_PAIRS = [
+    # the five named criteria sizes...
+    (1280, 720), (1600, 900), (1920, 1080), (2560, 1440), (3440, 1440),
+    # ...the owner's reported window and the other aspect-crossing cases the
+    # orchestrator's live measurements named...
+    (2560, 1300), (2560, 1270), (2560, 1200), (2400, 1200),
+    # ...and a spread across BOTH aspect directions: pairs whose stage is
+    # wider than the canvas aspect (right strip) and pairs whose stage is
+    # taller than it (bottom strip).
+    (3840, 2160), (3840, 460), (3200, 1440), (3440, 900), (2560, 2160),
+    (1920, 2160), (1920, 900), (1920, 1300), (1600, 2160), (1600, 460),
+    (1280, 1300), (1280, 460), (1024, 768), (1024, 1300), (800, 1440),
+    (800, 460), (640, 720), (640, 460),
+]
+
+SWEEP_EVAL_JS = r"""
+() => {
+  const rect = el => { const b = el.getBoundingClientRect();
+    return {x: b.x, y: b.y, top: b.top, left: b.left, w: b.width, h: b.height,
+            right: b.right, bottom: b.bottom}; };
+  const stage = document.getElementById('stage');
+  const surface = document.getElementById('surface');
+  const bandFill = document.getElementById('band-fill');
+  const lotFill = document.getElementById('lot-fill');
+  const board = document.getElementById('board');
+  const band = document.getElementById('band');
+  const lot = document.getElementById('lot');
+  const notes = [...document.querySelectorAll('#notes .note')].map(n => {
+    const b = n.getBoundingClientRect(); return {right: b.right, bottom: b.bottom};
+  });
+  return {
+    vw: innerWidth, vh: innerHeight,
+    stage: rect(stage), surface: rect(surface),
+    bandFill: rect(bandFill), lotFill: rect(lotFill),
+    board: rect(board), bandPainted: rect(band), lotPainted: rect(lot),
+    dataK: parseFloat(board.getAttribute('data-k')),
+    dataRw: parseFloat(board.getAttribute('data-rw')),
+    dataRh: parseFloat(board.getAttribute('data-rh')),
+    dataPaintScale: parseFloat(board.getAttribute('data-paint-scale')),
+    notes,
+  };
+}
+"""
+
+
+async def collect_surface_sweep(engine_overrides=None):
+    """Boot index.html once and sweep SWEEP_PAIRS, collecting coverage facts.
+
+    One page load; each pair is a viewport resize (the engine's resize
+    handler re-fits and re-paints the surface). Returns a list of dicts.
+    """
+    from playwright.async_api import async_playwright
+
+    overrides = engine_overrides or {}
+    httpd = _serve_loopback()
+    port = httpd.server_address[1]
+    try:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch()
+            context = await browser.new_context(viewport={"width": SWEEP_PAIRS[0][0], "height": SWEEP_PAIRS[0][1]})
+            try:
+                await context.add_init_script(BRIDGE_JS)
+
+                async def route_font(route):
+                    await asyncio.sleep(FONT_DELAY_MS / 1000.0)
+                    await route.continue_()
+
+                async def route_override(route):
+                    name = pathlib.Path(route.request.url).name
+                    if name in overrides:
+                        ctype = "text/css" if name.endswith(".css") else "text/javascript"
+                        await route.fulfill(status=200, content_type=ctype,
+                                            body=overrides[name])
+                    else:
+                        await route.continue_()
+
+                if overrides:
+                    await context.route("**/*", route_override)
+                await context.route("**/*.woff2", route_font)
+                page = await context.new_page()
+                await page.goto(f"http://127.0.0.1:{port}/index.html")
+                await page.wait_for_function(
+                    'document.fonts.status === "loaded"', timeout=15000)
+                results = []
+                for vw, vh in SWEEP_PAIRS:
+                    await page.set_viewport_size({"width": vw, "height": vh})
+                    await page.evaluate(
+                        "() => new Promise(r => requestAnimationFrame("
+                        "() => requestAnimationFrame(r)))")
+                    results.append(await page.evaluate(SWEEP_EVAL_JS))
+            finally:
+                await context.close()
+                await browser.close()
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+    return results
+
+
+def assert_surface_sweep(swept):
+    """The sweep assertions themselves. Returns the per-pair strip table."""
+    table = []
+    for d in swept:
+        vw, vh = d["vw"], d["vh"]
+        st, su = d["stage"], d["surface"]
+        bf, lf = d["bandFill"], d["lotFill"]
+        label = f"{vw}x{vh}"
+        # sanity: the stage really is (vw−300)×vh
+        assert abs(st["w"] - (vw - 300)) < 1 and abs(st["h"] - vh) < 1, \
+            f"{label}: stage box {st['w']:.1f}x{st['h']:.1f} != {(vw-300)}x{vh}"
+        # THE LAW: the surface is 100% of the stage by construction —
+        # (vw−300)×vh device px, the viewport-derived box (mechanism (a)).
+        for axis, name in ((st["right"] - su["right"], "right"),
+                           (st["bottom"] - su["bottom"], "bottom")):
+            assert axis <= 1, (
+                f"surface does not fill the stage at {label}: bare strip on "
+                f"the {name} is {axis:.1f}px (surface {su['w']:.1f}x"
+                f"{su['h']:.1f}, stage {st['w']:.1f}x{st['h']:.1f})")
+        assert su["x"] <= st["x"] + 1 and su["y"] <= st["y"] + 1, \
+            f"surface does not fill the stage at {label} (anchor off)"
+        # the band's water and its rule reach the stage's right edge, and
+        # the band-fill covers the band's own painted y-range
+        assert bf["right"] >= st["right"] - 1 and bf["top"] <= st["top"] + 1 \
+            and bf["bottom"] >= d["bandPainted"]["bottom"] - 1, (
+            f"surface: the band-fill's water stops short of the stage's "
+            f"right edge at {label}: fill spans x{bf['x']:.1f}..{bf['right']:.1f} "
+            f"(stage {st['x']:.1f}..{st['right']:.1f}, strip "
+            f"{max(0, st['right'] - bf['right']):.1f}px) and covers y"
+            f"{bf['y']:.1f}..{bf['bottom']:.1f} vs the canvas band's painted "
+            f"y{d['bandPainted']['y']:.1f}..{d['bandPainted']['bottom']:.1f}")
+        # the lot's water reaches the stage's right AND bottom edge, from
+        # the canvas lot's own painted top edge
+        assert lf["right"] >= st["right"] - 1 and lf["bottom"] >= st["bottom"] - 1 \
+            and lf["top"] <= d["lotPainted"]["top"] + 1, (
+            f"surface: the lot-fill's water stops short at {label}: fill "
+            f"right {lf['right']:.1f} vs stage {st['right']:.1f}, bottom "
+            f"{lf['bottom']:.1f} vs stage {st['bottom']:.1f}")
+        # the figure stays contained (§11/B64): notes never overflow the stage
+        for n in d["notes"]:
+            assert n["right"] <= st["right"] + 1 and n["bottom"] <= st["bottom"] + 1, \
+                f"figure not contained at {label}: note overflows the stage"
+        # §11's k is UNCHANGED at every pair: the reference's own arithmetic
+        render_scale, k = _scale_model_any(vw, vh, d["dataRw"], d["dataRh"])
+        assert abs(d["dataK"] - k) < 1e-6, \
+            f"{label}: data-k {d['dataK']} != §11 {k:.6f}"
+        table.append((vw, vh, k, st["right"] - bf["right"], st["bottom"] - lf["bottom"]))
+
+    # the two pinned k values, by name (the amendment's arithmetic)
+    k2560 = next(k for vw, vh, k, *_ in table if (vw, vh) == (2560, 1440))
+    k3440 = next(k for vw, vh, k, *_ in table if (vw, vh) == (3440, 1440))
+    assert abs(k2560 - 0.995421) < 5e-5, \
+        f"k at 2560x1440 moved to {k2560:.6f} (the unchanged invariant is 0.9954)"
+    assert abs(k3440 - 1.0) < 1e-9, \
+        f"k at 3440x1440 is {k3440:.6f}, not exactly 1.0 (the reference's min(2333/1576.66, 1000/1000))"
+    worst_r = max(table, key=lambda t: t[3])
+    worst_b = max(table, key=lambda t: t[4])
+    return {"worst_right": worst_r, "worst_bottom": worst_b, "pairs": len(table)}
+
+
+def _scale_model_any(vw, vh, rw, rh):
+    """§3 + §11 fit at an arbitrary viewport, exactly as board-engine.js:
+    renderScale = min(vh/1000, (vw−300)/900); LOGICAL_W = (vw−300)/renderScale;
+    LOGICAL_H = vh/renderScale; floors 900×1000; k = min(LOGICAL_W/rw, LOGICAL_H/rh)."""
+    ref_w, ref_h = 900, 1000
+    rail_w = 300
+    render_scale = min(vh / ref_h, (vw - rail_w) / ref_w)
+    logical_w = max((vw - rail_w) / render_scale, ref_w)
+    logical_h = max(vh / render_scale, ref_h)
+    k = min(logical_w / rw, logical_h / rh)
+    return render_scale, k
+
+
+def _mutate_revert_surface(src):
+    # Issue #32's regression: the surface is put back to the figure's box —
+    # the whole paintSurface body is neutered (an early return before any
+    # fill is positioned), so the fills stay at 0×0 and the band's water,
+    # the rule and the lot's water stop at the canvas's painted edge again.
+    # The SWEEP's coverage assertions must go RED, and for THAT reason.
+    needle = "  function paintSurface(root, f) {\n    if (f) root.__fit = f;"
+    assert src.count(needle) == 1, \
+        "board-engine.js drifted: paintSurface is not where the proof expects"
+    return src.replace(
+        needle,
+        "  function paintSurface(root, f) {\n"
+        "    return; /* PROVE-GATE: the surface reverted to the figure's box */\n"
+        "    if (f) root.__fit = f;")
+
+
+
 def assert_rendered_behaviour(rendered):
     """The behavioural assertions themselves — one block per contract."""
     for page_name, board_id in BROWSER_PAGES:
@@ -972,6 +1172,34 @@ def prove_gates():
                 f"gate proof FAILED: {label!r} went GREEN — "
                 f"the rendered gate cannot catch this regression")
 
+    # --- issue #32: the surface variant rides the SWEEP, not the rendered
+    # gate — the strip is an aspect condition, so the regression proves RED
+    # across the viewport pairs (worst on the widest pair, not at 2560x1440).
+    surface_variants = [
+        ("issue #32: the surface reverted to the figure's box (paintSurface "
+         "neutered — the band's water, the rule and the lot's water stop at "
+         "the canvas's painted edge)",
+         {"board-engine.js": _mutate_revert_surface},
+         r"surface"),
+    ]
+    for label, mutations, pattern in surface_variants:
+        overrides = {fname: fn((ROOT / fname).read_text())
+                     for fname, fn in mutations.items()}
+        try:
+            swept = asyncio.run(collect_surface_sweep(overrides))
+            assert_surface_sweep(swept)
+        except AssertionError as e:
+            if re.search(pattern, str(e)):
+                print(f"GATE PROOF OK (RED as required): {label}\n    -> {e}")
+            else:
+                raise AssertionError(
+                    f"gate proof for {label!r} failed with an UNRELATED error "
+                    f"(the gate is broken, not the build): {e}") from e
+        else:
+            raise AssertionError(
+                f"gate proof FAILED: {label!r} went GREEN — "
+                f"the surface sweep cannot catch this regression")
+
     # --- in-process README variants (issue #21) ---
     # README cannot ride the engine-override path above: --prove-gates serves
     # mutated ENGINE files over the loopback http server, and README.md is
@@ -1267,6 +1495,24 @@ def main():
     assert_rendered_behaviour(rendered)
     print(f"rendered gate: 6 pages booted headless, "
           f"{time.perf_counter() - t_browser:.1f}s")
+
+    # --- issue #32: the surface sweep — the strip is an ASPECT condition ----
+    # One page load, ≥24 viewport pairs spanning BOTH aspect directions; at
+    # every pair the surface must fill the stage within 1px on both axes and
+    # §11's k must be unchanged.
+    swept = asyncio.run(collect_surface_sweep())
+    worst = assert_surface_sweep(swept)
+    print(f"surface sweep: {len(SWEEP_PAIRS)} viewport pairs resized in one "
+          f"page load")
+    for d in swept:
+        print(f"sweep {str(str(d['vw']) + 'x' + str(d['vh'])).ljust(12)} "
+              f"k={d['dataK']:.6f} "
+              f"strip_right={max(0, d['stage']['right'] - d['bandFill']['right']):6.2f} "
+              f"strip_bottom={max(0, d['stage']['bottom'] - d['lotFill']['bottom']):6.2f}")
+    print(f"surface sweep worst: right {worst['worst_right'][3]:.2f}px at "
+          f"{worst['worst_right'][0]}x{worst['worst_right'][1]}; bottom "
+          f"{worst['worst_bottom'][4]:.2f}px at "
+          f"{worst['worst_bottom'][0]}x{worst['worst_bottom'][1]}")
 
     print("SELF-CHECK GREEN: 72 notes / 43 links / 4 lot entries / 0 orphans; "
           "README.md asserted (per-board table, every cell, prose sweep; docs/ "

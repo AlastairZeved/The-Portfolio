@@ -124,6 +124,39 @@ body {
   color: var(--ink-light);
 }
 
+/* ---------- Issue #32: the surface and the figure are separate ---------- */
+/* #surface is the board's SURFACE: a viewport-derived box — 100% of the
+   stage (inset), i.e. (vw−300)×vh device px by construction, exactly the
+   law the reference app applies when geometry.js derives LOGICAL_W/H from
+   the viewport so "the sheet fills its area exactly at every viewport"
+   (UIUX.md:150-152). It carries the deep canvas plus the full-bleed band
+   and lot. #board remains the FIGURE (§11 mapping untouched); its slack
+   falls right and bottom as open deep. The fills sit UNDER the figure
+   (DOM order), so inside the canvas box the board's own opaque surfaces
+   win and nothing there moves; outside it they carry the band's water and
+   the lot's water to the stage's edges. Their painted geometry is set by
+   fit() from the same composite scale — no viewport literal, no per-size
+   branch anywhere. */
+#surface {
+  position: absolute; inset: 0;
+  background: var(--deep);         /* the deep canvas, viewport-derived */
+}
+#band-fill {
+  position: absolute; left: 0; right: 0; top: 0; height: 0;
+  border-bottom: 0 solid var(--frame);  /* the rule: full width, sized by fit() */
+  background:
+    radial-gradient(ellipse at 50% 0%, rgb(0 0 0 / 0.35), transparent 70%), /* §2.8 falloff */
+    linear-gradient(to bottom, var(--water-top), var(--water-mid), var(--water-bot));
+}
+#lot-fill {
+  position: absolute; left: 0; right: 0; bottom: 0; top: auto;
+  /* height: auto — fit() sets top (the canvas lot's painted top edge) and
+     the fill stretches down to the stage's bottom edge (issue #32). */
+  /* background-image is set by fit() with pixel stops derived from the
+     canvas lot's own box, so the painted water is continuous across the
+     canvas edge and holds at the stage's bottom edge. */
+}
+
 /* ---------- §3.1 The band ---------- */
 /* Band height is set by JS from the rule formula (§3.1): rule-y = 14 + max(2,lines)*19.5 + 8 */
 #band {

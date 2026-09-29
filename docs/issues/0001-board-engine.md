@@ -131,6 +131,14 @@ Keyboard edit bindings (§12) are equally out of scope.
 strip on the right edge, and all OS window furniture (title bar, system tray,
 taskbar). All app chrome.
 
+**Owner ruling (2026-09-29, via AlastairZeved/The-Portfolio#43 and its attached
+wireframe):** the desktop rail renders the All Boards menu chrome as drawn —
+"New board" pills, Export, Import, Collapse — as inert chrome (appearance only,
+no click handlers). §7's "chrome to STRIP" list is SUPERSEDED for the rail
+chrome: the strip-list assertions for "New board", Export, Import, Collapse,
+and the "All Boards" title bar are REMOVED from the self-check, not exempted.
+The rest of the strip list stands. https://github.com/AlastairZeved/The-Portfolio/issues/43
+
 ## 8. Hover glow — owner ruling 2, "a hover glow for visual status of
 clickability"
 

@@ -32,37 +32,121 @@
    var LANDING_ID = 'fa246b33-d8c8-4ec2-9073-2915de0d5764';
 
    /* §13.1 B78 rail scaffolding: the four fixed groups BoardEngine.renderRail
-      fills. Runtime-built once per page (issue #5, finding 1) so no page
-      ships a byte-duplicated <aside> — previously all six pages carried the
-      identical block, md5 647b787117c6. */
-   var RAIL_GROUPS = [
-     { cat: 'todo', head: 'To Do' },
-     { cat: 'note', head: 'Notes' },
-     { cat: 'learning', head: 'Learning' },
-     { cat: 'idea', head: 'Ideas' }
-   ];
+         fills. Runtime-built once per page (issue #5, finding 1) so no page
+         ships a byte-duplicated <aside> — previously all six pages carried the
+         identical block, md5 647b787117c6.
 
-   function buildRailScaffolding() {
-     if (document.querySelectorAll('.rail-cards').length) return; // already present
-     var aside = document.createElement('aside');
-     aside.id = 'rail';
-     aside.setAttribute('aria-label', 'Board index');
-     RAIL_GROUPS.forEach(function (g) {
-       var group = document.createElement('div');
-       group.className = 'rail-group';
-       group.setAttribute('data-cat', g.cat);
-       var h = document.createElement('h2');
-       h.className = 'rail-head';
-       h.textContent = g.head;
-       var slot = document.createElement('div');
-       slot.className = 'rail-cards';
-       slot.setAttribute('data-slot', g.cat);
-       group.appendChild(h);
-       group.appendChild(slot);
-       aside.appendChild(group);
-     });
-     document.body.insertBefore(aside, document.body.firstChild);
-   }
+         Issue #43: the rail is rebuilt to match the wireframe drawing — a
+         titled panel ("All Boards" bar), each group heading carrying a
+         right-aligned "New board" pill, a "‹ Collapse" button at the panel's
+         bottom, and inert Export/Import chrome on the board side. All of it is
+         INERT chrome (owner ruling, issue comment 5884380115): appearance only,
+         no click handlers beyond the ones that already exist. */
+     var RAIL_GROUPS = [
+       { cat: 'todo', head: 'To Do' },
+       { cat: 'note', head: 'Notes' },
+       { cat: 'learning', head: 'Learning' },
+       { cat: 'idea', head: 'Ideas' }
+     ];
+
+     function buildRailScaffolding() {
+       if (document.querySelectorAll('.rail-cards').length) return; // already present
+       var aside = document.createElement('aside');
+       aside.id = 'rail';
+       aside.setAttribute('aria-label', 'Board index');
+
+       // The panel's title bar, above the To Do group (issue #43, criterion 1).
+       var titleBar = document.createElement('div');
+       titleBar.className = 'rail-title';
+       titleBar.textContent = 'All Boards';
+       aside.appendChild(titleBar);
+
+       RAIL_GROUPS.forEach(function (g) {
+         var group = document.createElement('div');
+         group.className = 'rail-group';
+         group.setAttribute('data-cat', g.cat);
+         // Heading row: the group heading with its "New board" pill at the
+         // row's right — both sitting on the category-coloured band (the group
+         // box itself wears the category ladder via [data-cat] scoping).
+         var headRow = document.createElement('div');
+         headRow.className = 'rail-head-row';
+         var h = document.createElement('h2');
+         h.className = 'rail-head';
+         h.textContent = g.head;
+         var pill = document.createElement('span');
+         pill.className = 'rail-new';
+         pill.textContent = 'New board';
+         headRow.appendChild(h);
+         headRow.appendChild(pill);
+         var slot = document.createElement('div');
+         slot.className = 'rail-cards';
+         slot.setAttribute('data-slot', g.cat);
+         group.appendChild(headRow);
+         group.appendChild(slot);
+         aside.appendChild(group);
+       });
+
+       // "‹ Collapse" at the sidebar's bottom (issue #43, criterion 5) — inert.
+       var collapseRow = document.createElement('div');
+       collapseRow.className = 'rail-collapse-row';
+       var collapse = document.createElement('button');
+       collapse.type = 'button';
+       collapse.className = 'rail-collapse';
+       collapse.textContent = '\u2039 Collapse';
+       collapseRow.appendChild(collapse);
+       aside.appendChild(collapseRow);
+
+       // Export/Import chrome on the board side, as drawn just above the
+       // Parking Lot band — inert, no handlers (issue #43, criterion 5).
+       var chrome = document.createElement('div');
+       chrome.id = 'board-chrome';
+       ['Export', 'Import'].forEach(function (label) {
+         var btn = document.createElement('span');
+         btn.className = 'board-chrome-btn';
+         btn.textContent = '\u2193 ' + label;
+         chrome.appendChild(btn);
+       });
+
+       document.body.insertBefore(aside, document.body.firstChild);
+       document.body.appendChild(chrome);
+     }
+
+     /* ---- Issue #43, criterion 3: every board entry is a CARD ----
+        The engine renders each rail entry as a bare title string (frozen —
+        renderRail stays untouched). This pass re-shapes the SAME anchor into
+        the wireframe's card: the title line, then a "Last Updated: MM/DD/YY"
+        line under it, formatted in US order from the board's `updatedAt`
+        epoch-ms. The anchor element itself is kept (same identity, so the
+        engine's slots, the SPA's click wiring and markActive all keep working);
+        only its children are rebuilt. */
+
+  function usDate(ms) {
+       var d = new Date(ms);
+       var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+       var dd = ('0' + d.getDate()).slice(-2);
+       var yy = ('' + d.getFullYear()).slice(-2);
+       return mm + '/' + dd + '/' + yy;
+     }
+
+     function augmentRailCards(boards) {
+       document.querySelectorAll('.rail-card').forEach(function (a) {
+         var id = a.getAttribute('data-board-id');
+         var board = boards.filter(function (b) { return String(b.id) === id; })[0];
+         if (!board) return;
+         var title = document.createElement('span');
+         title.className = 'rail-card-title';
+         title.textContent = board.title || '(untitled board)';
+         var date = document.createElement('span');
+         date.className = 'rail-card-date';
+         // Every board carries updatedAt (all five verified in the data); a
+         // missing one still gets the line — with an em dash, never a bare card.
+         date.textContent = 'Last Updated: ' +
+           (board.updatedAt ? usDate(board.updatedAt) : '\u2014');
+         a.textContent = '';
+         a.appendChild(title);
+         a.appendChild(date);
+       });
+     }
 
   var CROSSFADE_MS = 260; // §8
   var FADE_HALF = CROSSFADE_MS / 2;
@@ -250,6 +334,7 @@
       var root = document.getElementById('board');
       buildRailScaffolding();
       BoardEngine.renderRail(boards);
+      augmentRailCards(boards);
       BoardEngine.renderBoard(landingBoard, root);
       BoardEngine.fit(root);
       mountContactForm(root);
@@ -276,6 +361,7 @@
           buildRailScaffolding();
           var root = document.getElementById('board');
           BoardEngine.renderRail(boards);
+          augmentRailCards(boards);
           BoardEngine.renderBoard(board, root);
           applyTitleFormatting(board);
           BoardEngine.fit(root);

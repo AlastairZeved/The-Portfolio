@@ -104,3 +104,155 @@
   color: var(--ink-light);
 }
 .lot-form-status.is-visible { display: block; }
+
+/* ---- Issue #43: the rail rebuilt to the wireframe drawing ----
+   Owner ruling (issue comment 5884380115): appearance only — the menu as
+   DRAWN, no new colours, no icons, no hover idioms. Every colour below is
+   an existing engine token; the shapes come from the drawing: a titled
+   panel, four outlined category groups with a "New board" pill at each
+   heading's right, board entries as CARDS (title + "Last Updated" line)
+   wearing their category ladder, "‹ Collapse" at the panel's bottom, and
+   inert Export/Import chrome on the board side. All rules are scoped under
+   #rail / the chrome classes; the engine file is untouched. */
+
+/* The panel overlays the stage (z-index above #stage/#board) and never
+   scrolls (§3 law). The engine's own geometry (300px width, inset shadow,
+   the board's fit law with RAIL_W=300) is left standing: the board stays
+   fully visible right of the panel, exactly as drawn. */
+#rail {
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;          /* §3: nothing scrolls */
+  padding: 0;
+}
+
+/* Criterion 1: the titled panel — an "All Boards" bar above the To Do group. */
+.rail-title {
+  padding: 14px 16px 10px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--ink-light);   /* on --chrome: 17.9:1 */
+}
+
+/* Criterion 2: each group is the category-coloured band as drawn — a box
+   outlined in the category's --frame over the category's --deep, with the
+   heading and its "New board" pill on the band. Heights below are the
+   drawing's proportions (band ≈ 2.5× card height), not new invention. */
+#rail .rail-group {
+  margin: 0 12px 14px;
+  padding: 10px 10px 12px;
+  border: 1px solid var(--frame);
+  border-radius: 6px;
+  background: var(--deep);
+  min-height: 160px;         /* the drawing's bands run taller than their cards */
+}
+.rail-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+#rail .rail-head {
+  text-transform: uppercase; /* the drawing's headings: TO DO / NOTES / … */
+  padding: 0;
+  font-size: 15px;
+}
+.rail-new {
+  padding: 3px 10px;
+  border-radius: 3px;
+  background: var(--accent-restore);   /* the pill's light teal, as drawn */
+  color: var(--ink-dark);              /* 12.4:1 on --accent-restore */
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+/* The engine's .rail-cards box dissolves — the drawing floats the cards
+   inside the band. */
+#rail .rail-cards {
+  border: none;
+  background: transparent;
+  padding: 0 2px;
+}
+
+/* Criterion 3+4: each board entry is a CARD wearing its category ladder —
+   a water gradient built ONLY from the per-cat --water tokens already
+   scoped by engine.css under [data-cat]. Title top-left, date bottom-right. */
+#rail .rail-card {
+  display: block;
+  padding: 10px;
+  margin: 6px 0;
+  border: 1px solid var(--frame);
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--water-top), var(--water-mid));
+  color: var(--ink-light);
+  font-size: 14px;
+  line-height: 1.3;
+}
+.rail-card-title {
+  display: block;
+  font-weight: 600;
+  white-space: pre-wrap;     /* engine-owned idiom for jammed/newlined titles */
+}
+.rail-card-date {
+  display: block;
+  margin-top: 10px;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 400;
+  color: rgb(var(--ink-light-rgb) / 0.85);  /* dimmed, as drawn; ≥4.5:1 — see handoff */
+}
+
+/* The owner idiom (ruling 2) re-asserted at #rail specificity: the gradient
+   rule above would otherwise out-rank assembly.css's original
+   .rail-card.is-active fill, and the selected card would lose its face. */
+#rail .rail-card.is-active {
+  box-shadow: 0 0 0 2px var(--frame);
+  background: var(--frame);
+  color: var(--ink-dark);
+  font-weight: 800;
+}
+#rail .rail-card.is-active .rail-card-date { color: var(--ink-dark); }
+
+/* Criterion 5: "‹ Collapse" at the panel's bottom, right-aligned as drawn.
+   Inert: no click handler exists or is added. */
+.rail-collapse-row {
+  margin-top: auto;          /* pinned to the panel's bottom edge */
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px;
+}
+.rail-collapse {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 8px 16px;
+  border: 1px solid var(--ink-dark);
+  border-radius: 6px;
+  background: var(--accent-page);   /* the drawing's blue button */
+  color: var(--ink-dark);           /* 6.9:1 on --accent-page */
+  cursor: pointer;
+}
+
+/* Criterion 5: Export/Import chrome on the board side, as drawn just above
+   the Parking Lot band, with the down-arrow glyphs. Inert spans — no handlers. */
+#board-chrome {
+  position: fixed;
+  left: 314px;               /* the stage's left edge + the drawing's offset */
+  bottom: 14px;
+  z-index: 10;
+  display: flex;
+  gap: 10px;
+}
+.board-chrome-btn {
+  padding: 6px 12px;
+  border: 1px solid var(--ink-dark);
+  border-radius: 3px;
+  background: var(--accent-page);
+  color: var(--ink-dark);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.3;
+}

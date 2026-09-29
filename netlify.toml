@@ -1,9 +1,12 @@
 # Netlify deploy configuration for this repository.
 #
 # The site root IS the repo root: index.html sits at the top level, and the
-# site (razgregory, https://razgregory.netlify.app) auto-deploys every push
-# to main. This file makes those two decisions reviewable in the repo
-# instead of living only in the Netlify UI.
+# site (razgregory, https://razgregory.netlify.app) publishes from the
+# `deploy` branch. A push to `main` publishes nothing; `main` is the working
+# branch, and publishing is a `main` -> `deploy` pull request merged on
+# purpose. WHICH branch is production is a Netlify UI setting, not a key in
+# this file — this file records the build shape, and README.md's Deployment
+# section records the branch topology and the branch rule.
 #
 # Deliberately absent: [build.command] — there is no build step, and any
 # command here would either fail the deploy or blank the site. Also absent:

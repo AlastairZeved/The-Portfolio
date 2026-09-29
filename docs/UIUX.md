@@ -1,0 +1,305 @@
+# UIUX.md — The-Portfolio
+
+**Status:** v1, written from the owner's rulings of 2026-09-29 (governing
+issue: [The-Portfolio #51](https://github.com/AlastairZeved/The-Portfolio/issues/51)).
+This is the **rendering authority** — the document `index.html` and every
+review resolves rendering against. `PRD.md` says what the site *is*; this
+says what it *looks like* and how it behaves under the hand and the cursor.
+Where the two disagree about a rendering decision, **this document wins**.
+
+**Scope and provenance.** This document carries the design system of
+TheBoards in full for the surfaces this site draws, quoted as values here —
+it is self-contained by design, never a pinned fork of TheBoards' records,
+never synced from them, never stale alongside them (owner's derived-document
+ruling). External citations to TheBoards' own record (`TheBoards'
+DECISIONS.md B58`, etc.) are historical provenance only, not load-bearing:
+every value this page needs is printed below. A diff that changes a hex,
+ratio, px, ms, or state without an owner ruling is a FAIL.
+
+---
+
+## §1 Governing law
+
+> **If you have to think about the interface, it failed.
+> Every pixel earns its place.**
+
+And its corollary:
+
+> **Identity comes from structure — frame, surface tone — never costume.**
+
+Two consequences hold throughout, without exception:
+
+- **Never colour alone.** Every state distinguished by colour is also
+  distinguished by geometry, position or texture. The click is a 1px inset
+  (geometry) *and* a glow shift (colour). Focus is a ring, not a tint.
+- **Elevation means "temporary, above the page."** Shadow is reserved for
+  transient interaction states — hover glow, pressed inset. **Resting cards
+  carry no shadow.** They are *on* the page, not floating over it.
+
+### §1.1 The register
+
+TheBoards' register, carried whole: **peaceful fondness — calm water at
+depth and at dusk.** Dark palette, deliberately. The page reads top to bottom
+as one scene — water closing each end of the sheet, the deep between — and
+the door-cards are the lit things on the deep. This does not license
+decoration.
+
+---
+
+## §2 Design tokens
+
+### §2.1 One binding
+
+TheBoards rotates its ladder by board type; **this site wears exactly one
+binding: the To-Do blue** (owner ruling, `DECISIONS.md` B1 — a portfolio is
+one scene, not five board types). The ladder does not rotate here. Values
+below are the To-Do ladder's, quoted as shipped in TheBoards
+(`TheBoards' UIUX.md §2.2`), re-verified at the rung's relative luminance.
+
+### §2.2 The surface ladder
+
+| Token | Value | What it is | Rel. luminance |
+|---|---|---|---|
+| `--deep` | `#020812` | the canvas — the deepest surface on the page | 0.0023 |
+| `--chrome` | `#020812` | the room behind the page — the rail's ground and any summoned surface | 0.0023 |
+| `--card` | `#08152c` | the title compartment, sitting just above the deep | 0.0077 |
+| `--water` | `#34697f` → `#255265` → `#163646` | the water, as a field — closing both ends of the sheet | 0.1237 … 0.0325 |
+| `--frame` | `#698ebf` | the card's border and both full-width rules | 0.2611 |
+| `--note` | `#a0d4da` | the door-card — the lit thing on the deep | 0.5962 |
+| `--danger` | `#E2A08C` | the single warm hue, carried from TheBoards; no destructive action is drawn in v1 | 0.4000 (approx.) |
+
+### §2.3 Ink
+
+| Token | Value | Bound on |
+|---|---|---|
+| `--ink-light` | `#f4f5f1` | `--deep`, `--card`, `--water`, `--chrome` |
+| `--ink-dark` | `#031019` | `--note` |
+
+Verified contrast, each at the worst extreme of its range:
+
+| Ground | Ink | Ratio | Level |
+|---|---|---|---|
+| `--deep` `#020812` | light | **18.33:1** | AAA |
+| `--card` `#08152c` | light | **16.62:1** | AAA |
+| `--water`, lightest stop `#34697f` | light | **5.52:1** | AA |
+| `--water`, darkest stop `#163646` | light | **11.62:1** | AAA |
+| `--note` `#a0d4da` | dark | **11.84:1** | AAA |
+
+**The crossover and the forbidden band carry from TheBoards, verbatim:**
+
+> Below `L = 0.1788` a ground takes `--ink-light`; above it, `--ink-dark`.
+> **No text-bearing surface may have a relative luminance between 0.163 and
+> 0.196** — there is no ink in the palette that works there.
+
+### §2.4 Accents (blue family)
+
+The hover glow is drawn with an **existing** blue token — no new token, no
+new colour (owner ruling, `DECISIONS.md` B14). The binding transcribed in v1:
+**hover glow = `--frame` `#698ebf`** (the card's own established blue line
+blooming). A second existing blue (`--accent-page` `#6d9cb0`) is noted in the
+governing issue as the alternative; the owner confirms in one word on #51.
+
+| Token | Value | Role |
+|---|---|---|
+| `--frame` (hover glow) | `#698ebf` | the card's border and rule colour, blooming on hover |
+| `--accent-page` (candidate) | `#6d9cb0` | the alternative hover-glow blue, pending owner pick |
+
+### §2.5 The click-state green
+
+On **active** (pressed), the glow shifts to a light **"go" green pulled from
+the Idea boards' colour family** — no new colour, no new token (owner ruling,
+`DECISIONS.md` B14). The member transcribed in v1: **the Idea ladder's `--note`
+rung, `#b9d2b2`**, the lightest green the Idea family ships (`TheBoards'
+UIUX.md §2.2.2`). Pending one-word confirmation on #51.
+
+### §2.6 Elevation
+
+```css
+--elevation: 0 2px 8px rgb(0 0 0 / 0.45);   /* hover glow + pressed, transient only */
+```
+
+**Resting door-cards take no shadow** (§1). The rail is embedded in the page
+and takes an inset treatment, not a float shadow.
+
+### §2.7 Edges, rules and hairlines
+
+> **A surface's edge is drawn in that surface's own ink.**
+
+- The title compartment separates from the deep by `--frame` border —
+  **edge-carried** (fill ratio ~1.10:1 deliberately quiet; `--frame` clears
+  5.39:1 on it).
+- The water field (band top, Parking Lot bottom) meets the deep at its
+  darkest stop, and the full-width `--frame` rule carries that seam
+  (5.95:1 on the deep, 3.77:1 on the water's darkest stop).
+- The door-card's 2px `--frame` border is what separates overlapping cards
+  (their fills are the same colour — 1.00:1). Overlap is allowed; the frame
+  is load-bearing legibility, not chrome.
+- Hairlines, where a separator is needed: that surface's ink at
+  `rgb(var(--ink-a) / 0.4)`, clearing 3:1 on its ground.
+
+### §2.8 Radius grammar
+
+TheBoards' grammar, carried whole: **near-square**. The door-card radius is
+`symmetric 3px`; the title compartment hangs beneath its rule with bottom-only
+corners (`border-radius: 0 0 3px 3px`); the rail's empty boards take the same
+3px hand. No large radii — within any scale the card can be resized to, a
+large radius would deform.
+
+### §2.9 Type
+
+**Montserrat Alternates**, self-hosted, **no CDN** — the same face as
+TheBoards. Three weights shipped: 400, 600, 800, Latin-subset woff2,
+`font-display: swap`. May be embedded as a data URI to keep the single-file
+law (`PRD §3.3`).
+
+---
+
+## §3 The page
+
+### §3.1 The scene
+
+One bounded sheet, no calendar rail, no hero (owner rulings). Reading top to
+bottom: the **band** (water) with the **title compartment** overhanging its
+rule, the **deep** through the middle where the **door-cards** sit in the
+free board space, and the **Parking Lot** (water) closing the foot. The
+**All Boards rail** sits beside the sheet (desktop), grounded in `--chrome`.
+
+Everything is visible at once: one viewport, no internal scrolling. If the
+sheet is full, it is full — that boundary is the point.
+
+### §3.2 The band and the title compartment
+
+The title compartment is the same title card as TheBoards (owner ruling):
+overhangs the band's rule (`--frame`, full-width `left: 0; right: 0`),
+bottom corners only, centred, **not a link, not a control** (no `role`, no
+`tabindex`, no caret).
+
+Its two lines, in order (owner ruling, `B5`):
+
+1. **"The life of"** — the secondary rung the legible stamps wear: the
+   ground's own pole (`var(--ink)`), 10px, `line-height: 1.2`.
+2. **"Robert Alastair Zeved Gregory"** — the title rung: 15px / **600**.
+
+### §3.3 The regions
+
+| Region | Render |
+|---|---|
+| Title | the compartment above (§3.2) |
+| Components | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
+| Requirements | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
+| Parking Lot | water field closing the sheet; holds the contact form (§6) |
+| All Boards rail | `--chrome`-grounded side rail, four empty categories (To Do, Notes, Learning, Ideas), no boards — contents not scoped (B15) |
+
+### §3.4 The door-cards live in the board space
+
+The six door-cards sit **in the free board space** — the empty canvas between
+the regions — at the positions the owner's wireframe illustrates (owner
+ruling, `B2`: "the empty space is literally FOR those cards"). The wireframe
+is committed as an **illustrative reference only**:
+[`docs/proofs/wireframe-illustration-2026-09-29.png`](proofs/wireframe-illustration-2026-09-29.png)
+— it is not law; where the wireframe and this document disagree, this
+document wins. The cards do **not** live inside Components, Requirements, or
+the Parking Lot.
+
+---
+
+## §4 The door-card component
+
+A door-card is a **real anchor** — `<a target="_blank"
+rel="noopener noreferrer">` — not a scripted button. It renders as a TheBoards
+note: `--note` fill, 2px `--frame` border, 3px radius, `--ink-dark` text,
+draggable and resizable for the visitor's entertainment only (no persistence,
+no state — `B7`).
+
+### §4.1 States
+
+| State | Render | Geometry partner (never colour alone) |
+|---|---|---|
+| **rest** | note surface, `--frame` border, no shadow, no glow, no underline | — the border itself is the resting edge |
+| **hover** | blue glow blooms: `--frame` `#698ebf` at `--elevation` (B14, binding pending #51) | the glow *is* elevation — a temporary lifting, permitted by §1 |
+| **active (pressed)** | glow shifts to the Idea green `#b9d2b2` (B14, binding pending #51) | **1px inset** — the card presses into the page |
+| **focus-visible** | a focus ring in the surface's ink (never a tint) | the ring is the geometry; keyboard users are never left to colour alone |
+
+Transitions between states use TheBoards' closed motion set — short, quiet,
+no bounce; nothing moves on its own after the interaction ends.
+
+### §4.2 The six doors
+
+| Card | Destination (all `target="_blank"`) | Status |
+|---|---|---|
+| Community | `https://earp-street-park.netlify.app` | live |
+| Professional | `https://razgregory.com/career` | **stub** (built after the landing page, B4) |
+| Writing | `https://substack.com/@theaboveaveragerob` | live |
+| Software & AI | `https://alastairzeved.com` | live |
+| Plants & Rocks | `https://razgregory.com/plantsandrocks` | **stub** (built after the landing page, B4) |
+| Music | `https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ` | live (owner's correction: Spotify, not Apple Music) |
+
+---
+
+## §5 Motion
+
+A closed set of quiet transitions inherited from TheBoards' grammar: hover
+glow ~120–200ms ease-out; pressed inset ~80ms; no keyframes that loop, no
+entrance animations, no staggered reveals. **Nothing animates on load.** If a
+new motion cannot name its job in one sentence it is costume and comes out.
+
+---
+
+## §6 The contact form (Parking Lot)
+
+A Formspree form with fields and protections per the owner's ruling (B6):
+
+| Field | Required |
+|---|---|
+| Name | no |
+| Email | no |
+| Message | **yes** |
+
+- **Captcha:** Formspree's reCAPTCHA — on by default, runs on Formspree's
+  side; it adds no third-party script to the page. Never add a second
+  captcha.
+- **Honeypot:** the standard `_gotcha` field — `type="text"`, visually
+  hidden via CSS, **not** `type="hidden"`.
+- **Referrer policy:** the site must never send `Referrer-Policy:
+  no-referrer` or `same-origin` — Formspree files every submission as spam
+  when the referrer is missing, which would silently brick the form.
+- The form is the page's **only** network call (§3.4, PRD).
+
+---
+
+## §7 Accessibility
+
+- Every door-card is a real link: keyboard-focusable, announced by its
+  visible name, `target="_blank"` with `rel="noopener noreferrer"`.
+- Focus is a visible ring (§4.1), never a tint alone.
+- The title compartment is not a control and must not be announced as one.
+- Form fields carry labels; the Message field is `required` and announced so.
+- Text contrast holds to §2.3's table on every surface it lands on.
+- The rail's four empty categories are present semantics, not ghosts — an
+  empty list is still a list.
+
+---
+
+## §8 What pins this document
+
+| What is pinned | By |
+|---|---|
+| §2's tokens, ratios, crossover | `test/tokens.js` — recomputed from shipped hexes |
+| card states, region layout, rail presence | `test/mobile.js`, `test/desktop.js` |
+| the four empty rail categories | `test/desktop.js` |
+| no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
+
+---
+
+## §9 Cross-reference
+
+| Citation | Here |
+|---|---|
+| `UIUX §1` — governing law | §1 |
+| `UIUX §2` — tokens, ladder, ink | §2 |
+| `UIUX §3` — the page, regions | §3 |
+| `UIUX §4` — the door-card, states, doors | §4 |
+| `UIUX §6` — the contact form | §6 |
+| `UIUX §7` — accessibility | §7 |
+
+The codebase's `UIUX §x` citations resolve to their own numbers here.

@@ -1,4 +1,4 @@
-# The Life of Robert Alastair Zeved Gregory
+# The Portfolio of Robert Alastair Zeved Gregory
 
 The central hub for Robert A. Gregory's scattered pseudonyms and websites —
 one page, built literally on TheBoards as the template. A static, single-file
@@ -23,8 +23,8 @@ question. The governing issue of record is
 
 ## The site
 
-- **Title card:** "The Life of Robert Alastair Zeved Gregory" — two lines,
-  the same title card as TheBoards, never a link.
+- **Title card:** "The Portfolio of" / "Robert Alastair Zeved Gregory" — two
+  lines (B17, superseding B5), the same title card as TheBoards, never a link.
 - **Six doors**, all new tab:
   | Card | Dest |
   |---|---|

@@ -59,10 +59,11 @@ themselves are built only after the landing page is finished.
 razgregory.com sub pages, they just need to be stubbed for now - we build
 those only after the landing page is finished."
 
-### B5. The title card
+### B5. The title card (SUPERSEDED by B17)
 "The Life of Robert Alastair Zeved Gregory" — "the life of" first line,
 "Robert Alastair Zeved Gregory" second line. Same title card as TheBoards;
-not a link, not a control.
+not a link, not a control. **Superseded by B17** ("The Portfolio of" /
+"Robert Alastair Zeved Gregory"), issue #51, 2026-09-29.
 
 **Source:** owner's answer to the grill, 2026-09-29, issue #51 — "The title
 card is 'The Life of Robert Alastair Zeved Gregory' where 'the life of' is
@@ -143,15 +144,16 @@ service worker.)
 Hover: a **blue glow** appears, drawn from the existing blue tokens — never a
 new colour or token. Click (pressed): the card presses **1px inset** and the
 glow shifts to a light **"go" green** pulled from the Idea boards' colour
-family — never a new colour or token. (Member bindings transcribed in
-`UIUX §2.4`/`§2.5`: hover glow = `--frame #698ebf`; click green = Idea
-`--note #b9d2b2`; both pending one-word confirmation on issue #51.)
+family — never a new colour or token. Member bindings **confirmed by the
+owner**: hover glow = `--frame` `#698ebf`; click green = Idea `--note`
+`#b9d2b2` (`UIUX §2.4`/`§2.5`).
 
 **Source:** owner's answer to the grill, 2026-09-29, issue #51 — "Hover -
 blue glow appears (from the existing blue design tokens already established,
 not a new one). Click = pressed 1px inset + glow shifts to a light 'go' green
 on click (pull from the idea boards color family, don't invent a new color or
-design token)."
+design token)." — bindings confirmed on issue #51, 2026-09-29: "Confirm both:
+hover = --frame #698ebf, click = Idea --note #b9d2b2."
 
 ### B15. The All Boards rail: empty categories, not scoped
 The rail shows the four board categories (To Do, Notes, Learning, Ideas) with
@@ -171,3 +173,28 @@ publish root.
 
 **Source:** owner's answer to the grill, 2026-09-29, issue #51 — "The
 deploy-branch topology (Netlify production = deploy branch)."
+
+### B17. Title card text: "The Portfolio of Robert Alastair Zeved Gregory"
+The title card reads — line 1: **"The Portfolio of"** (secondary rung,
+10px); line 2: **"Robert Alastair Zeved Gregory"** (title rung, 15px/600).
+Same title-card component as TheBoards; not a link, not a control.
+**Supersedes B5.**
+
+**Source:** owner's answer to the grill, 2026-09-29, issue #51 — "a title card
+that reads 'The Portfolio of Robert Alastair Zeved Gregory' with 'The
+Portfolio of' being the top line and my name as the second line of the
+title. ... this is a change from the previous 'The Life of...' and we are
+replacing the term 'life' with 'Portfolio'." — and the owner's confirmation,
+same issue: "Yes, B5 superseded — new title is law."
+
+---
+
+## The build (issue #53)
+
+The landing page is built from these rulings in one single-file
+`index.html`. The rail shows four empty categories (B15); Components and
+Requirements render furniture only (PRD §2.6); the six door-cards sit in the
+free board space (B2, B3); the Parking Lot holds the Formspree form, action
+`https://formspree.io/f/xppwbrga` (B6); card states per B14. Two on-brand
+under-construction stubs (`career.html`, `plantsandrocks.html`) are built in
+this repo for the deferred razgregory.com destinations (B4).

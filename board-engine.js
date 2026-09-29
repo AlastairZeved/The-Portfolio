@@ -87,6 +87,9 @@
     root.setAttribute('data-rw', rw);
     root.setAttribute('data-rh', rh);
 
+    var surface = ensureSurface(root);
+    surface.setAttribute('data-cat', catOf(board)); // the surface wears the board's own ladder
+
     renderBand(board, root);
     renderNotes(board, root, rw);
     renderLinks(board, root);
@@ -231,6 +234,9 @@
       var ceiling = Math.ceil(0.5 * rh);
       if (h > ceiling) h = ceiling; // §3.2: a runaway lot cannot swallow the canvas
       root.querySelector('#lot').style.height = h + 'px';
+      // Issue #32: the settled re-measure can move the lot's box, so the
+      // full-bleed lot fill must follow it — same fit, fresh measurement.
+      paintSurface(root);
     }
 
     measureAndDraw();
@@ -241,6 +247,72 @@
     }
     // Keep the action-row plane above the lot's top edge? No — this is a read-only
     // portfolio: no board-action row is built (owner ruling 1).
+  }
+
+  /* ---- Issue #32: the surface and the figure are separate ---- */
+  /* #surface is the board's SURFACE: a viewport-derived box (100% of the
+     stage, i.e. (vw−300)×vh device px by construction — the same law the
+     reference app applies in geometry.js when it derives LOGICAL_W/H from
+     the viewport, so the sheet fills its area at every viewport). It is
+     created engine-side so every page (SPA and the five static ones)
+     inherits it with the render; #board keeps its role as the FIGURE.
+     The two fills inside carry the band's water and the lot's water to
+     the stage's edges; they sit UNDER the figure, so inside the canvas
+     box the board's own opaque surfaces win and nothing there moves. */
+  function ensureSurface(root) {
+    var surface = document.getElementById('surface');
+    if (surface) return surface;
+    surface = document.createElement('div');
+    surface.id = 'surface';
+    surface.setAttribute('aria-hidden', 'true'); // decorative: the figure carries the content
+    var bandFill = document.createElement('div');
+    bandFill.id = 'band-fill';
+    var lotFill = document.createElement('div');
+    lotFill.id = 'lot-fill';
+    surface.appendChild(bandFill);
+    surface.appendChild(lotFill);
+    root.parentNode.insertBefore(surface, root);
+    return surface;
+  }
+
+  /* Position the fills from the SAME composite scale the figure uses.
+     Every dimension here is derived (k × renderScale, or a DOM-measured
+     logical box) — never a viewport literal, never a per-size branch. */
+  function paintSurface(root, f) {
+    if (f) root.__fit = f; // the fonts.ready re-measures re-use the current fit
+    f = root.__fit;
+    if (!f) return;
+    var surface = document.getElementById('surface');
+    if (!surface) return;
+    var rw = Number(root.getAttribute('data-rw'));
+    var rh = Number(root.getAttribute('data-rh'));
+    var ps = f.k * f.renderScale;
+    var bandFill = surface.querySelector('#band-fill');
+    var lotFill = surface.querySelector('#lot-fill');
+    // The band: full-bleed water over the canvas band's own painted
+    // y-range; the radial layer is sized to the CANVAS band box so the
+    // falloff is continuous across the canvas edge. border-bottom-width
+    // is the band rule's painted thickness (2 logical px at the composite
+    // scale) — a derived size, not a viewport literal.
+    var bandH = root.querySelector('#band').offsetHeight;
+    bandFill.style.height = bandH * ps + 'px';
+    bandFill.style.backgroundSize = rw * ps + 'px ' + bandH * ps + 'px, 100% 100%';
+    bandFill.style.backgroundPosition = '0 0, 0 0';
+    bandFill.style.backgroundRepeat = 'no-repeat, no-repeat';
+    bandFill.style.borderBottomWidth = 2 * ps + 'px';
+    // The lot: full-bleed from the canvas lot's painted top edge down to
+    // the stage's bottom edge. The linear layer uses pixel stops matched
+    // to the canvas lot's own gradient so the water is continuous across
+    // the canvas edge and holds at the stage's bottom.
+    var lotH = root.querySelector('#lot').offsetHeight;
+    lotFill.style.top = (rh - lotH) * ps + 'px';
+    lotFill.style.backgroundImage =
+      'radial-gradient(ellipse at 50% 100%, rgb(0 0 0 / 0.35), transparent 70%),' +
+      'linear-gradient(to bottom, var(--water-top) 0px, var(--water-mid) ' + 0.5 * lotH * ps + 'px, ' +
+      'var(--water-bot) ' + lotH * ps + 'px, var(--water-bot) 100%)';
+    lotFill.style.backgroundSize = rw * ps + 'px ' + lotH * ps + 'px, 100% 100%';
+    lotFill.style.backgroundPosition = '0 0, 0 0';
+    lotFill.style.backgroundRepeat = 'no-repeat, no-repeat';
   }
 
   /* ---- §11 Apply the fit: ONE uniform transform, anchored top-left ---- */
@@ -259,6 +331,7 @@
     root.setAttribute('data-k', f.k);                 // §11 figure, reported as-is
     root.setAttribute('data-render-scale', f.renderScale); // §3 factor itself
     root.setAttribute('data-paint-scale', paintScale);     // the composite paint scale
+    paintSurface(root, f);
     return f;
   }
 

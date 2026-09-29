@@ -59,12 +59,28 @@ FIXED_TOKENS = {
 
 # Owner ruling 1 (§7): chrome that must NOT be built. Searched in the built
 # sources only (the data file legitimately contains words like "Delete").
+#
+# Superseding ruling (2026-09-29, docs/issues/0001-board-engine.md §7): the
+# rail chrome mandated by issue #43's wireframe — "New board" pills, Export,
+# Import, Collapse, plus the "All Boards" title — is INERT chrome, exempted
+# for those four tokens in the rail context (assembly.js). The ponytail:
+# this covers ONLY the rail's inert chrome. Upgrade path: if Rob later rules
+# the whole §7 strip list retired, rewrite §7 wholesale (a new dated ruling),
+# then delete STRIP_TOKENS and the §7 scans together.
 STRIP_TOKENS = [
     "note-tb", "note-tb-btn", "reminder", "New board", "Export", "Import",
     "Collapse", "draggable", "resizer", "resize-frame", "resize handle",
     "taskbar", "system tray", "title bar",
     "CALENDAR BOARD", "5A 2026", "board-actions", "action-tab", "trash",
 ]
+# Tokens whose strip assertion no longer applies to the rail chrome files
+# (assembly.js + assembly.css, PR #44's files) per the 2026-09-29 §7
+# superseding ruling. Every other token still scans every file; these four
+# still scan every OTHER file.
+# "title bar" appears in assembly.js only as prose describing the mandated
+# "All Boards" title bar — the same exempted rail chrome.
+RAIL_CHROME_TOKENS = ["New board", "Export", "Import", "Collapse", "title bar"]
+RAIL_CHROME_FILES = ["assembly.js", "assembly.css"]
 # Owner ruling 2026-09-27: no monospace face anywhere.
 MONO_TOKENS = ["monospace", "mono,", "Courier", "Consolas", "Menlo", "JetBrains"]
 
@@ -210,10 +226,17 @@ PAGE_EVAL_JS = r"""
   const isDataOwned = el =>
     el.closest('.note') ||
     (el.closest('.lot-item') && !el.closest('#lot-contact-form'));
+  // §7 superseding ruling (2026-09-29): the rail's inert chrome — the #rail
+  // panel ("All Boards" title bar, group "New board" pills, "‹ Collapse") and
+  // the #board-chrome Export/Import pair — is mandated as drawn and exempt
+  // from this scan, scoped to those two containers ONLY. Chrome named
+  // classes/ids and everything outside them still fail the scan.
+  const isRailChrome = el => el.closest('#rail, #board-chrome');
   const stripAttrs = /note-tb|board-actions|action-tab|taskbar|resize-frame|resizer|draggable-resize/i;
   const stripWords = /\b(Export|Import|Collapse|reminder|taskbar|resizer|New board|note-tb|board-actions|action-tab|resize handle|system tray|title bar|CALENDAR BOARD)\b/;
   const chrome = [];
   document.querySelectorAll('button, input, select, textarea').forEach(el => {
+    if (isRailChrome(el)) return;
     if (!el.closest('#lot-contact-form'))
       chrome.push('control: ' + el.tagName + (el.id ? '#' + el.id : ''));
   });
@@ -224,7 +247,7 @@ PAGE_EVAL_JS = r"""
   document.querySelectorAll('*').forEach(el => {
     if (el.childElementCount) return;
     const t = el.textContent && el.textContent.trim();
-    if (!t || isDataOwned(el)) return;
+    if (!t || isDataOwned(el) || isRailChrome(el)) return;
     if (stripWords.test(t))
       chrome.push('text: ' + el.tagName + ' ' + JSON.stringify(t.slice(0, 60)));
   });
@@ -1425,9 +1448,14 @@ def main():
     # --- §7 strip-list absent from built sources ---
     # Word-boundary, case-sensitive: `!important` in CSS must not read as "Import".
     # finding 5: same widened file set as the mono scan above.
+    # §7 superseding ruling (2026-09-29): the four rail-chrome tokens are
+    # exempt in assembly.js only (the rail chrome file); everywhere else the
+    # strip list still stands, token for token.
     for tok in STRIP_TOKENS:
         pat = re.compile(r"\b%s\b" % re.escape(tok))
         for src_name, src in scanned:
+            if tok in RAIL_CHROME_TOKENS and src_name in RAIL_CHROME_FILES:
+                continue
             assert not pat.search(src), f"strip-list chrome '{tok}' in {src_name}"
 
     # --- the data contract: parse EVERY board ---

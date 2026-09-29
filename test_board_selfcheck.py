@@ -260,6 +260,30 @@ PAGE_EVAL_JS = r"""
     monoHits, chrome, cssImportant,
     formPresent: !!document.getElementById('lot-contact-form'),
     titleText: document.getElementById('board-title').textContent,
+    // -- issue #28: the title CARD's rendered box, its bottom border, its
+    //    overhang of the band rule, and its widest text line (for the
+    //    box:text ratio that distinguishes a wider card from scaled text).
+    bandTitle: (() => {
+      const el = document.getElementById('board-title');
+      const band = document.getElementById('band');
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      const ctx = document.createElement('canvas').getContext('2d');
+      ctx.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+      const lines = el.textContent.split('\n').map(s => s.trim()).filter(Boolean);
+      const comps = document.getElementById('zone-components');
+      const reqs = document.getElementById('zone-requirements');
+      return {
+        x: r.x, y: r.y, w: r.width, h: r.height,
+        cardBottom: r.bottom,
+        bandBottom: band.getBoundingClientRect().bottom,
+        cardH: el.offsetHeight, bandH: band.offsetHeight,
+        bottomBorder: parseFloat(cs.borderBottomWidth),
+        widest: lines.length ? Math.max(...lines.map(l => ctx.measureText(l).width)) : 0,
+        compRight: comps ? comps.getBoundingClientRect().right : null,
+        reqLeft: reqs ? reqs.getBoundingClientRect().left : null,
+      };
+    })(),
     railGroups: document.querySelectorAll('#rail .rail-group').length,
     railCards: [...document.querySelectorAll('#rail .rail-card')].map(a => a.textContent.trim()),
     notesCount: document.querySelectorAll('#notes .note').length,
@@ -513,6 +537,37 @@ def assert_rendered_behaviour(rendered):
                 f"{page_name}: {len(d['drawn'])} connector lines drawn on the "
                 "landing board, expected 14 after the deletion of the Earp Street "
                 "Park note and its single link")
+        # -- issue #28: the title CARD is the designed compartment ------------
+        # (a) its painted outer box measures 455±15 px (source number at the
+        #     same stage width; 317 logical × the composite paint scale).
+        tc = d["bandTitle"]
+        assert abs(tc["w"] - 455) <= 15, (
+            f"{page_name}: title card outer width {tc['w']:.1f}px != the "
+            f"designed 455±15 painted px (issue #28) — the card is "
+            f"shrink-wrapping its text instead of being the compartment")
+        # (b) the box:text ratio pins that the BOX grew, not the TEXT: the
+        #     source measures 2.92 on the landing board; scaling the text
+        #     instead of the box collapses this toward 1.
+        if is_landing:
+            ratio = tc["w"] / tc["widest"]
+            assert ratio >= 2.5, (
+                f"{page_name}: title card:text ratio {ratio:.2f} < 2.5 (source "
+                f"2.92) — the text was scaled instead of the card box (issue #28)")
+        # (c) the card is a CLOSED box that overhangs the band rule (B38): a
+        #     bottom border present on all four sides, and the card's bottom
+        #     edge 22 logical px below the band's bottom edge (the rule).
+        assert tc["bottomBorder"] >= 2 and (
+            tc["cardH"] - tc["bandH"]) == 22 and tc["cardBottom"] > tc["bandBottom"], (
+            f"{page_name}: title card does not overhang the band rule as a "
+            f"closed box (issue #28 / B38): bottom border {tc['bottomBorder']}px, "
+            f"card h {tc['cardH']} vs band h {tc['bandH']} (overhang "
+            f"{tc['cardH'] - tc['bandH']} logical px, expected 22), "
+            f"card bottom {tc['cardBottom']:.1f} vs band bottom {tc['bandBottom']:.1f}")
+        # (d) the card stays centred in the centre channel between the zones.
+        assert tc["compRight"] is not None and abs(
+            ((tc["compRight"] + tc["reqLeft"]) / 2) - (tc["x"] + tc["w"] / 2)) <= 1.2, (
+            f"{page_name}: title card not centred in the centre channel "
+            f"(issue #16/#28)")
         print(f"behaviour {page_name.ljust(38)} lot={d['lotHeight']:4} "
               f"k={d['dataK']:.4f} lines={len(d['drawn']):2} "
               f"mono=0 chrome=0 endpoint-drift={worst:.2f}px")
@@ -561,6 +616,29 @@ def _mutate_neuter_note_anchor(src):
     assert src.count(anchor) == 1, \
         "board-engine.js drifted: the note-anchor createElement is not where the proof expects"
     return src.replace(anchor, "var el = document.createElement('div');")
+
+
+def _mutate_shrink_title_card(src):
+    # Issue #28 regression A: the card reverts to shrink-wrapping its two text
+    # lines instead of being the designed 317-logical-px compartment. The
+    # rendered width assertion must go RED, and for THAT reason.
+    needle = "  width: 317px;"
+    assert src.count(needle) == 1, "issue #28 width rule drifted — mutate nothing"
+    return src.replace(needle, "  min-width: 120px; max-width: 40%;")
+
+
+def _mutate_open_title_card(src):
+    # Issue #28 regression B: the bottom border is removed again — the card
+    # stops being a closed box overhanging the rule. The rendered overhang
+    # assertion (which requires the bottom border) must go RED, and for THAT
+    # reason.
+    anchor = ("  border: 2px solid var(--frame);\n"
+              "  border-radius: 3px;")
+    assert src.count(anchor) == 1, "issue #28 border block drifted — mutate nothing"
+    return src.replace(
+        anchor,
+        "  border: 2px solid var(--frame); border-bottom: none;\n"
+        "  border-radius: 3px 3px 0 0;")
 
 
 def _mutate_drop_clicked_state(src):
@@ -722,6 +800,14 @@ def prove_gates():
         ("the persisted clicked state removed from the note's click handler",
          {"board-engine.js": _mutate_drop_clicked_state},
          r"\.is-clicked"),
+        ("issue #28 regression A: the title card reverts to shrink-wrapping "
+         "its text (min-width/max-width, no 317px width)",
+         {"engine.css": _mutate_shrink_title_card},
+         r"title card outer width"),
+        ("issue #28 regression B: the card's bottom border removed — the box "
+         "no longer closes over the rule",
+         {"engine.css": _mutate_open_title_card},
+         r"overhang the band rule"),
     ]
     for label, mutations, pattern in variants:
         # apply each mutation to the CURRENT file source: the override map

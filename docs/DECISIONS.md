@@ -146,32 +146,35 @@ new colour or token. Click (pressed): the card presses **1px inset** and the
 glow shifts to a light **"go" green** pulled from the Idea boards' colour
 family — never a new colour or token.
 
-The two **member bindings are pending owner confirmation** — the hover glow
-transcribed as `--frame` `#698ebf` and the click green as the Idea ladder's
-`--note` rung `#b9d2b2` (`UIUX §2.4`/`§2.5`). Both are existing palette
-tokens, not inventions; but the owner has neither confirmed nor overruled
-them, so they are recorded as asserted-and-pending and carry no owner source
-of their own.
+**Members resolved.** The hover glow is `--accent-page` `#6d9cb0` (**B25**,
+#67); the click-state green is the Idea ladder's `--note` rung `#b9d2b2`,
+**ruled final** (**B29**, #78) (`UIUX §2.4`/`§2.5`). Both are existing
+palette tokens, not inventions. Each was recorded on 2026-09-29 as asserted
+rather than owner-sourced; both are settled now — the hover by B25, the click
+green by B29.
 
-**Hover member superseded by B25** (#67, 2026-09-29): the hover glow is `--accent-page` `#6d9cb0`, not `--frame`; the click-state green below remains pending.
+**Hover member superseded by B25** (#67, 2026-09-29): the hover glow is `--accent-page` `#6d9cb0`, not `--frame`; the click-state green below is **ruled final** (B29, #78).
 
 **Source:** owner's answer to the grill, 2026-09-29, issue #51 — "Hover -
 blue glow appears (from the existing blue design tokens already established,
 not a new one). Click = pressed 1px inset + glow shifts to a light 'go' green
 on click (pull from the idea boards color family, don't invent a new color or
-design token)." — the members stand **pending**: the owner's 2026-09-29
+design token)." — the members were recorded as not yet owner-sourced: the
+owner's 2026-09-29
 statement ([issue #51, comment
 5897377233](https://github.com/AlastairZeved/The-Portfolio/issues/51#issuecomment-5897377233)),
 answering a two-question choice, confirmed "both rulings" — the **monospace
-ban and the self-hosted fonts** (B22, B23) — and did **not** confirm the two
-card-state colours; on those he asked instead, "Are those colors made up or
-are they from the palette as instructed?"
+ban and the self-hosted fonts** (B22, B23) — and did not name the two
+card-state colours in that comment; on those he asked instead, "Are those
+colors made up or are they from the palette as instructed?" Both are settled
+since — the hover glow by B25, the click-state green by B29 (ruled final,
+#78).
 
 **Record repair, 2026-09-29 (same comment).** This entry previously said the
 bindings were "confirmed by the owner" and quoted a confirmation — "Confirm
 both: hover = --frame #698ebf, click = Idea --note #b9d2b2" — that appears in
 no owner statement anywhere in this thread or the record. The fabricated
-quote has been **deleted**; the two members were downgraded to pending and
+quote has been **deleted**; the two members were downgraded to unsourced and
 `UIUX §4.1` was brought into line with `UIUX §2.4`/`§2.5`. No other part of
 this entry changed, and no design value changed.
 
@@ -373,7 +376,7 @@ no hex, px, ms or state; both are record-law transcriptions of rulings that
 were already being followed by the shipped page.
 
 ### B25. The door-card hover glow: `--accent-page`, and a bloom that registers (#67)
-The hover glow's blue is **`--accent-page` `#6d9cb0`** — an existing palette blue (`TheBoards' UIUX.md §2.6`, the B52 accent pass: the primary, the rail pager, the drop target; 0.3016 relative luminance, 6.72:1 on `--chrome`) — superseding the v1 member `--frame` `#698ebf` (0.2611, 5.95:1), which the owner never confirmed. No new colour, no new token: both are existing tokens, per B14. Its geometry is a single bloom — **`0 0 32px 4px rgb(var(--glow-blue) / 0.9)`** — with no second shadow layer: the bloom *is* the elevation on hover (`UIUX §1`, §4.1), and the `--elevation` shadow that used to paint over the bloom's brightest band is removed from the hover state (`--elevation` remains the pressed state's). The click-state green (`--glow-green` `#b9d2b2`, `UIUX §2.5`) is **unchanged and still pending**; this ruling does not move it.
+The hover glow's blue is **`--accent-page` `#6d9cb0`** — an existing palette blue (`TheBoards' UIUX.md §2.6`, the B52 accent pass: the primary, the rail pager, the drop target; 0.3016 relative luminance, 6.72:1 on `--chrome`) — superseding the v1 member `--frame` `#698ebf` (0.2611, 5.95:1), which the owner never confirmed. No new colour, no new token: both are existing tokens, per B14. Its geometry is a single bloom — **`0 0 32px 4px rgb(var(--glow-blue) / 0.9)`** — with no second shadow layer: the bloom *is* the elevation on hover (`UIUX §1`, §4.1), and the `--elevation` shadow that used to paint over the bloom's brightest band is removed from the hover state (`--elevation` remains the pressed state's). The click-state green (`--glow-green` `#b9d2b2`, `UIUX §2.5`) is **unchanged**; this ruling does not move its value — the green itself is **ruled final** (**B29**, #78).
 
 **Follow-up ruling (owner chat, 2026-09-29):** the active/pressed state takes the hover's full bloom geometry (`0 0 32px 4px` / `0.9`) in the green channels (`--glow-green` #b9d2b2), with the elevation layer dropped — so the press holds the bloom while the card sinks 1px, instead of contracting it.
 
@@ -449,3 +452,27 @@ note centres, `pointer-events: none`, `z-index: 1` under the notes,
 carries the rendering; `test/desktop.js` pins the six pairs.
 
 **Source:** owner's issue [#75](https://github.com/AlastairZeved/The-Portfolio/issues/75), 2026-09-29 — "Create the following links between note cards on the board:\n1. Link Music and Writing\n2. Link Software & AI to Community\n3. Link Software & AI to Writing\n4. Link Plants and Rocks to Community\n5. Link Plants and Rocks and Writing\n6. Link Software & AI to Music". The rendering values are transcribed, not invented: the owner's statement names no value, so they are taken verbatim from the reference implementation — TheBoards' `UIUX §4.6` / `B91` (TheBoards' record, the link idiom this page wears by owner ruling, `AGENTS.md` "built literally on TheBoards as the template").
+
+---
+
+### B29. The click-state green is ruled final — a rule carries no "pending" status (#78)
+
+The door-card's **click-state green is ruled final**. The pressed glow is the
+Idea ladder's `--note` rung, **`#b9d2b2`** (shipped as `--glow-green`),
+rendered as the hover's full bloom geometry (`0 0 32px 4px` / `0.9`) with the
+elevation layer dropped (`UIUX §2.5`) — the value and the geometry both stand,
+unchanged, exactly as `index.html` already paints them.
+
+A rule carries **no "pending" status**. This entry retires every
+"pending"/"awaiting confirmation" annotation attached to the click-state green
+in this record — in **B14** (the member-bindings paragraph) and **B25** (the
+"still pending" clause) — because those clauses recorded an *agent status
+note*, not an owner ruling, and the owner's statement below removes them. The
+green is now carried by this entry, with the owner's source. **Supersedes** the
+pending-status clauses of B14 and B25; it moves no design value and edits away
+no ruling.
+
+**Source:** owner chat, 2026-09-29, recorded in the owner's issue
+[#78](https://github.com/AlastairZeved/The-Portfolio/issues/78) — "Confirm the
+glow green. There is no 'pending' status for a rule. It's final once written,
+not debated once written."

@@ -127,7 +127,8 @@ On **active** (pressed), the glow shifts to a light **"go" green pulled from
 the Idea boards' colour family** — no new colour, no new token (owner ruling,
 `DECISIONS.md` B14). The member transcribed in v1: **the Idea ladder's `--note`
 rung, `#b9d2b2`**, the lightest green the Idea family ships (`TheBoards'
-UIUX.md §2.2.2`). Pending one-word confirmation on #51.
+UIUX.md §2.2.2`). This binding is **ruled final** (owner chat, 2026-09-29,
+issue #78).
 
 **Follow-up ruling (owner chat, 2026-09-29):** the press takes the hover's
 full bloom geometry (`0 0 32px 4px` / `0.9`) in the green channels

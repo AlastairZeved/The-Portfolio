@@ -265,6 +265,13 @@ for ~3 lines of the 17px title) and never above `1/5` of the viewport width,
 on a narrow viewport where `1/5` width falls below the legible floor, the
 legible floor wins (a card smaller than legible is never produced).
 
+> **Provenance (issue #72, `B33`):** the `132×80` figure is an
+> **agent-derived implementation** of the owner's "legible" word for the
+> **visitor's resize gesture** — the script's `getConstraints` — **never an
+> owner-set number**. The owner's drawings (issue #72/#74 screenshots) and his
+> chat of 2026-09-30 rule **authored** card sizes; the gesture floor does not
+> bound authored geometry.
+
 Both bounds and the gesture are read in the board's **logical coordinate
 space** (§3.1, `B30`): a card's `left/top` and `width/height` are authored in
 logical px, so pointer input (`clientX`/`clientY`, physical) is converted with

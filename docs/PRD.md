@@ -190,9 +190,10 @@ resolved by ruling before or during the build:
   them — furniture present, contents absent (a blank region is the correct
   state of a blank region).
 - **The exact hover/click treatment of the door-cards beyond the owner's
-  words.** The family rule is ruled (`B14`); the two member bindings are
-  transcribed in `UIUX.md §4` and are pending one-word confirmation on issue
-  #51. Do not invent a third.
+  words.** The family rule is ruled (`B14`); both member bindings are settled
+  — the hover glow is `--accent-page` `#6d9cb0` (`B25`) and the click-state
+  green is `--note` `#b9d2b2`, **ruled final** (`B29`, issue #78), both
+  transcribed in `UIUX.md §4`. Do not invent a third.
 
 ---
 

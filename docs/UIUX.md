@@ -122,9 +122,11 @@ second shadow layer on hover** (§2.6).
 
 On **active** (pressed), the glow shifts to a light **"go" green pulled from
 the Idea boards' colour family** — no new colour, no new token (owner ruling,
-`DECISIONS.md` B14). The member transcribed in v1: **the Idea ladder's `--note`
-rung, `#b9d2b2`**, the lightest green the Idea family ships (`TheBoards'
-UIUX.md §2.2.2`). Pending one-word confirmation on #51.
+`DECISIONS.md` B14). The member is **the Idea ladder's `--note` rung,
+`#b9d2b2`**, the lightest green the Idea family ships (`TheBoards'
+UIUX.md §2.2.2`) — **ruled final** by the owner (`DECISIONS.md` B29, issue
+#78): *"Confirm the glow green. There is no 'pending' status for a rule. It's
+final once written, not debated once written."*
 
 **Follow-up ruling (owner chat, 2026-09-29):** the press takes the hover's
 full bloom geometry (`0 0 32px 4px` / `0.9`) in the green channels

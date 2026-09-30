@@ -620,3 +620,25 @@ byte-identical. Nobody asked for Music → LinkedIn; the record must read
 Career ↔ LinkedIn.
 
 **Source:** owner's issue [#74](https://github.com/AlastairZeved/The-Portfolio/issues/74), 2026-09-29 — item 3: "Link the new note card to the existing \"Career\" note card (previously Professional)" (screenshot: [issue #74](https://github.com/user-attachments/assets/3bc427e8-5062-480d-b110-2e8ec37a9f49)).
+
+---
+
+### B35. The shipped LinkedIn anchor is `left: calc(38% - 69px); top: calc(18% + 132px); width:110px; height:47px;` — B34's authored-anchor clause superseded (issue #74, record repair)
+
+B34 carries the interior line "Authored `left:31.5%; top:40%`." That seat was
+authored interim and never shipped. What ships on `main` — from PR #99 (merge
+`a06525c`), closing issue #74 — is the `<a class="door-card" data-id="linkedin">`
+element's inline style, quoted verbatim from `index.html`:
+
+`left: calc(38% - 69px); top: calc(18% + 132px); width:110px; height:47px;`
+
+**This entry supersedes B34's "Authored `left:31.5%; top:40%`." clause on that
+point, and only that point**; B34's text stands byte-identical otherwise —
+including its size and placement readings (110×47, below-left of Career) and its
+supersession of B32's "(Music ↔ LinkedIn, issue #74)" clause. B32 stands
+byte-identical as well.
+
+**Source:** the shipped code — `index.html` `[data-id="linkedin"]` on `main`, PR
+#99 (merge `a06525c`) closing issue [#74](https://github.com/AlastairZeved/The-Portfolio/issues/74).
+The anchor string above is quoted verbatim from `git show origin/main:index.html`,
+not paraphrased.

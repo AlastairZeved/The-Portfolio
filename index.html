@@ -52,6 +52,10 @@
   --lot-h: 180px;
 }
 
+/* ---- Ink poles (UIUX §2.3): flip at the surface boundary ---- */
+.on-dark  { --ink: var(--ink-light); --ink-a: 244 245 241; }
+.on-light { --ink: var(--ink-dark);  --ink-a: 3 16 25; }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 body {
@@ -538,10 +542,10 @@ html.wide #board { left: 300px; right: 0; }
   <div id="band-rule"></div>
 
   <div id="zone-components" class="band-zone">
-    <span class="band-label">Components</span>
+    <span class="band-label on-light">Components</span>
   </div>
   <div id="zone-requirements" class="band-zone">
-    <span class="band-label">Requirements</span>
+    <span class="band-label on-light">Requirements</span>
   </div>
 
   <div id="anchor-title">

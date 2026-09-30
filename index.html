@@ -200,6 +200,18 @@ body {
 .door-card .resize-handle::before { transform: rotate(-45deg) translateY(-4px); }
 .door-card .resize-handle::after  { transform: rotate(-45deg) translateY(-1px); }
 
+/* Rest-only note (the Music card): it is not a link, so it takes no hover
+   state and no click state — rest surface only (B26) */
+.door-card.note-card { pointer-events: none; }
+.door-card.note-card:hover,
+.door-card.note-card:active,
+.door-card.note-card:focus-visible {
+  box-shadow: none;
+  transform: none;
+  outline: none;
+}
+.door-card.note-card .resize-handle { display: none; }
+
 /* ---- The Parking Lot: water closing the foot (UIUX §6) ---- */
 #lot {
   position: absolute;
@@ -553,7 +565,8 @@ html.wide #board { left: 300px; right: 0; }
     <div class="title-pinned">Robert Alastair Zeved Gregory</div>
   </div>
 
-  <!-- The six door-cards, in the free board space (B2, B3) -->
+  <!-- The door-cards, in the free board space (B2, B3); the Music note is not
+       a door — the Apple Music and Spotify doors hang under it (B26) -->
   <a class="door-card" style="left:8%; top:22%; width:230px; height:96px;" href="https://earp-street-park.netlify.app" target="_blank" rel="noopener noreferrer">
     Community
     <span class="resize-handle" aria-hidden="true"></span>
@@ -574,8 +587,16 @@ html.wide #board { left: 300px; right: 0; }
     Plants &amp; Rocks
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" style="left:73%; top:54%; width:220px; height:96px;" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
+  <div class="door-card note-card" style="left:73%; top:54%; width:220px; height:96px;">
     Music
+    <span class="resize-handle" aria-hidden="true"></span>
+  </div>
+  <a class="door-card" style="left:66%; top:69%; width:150px; height:78px;" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
+    Apple Music
+    <span class="resize-handle" aria-hidden="true"></span>
+  </a>
+  <a class="door-card" style="left:86%; top:69%; width:150px; height:78px;" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
+    Spotify
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
   <a class="door-card" style="left:10%; top:70%; width:180px; height:80px;" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">

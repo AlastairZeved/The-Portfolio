@@ -389,7 +389,8 @@ both **real anchors** carrying the full link states (`UIUX §4.1`): the blue
 hover bloom and the 1px-inset green press. The **"Music" card stops being a
 door** — it keeps its note surface at rest and takes **no hover state and no
 click state**, because it is no longer a link (a **rest-only note**,
-`UIUX §4.1`). The link the Music card used to carry (Spotify) moves to the new
+`UIUX §4.1`). It remains a draggable, resizable note like every other note
+(B7) — only its link states are gone. The link the Music card used to carry (Spotify) moves to the new
 Spotify door. The two new doors sit **below the Music card as a mirrored
 pair** — Apple Music lower-left, Spotify lower-right — at the spatial
 placement the owner's issue screenshot gives. This entry changes **no design

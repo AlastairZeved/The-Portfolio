@@ -201,8 +201,8 @@ body {
 .door-card .resize-handle::after  { transform: rotate(-45deg) translateY(-1px); }
 
 /* Rest-only note (the Music card): it is not a link, so it takes no hover
-   state and no click state — rest surface only (B26) */
-.door-card.note-card { pointer-events: none; }
+   state and no click state — rest surface only (B26). It is still a note, so
+   it drags and resizes like the rest (B7). */
 .door-card.note-card:hover,
 .door-card.note-card:active,
 .door-card.note-card:focus-visible {
@@ -210,7 +210,6 @@ body {
   transform: none;
   outline: none;
 }
-.door-card.note-card .resize-handle { display: none; }
 
 /* ---- The Parking Lot: water closing the foot (UIUX §6) ---- */
 #lot {

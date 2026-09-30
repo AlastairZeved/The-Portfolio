@@ -61,9 +61,11 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('Music card is a non-link note', await musicNotes.count() === 1
     && (await musicNotes.first().innerText()).trim().split('\n')[0].trim() === 'Music');
   ok('Music note has no href', await musicNotes.first().evaluate(el => !el.hasAttribute('href')));
-  ok('Music note carries no hover/click shadow', await musicNotes.first().evaluate(el => {
-    const s = getComputedStyle(el);
-    return s.boxShadow === 'none' && s.pointerEvents === 'none';
+  ok('Music note carries no hover/click shadow', await musicNotes.first().evaluate(el =>
+    getComputedStyle(el).boxShadow === 'none'));
+  ok('Music note still drags and resizes like any note (B7)', await musicNotes.first().evaluate(el => {
+    const h = el.querySelector('.resize-handle');
+    return getComputedStyle(el).pointerEvents !== 'none' && !!h && getComputedStyle(h).display !== 'none';
   }));
 
   // rail hidden on mobile (B15: wide only)

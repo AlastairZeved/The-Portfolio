@@ -275,6 +275,36 @@ The **Music** card is not a door (§4.1, B26): it is the plain parent note the
 **below the Music card as a mirrored pair** — Apple Music lower-left, Spotify
 lower-right — at the placement the owner's screenshot gives (issue #72).
 
+### §4.3 Note links (B28)
+
+Six **links** join the note cards — the pairs the owner names in issue #75:
+Music ↔ Writing · Software & AI ↔ Community · Software & AI ↔ Writing ·
+Plants & Rocks ↔ Community · Plants & Rocks ↔ Writing · Software & AI ↔ Music.
+A link is the card-to-card relationship drawn as the board's own linework:
+a thin straight line between two cards' **centres**, no label, no arrowhead.
+
+**The line.** 1px in **`--frame` `#698ebf`** — the page's linework blue
+(§2.2), the same blue as the full-width rules and the card borders, so a link
+introduces **no colour**. Held to a crisp 1px at any render scale by
+`vector-effect: non-scaling-stroke`. **No fill, no cap decoration, no marker.**
+
+**Where it sits.** One `<svg id="link-layer">` in `#board` space —
+`position: absolute; inset: 0`, `z-index: 1`: **below the notes** (the
+door-cards are `z-index: 2`) and **above the board furniture**, with DOM order
+after the furniture. It is `pointer-events: none` — it never takes a hit,
+because a link is a line, not a control.
+
+**Endpoints.** Card centres, computed from live geometry and recomputed
+whenever a card moves — drag, resize, or a window resize that re-scales the
+percentage-authored layout — so a line follows the card it joins. Only the
+**pairing** is authored: every card carries a `data-id`, every line carries
+`data-from` / `data-to`, so both ends of all six links are readable in the
+source (`test/desktop.js` pins them).
+
+**Provenance.** The idiom is TheBoards' note-link rendering, ported verbatim
+(TheBoards' `UIUX §4.6` / `B91`); the six pairs are the owner's (issue #75).
+No value above is invented, and no card's geometry, links or states change.
+
 ---
 
 ## §5 Motion
@@ -347,6 +377,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 |---|---|
 | §2's tokens, ratios, crossover | `test/tokens.js` — recomputed from shipped hexes |
 | card states, region layout, the full-viewport sheet, no rail in the DOM | `test/mobile.js`, `test/desktop.js` |
+| the six note links — their pairs, their 1px `--frame` line, their centres | `test/desktop.js` [L1]–[L6] |
 | card drag + resize floor/ceiling, link still opens a new tab | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 

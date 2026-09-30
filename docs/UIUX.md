@@ -204,15 +204,15 @@ overhangs the band's rule (`--frame`, full-width `left: 0; right: 0`),
 bottom corners only, centred, **not a link, not a control** (no `role`, no
 `tabindex`, no caret).
 
-Its two lines, in order (B17, superseding B5; sizes and width per B19,
-superseding the B17 sizes):
+Its two lines, in order (B17, superseding B5; sizes and width per B31,
+superseding B19, which superseded the B17 sizes):
 
-1. **"The Portfolio of"** — same size as the name: 15px, `line-height: 1.2`.
-2. **"Robert Alastair Zeved Gregory"** — the title rung: 15px / **600**.
+1. **"The Portfolio of"** — same size as the name: 20px, `line-height: 1.2`.
+2. **"Robert Alastair Zeved Gregory"** — the title rung: 20px / **600**.
 
-The compartment's two lines render at **one font size** (15px). Its width hugs
+The compartment's two lines render at **one font size** (20px). Its width hugs
 the title text: the `--frame` left/right borders close in on the text with
-comfortable padding (`18px`), the card stays centred, and the interior never
+comfortable padding (`16px`), the card stays centred, and the interior never
 exceeds the sheet minus the side gutters.
 
 ### §3.3 The regions

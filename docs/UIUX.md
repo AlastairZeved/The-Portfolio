@@ -266,7 +266,7 @@ on a narrow viewport where `1/5` width falls below the legible floor, the
 legible floor wins (a card smaller than legible is never produced).
 
 Both bounds and the gesture are read in the board's **logical coordinate
-space** (§3.1, `B28`): a card's `left/top` and `width/height` are authored in
+space** (§3.1, `B30`): a card's `left/top` and `width/height` are authored in
 logical px, so pointer input (`clientX`/`clientY`, physical) is converted with
 `÷ rs` before it touches card geometry — the same rule the scale cites
 (TheBoards AGENTS.md architecture point 1; `toLogical` divides by the render

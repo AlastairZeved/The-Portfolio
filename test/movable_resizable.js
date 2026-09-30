@@ -2,7 +2,7 @@
    draggable, resizable via the corner handle, clamped to a 1/5-viewport max
    and a legible minimum, with each card's link still opening in a new tab.
 
-   Since issue #87 (B28) the sheet renders through ONE uniform scale, so this
+   Since issue #87 (B30) the sheet renders through ONE uniform scale, so this
    scenario runs at two widths in one pass:
      desktop 1440x900 — scale exactly 1: the authored physical behaviour
                         (unchanged; this is the desktop pin), and

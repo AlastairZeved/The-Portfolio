@@ -555,3 +555,36 @@ now carries **eight** links, two of which (this PR) plus a third pair
 
 **Source:** the owner's reopen on [issue #72's comment
 5917810423](https://github.com/AlastairZeved/The-Portfolio/issues/72#issuecomment-5917810423), 2026-09-30 — "I asked for the two new cards "Apple Music" and "Spotify" to be linked to the "Music" card. Did you link them? No you did not. If you don't know how, look at repo AlastairZeved/TheBoards to learn. Do not disregard my instructions again. Re-open the closed issue that addressed this. It even had fucking screenshots for you to see the placement of them spatially. Idiot."
+
+### B33. The `132×80` number is agent-derived, never an owner ruling — authored card sizes are ruled by the drawings (#72, record amendment)
+
+On 2026-09-30 the owner directed that this provenance defect be fixed
+permanently, and that no rule may ever exist that did not come from him: "make
+sure that is fixed permanently, not just this time. I never made that ruling,
+that is not an owner ruling. There should never be rulings that never came from
+me or twist my words around. Agents do not make rules, they follow them.
+Period." And, on the floor number itself: "I never set a px explicit floor."
+
+The number `132×80` is an **agent-derived implementation value**, not owner
+law. It predates issue #58's ruling and was adopted by `B21`'s transcription
+("The 132px floor was already the shipped minimum width") — a transcription
+that described a shipped implementation value, not an owner-set ruling. As a
+floor, `132×80` belongs only to the script's `getConstraints` — it implements
+the owner's "legible" word (`B21`) for the **visitor's resize gesture**
+(entertainment); it never bounds authored card sizes.
+
+**Authored card sizes are ruled by the owner's drawings** — the screenshot in
+issue #72 defining Apple Music and Spotify at the sizes he drew, and the owner's
+chat of 2026-09-30 confirming the screenshots explicitly define the sizes. This
+entry supersedes any reading of `B21`'s parenthetical that treats `132×80` as a
+floor on authored geometry; `B21`'s own words (a legible minimum and a
+one-fifth ceiling for the resize gesture) stand unchanged.
+
+**Source:** the owner's chat directive 2026-09-30, quoted verbatim in the
+[orchestrator's reopen on issue #72](https://github.com/AlastairZeved/The-Portfolio/issues/72#issuecomment-5919104671)
+— "make sure that is fixed permanently, not just this time. I never made that
+ruling, that is not an owner ruling. There should never be rulings that never
+came from me or twist my words around. Agents do not make rules, they follow
+them. Period.", and "I never set a px explicit floor."; plus the
+[issue #72 screenshot](https://github.com/user-attachments/assets/0b406ea2-9d55-4cf5-af15-b359c2690f37),
+which defines the Apple Music and Spotify card sizes the owner drew.

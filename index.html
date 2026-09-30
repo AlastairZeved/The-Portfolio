@@ -134,14 +134,14 @@ body {
 #anchor-title {
   position: absolute;
   left: 50%; transform: translateX(-50%);
-  top: 0; min-height: calc(var(--rule-y) + 22px);
+  top: 0; min-height: calc(var(--rule-y) + 29px);
   /* issue #59: hug the title text — the borders close in instead of
-     spanning the full card width, staying centred and comfortably padded */
+    spanning the full card width, staying centred and comfortably padded */
   width: max-content;
   max-width: calc(100% - 2 * var(--gutter));
   display: flex;
   flex-direction: column; justify-content: center;
-  padding: calc(var(--band-top) + 6px) 12px 12px;
+  padding: calc(var(--band-top) + 8px) 16px 16px;
   border: 2px solid var(--frame);
   border-top: 0;
   border-radius: 0 0 3px 3px;                  /* only the corners that exist */
@@ -150,12 +150,12 @@ body {
   z-index: 2;
 }
 #anchor-title .title-eyebrow {
-  /* issue #59: single font size in the card — both lines at 15px */
-  font-size: 15px; font-weight: 400; line-height: 1.2;
+  /* issue #59: single font size in the card — both lines at 20px (#91) */
+  font-size: 20px; font-weight: 400; line-height: 1.2;
   color: var(--ink);
 }
 #anchor-title .title-pinned {
-  font-size: 15px; font-weight: 600;
+  font-size: 20px; font-weight: 600;
   color: var(--ink);
 }
 

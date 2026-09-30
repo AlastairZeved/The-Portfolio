@@ -509,3 +509,25 @@ geometry (TheBoards' `toLogical`, the same architecture point). At `rs = 1`
 the conversion is the identity and the desktop gesture is unchanged 1:1.
 
 **Source:** owner's issue [#87](https://github.com/AlastairZeved/The-Portfolio/issues/87), 2026-09-30 — "Scale the whole sheet (TheBoards' own mechanism) — one render scale, cards shrink with the scene, zero new geometry values."
+
+### B31. The title compartment reads as a title (issue #91)
+The title compartment is sized and read as the page's title, not one more
+17px note: both title lines move from **15px to 20px** (**×4/3**, still **one
+size** for both — the #59 single-size law holds), the compartment's own
+padding scales **12px → 16px** sides/bottom and **+6px → +8px** top
+(`--band-top` itself is frozen page structure and does not move), and its
+`min-height` becomes **`calc(var(--rule-y) + 29px)`** (the +22px scaled ×4/3
+→ 29.33, rounded **down** to 29 per "not aggressively"). The hug-the-text
+geometry is untouched: `width: max-content`, `max-width`, the centred
+`translateX(-50%)`, `border: 2px solid var(--frame)` / `border-top: 0`,
+`border-radius: 0 0 3px 3px`, `background: var(--card)`, and the flex
+centring all stand. **No new token** — every name ranges over the existing
+`--band-top`, `--rule-y`, `--frame`, `--card`, `--ink`. **Supersedes only
+B19's number** (15px / 12px / +6px / +22px); never its rule. **Do-not-touch:**
+the door-cards, the band zones, the link layer, and the drag machinery.
+
+**Source:** the design ruling on [issue #91's comment
+5918163891](https://github.com/AlastairZeved/The-Portfolio/issues/91#issuecomment-5918163891)
+— "Increase the size of the title card. Not aggressively, but it's too small
+to read as a title right now. Increase the text's font size in the title card
+too, proportionately to the increase in the size of the title card."

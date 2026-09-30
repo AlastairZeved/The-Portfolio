@@ -1,5 +1,6 @@
 /* test/mobile.js — mobile render + eight new-tab door-cards + form + the one
-   render scale (no clip, no overflow) (black-box, Playwright).
+   render scale (no clip, no overflow, link endpoints under the scale) and the
+   six note links (B28) (black-box, Playwright).
    Run: node test/mobile.js   (BOARDS_URL default http://localhost:8000/index.html) */
 
 const { chromium } = require('playwright');
@@ -58,6 +59,29 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('every door-card fully inside the sheet (no clipping)', fit.allInside);
   ok('no horizontal overflow (scrollWidth <= innerWidth)', fit.noHOverflow);
   ok('no vertical overflow (scrollHeight <= innerHeight)', fit.noVOverflow);
+
+  // the six note links (B28) hold their endpoints under the same scale: the
+  // layer's user units are the board's LOGICAL px, so every line must land on
+  // the LOGICAL centre of the two cards it joins — measured rects are physical,
+  // divided by rs here exactly as index.html's toLogical does (issue #87, B30)
+  const linkFit = await page.evaluate(() => {
+    const board = document.querySelector('#board');
+    const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
+    const br = board.getBoundingClientRect();
+    const centre = el => {
+      const r = el.getBoundingClientRect();
+      return [(r.left - br.left + r.width / 2) / rs, (r.top - br.top + r.height / 2) / rs];
+    };
+    return [...document.querySelectorAll('#link-layer line')].map(l => {
+      const a = board.querySelector('[data-id="' + l.getAttribute('data-from') + '"]');
+      const b = board.querySelector('[data-id="' + l.getAttribute('data-to') + '"]');
+      if (!a || !b) return Infinity;
+      const ca = centre(a), cb = centre(b);
+      return Math.max(Math.abs(+l.getAttribute('x1') - ca[0]), Math.abs(+l.getAttribute('y1') - ca[1]),
+                      Math.abs(+l.getAttribute('x2') - cb[0]), Math.abs(+l.getAttribute('y2') - cb[1]));
+    });
+  });
+  ok('all six links land on their card centres at scale < 1', linkFit.length === 6 && linkFit.every(d => d < 1));
 
   // eight door-cards, each a real new-tab anchor (B26); the Music card is a plain note
   const cards = await page.locator('a.door-card').count();

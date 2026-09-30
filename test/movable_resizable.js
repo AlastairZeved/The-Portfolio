@@ -2,6 +2,20 @@
    draggable, resizable via the corner handle, clamped to a 1/5-viewport max
    and a legible minimum, with each card's link still opening in a new tab.
 
+   Since issue #87 (B28) the sheet renders through ONE uniform scale, so this
+   scenario runs at two widths in one pass:
+     desktop 1440x900 — scale exactly 1: the authored physical behaviour
+                        (unchanged; this is the desktop pin), and
+     narrow  390x844  — scale < 1: every pointer reading must be converted into
+                        the board's LOGICAL space. A dragged card tracks the
+                        pointer 1:1 on screen (physical dx/dy unchanged), the
+                        resize ceiling stays 1/5 of the viewport on screen, and
+                        the legible floor 132x80 is an authored logical size
+                        that scales with the sheet.
+   The style.left/width values are asserted in LOGICAL px directly, so a
+   regression that reads clientX/clientY against card geometry again (the
+   issue #87 review finding) fails here at 390x844.
+
    Dispatch synthetic pointer events ON the target element so the card's own
    event handlers run with the correct e.target (a Playwright real-mouse drag
    coalesces pointermove events in this headless environment; real browsers
@@ -14,32 +28,51 @@ const OUT = process.env.PORTFOLIO_OUT && path.resolve(process.env.PORTFOLIO_OUT)
 let failures = 0;
 const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
 
-(async () => {
-  const browser = await chromium.launch();
-  const context = await browser.newContext();
-  const page = await context.newPage({ viewport: { width: 1440, height: 900 }, hasTouch: false });
+const DRAG_X = 180, DRAG_Y = 150;   // physical px the pointer travels (6 moves of +30/+25)
+const MIN_W = 132, MIN_H = 80;      // the legible floor, LOGICAL px (UIUX §3.4)
+
+/* one scenario, run once per viewport; rs is the render scale the page reports */
+async function runScenario(page, tag, width, height) {
+  await page.setViewportSize({ width, height });
   await page.goto(URL, { waitUntil: 'networkidle' });
 
-  const card = page.locator('a.door-card').first();
+  const rs = await page.evaluate(() =>
+    parseFloat(getComputedStyle(document.querySelector('#board')).getPropertyValue('--rs')) || 1);
+  ok(`${tag}: render scale is ${width >= 1080 ? '1' : 'below 1'} (rs=${rs.toFixed(3)})`,
+     width >= 1080 ? Math.abs(rs - 1) < 1e-6 : rs < 1);
 
-  // --- DRAG: move the card a known distance ---
-  const drag = await page.evaluate(() => {
+  // --- DRAG: the card must track the pointer 1:1 on screen ---
+  const drag = await page.evaluate(({ dx, dy }) => {
+    const board = document.querySelector('#board');
     const c = document.querySelector('a.door-card');
+    const br = board.getBoundingClientRect();
     const cr = c.getBoundingClientRect();
     const sx = cr.left + cr.width / 2, sy = cr.top + cr.height / 2;
     const before = { x: cr.left, y: cr.top };
+    const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
+    // where the card sits in the board's logical space when it is grabbed
+    const start = { x: (cr.left - br.left) / rs, y: (cr.top - br.top) / rs };
     const send = (type, x, y) => c.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y }));
     send('pointerdown', sx, sy);
-    for (let i = 1; i <= 6; i++) send('pointermove', sx + i * 30, sy + i * 25);
-    send('pointerup', sx + 180, sy + 150);
+    for (let i = 1; i <= 6; i++) send('pointermove', sx + i * (dx / 6), sy + i * (dy / 6));
+    send('pointerup', sx + dx, sy + dy);
     const after = c.getBoundingClientRect();
-    return { dx: after.x - before.x, dy: after.y - before.y, expectDx: 180, expectDy: 150 };
-  });
-  ok(`drag moves card 1:1 (moved ${drag.dx},${drag.dy})`,
-     Math.abs(drag.dx - drag.expectDx) < 3 && Math.abs(drag.dy - drag.expectDy) < 3);
+    return {
+      dx: after.x - before.x, dy: after.y - before.y,
+      styleLeft: parseFloat(c.style.left), styleTop: parseFloat(c.style.top),
+      wantLeft: start.x + dx / rs, wantTop: start.y + dy / rs
+    };
+  }, { dx: DRAG_X, dy: DRAG_Y });
+  ok(`${tag}: drag moves the card 1:1 with the pointer (moved ${drag.dx.toFixed(1)},${drag.dy.toFixed(1)})`,
+     Math.abs(drag.dx - DRAG_X) < 3 && Math.abs(drag.dy - DRAG_Y) < 3);
+  // the write lands in the board's LOGICAL space (physical px ÷ scale) — the
+  // issue #87 defect wrote the physical delta straight into style.left
+  ok(`${tag}: drag writes the logical offset (style.left ${drag.styleLeft.toFixed(1)}, want ${drag.wantLeft.toFixed(1)}; style.top ${drag.styleTop.toFixed(1)}, want ${drag.wantTop.toFixed(1)})`,
+     Math.abs(drag.styleLeft - drag.wantLeft) < 1 && Math.abs(drag.styleTop - drag.wantTop) < 1);
 
-  // --- RESIZE max: grow the card past the 1/5 viewport cap ---
+  // --- RESIZE ceiling: 1/5 of the viewport on screen, at any scale ---
   const grown = await page.evaluate(() => {
+    const board = document.querySelector('#board');
     const c = document.querySelector('a.door-card');
     const handle = c.querySelector('.resize-handle');
     const hb = handle.getBoundingClientRect();
@@ -49,15 +82,18 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     for (let i = 1; i <= 20; i++) send('pointermove', sx + i * 40, sy + i * 30); // drag far
     send('pointerup', sx + 800, sy + 600);
     const a = c.getBoundingClientRect();
-    return { w: a.width, h: a.height, vw: window.innerWidth, vh: window.innerHeight };
+    const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
+    return { w: a.width, h: a.height, styleW: parseFloat(c.style.width), styleH: parseFloat(c.style.height),
+             vw: window.innerWidth, vh: window.innerHeight, rs };
   });
-  ok(`resize capped at 1/5 viewport width (got ${grown.w.toFixed(0)}, cap ${(grown.vw/5).toFixed(0)})`,
-     grown.w <= grown.vw / 5 + 1);
-  ok(`resize capped at 1/5 viewport height (got ${grown.h.toFixed(0)}, cap ${(grown.vh/5).toFixed(0)})`,
-     grown.h <= grown.vh / 5 + 1);
+  ok(`${tag}: resize capped at 1/5 viewport width (got ${grown.w.toFixed(1)}, cap ${(grown.vw / 5).toFixed(1)}; style.width ${grown.styleW.toFixed(1)} logical)`,
+     Math.abs(grown.w - grown.vw / 5) < 1.5 && Math.abs(grown.styleW - grown.vw / grown.rs / 5) < 1.5);
+  ok(`${tag}: resize capped at 1/5 viewport height (got ${grown.h.toFixed(1)}, cap ${(grown.vh / 5).toFixed(1)}; style.height ${grown.styleH.toFixed(1)} logical)`,
+     Math.abs(grown.h - grown.vh / 5) < 1.5 && Math.abs(grown.styleH - grown.vh / grown.rs / 5) < 1.5);
 
-  // --- RESIZE min: shrink the card below the legible floor ---
+  // --- RESIZE floor: the authored 132x80 legible minimum, in logical px ---
   const shrunk = await page.evaluate(() => {
+    const board = document.querySelector('#board');
     const c = document.querySelector('a.door-card');
     const handle = c.querySelector('.resize-handle');
     const hb = handle.getBoundingClientRect();
@@ -67,10 +103,13 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     for (let i = 1; i <= 20; i++) send('pointermove', sx - i * 40, sy - i * 40); // drag far up-left
     send('pointerup', sx - 800, sy - 800);
     const a = c.getBoundingClientRect();
-    return { w: a.width, h: a.height };
+    const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
+    return { w: a.width, h: a.height, styleW: parseFloat(c.style.width), styleH: parseFloat(c.style.height), rs };
   });
-  ok(`min width stays legible (got ${shrunk.w.toFixed(0)}, want >= 132)`, shrunk.w >= 132);
-  ok(`min height stays legible (got ${shrunk.h.toFixed(0)}, want >= 80)`, shrunk.h >= 80);
+  ok(`${tag}: min width stays legible (got ${shrunk.w.toFixed(1)} physical = ${shrunk.styleW.toFixed(1)} logical, want >= ${MIN_W})`,
+     shrunk.styleW >= MIN_W - 0.5 && shrunk.w >= MIN_W * shrunk.rs - 1);
+  ok(`${tag}: min height stays legible (got ${shrunk.h.toFixed(1)} physical = ${shrunk.styleH.toFixed(1)} logical, want >= ${MIN_H})`,
+     shrunk.styleH >= MIN_H - 0.5 && shrunk.h >= MIN_H * shrunk.rs - 1);
 
   // --- Link still opens in a new tab on a plain click (B3) ---
   // Reload so no drag-suppression handler is pending (a real browser drag
@@ -78,12 +117,22 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   // do not, so a fresh page isolates the link behavior).
   await page.goto(URL, { waitUntil: 'networkidle' });
   const freshCard = page.locator('a.door-card').first();
-  const beforePages = (await context.pages()).length;
+  const beforePages = (await page.context().pages()).length;
   const bb = await freshCard.boundingBox();
   await page.mouse.click(bb.x + 10, bb.y + 10);
   await page.waitForTimeout(1500);
-  const afterPages = (await context.pages()).length;
-  ok('card link still opens in a new tab', afterPages === beforePages + 1);
+  const pages = page.context().pages();
+  ok(`${tag}: card link still opens in a new tab`, pages.length === beforePages + 1);
+  for (const p of pages) if (p !== page) await p.close();   // leave the next pass clean
+}
+
+(async () => {
+  const browser = await chromium.launch();
+  const context = await browser.newContext();
+  const page = await context.newPage({ viewport: { width: 1440, height: 900 }, hasTouch: false });
+
+  await runScenario(page, 'desktop', 1440, 900);   // rs = 1 — the desktop pin
+  await runScenario(page, 'mobile', 390, 844);     // rs < 1 — the issue #87 scale
 
   if (OUT) await page.screenshot({ path: OUT });
   await browser.close();

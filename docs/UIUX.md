@@ -265,6 +265,16 @@ for ~3 lines of the 17px title) and never above `1/5` of the viewport width,
 on a narrow viewport where `1/5` width falls below the legible floor, the
 legible floor wins (a card smaller than legible is never produced).
 
+Both bounds and the gesture are read in the board's **logical coordinate
+space** (§3.1, `B28`): a card's `left/top` and `width/height` are authored in
+logical px, so pointer input (`clientX`/`clientY`, physical) is converted with
+`÷ rs` before it touches card geometry — the same rule the scale cites
+(TheBoards AGENTS.md architecture point 1; `toLogical` divides by the render
+scale). A dragged card therefore tracks the pointer 1:1 on screen at every
+scale, the ceiling stays exactly `1/5` of the viewport **on screen**, and the
+authored `132×80` floor is a logical size that scales with the sheet — it is
+never re-authored and never a fixed physical px.
+
 ### §4.1 States
 
 | State | Render | Geometry partner (never colour alone) |
@@ -399,7 +409,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | card states, region layout, the full-viewport sheet, no rail in the DOM | `test/mobile.js`, `test/desktop.js` |
 | the six note links — their pairs, their 1px `--frame` line, their centres | `test/desktop.js` [L1]–[L6]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
-| card drag + resize floor/ceiling, link still opens a new tab | `test/movable_resizable.js` |
+| card drag + resize floor/ceiling, link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 
 ---

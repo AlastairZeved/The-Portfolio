@@ -474,26 +474,46 @@ body {
 })();
 
 /* ---- Entertainment only: drag to move, corner to resize (B7) ----
-   No persistence. Nothing is saved; reload restores the authored layout. */
+   No persistence. Nothing is saved; reload restores the authored layout.
+
+   The sheet renders through ONE uniform scale (B30), so pointer input arrives
+   in PHYSICAL px while a card's inline left/top/width/height are authored in
+   the board's LOGICAL space. Every pointer reading is therefore converted with
+   toLogical() before it touches card geometry — the same rule TheBoards states
+   for itself (TheBoards AGENTS.md architecture point 1; geometry.js toLogical
+   divides by the render scale: never read clientX/clientY directly against
+   note geometry). At desktop widths the scale is 1 and nothing changes. */
 (function () {
   var board = document.getElementById('board');
   var cards = Array.prototype.slice.call(document.querySelectorAll('.door-card'));
   var drag = null, resizing = null;
+
+  // The scale the transform itself consumes is the single source of truth —
+  // read it, never keep a copy that could drift from what is rendered.
+  function renderScale() {
+    var rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs'));
+    return (isFinite(rs) && rs > 0) ? rs : 1;
+  }
+  function toLogical(px) { return px / renderScale(); }
 
   /* ---- The link layer (UIUX §4.3, B28): six straight 1px --frame lines
      between card centres, one per pair authored in the markup. The pairing
      is authored; the geometry is computed, so a line stays true while a
      card is dragged or resized (TheBoards' link idiom, UIUX §4.6 / B91 —
      endpoints are plain board-logical centres, recomputed on every path
-     that moves a note). */
+     that moves a note). The SVG's user units ARE the board's logical px, so
+     a measured rect — which is physical — is converted with toLogical()
+     before it is written: under the one render scale (B30) an unconverted
+     centre would place the line at 1/rs of the card's distance from the
+     board's origin. */
   var linkLayer = document.getElementById('link-layer');
   var links = linkLayer ? Array.prototype.slice.call(linkLayer.querySelectorAll('line')) : [];
 
   function centreOf(card, boardRect) {
     var r = card.getBoundingClientRect();
     return {
-      x: r.left - boardRect.left + r.width / 2,
-      y: r.top - boardRect.top + r.height / 2
+      x: toLogical(r.left - boardRect.left + r.width / 2),
+      y: toLogical(r.top - boardRect.top + r.height / 2)
     };
   }
 
@@ -523,41 +543,47 @@ body {
     var rect = board.getBoundingClientRect();
     var cr = card.getBoundingClientRect();
     if (handle) {
-      resizing = { card: card, startX: e.clientX, startY: e.clientY, w: cr.width, h: cr.height, bx: rect.left, by: rect.top };
+      resizing = { card: card, startX: e.clientX, startY: e.clientY, w: toLogical(cr.width), h: toLogical(cr.height) };
     } else if (e.target === card || card.contains(e.target)) {
       // don't hijack the link's own click; only move on real drag
-      drag = { card: card, startX: e.clientX, startY: e.clientY, left: cr.left - rect.left, top: cr.top - rect.top, moved: false };
+      drag = { card: card, startX: e.clientX, startY: e.clientY, left: toLogical(cr.left - rect.left), top: toLogical(cr.top - rect.top), moved: false };
     }
   });
 
-  function getConstraints() {
-    // 1/5 of the viewport, but never below the legible minimums.
-    var vw = window.innerWidth;
-    var vh = window.innerHeight;
+  function getConstraints(rs) {
+    // 1/5 of the viewport, but never below the legible minimums (UIUX §3.4).
+    // The board's logical space is exactly the viewport divided by the render
+    // scale (B30), so the ceiling is the LOGICAL width/height over 5 — which is
+    // 1/5 of the viewport on screen at any scale. The floor is an authored px
+    // like every other authored px: it scales with the sheet.
+    var lw = window.innerWidth / rs;
+    var lh = window.innerHeight / rs;
     return {
       minW: 132,
       minH: 80,  // increased for legibility (fits ~3 lines of text at 17px)
-      maxW: Math.max(132, vw / 5),
-      maxH: Math.max(80, vh / 5)
+      maxW: Math.max(132, lw / 5),
+      maxH: Math.max(80, lh / 5)
     };
   }
 
   window.addEventListener('pointermove', function (e) {
     if (!drag && !resizing) return;
+    var rs = renderScale();
     if (resizing) {
       var r = resizing;
-      var c = getConstraints();
-      var nw = Math.min(c.maxW, Math.max(c.minW, r.w + (e.clientX - r.startX)));
-      var nh = Math.min(c.maxH, Math.max(c.minH, r.h + (e.clientY - r.startY)));
+      var c = getConstraints(rs);
+      var nw = Math.min(c.maxW, Math.max(c.minW, r.w + (e.clientX - r.startX) / rs));
+      var nh = Math.min(c.maxH, Math.max(c.minH, r.h + (e.clientY - r.startY) / rs));
       r.card.style.width = nw + 'px';
       r.card.style.height = nh + 'px';
     } else {
       var d = drag;
-      var dx = e.clientX - d.startX, dy = e.clientY - d.startY;
-      if (Math.abs(dx) + Math.abs(dy) > 4) d.moved = true;
+      var adx = e.clientX - d.startX, ady = e.clientY - d.startY;   // physical
+      if (Math.abs(adx) + Math.abs(ady) > 4) d.moved = true;        // 4 physical px — the same gesture as before the scale
       if (d.moved) {
-        d.card.style.left = (d.left + dx) + 'px';
-        d.card.style.top = (d.top + dy) + 'px';
+        // the card tracks the pointer 1:1 on screen: logical + physical/scale
+        d.card.style.left = (d.left + adx / rs) + 'px';
+        d.card.style.top = (d.top + ady / rs) + 'px';
       }
     }
     // the moved card drags its links with it (UIUX §4.3)

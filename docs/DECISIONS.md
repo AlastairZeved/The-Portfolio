@@ -416,3 +416,36 @@ sheet. **Supersedes B24** (the rail's To Do tray), and the rail clauses of
 (B25), no longer as a rail fill.
 
 **Source:** owner's issue [#71](https://github.com/AlastairZeved/The-Portfolio/issues/71), 2026-09-29 — "Remove the left-most pane, \"All Boards\" entirely and re-scale to fit the board for \"The Portfolio of Robert Alastair Zeved Gregory\" across the entire viewport. … Do not replace the pane with something else. The site does not need navigation to other pages. Everything else needs to be re-scaled to fit."
+
+---
+
+### B28. Six links join the note cards (issue #75)
+
+The board gains **six links** between its note cards — exactly the pairs the
+owner names: **Music ↔ Writing**, **Software & AI ↔ Community**,
+**Software & AI ↔ Writing**, **Plants & Rocks ↔ Community**,
+**Plants & Rocks ↔ Writing**, **Software & AI ↔ Music**. A link is TheBoards'
+note-link rendering, ported verbatim: a thin **straight line between the two
+cards' centres**, no label and no arrowhead, drawn in the page's own linework
+blue **`--frame` `#698ebf`** (`UIUX §2.2`) at **1px**, held crisp at any render
+scale by `vector-effect: non-scaling-stroke`, with **no fill, no cap
+decoration, no marker**. It lives on **one `<svg>` layer** (`#link-layer`) in
+`#board` space at `z-index: 1` — **below the notes** (the door-cards are
+`z-index: 2`) and above the board furniture — and it is `pointer-events: none`:
+a link is a line, not a control. Endpoints are card **centres**, recomputed
+whenever a card moves (drag, resize, or a viewport resize that re-scales the
+percentage-authored layout), so a link follows the card it joins; only the
+**pairing** is authored (each card carries a `data-id`, each line `data-from` /
+`data-to`). **No card changes:** the nine cards keep their authored geometry,
+their destinations, their states and their drag/resize behaviour untouched, and
+no card is added.
+
+**No invented design value.** The owner's statement names the six pairs and
+nothing else; every rendered value this entry binds is either a token already
+printed in `UIUX §2.2` (`--frame`) or the reference implementation's own ruled
+value, transcribed from TheBoards' `UIUX §4.6` (B91) — "1px `--frame`" between
+note centres, `pointer-events: none`, `z-index: 1` under the notes,
+`non-scaling-stroke`, "no fill, no cap decoration, no marker". `UIUX §4.3`
+carries the rendering; `test/desktop.js` pins the six pairs.
+
+**Source:** owner's issue [#75](https://github.com/AlastairZeved/The-Portfolio/issues/75), 2026-09-29 — "Create the following links between note cards on the board:\n1. Link Music and Writing\n2. Link Software & AI to Community\n3. Link Software & AI to Writing\n4. Link Plants and Rocks to Community\n5. Link Plants and Rocks and Writing\n6. Link Software & AI to Music". The rendering values are transcribed, not invented: the owner's statement names no value, so they are taken verbatim from the reference implementation — TheBoards' `UIUX §4.6` / `B91` (TheBoards' record, the link idiom this page wears by owner ruling, `AGENTS.md` "built literally on TheBoards as the template").

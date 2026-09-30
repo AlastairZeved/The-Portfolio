@@ -1,6 +1,8 @@
 /* test/desktop.js — desktop grammar: no All Boards rail; the single board
    spans the full viewport, the door-cards re-scale inside it. Card states
-   (hover glow, pressed green, never colour alone). Black-box Playwright.
+   (hover glow, pressed green, never colour alone). The six note links
+   (B28, UIUX §4.3) — pairs, 1px --frame line, card-centre endpoints.
+   Black-box Playwright.
    Run: node test/desktop.js   (PORTFOLIO_URL default http://localhost:8000/index.html) */
 
 const { chromium } = require('playwright');
@@ -62,6 +64,53 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     return r.left >= -0.5 && r.top >= -0.5 && r.right <= vp.w + 0.5 && r.bottom <= vp.h + 0.5;
   }), { w: VW, h: VH });
   ok('all door-cards sit inside the viewport (no clipping)', inside);
+
+  // the six note links (B28, UIUX §4.3): one <line> per owner-named pair
+  // (issue #75), 1px --frame between the two cards' centres, on a hitless
+  // layer below the notes. [L0] is the layer, [L1]–[L6] the six pairs.
+  const WANT = [
+    ['music', 'writing'], ['software-ai', 'community'], ['software-ai', 'writing'],
+    ['plants-rocks', 'community'], ['plants-rocks', 'writing'], ['software-ai', 'music']
+  ];
+  const lk = await page.evaluate(() => {
+    const board = document.getElementById('board');
+    const layer = document.getElementById('link-layer');
+    if (!layer) return null;
+    const br = board.getBoundingClientRect();
+    const note = document.querySelector('.door-card');
+    return {
+      pe: getComputedStyle(layer).pointerEvents,
+      z: getComputedStyle(layer).zIndex,
+      noteZ: getComputedStyle(note).zIndex,
+      lines: [...layer.querySelectorAll('line')].map(l => {
+        const cs = getComputedStyle(l);
+        const a = board.querySelector('[data-id="' + l.dataset.from + '"]');
+        const b = board.querySelector('[data-id="' + l.dataset.to + '"]');
+        const ca = a && a.getBoundingClientRect(), cb = b && b.getBoundingClientRect();
+        return {
+          from: l.dataset.from, to: l.dataset.to,
+          stroke: cs.stroke, width: cs.strokeWidth, ve: cs.vectorEffect,
+          cA: ca && [ca.left - br.left + ca.width / 2, ca.top - br.top + ca.height / 2],
+          cB: cb && [cb.left - br.left + cb.width / 2, cb.top - br.top + cb.height / 2],
+          x1: +l.getAttribute('x1'), y1: +l.getAttribute('y1'),
+          x2: +l.getAttribute('x2'), y2: +l.getAttribute('y2')
+        };
+      })
+    };
+  });
+  ok('[L0] link layer draws below the notes (z 1 under z 2) and never takes a hit',
+    !!lk && lk.pe === 'none' && lk.z === '1' && lk.noteZ === '2' && lk.lines.length === 6);
+  lk.lines.forEach((l, i) => {
+    const w = WANT[i] || ['?', '?'];
+    ok(`[L${i + 1}] link ${i + 1}: ${w[0]} <-> ${w[1]}`,
+      l.from === w[0] && l.to === w[1] && !!l.cA && !!l.cB);
+  });
+  ok('[L7] every link is a 1px --frame line (crisp at any scale)',
+    lk.lines.every(l => l.stroke === 'rgb(105, 142, 191)' && l.width === '1px' && l.ve === 'non-scaling-stroke'));
+  ok('[L8] every link runs between its two cards\' centres',
+    lk.lines.every(l => l.cA && l.cB &&
+      Math.abs(l.x1 - l.cA[0]) < 0.6 && Math.abs(l.y1 - l.cA[1]) < 0.6 &&
+      Math.abs(l.x2 - l.cB[0]) < 0.6 && Math.abs(l.y2 - l.cB[1]) < 0.6));
 
   // card states (B14) on the first door-card
   const first = page.locator('a.door-card').first();

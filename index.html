@@ -211,6 +211,30 @@ body {
   outline: none;
 }
 
+/* ---- The link layer (UIUX §4.3): the lines that join the note cards ----
+   TheBoards' link idiom ported verbatim (TheBoards' UIUX §4.6 / B91): a thin
+   straight 1px line between two cards' centres, in --frame — this page's own
+   linework blue (§2.2) — with no fill, no cap decoration and no marker, held
+   to a crisp 1px at any render scale by non-scaling-stroke. It draws BELOW
+   the notes and ABOVE the board furniture: z-index 1, the door-cards being
+   z-index 2, with DOM order after the furniture. The layer never takes a hit
+   — a link is a line, not a control (pointer-events: none). */
+#link-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+}
+#link-layer line {
+  stroke: var(--frame);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: butt;
+  fill: none;
+}
+
 /* ---- The Parking Lot: water closing the foot (UIUX §6) ---- */
 #lot {
   position: absolute;
@@ -324,40 +348,42 @@ body {
   </div>
 
   <!-- The door-cards, in the free board space (B2, B3); the Music note is not
-       a door — the Apple Music and Spotify doors hang under it (B26) -->
-  <a class="door-card" style="left:8%; top:22%; width:230px; height:96px;" href="https://earp-street-park.netlify.app" target="_blank" rel="noopener noreferrer">
+       a door — the Apple Music and Spotify doors hang under it (B26). Each
+       card carries a data-id: the link layer below names its pairs by it
+       (B28), so both ends of every link are greppable and readable. -->
+  <a class="door-card" data-id="community" style="left:8%; top:22%; width:230px; height:96px;" href="https://earp-street-park.netlify.app" target="_blank" rel="noopener noreferrer">
     Community
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" style="left:38%; top:18%; width:220px; height:96px;" href="https://razgregory.com/career" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="career" style="left:38%; top:18%; width:220px; height:96px;" href="https://razgregory.com/career" target="_blank" rel="noopener noreferrer">
     Career
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" style="left:66%; top:24%; width:230px; height:96px;" href="https://substack.com/@theaboveaveragerob" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="writing" style="left:66%; top:24%; width:230px; height:96px;" href="https://substack.com/@theaboveaveragerob" target="_blank" rel="noopener noreferrer">
     Writing
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" style="left:12%; top:52%; width:250px; height:96px;" href="https://alastairzeved.com" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="software-ai" style="left:12%; top:52%; width:250px; height:96px;" href="https://alastairzeved.com" target="_blank" rel="noopener noreferrer">
     Software &amp; AI
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" style="left:44%; top:58%; width:240px; height:96px;" href="https://razgregory.com/plantsandrocks" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="plants-rocks" style="left:44%; top:58%; width:240px; height:96px;" href="https://razgregory.com/plantsandrocks" target="_blank" rel="noopener noreferrer">
     Plants &amp; Rocks
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <div class="door-card note-card" style="left:73%; top:54%; width:220px; height:96px;">
+  <div class="door-card note-card" data-id="music" style="left:73%; top:54%; width:220px; height:96px;">
     Music
     <span class="resize-handle" aria-hidden="true"></span>
   </div>
-  <a class="door-card" style="left:66%; top:69%; width:150px; height:78px;" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="apple-music" style="left:66%; top:69%; width:150px; height:78px;" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
     Apple Music
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" style="left:86%; top:69%; width:150px; height:78px;" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="spotify" style="left:86%; top:69%; width:150px; height:78px;" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
     Spotify
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" style="left:10%; top:70%; width:180px; height:80px;" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="linkedin" style="left:10%; top:70%; width:180px; height:80px;" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">
     LinkedIn
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
@@ -391,6 +417,22 @@ body {
     </div>
   </div>
 
+  <!-- The link layer (UIUX §4.3, B28): the six straight 1px --frame lines
+       that join the note cards, one `<line>` per pair the owner names in
+       issue #75. TheBoards' link idiom ported verbatim (TheBoards' UIUX
+       §4.6 / B91) — a line between two cards' centres, below the notes,
+       never a hit target. Endpoints are computed from live card geometry
+       in the script below, so a line follows a card that is dragged or
+       resized; only the pairing is authored here. -->
+  <svg id="link-layer" aria-hidden="true" focusable="false">
+    <line data-link="1" data-from="music" data-to="writing"></line>
+    <line data-link="2" data-from="software-ai" data-to="community"></line>
+    <line data-link="3" data-from="software-ai" data-to="writing"></line>
+    <line data-link="4" data-from="plants-rocks" data-to="community"></line>
+    <line data-link="5" data-from="plants-rocks" data-to="writing"></line>
+    <line data-link="6" data-from="software-ai" data-to="music"></line>
+  </svg>
+
 </div>
 
 <script>
@@ -400,6 +442,42 @@ body {
   var board = document.getElementById('board');
   var cards = Array.prototype.slice.call(document.querySelectorAll('.door-card'));
   var drag = null, resizing = null;
+
+  /* ---- The link layer (UIUX §4.3, B28): six straight 1px --frame lines
+     between card centres, one per pair authored in the markup. The pairing
+     is authored; the geometry is computed, so a line stays true while a
+     card is dragged or resized (TheBoards' link idiom, UIUX §4.6 / B91 —
+     endpoints are plain board-logical centres, recomputed on every path
+     that moves a note). */
+  var linkLayer = document.getElementById('link-layer');
+  var links = linkLayer ? Array.prototype.slice.call(linkLayer.querySelectorAll('line')) : [];
+
+  function centreOf(card, boardRect) {
+    var r = card.getBoundingClientRect();
+    return {
+      x: r.left - boardRect.left + r.width / 2,
+      y: r.top - boardRect.top + r.height / 2
+    };
+  }
+
+  function drawLinks() {
+    if (!links.length) return;
+    var rect = board.getBoundingClientRect();
+    links.forEach(function (line) {
+      var a = board.querySelector('[data-id="' + line.getAttribute('data-from') + '"]');
+      var b = board.querySelector('[data-id="' + line.getAttribute('data-to') + '"]');
+      if (!a || !b) return;
+      var ca = centreOf(a, rect), cb = centreOf(b, rect);
+      line.setAttribute('x1', ca.x);
+      line.setAttribute('y1', ca.y);
+      line.setAttribute('x2', cb.x);
+      line.setAttribute('y2', cb.y);
+    });
+  }
+
+  drawLinks();
+  // the percentage-authored layout re-scales with the viewport: recompute
+  window.addEventListener('resize', drawLinks);
 
   board.addEventListener('pointerdown', function (e) {
     var handle = e.target.closest('.resize-handle');
@@ -428,6 +506,7 @@ body {
   }
 
   window.addEventListener('pointermove', function (e) {
+    if (!drag && !resizing) return;
     if (resizing) {
       var r = resizing;
       var c = getConstraints();
@@ -435,7 +514,7 @@ body {
       var nh = Math.min(c.maxH, Math.max(c.minH, r.h + (e.clientY - r.startY)));
       r.card.style.width = nw + 'px';
       r.card.style.height = nh + 'px';
-    } else if (drag) {
+    } else {
       var d = drag;
       var dx = e.clientX - d.startX, dy = e.clientY - d.startY;
       if (Math.abs(dx) + Math.abs(dy) > 4) d.moved = true;
@@ -444,6 +523,8 @@ body {
         d.card.style.top = (d.top + dy) + 'px';
       }
     }
+    // the moved card drags its links with it (UIUX §4.3)
+    drawLinks();
   });
 
   function endDrag() {

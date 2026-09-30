@@ -476,3 +476,36 @@ no ruling.
 [#78](https://github.com/AlastairZeved/The-Portfolio/issues/78) — "Confirm the
 glow green. There is no 'pending' status for a rule. It's final once written,
 not debated once written."
+
+---
+
+### B30. One render scale; the sheet shrinks as a whole on narrow viewports (#87)
+The board renders through **one uniform `transform: scale()`** over a **fixed
+logical coordinate space** (`transform-origin: 0 0`), exactly TheBoards' own
+mechanism (TheBoards AGENTS.md architecture point 1). The scale, `rs`, is the
+smaller of `vw/REF_W` and `vh/REF_H`, capped at 1 — **never upscales**.
+`REF_W = 1080` is the narrowest width at which the authored B2 geometry fits
+without clipping (Spotify's `left:86% + 150px` needs ≥1072); `REF_H = 600` is
+the content's measured minimum height. Logical width/height are set to
+`vw/rs` × `vh/rs` in JS so the scaled sheet always fills the viewport edge to
+edge. On narrow screens (320–1023px) the **whole scene shrinks as one** —
+every door-card's authored `left/top %` and `px width/height` stand untouched
+and scale with the sheet; nothing reflows, nothing clips, no new geometry
+value is invented. Above `REF_W`×`REF_H` the scale is exactly 1, so every
+real desktop width (1024–1920px, common laptops) renders **unchanged**. This
+fixes the pre-existing (pre-#71) clip where percentage offset + fixed px width
+overflowed a narrow sheet; at 1024px the untouched geometry already overflowed
+(measured scrollW 1031 > 1024), so scaling the 1024–1079 band is a repair, not
+a disturbance. **Supersedes the `inset: 0` rendering clause of B27** — the
+board now spans the viewport via explicit `left:0; top:0` plus JS-set logical
+width/height under the scale — and **modifies no B2 value**; every authored
+door-card `left/top %` and `px width/height` is rendered through the scale
+(`UIUX §3.1`, the "one-viewport law" now holds at every width). The logical
+space is the **only** space anything is read or written in: a card's inline
+`left/top`/`width/height`, the resize bounds, and any computed point (the note
+links' card centres, `B28`) are board-logical px, so pointer input and measured
+rects — which arrive physical — are converted with `÷ rs` before they touch
+geometry (TheBoards' `toLogical`, the same architecture point). At `rs = 1`
+the conversion is the identity and the desktop gesture is unchanged 1:1.
+
+**Source:** owner's issue [#87](https://github.com/AlastairZeved/The-Portfolio/issues/87), 2026-09-30 — "Scale the whole sheet (TheBoards' own mechanism) — one render scale, cards shrink with the scene, zero new geometry values."

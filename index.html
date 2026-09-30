@@ -65,9 +65,22 @@ body {
 }
 
 /* ---- The page: one bounded sheet (PRD §3.1) ---- */
+/* One logical page, one render scale (issue #87, B30). The sheet is a fixed
+   reference-width scene (REF_W×REF_H, the widths at which the B2 authored
+   geometry fills without clipping) rendered through a single uniform
+   transform: scale(). On narrow viewports the sheet shrinks as a whole — the
+   authored left/top % and px width/height stand untouched, every card scales
+   with the scene, nothing reflows and nothing clips. Width/height are set in
+   JS to the logical size (vw/scale, vh/scale) so the scaled sheet always
+   fills the viewport exactly, edge to edge. transform-origin 0 0 keeps the
+   top-left coordinate truthful (TheBoards AGENTS.md architecture point 1). */
 #board {
   position: absolute;
-  inset: 0;
+  left: 0; top: 0;
+  width: var(--logical-w, 1080px);
+  height: var(--logical-h, 900px);
+  transform-origin: 0 0;
+  transform: scale(var(--rs, 1));
   background: var(--deep);
 }
 
@@ -436,6 +449,30 @@ body {
 </div>
 
 <script>
+/* ---- The one render scale (issue #87, B30) ----
+   The sheet is a fixed reference scene (REF_W × REF_H) rendered through a
+   single uniform transform: scale(). On narrow viewports the whole sheet
+   shrinks as one: the B2 authored % left/top and px width/height stand
+   untouched, every card scales with the scene, nothing reflows, nothing
+   clips. At desktop widths (vw >= REF_W and vh >= REF_H) the scale is exactly
+   1 — the render is unchanged. Logical width/height are set so the scaled
+   sheet always fills the viewport edge to edge. (TheBoards AGENTS.md
+   architecture point 1; LOGICAL_W/H and --rs/--logical-w/h ported verbatim.) */
+(function () {
+  var board = document.getElementById('board');
+  var REF_W = 1080;   // the narrowest authored geometry fits without clipping
+  var REF_H = 600;    // the content's minimum height at width (measured; no scale above this)
+  function frame() {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var rs = Math.min(vw / REF_W, vh / REF_H, 1);   // never upscale; 1 at desktop
+    board.style.setProperty('--rs', rs);
+    board.style.setProperty('--logical-w', (vw / rs) + 'px');
+    board.style.setProperty('--logical-h', (vh / rs) + 'px');
+  }
+  frame();
+  window.addEventListener('resize', frame);
+})();
+
 /* ---- Entertainment only: drag to move, corner to resize (B7) ----
    No persistence. Nothing is saved; reload restores the authored layout. */
 (function () {

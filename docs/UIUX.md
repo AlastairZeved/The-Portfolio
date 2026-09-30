@@ -177,13 +177,24 @@ law (`PRD §3.3`).
 ### §3.1 The scene
 
 One bounded sheet, no calendar rail, no All Boards rail, no hero (owner
-rulings). The sheet is the **whole viewport** — `#board` is `inset: 0`, edge to
-edge, with nothing beside it (#71). Reading top to bottom: the **band** (water)
+rulings). The sheet is the **whole viewport** — `#board` spans edge to edge
+(no longer `inset:0`, but explicit `left:0; top:0` + JS-set logical
+width/height, B30), with nothing beside it (#71), rendered through **one
+render scale** (B30,
+issue #87): a fixed logical coordinate space behind a single uniform
+`transform: scale()` (`transform-origin: 0 0`), so on narrow viewports the
+**whole scene shrinks as one** — the authored door-card geometry stands and
+scales; nothing reflows, nothing clips. Logical width/height are set in JS
+(`vw/rs` × `vh/rs`) so the scaled sheet always fills the viewport edge to
+edge. Reading top to bottom: the **band** (water)
 with the **title compartment** overhanging its rule, the **deep** through the
 middle where the **door-cards** sit in the free board space, and the **Parking
 Lot** (water) closing the foot.
 
-Everything is visible at once: one viewport, no internal scrolling. If the
+Everything is visible at once: one viewport, no internal scrolling. The one
+render scale keeps `scrollWidth <= innerWidth` at **every** width — at desktop
+(≥`REF_W`×`REF_H` = 1080×600) the scale is exactly 1 and the render is
+unchanged; below it the sheet shrinks to fit the viewport. If the
 sheet is full, it is full — that boundary is the point.
 
 ### §3.2 The band and the title compartment
@@ -226,6 +237,13 @@ is committed as an **illustrative reference only**:
 — it is not law; where the wireframe and this document disagree, this
 document wins. The cards do **not** live inside Components, Requirements, or
 the Parking Lot.
+
+On narrow viewports the cards shrink with the board as a whole through the
+**one render scale** (§3.1, B30): their authored `left/top %` and `px
+width/height` are never re-authored — the whole sheet scales, so every card
+stays fully inside the sheet edge to edge (no left/right clipping, no
+horizontal overflow) at 320–1023px. Desktop (≥1080×600) renders at scale 1,
+unchanged.
 
 ---
 
@@ -379,7 +397,8 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 |---|---|
 | §2's tokens, ratios, crossover | `test/tokens.js` — recomputed from shipped hexes |
 | card states, region layout, the full-viewport sheet, no rail in the DOM | `test/mobile.js`, `test/desktop.js` |
-| the six note links — their pairs, their 1px `--frame` line, their centres | `test/desktop.js` [L1]–[L6] |
+| the six note links — their pairs, their 1px `--frame` line, their centres | `test/desktop.js` [L1]–[L6]; `test/mobile.js` pins the endpoints at scale < 1 |
+| one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
 | card drag + resize floor/ceiling, link still opens a new tab | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 

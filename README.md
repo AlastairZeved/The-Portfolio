@@ -38,7 +38,9 @@ question. The governing issue of record is
   (optional), Message (required).
 - **One binding:** the To-Do blue of TheBoards' design ladder. No calendar
   rail, no All Boards rail, no hero, no service worker. The sheet fills the
-  whole viewport (#71, B27).
+  whole viewport (#71, B27) and renders through **one render scale** (B30,
+  issue #87): on narrow viewports the whole scene shrinks as one, so the
+  door-cards never clip and nothing overflows the one viewport.
 
 ## How to use
 

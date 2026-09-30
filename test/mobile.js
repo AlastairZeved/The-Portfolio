@@ -1,4 +1,5 @@
-/* test/mobile.js — mobile render + eight new-tab door-cards + form (black-box, Playwright).
+/* test/mobile.js — mobile render + eight new-tab door-cards + form + the one
+   render scale (no clip, no overflow) (black-box, Playwright).
    Run: node test/mobile.js   (BOARDS_URL default http://localhost:8000/index.html) */
 
 const { chromium } = require('playwright');
@@ -25,17 +26,38 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     .evaluateAll(els => els.map(el => getComputedStyle(el).fontSize));
   ok('title card single font size (both lines equal)', titleSizes.length === 2 && titleSizes[0] === titleSizes[1] && !!titleSizes[0]);
   const titleBox = await page.locator('#anchor-title').boundingBox();
-  // B19: borders close in on the text — card width = widest line + horizontal padding + borders
+  // B19: borders close in on the text — card width = widest line + horizontal padding + borders.
+  // The whole sheet renders through one scale (issue #87, B30): rect widths from
+  // getBoundingClientRect() are scaled, but the authored padding/border px are logical.
+  // Divide pad/bdr by the render scale so both sides compare in physical (scaled) px.
   const hug = await page.evaluate(() => {
     const card = document.querySelector('#anchor-title');
+    const rs = parseFloat(getComputedStyle(document.querySelector('#board')).getPropertyValue('--rs') || '1');
     const padX = parseFloat(getComputedStyle(card).paddingLeft) + parseFloat(getComputedStyle(card).paddingRight);
     const bdrX = parseFloat(getComputedStyle(card).borderLeftWidth) + parseFloat(getComputedStyle(card).borderRightWidth);
     const widest = Math.max(...[...card.querySelectorAll('.title-eyebrow, .title-pinned')]
       .map(el => el.getBoundingClientRect().width));
-    return Math.abs(card.getBoundingClientRect().width - (widest + padX + bdrX));
+    return Math.abs(card.getBoundingClientRect().width - (widest + (padX + bdrX) * rs));
   });
   ok('title card borders hug text', titleBox && hug < 2);
   ok('title card stays centred', titleBox && Math.abs((titleBox.x + titleBox.width / 2) - 390 / 2) < 2);
+
+  // no door-card clips left or right, and no horizontal overflow (issue #87, B30) —
+  // the one render scale keeps every authored card inside the shrunk sheet
+  const fit = await page.evaluate(() => {
+    const vw = window.innerWidth;
+    const cards = [...document.querySelectorAll('.door-card')].map(a => {
+      const r = a.getBoundingClientRect();
+      return r.left >= -0.5 && r.right <= vw + 0.5;
+    });
+    const sw = document.documentElement.scrollWidth;
+    const sh = document.documentElement.scrollHeight;
+    const vh = window.innerHeight;
+    return { allInside: cards.every(Boolean), noHOverflow: sw <= vw + 1, noVOverflow: sh <= vh + 1 };
+  });
+  ok('every door-card fully inside the sheet (no clipping)', fit.allInside);
+  ok('no horizontal overflow (scrollWidth <= innerWidth)', fit.noHOverflow);
+  ok('no vertical overflow (scrollHeight <= innerHeight)', fit.noVOverflow);
 
   // eight door-cards, each a real new-tab anchor (B26); the Music card is a plain note
   const cards = await page.locator('a.door-card').count();

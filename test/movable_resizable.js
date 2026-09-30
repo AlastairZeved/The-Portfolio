@@ -41,6 +41,31 @@ async function runScenario(page, tag, width, height) {
   ok(`${tag}: render scale is ${width >= 1080 ? '1' : 'below 1'} (rs=${rs.toFixed(3)})`,
      width >= 1080 ? Math.abs(rs - 1) < 1e-6 : rs < 1);
 
+  // --- issue #94: the native HTML5 anchor drag is suppressed on door-cards ---
+  // A real press-and-move on an <a href> would otherwise fire the browser's
+  // own `dragstart` and take the pointer flow away from the drag gesture — the
+  // ghost wanders and the card never moves. Every .door-card and its
+  // .resize-handle (a span inside the anchor) must report the drag suppressed.
+  const unsuppressed = await page.evaluate(() => {
+    const bad = [];
+    let checked = 0;
+    document.querySelectorAll('.door-card').forEach(card => {
+      const targets = [card];
+      const h = card.querySelector('.resize-handle');
+      if (h) targets.push(h);
+      targets.forEach(t => {
+        checked++;
+        const ev = new DragEvent('dragstart', { bubbles: true, cancelable: true });
+        t.dispatchEvent(ev);
+        if (!ev.defaultPrevented)
+          bad.push(t.closest('.door-card').getAttribute('data-id') + (t === card ? '' : '.handle'));
+      });
+    });
+    return { bad, checked };
+  });
+  ok(`${tag}: door-card dragstart is suppressed (${unsuppressed.bad.length === 0 ? `all ${unsuppressed.checked} card/handle targets` : 'NOT: ' + unsuppressed.bad.join(', ')})`,
+     unsuppressed.bad.length === 0);
+
   // --- DRAG: the card must track the pointer 1:1 on screen ---
   const drag = await page.evaluate(({ dx, dy }) => {
     const board = document.querySelector('#board');

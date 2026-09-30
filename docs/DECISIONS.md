@@ -659,3 +659,23 @@ The shipped anchor is the **agent-derived implementation** of the owner's issue-
 B34's interior line "Authored `left:31.5%; top:40%`." records **no owner-set value**: that seat is an **agent draft** — never shipped, never in the owner's drawing, never ruled by the owner. B34's other text stands byte-identical.
 
 **Source:** the owner's chat directive 2026-09-30, quoted verbatim — "make sure that is fixed permanently, not just this time. I never made that ruling, that is not an owner ruling. There should never be rulings that never came from me or twist my words around. Agents do not make rules, they follow them. Period." — and "I never set a px explicit floor."; transcribed in [issue #101](https://github.com/AlastairZeved/The-Portfolio/issues/101).
+
+### B37. The Requirements region gains the line "Click around, explore!" (issue #92)
+
+The **Requirements** region renders one text line — **"Click around,
+explore!"** — ported from TheBoards' own section-text mechanism (TheBoards
+`styles.css` `.anchor` / `.band-zone .anchor`), rendered **static** here: the
+line hangs from the zone's top at `--band-top`, in `--ink` at **15px/600**
+(`font-size`, `font-weight`), above the rule the `band-label` tab sits under.
+No contenteditable, no `role="textbox"`, no editing affordance — this site
+registers no state and refuses editing (B7/B13, PRD §5). The zone's
+`pointer-events: none` stands (static text takes no hits; drag passes through).
+No new token is invented: `--band-top`, `--ink`, 15px and 600 are existing
+values, ported verbatim from TheBoards' own numbers.
+
+**Source:** owner's issue [#92](https://github.com/AlastairZeved/The-Portfolio/issues/92),
+2026-09-30 — "Add a new text line in the \"Requirements\" section that reads:
+\"Click around, explore!\". If you do not know how the text should be formatted
+and placed in the \"Requirements\" section, do not come to me. Look at repo
+AlastairZeved/TheBoards for how the \"Requirements\" section works because it was
+already built once."

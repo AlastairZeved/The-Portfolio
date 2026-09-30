@@ -186,9 +186,16 @@ resolved by ruling before or during the build:
 - **The contents of the Components and Requirements regions.** The owner ruled
   the regions exist and that the door-cards do **not** live inside them (they
   live in the free board space, `B2`); he did not rule what the regions
-  themselves hold. Until ruled, render the regions as TheBoards renders
-  them — furniture present, contents absent (a blank region is the correct
-  state of a blank region).
+  themselves hold, and rendered them as TheBoards renders them — furniture
+  present, contents absent — until he did. He has since directed the two
+  region lines: **Requirements** holds "Click around, explore!" (issue
+  [#92](https://github.com/AlastairZeved/The-Portfolio/issues/92)) and
+  **Components** holds "All cards open their pages in a new tab" (issue
+  [#93](https://github.com/AlastairZeved/The-Portfolio/issues/93), the second
+  line's historical provenance). Each line is ported from TheBoards' own
+  section-text mechanism (`theboards styles.css .anchor /.band-zone .anchor`),
+  rendered static here — no contenteditable, no editing affordance — because
+  this site registers no state and refuses editing (B7/B13, PRD §5).
 - **The exact hover/click treatment of the door-cards beyond the owner's
   words.** The family rule is ruled (`B14`); both member bindings are settled
   — the hover glow is `--accent-page` `#6d9cb0` (`B25`) and the click-state

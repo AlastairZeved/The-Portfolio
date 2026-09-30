@@ -509,3 +509,199 @@ geometry (TheBoards' `toLogical`, the same architecture point). At `rs = 1`
 the conversion is the identity and the desktop gesture is unchanged 1:1.
 
 **Source:** owner's issue [#87](https://github.com/AlastairZeved/The-Portfolio/issues/87), 2026-09-30 — "Scale the whole sheet (TheBoards' own mechanism) — one render scale, cards shrink with the scene, zero new geometry values."
+
+### B31. The title compartment reads as a title (issue #91)
+The title compartment is sized and read as the page's title, not one more
+17px note: both title lines move from **15px to 20px** (**×4/3**, still **one
+size** for both — the #59 single-size law holds), the compartment's own
+padding scales **12px → 16px** sides/bottom and **+6px → +8px** top
+(`--band-top` itself is frozen page structure and does not move), and its
+`min-height` becomes **`calc(var(--rule-y) + 29px)`** (the +22px scaled ×4/3
+→ 29.33, rounded **down** to 29 per "not aggressively"). The hug-the-text
+geometry is untouched: `width: max-content`, `max-width`, the centred
+`translateX(-50%)`, `border: 2px solid var(--frame)` / `border-top: 0`,
+`border-radius: 0 0 3px 3px`, `background: var(--card)`, and the flex
+centring all stand. **No new token** — every name ranges over the existing
+`--band-top`, `--rule-y`, `--frame`, `--card`, `--ink`. **Supersedes only
+B19's number** (15px / 12px / +6px / +22px); never its rule. **Do-not-touch:**
+the door-cards, the band zones, the link layer, and the drag machinery.
+
+**Source:** the design ruling on [issue #91's comment
+5918163891](https://github.com/AlastairZeved/The-Portfolio/issues/91#issuecomment-5918163891)
+— "Increase the size of the title card. Not aggressively, but it's too small
+to read as a title right now. Increase the text's font size in the title card
+too, proportionately to the increase in the size of the title card."
+
+---
+
+### B32. The Music note links to the Apple Music and Spotify notes below it — the two pairings the owner re-asked for (#72, reopen)
+
+The **Music** note streams **two new links** down to its two music doors —
+**Music ↔ Apple Music** and **Music ↔ Spotify** — the pairings the owner
+explicitly re-asked for when he reopened issue #72 on 2026-09-30. They are
+authored exactly like every other link (`B28`): one `<line>` per pair in
+`#link-layer` with `data-from="music" data-to="apple-music"` and
+`data-from="music" data-to="spotify"`, inheriting the whole `B28`/`UIUX §4.3`
+idiom — thin straight 1px `--frame` line between the two cards' centres, no
+label, no arrowhead, non-scaling-stroke, below the notes, `pointer-events:
+none` — because the link layer's geometry is computed, not authored. **The
+count clause of B28 (\"six links\") is superseded** — the ruling of record is
+now the per-authored-pair mechanism (`UIUX §4.3`): one 1px `--frame` line per
+authored pair, named by `data-id`. **No card changes:** the Music note stays a
+rest-only note (`B26` — no href, no hover/click states), and the Apple Music
+and Spotify doors keep their real anchor links and full link states. The board
+now carries **eight** links, two of which (this PR) plus a third pair
+(**Music ↔ LinkedIn**, issue #74) are the new pairings this chain family adds.
+
+**Source:** the owner's reopen on [issue #72's comment
+5917810423](https://github.com/AlastairZeved/The-Portfolio/issues/72#issuecomment-5917810423), 2026-09-30 — "I asked for the two new cards "Apple Music" and "Spotify" to be linked to the "Music" card. Did you link them? No you did not. If you don't know how, look at repo AlastairZeved/TheBoards to learn. Do not disregard my instructions again. Re-open the closed issue that addressed this. It even had fucking screenshots for you to see the placement of them spatially. Idiot."
+
+### B33. The `132×80` number is agent-derived, never an owner ruling — authored card sizes are ruled by the drawings (#72, record amendment)
+
+On 2026-09-30 the owner directed that this provenance defect be fixed
+permanently, and that no rule may ever exist that did not come from him: "make
+sure that is fixed permanently, not just this time. I never made that ruling,
+that is not an owner ruling. There should never be rulings that never came from
+me or twist my words around. Agents do not make rules, they follow them.
+Period." And, on the floor number itself: "I never set a px explicit floor."
+
+The number `132×80` is an **agent-derived implementation value**, not owner
+law. It predates issue #58's ruling and was adopted by `B21`'s transcription
+("The 132px floor was already the shipped minimum width") — a transcription
+that described a shipped implementation value, not an owner-set ruling. As a
+floor, `132×80` belongs only to the script's `getConstraints` — it implements
+the owner's "legible" word (`B21`) for the **visitor's resize gesture**
+(entertainment); it never bounds authored card sizes.
+
+**Authored card sizes are ruled by the owner's drawings** — the screenshot in
+issue #72 defining Apple Music and Spotify at the sizes he drew, and the owner's
+chat of 2026-09-30 confirming the screenshots explicitly define the sizes. This
+entry supersedes any reading of `B21`'s parenthetical that treats `132×80` as a
+floor on authored geometry; `B21`'s own words (a legible minimum and a
+one-fifth ceiling for the resize gesture) stand unchanged.
+
+**Source:** the owner's chat directive 2026-09-30, quoted verbatim in the
+[orchestrator's reopen on issue #72](https://github.com/AlastairZeved/The-Portfolio/issues/72#issuecomment-5919104671)
+— "make sure that is fixed permanently, not just this time. I never made that
+ruling, that is not an owner ruling. There should never be rulings that never
+came from me or twist my words around. Agents do not make rules, they follow
+them. Period.", and "I never set a px explicit floor."; plus the
+[issue #72 screenshot](https://github.com/user-attachments/assets/0b406ea2-9d55-4cf5-af15-b359c2690f37),
+which defines the Apple Music and Spotify card sizes the owner drew.
+
+---
+
+### B34. The LinkedIn note links to the Career note (issue #74)
+
+Issue #74 pairs the new **LinkedIn** note with the existing **Career** note
+(previously Professional). Issue #74 item 3 reads verbatim: "Link the new note
+card to the existing \"Career\" note card (previously Professional)". The two
+join exactly like every link before them (the B28 / UIUX §4.3 per-authored-pair
+mechanism): one `<line>` in `#link-layer` with `data-from="career"
+data-to="linkedin"`, a thin straight 1px `--frame` line between the two cards'
+centres, no label, no arrowhead, non-scaling-stroke, below the notes,
+`pointer-events: none`. **No card gains or loses a state:** Career keeps its door
+(href `https://razgregory.com/career`, `target="_blank"`, the full hover/click
+link states of `UIUX §4.1`), and the LinkedIn card keeps the same door
+(`https://www.linkedin.com/in/robertagregory`) with the same full link states.
+The LinkedIn card's size and placement are read from the owner's issue #74
+screenshot (embedded below): at Career's authored 220×96, LinkedIn draws
+**110×47** (0.500 w / 0.492 h of Career), **below-left of Career**, its top edge
+a small gap under Career's bottom edge and its right side overlapping Career's
+left edge. Authored `left:31.5%; top:40%`. LinkedIn's hover shows the blue
+bloom (`0 0 32px 4px` `--glow-blue`/0.9) and its press the 1px inset + green
+bloom (`B25` follow-up), both from `.door-card` CSS.
+
+**No Music ↔ LinkedIn pairing exists, and none is authorized.** B32's clause
+"(Music ↔ LinkedIn, issue #74)" names the wrong pair: issue #74 item 3 links
+LinkedIn to **Career**, not Music. **This entry supersedes B32's "(Music ↔
+LinkedIn, issue #74)" clause on that point**, and B32's own text stands
+byte-identical. Nobody asked for Music → LinkedIn; the record must read
+Career ↔ LinkedIn.
+
+**Source:** owner's issue [#74](https://github.com/AlastairZeved/The-Portfolio/issues/74), 2026-09-29 — item 3: "Link the new note card to the existing \"Career\" note card (previously Professional)" (screenshot: [issue #74](https://github.com/user-attachments/assets/3bc427e8-5062-480d-b110-2e8ec37a9f49)).
+
+---
+
+### B35. The shipped LinkedIn anchor is `left: calc(38% - 69px); top: calc(18% + 132px); width:110px; height:47px;` — B34's authored-anchor clause superseded (issue #74, record repair)
+
+B34 carries the interior line "Authored `left:31.5%; top:40%`." That seat was
+authored interim and never shipped. What ships on `main` — from PR #99 (merge
+`a06525c`), closing issue #74 — is the `<a class="door-card" data-id="linkedin">`
+element's inline style, quoted verbatim from `index.html`:
+
+`left: calc(38% - 69px); top: calc(18% + 132px); width:110px; height:47px;`
+
+**This entry supersedes B34's "Authored `left:31.5%; top:40%`." clause on that
+point, and only that point**; B34's text stands byte-identical otherwise —
+including its size and placement readings (110×47, below-left of Career) and its
+supersession of B32's "(Music ↔ LinkedIn, issue #74)" clause. B32 stands
+byte-identical as well.
+
+**Source:** the shipped code — `index.html` `[data-id="linkedin"]` on `main`, PR
+#99 (merge `a06525c`) closing issue [#74](https://github.com/AlastairZeved/The-Portfolio/issues/74).
+The anchor string above is quoted verbatim from `git show origin/main:index.html`,
+not paraphrased.
+
+---
+
+### B36. The shipped LinkedIn anchor is agent-derived implementation, never an owner ruling — B35's `Source:` corrected to the owner (issue #101, record provenance repair)
+
+On 2026-09-30 the owner directed that this provenance defect be fixed
+permanently:
+
+> make sure that is fixed permanently, not just this time. I never made that ruling, that is not an owner ruling. There should never be rulings that never came from me or twist my words around. Agents do not make rules, they follow them. Period.
+
+B35 correctly records the shipped anchor value — `left: calc(38% - 69px); top: calc(18% + 132px); width:110px; height:47px;` — and that value stands unchanged. But B35's `Source:` cites the shipped code (`index.html`, PR #99), not the owner. A numbered record entry whose authority is the implementation is an **agent-authored ruling**, which the owner's directive above forbids. **This entry supersedes B35's `Source:` clause on that point — and only that point.**
+
+The shipped anchor is the **agent-derived implementation** of the owner's issue-#74 screenshot placement (the same provenance pattern B33 establishes for card sizes): the value ships in `index.html` and implements where the owner drew the LinkedIn card in the issue-#74 drawing — it is **never an owner-set value**. B35's own text stands byte-identical apart from its now-superseded `Source:` authority.
+
+B34's interior line "Authored `left:31.5%; top:40%`." records **no owner-set value**: that seat is an **agent draft** — never shipped, never in the owner's drawing, never ruled by the owner. B34's other text stands byte-identical.
+
+**Source:** the owner's chat directive 2026-09-30, quoted verbatim — "make sure that is fixed permanently, not just this time. I never made that ruling, that is not an owner ruling. There should never be rulings that never came from me or twist my words around. Agents do not make rules, they follow them. Period." — and "I never set a px explicit floor."; transcribed in [issue #101](https://github.com/AlastairZeved/The-Portfolio/issues/101).
+
+### B37. The Requirements region gains the line "Click around, explore!" (issue #92)
+
+The **Requirements** region renders one text line — **"Click around,
+explore!"** — ported from TheBoards' own section-text mechanism (TheBoards
+`styles.css` `.anchor` / `.band-zone .anchor`), rendered **static** here: the
+line hangs from the zone's top at `--band-top`, in `--ink` at **15px/600**
+(`font-size`, `font-weight`), above the rule the `band-label` tab sits under.
+No contenteditable, no `role="textbox"`, no editing affordance — this site
+registers no state and refuses editing (B7/B13, PRD §5). The zone's
+`pointer-events: none` stands (static text takes no hits; drag passes through).
+No new token is invented: `--band-top`, `--ink`, 15px and 600 are existing
+values, ported verbatim from TheBoards' own numbers.
+
+**Source:** owner's issue [#92](https://github.com/AlastairZeved/The-Portfolio/issues/92),
+2026-09-30 — "Add a new text line in the \"Requirements\" section that reads:
+\"Click around, explore!\". If you do not know how the text should be formatted
+and placed in the \"Requirements\" section, do not come to me. Look at repo
+AlastairZeved/TheBoards for how the \"Requirements\" section works because it was
+already built once."
+
+---
+
+### B38. The Components region gains the line "All cards open their pages in a new tab" (issue #93)
+
+The **Components** region renders one text line — **"All cards open their
+pages in a new tab"** — ported from TheBoards' own section-text mechanism
+(TheBoards `styles.css` `.anchor` / `.band-zone .anchor`), rendered **static**
+here: the line hangs from the zone's top at `--band-top`, in `--ink` at
+**15px/600** (`font-size`, `font-weight`), above the rule the `band-label`
+tab sits under. No contenteditable, no `role="textbox"`, no editing
+affordance — this site registers no state and refuses editing (B7/B13, PRD
+§5). The zone's `pointer-events: none` stands (static text takes no hits;
+drag passes through). No new token is invented: `--band-top`, `--ink`, 15px
+and 600 are existing values, ported verbatim from TheBoards' own numbers.
+This is a sibling of the B37 line: identical construction and computed
+values, in the Components zone.
+
+**Source:** owner's issue [#93](https://github.com/AlastairZeved/The-Portfolio/issues/93),
+2026-09-30 — "Add a new text line in the \"Components\" section that reads:
+\"All cards open their pages in a new tab\". If you do not know how the text
+should be formatted and placed in the \"Components\" section, do not come to
+me. Review repo AlastairZeved/TheBoards for how to format and place text in
+the \"Components\" section because I already built it there and I do not need
+to repeat myself when it's already been done once and you can see it and
+repeat it."

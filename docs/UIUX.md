@@ -204,15 +204,15 @@ overhangs the band's rule (`--frame`, full-width `left: 0; right: 0`),
 bottom corners only, centred, **not a link, not a control** (no `role`, no
 `tabindex`, no caret).
 
-Its two lines, in order (B17, superseding B5; sizes and width per B19,
-superseding the B17 sizes):
+Its two lines, in order (B17, superseding B5; sizes and width per B31,
+superseding B19, which superseded the B17 sizes):
 
-1. **"The Portfolio of"** — same size as the name: 15px, `line-height: 1.2`.
-2. **"Robert Alastair Zeved Gregory"** — the title rung: 15px / **600**.
+1. **"The Portfolio of"** — same size as the name: 20px, `line-height: 1.2`.
+2. **"Robert Alastair Zeved Gregory"** — the title rung: 20px / **600**.
 
-The compartment's two lines render at **one font size** (15px). Its width hugs
+The compartment's two lines render at **one font size** (20px). Its width hugs
 the title text: the `--frame` left/right borders close in on the text with
-comfortable padding (`18px`), the card stays centred, and the interior never
+comfortable padding (`16px`), the card stays centred, and the interior never
 exceeds the sheet minus the side gutters.
 
 ### §3.3 The regions
@@ -265,6 +265,13 @@ for ~3 lines of the 17px title) and never above `1/5` of the viewport width,
 on a narrow viewport where `1/5` width falls below the legible floor, the
 legible floor wins (a card smaller than legible is never produced).
 
+> **Provenance (issue #72, `B33`):** the `132×80` figure is an
+> **agent-derived implementation** of the owner's "legible" word for the
+> **visitor's resize gesture** — the script's `getConstraints` — **never an
+> owner-set number**. The owner's drawings (issue #72/#74 screenshots) and his
+> chat of 2026-09-30 rule **authored** card sizes; the gesture floor does not
+> bound authored geometry.
+
 Both bounds and the gesture are read in the board's **logical coordinate
 space** (§3.1, `B30`): a card's `left/top` and `width/height` are authored in
 logical px, so pointer input (`clientX`/`clientY`, physical) is converted with
@@ -307,9 +314,14 @@ lower-right — at the placement the owner's screenshot gives (issue #72).
 
 ### §4.3 Note links (B28)
 
-Six **links** join the note cards — the pairs the owner names in issue #75:
+The note cards are joined by **links** — one per pair the owner authors. The
+original eight pairs (issue #75's six plus #72's two — the Music note to the
+Apple Music and Spotify notes below it) are:
+
 Music ↔ Writing · Software & AI ↔ Community · Software & AI ↔ Writing ·
-Plants & Rocks ↔ Community · Plants & Rocks ↔ Writing · Software & AI ↔ Music.
+Plants & Rocks ↔ Community · Plants & Rocks ↔ Writing · Software & AI ↔ Music ·
+Music ↔ Apple Music · Music ↔ Spotify.
+
 A link is the card-to-card relationship drawn as the board's own linework:
 a thin straight line between two cards' **centres**, no label, no arrowhead.
 
@@ -328,12 +340,14 @@ because a link is a line, not a control.
 whenever a card moves — drag, resize, or a window resize that re-scales the
 percentage-authored layout — so a line follows the card it joins. Only the
 **pairing** is authored: every card carries a `data-id`, every line carries
-`data-from` / `data-to`, so both ends of all six links are readable in the
-source (`test/desktop.js` pins them).
+`data-from` / `data-to` — the mechanism, not a fixed count, is authoritative,
+so a line exists for every authored pair, one 1px `--frame` line named by its
+`data-id` (`test/desktop.js` pins the pairs).
 
 **Provenance.** The idiom is TheBoards' note-link rendering, ported verbatim
-(TheBoards' `UIUX §4.6` / `B91`); the six pairs are the owner's (issue #75).
-No value above is invented, and no card's geometry, links or states change.
+(TheBoards' `UIUX §4.6` / `B91`); the pairs are the owner's (issue #75 and
+#72). No value above is invented, and no card's geometry, links or states
+change.
 
 ---
 
@@ -407,7 +421,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 |---|---|
 | §2's tokens, ratios, crossover | `test/tokens.js` — recomputed from shipped hexes |
 | card states, region layout, the full-viewport sheet, no rail in the DOM | `test/mobile.js`, `test/desktop.js` |
-| the six note links — their pairs, their 1px `--frame` line, their centres | `test/desktop.js` [L1]–[L6]; `test/mobile.js` pins the endpoints at scale < 1 |
+| the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L8]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
 | card drag + resize floor/ceiling, link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |

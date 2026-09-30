@@ -130,18 +130,44 @@ body {
   border-radius: 0 0 3px 3px;
 }
 
+/* ---- The Requirements section line (issue #92) ----------------------------
+   Ported from TheBoards' section-text mechanism (TheBoards styles.css .anchor
+   / .band-zone .anchor). TheBoards' anchors are contenteditable textboxes
+   because TheBoards is the app; this site is static (B5/B7/B13, PRD §2.6 — no
+   state, no persistence, editing refused), so only the RENDERED format and
+   placement are ported: the line hangs from the zone top at --band-top, in
+   --ink at 15px/600, above the rule the band-label tab sits under.  The zone
+   keeps pointer-events:none — static text takes no hits and drag gestures pass
+   through, exactly as the empty zone behaved. */
+.anchor {
+  position: absolute;
+  z-index: 1;
+  color: var(--ink);
+  line-height: 1.3;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+.band-zone .anchor {
+  left: 0; right: 0;
+  top: var(--band-top);
+  width: auto;
+  min-height: 44px;
+  padding: 0;
+  font-size: 15px; font-weight: 600;
+}
+
 /* ---- The title compartment (UIUX §3.2, B17; TheBoards #anchor-title) ---- */
 #anchor-title {
   position: absolute;
   left: 50%; transform: translateX(-50%);
-  top: 0; min-height: calc(var(--rule-y) + 22px);
+  top: 0; min-height: calc(var(--rule-y) + 29px);
   /* issue #59: hug the title text — the borders close in instead of
-     spanning the full card width, staying centred and comfortably padded */
+    spanning the full card width, staying centred and comfortably padded */
   width: max-content;
   max-width: calc(100% - 2 * var(--gutter));
   display: flex;
   flex-direction: column; justify-content: center;
-  padding: calc(var(--band-top) + 6px) 12px 12px;
+  padding: calc(var(--band-top) + 8px) 16px 16px;
   border: 2px solid var(--frame);
   border-top: 0;
   border-radius: 0 0 3px 3px;                  /* only the corners that exist */
@@ -150,12 +176,12 @@ body {
   z-index: 2;
 }
 #anchor-title .title-eyebrow {
-  /* issue #59: single font size in the card — both lines at 15px */
-  font-size: 15px; font-weight: 400; line-height: 1.2;
+  /* issue #59: single font size in the card — both lines at 20px (#91) */
+  font-size: 20px; font-weight: 400; line-height: 1.2;
   color: var(--ink);
 }
 #anchor-title .title-pinned {
-  font-size: 15px; font-weight: 600;
+  font-size: 20px; font-weight: 600;
   color: var(--ink);
 }
 
@@ -164,7 +190,6 @@ body {
   position: absolute;
   display: flex;
   align-items: center; justify-content: center;
-  min-width: 132px;
   background: var(--note);
   color: var(--ink-dark);
   border-radius: 3px;
@@ -350,9 +375,11 @@ body {
 
   <div id="zone-components" class="band-zone">
     <span class="band-label on-light">Components</span>
+    <div class="anchor">All cards open their pages in a new tab</div>
   </div>
   <div id="zone-requirements" class="band-zone">
     <span class="band-label on-light">Requirements</span>
+    <div class="anchor">Click around, explore!</div>
   </div>
 
   <div id="anchor-title">
@@ -388,15 +415,15 @@ body {
     Music
     <span class="resize-handle" aria-hidden="true"></span>
   </div>
-  <a class="door-card" data-id="apple-music" style="left:66%; top:69%; width:150px; height:78px;" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="apple-music" style="left:66%; top:69%; width:120px; height:50px;" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
     Apple Music
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="spotify" style="left:86%; top:69%; width:150px; height:78px;" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="spotify" style="left:86%; top:69%; width:110px; height:48px;" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
     Spotify
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="linkedin" style="left:10%; top:70%; width:180px; height:80px;" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="linkedin" style="left: calc(38% - 69px); top: calc(18% + 132px); width:110px; height:47px;" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">
     LinkedIn
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
@@ -430,10 +457,10 @@ body {
     </div>
   </div>
 
-  <!-- The link layer (UIUX §4.3, B28): the six straight 1px --frame lines
+  <!-- The link layer (UIUX §4.3, B28): the nine straight 1px --frame lines
        that join the note cards, one `<line>` per pair the owner names in
-       issue #75. TheBoards' link idiom ported verbatim (TheBoards' UIUX
-       §4.6 / B91) — a line between two cards' centres, below the notes,
+       issue #75, #72 and #74. TheBoards' link idiom ported verbatim (TheBoards'
+       UIUX §4.6 / B91) — a line between two cards' centres, below the notes,
        never a hit target. Endpoints are computed from live card geometry
        in the script below, so a line follows a card that is dragged or
        resized; only the pairing is authored here. -->
@@ -444,6 +471,9 @@ body {
     <line data-link="4" data-from="plants-rocks" data-to="community"></line>
     <line data-link="5" data-from="plants-rocks" data-to="writing"></line>
     <line data-link="6" data-from="software-ai" data-to="music"></line>
+    <line data-link="7" data-from="music" data-to="apple-music"></line>
+    <line data-link="8" data-from="music" data-to="spotify"></line>
+    <line data-link="9" data-from="career" data-to="linkedin"></line>
   </svg>
 
 </div>
@@ -496,7 +526,7 @@ body {
   }
   function toLogical(px) { return px / renderScale(); }
 
-  /* ---- The link layer (UIUX §4.3, B28): six straight 1px --frame lines
+  /* ---- The link layer (UIUX §4.3, B28): nine straight 1px --frame lines
      between card centres, one per pair authored in the markup. The pairing
      is authored; the geometry is computed, so a line stays true while a
      card is dragged or resized (TheBoards' link idiom, UIUX §4.6 / B91 —
@@ -536,10 +566,34 @@ body {
   // the percentage-authored layout re-scales with the viewport: recompute
   window.addEventListener('resize', drawLinks);
 
+  // issue #94 — native anchor drag must not steal the gesture. The door-cards
+  // are real <a href> anchors, so a real press-and-move would otherwise fire
+  // the browser's own HTML5 drag: `dragstart` fires, the pointer flow cancels,
+  // and the drag ghost wanders while the card never moves. TheBoards' cards
+  // are divs, so this suppression is the one piece this page must add. It is
+  // scoped to the door-cards ONLY — never the whole page — and lives entirely
+  // here: there is no `draggable` attribute anywhere and no preventDefault on
+  // pointerdown (that would kill the :active click glow, B29).
+  board.addEventListener('dragstart', function (e) {
+    if (e.target.closest('.door-card')) e.preventDefault();
+  });
+
+  // TheBoards' pointer idiom (attachBoardCardGestures): the grabbed card takes
+  // over the pointer stream so a drag still tracks even when the pointer
+  // leaves the card's own bounds. A browser rejects an unknown pointerId — a
+  // synthetic PointerEvent (as the regression suite and dragstart assertions
+  // dispatch) carries no active pointer — so a throw here is benign: the
+  // window-level pointermove/up listeners plus the dragstart suppression above
+  // carry the gesture either way.
+  function capturePointer(card, e) {
+    try { card.setPointerCapture(e.pointerId); } catch (_) { /* no active pointer */ }
+  }
+
   board.addEventListener('pointerdown', function (e) {
     var handle = e.target.closest('.resize-handle');
     var card = e.target.closest('.door-card');
     if (!card) return;
+    capturePointer(card, e);
     var rect = board.getBoundingClientRect();
     var cr = card.getBoundingClientRect();
     if (handle) {

@@ -125,9 +125,10 @@ door.
 
 A single static `index.html` (all CSS and JS inline, truly one file — owner
 ruling, `DECISIONS.md` B12) that renders TheBoards' four regions — **Title,
-Components, Requirements, Parking Lot** — plus the **All Boards rail**, with
-door-cards in the free board space linking out to the owner's sites, and a
-Formspree contact form in the Parking Lot.
+Components, Requirements, Parking Lot** — with door-cards in the free board
+space linking out to the owner's sites, and a Formspree contact form in the
+Parking Lot. The sheet fills the whole viewport; there is **no All Boards rail**
+(#71, B27).
 
 - **Title card:** "The Portfolio of" / "Robert Alastair Zeved Gregory" — two
   lines (B17, superseding B5), one font size, borders that hug the text
@@ -174,7 +175,7 @@ evidence of the tool it advertises. Everything else is secondary.
 | Deferred | Why it is not here |
 |---|---|
 | `razgregory.com/career` and `razgregory.com/plantsandrocks` destinations | Owner ruling (issue #51): "they just need to be stubbed for now — we build those only after the landing page is finished." The cards exist and link to stubs |
-| All Boards rail content | Owner ruling (issue #51): "a future problem, not a right now problem" — was deferred until the landing page was done. Now scoped (B24): the rail renders the single To Do tray matched to the wireframe |
+| All Boards rail | **Removed** (issue #71, B27): the pane is deleted and the board spans the full viewport. Earlier rulings deferred it (issue #51: "a future problem") then scoped it (B24); the owner then cut it entirely |
 
 ### §2.6 Not yet ruled — do not invent
 
@@ -239,8 +240,9 @@ submission as spam.)
    contents not yet ruled; open question).
 4. **Parking Lot** — closes the sheet; holds the Formspree contact form
    (B6).
-5. **All Boards rail** — present with the single To Do tray carrying the
-   Portfolio board card, the New board control and the pager (B24).
+
+There is no fifth region: the All Boards rail is removed (#71, B27) and the
+sheet spans the full viewport.
 
 The door-cards sit **in the free board space** — the empty canvas
 between the regions — never inside Components, Requirements or the Parking

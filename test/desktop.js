@@ -1,6 +1,6 @@
-/* test/desktop.js — desktop grammar: rail visible with the single To Do tray
-   carrying the Portfolio board (B24), card states (hover glow, pressed green,
-   never colour alone). Black-box Playwright.
+/* test/desktop.js — desktop grammar: no All Boards rail; the single board
+   spans the full viewport, the door-cards re-scale inside it. Card states
+   (hover glow, pressed green, never colour alone). Black-box Playwright.
    Run: node test/desktop.js   (PORTFOLIO_URL default http://localhost:8000/index.html) */
 
 const { chromium } = require('playwright');
@@ -8,30 +8,60 @@ const path = require('path');
 
 const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/index.html';
 const OUT = process.env.PORTFOLIO_OUT && path.resolve(process.env.PORTFOLIO_OUT);
+const VW = 1440, VH = 900;
 let failures = 0;
 const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
 
 (async () => {
   const browser = await chromium.launch();
-  // desktop: the wide gate is (min-width:1024px) and (hover:hover) and (pointer:fine)
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, hasTouch: false });
+  const page = await browser.newPage({ viewport: { width: VW, height: VH }, hasTouch: false });
   await page.goto(URL, { waitUntil: 'networkidle' });
 
-  // html.wide applied
-  ok('html.wide set on desktop', await page.evaluate(() => document.documentElement.classList.contains('wide')));
+  // issue #71: the All Boards pane is removed entirely — DOM and layout
+  ok('no #pane element in the DOM', await page.locator('#pane').count() === 0);
+  ok('no legacy rail nodes (.board-cat/.pane-card/.pager-btn/.cat-pages)',
+     (await page.locator('.board-cat, .pane-card, .pager-btn, .cat-pages, .cat-head, .cat-add').count()) === 0);
+  const panelNodes = await page.evaluate(() => {
+    const aside = document.querySelector('aside');
+    const text = document.body.innerText;
+    return { aside: !!aside, mentionsAllBoards: /All Boards/i.test(text) };
+  });
+  ok('no <aside> rail and no "All Boards" text anywhere', !panelNodes.aside && !panelNodes.mentionsAllBoards);
 
-  // rail: the single To Do tray carrying the Portfolio board (B24, supersedes B15)
-  ok('rail visible on desktop', await page.locator('#pane').isVisible());
-  const trayLabels = await page.locator('.board-cat .cat-head span').allTextContents();
-  ok('single To Do tray', JSON.stringify(trayLabels) === JSON.stringify(['To Do']));
-  const cardTitle = await page.locator('.pane-card .row-title').first().innerText();
-  ok('Portfolio board card in the To Do tray',
-     cardTitle.includes('The Portfolio of Robert Alastair Zeved Gregory'));
-  const date = await page.locator('.pane-card .row-date').first().innerText();
-  ok('Last Updated stamp on the card', date.includes('Last Updated') && date.includes('09/29/26'));
-  ok('pager shows four arrow buttons', await page.locator('.pager-btn').count() === 4);
-  ok('pager shows 1/5', await page.locator('.cat-pages').innerText() === '1/5');
-  ok('first two arrows disabled on page 1', await page.locator('.pager-btn:disabled').count() === 2);
+  // issue #71: the board spans the full viewport
+  const board = await page.locator('#board').boundingBox();
+  ok('board starts at x=0', board && Math.abs(board.x) < 1);
+  ok('board spans full viewport width', board && Math.abs(board.width - VW) < 1);
+  ok('board spans full viewport height', board && Math.abs(board.height - VH) < 1);
+
+  // no horizontal scrolling introduced, one-viewport fit (TheBoards law)
+  const scroll = await page.evaluate(() => ({
+    sw: document.documentElement.scrollWidth,
+    iw: window.innerWidth,
+    sh: document.documentElement.scrollHeight,
+    ih: window.innerHeight,
+    bodyOverflow: getComputedStyle(document.body).overflow,
+  }));
+  ok('no horizontal overflow (scrollWidth <= innerWidth)', scroll.sw <= scroll.iw + 1);
+  ok('no vertical overflow (scrollHeight <= innerHeight)', scroll.sh <= scroll.ih + 1);
+  ok('body clips overflow (one viewport)', scroll.bodyOverflow === 'hidden');
+
+  // the title compartment is centred on the full-width sheet
+  const tb = await page.locator('#anchor-title').boundingBox();
+  ok('title card centred on the full-width sheet', tb && Math.abs((tb.x + tb.width / 2) - VW / 2) < 2);
+
+  // regions still render their furniture
+  ok('Components zone label', (await page.locator('#zone-components .band-label').innerText()) === 'Components');
+  ok('Requirements zone label', (await page.locator('#zone-requirements .band-label').innerText()) === 'Requirements');
+  ok('Parking Lot header', (await page.locator('#lot-header').innerText()) === 'Parking Lot');
+
+  // the six door-cards render inside the viewport (re-scaled to the wider sheet)
+  ok('door-card links present (>=6)', await page.locator('a.door-card').count() >= 6);
+  const inside = await page.locator('.door-card').evaluateAll((as, vp) => as.every(a => {
+    const r = a.getBoundingClientRect();
+    return r.left >= -0.5 && r.top >= -0.5 && r.right <= vp.w + 0.5 && r.bottom <= vp.h + 0.5;
+  }), { w: VW, h: VH });
+  ok('all door-cards sit inside the viewport (no clipping)', inside);
 
   // card states (B14) on the first door-card
   const first = page.locator('a.door-card').first();
@@ -50,9 +80,6 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   // focus ring for keyboard (never colour alone)
   await page.keyboard.press('Tab');
   await page.waitForTimeout(80);
-  const focusOutline = await page.locator('a.door-card:focus-visible').count()
-    .catch(async () => { const n = await page.evaluate(() => document.querySelectorAll('a.door-card').length); return n; });
-  ok('focus-visible ring reachable by Tab', focusOutline >= 0); // informational; ring asserted in CSS below
   const css = await page.evaluate(() => {
     const s = [...document.styleSheets].map(sh => { try { return [...sh.cssRules].map(r => r.cssText).join('\n'); } catch (e) { return ''; } }).join('\n');
     return { hasFocusRing: s.includes(':focus-visible') && s.includes('outline'), hasTransition: s.includes('transition') };

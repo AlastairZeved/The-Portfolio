@@ -37,7 +37,8 @@ question. The governing issue of record is
 - **Parking Lot:** Formspree contact form — Name (optional), Email
   (optional), Message (required).
 - **One binding:** the To-Do blue of TheBoards' design ladder. No calendar
-  rail, no hero, no service worker.
+  rail, no All Boards rail, no hero, no service worker. The sheet fills the
+  whole viewport (#71, B27).
 
 ## How to use
 
@@ -56,7 +57,7 @@ state — notes drag and resize for delight, nothing persists.
 npm install playwright   # onto NODE_PATH; not committed
 node test/tokens.js      # design contract: UIUX §2 recomputed from shipped hexes
 node test/mobile.js      # touch + band/lot geometry + card states at mobile widths
-node test/desktop.js     # desktop grammar, rail, card link semantics
+node test/desktop.js     # desktop grammar: full-viewport sheet, no rail, card link semantics
 ```
 
 There is deliberately no `test/sw-update.js` — the site ships no service

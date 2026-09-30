@@ -61,7 +61,7 @@ TheBoards; whole files only, each is one linear scenario):
 npm install playwright        # onto NODE_PATH; not committed, no package.json
 node test/tokens.js           # design contract: UIUX §2 recomputed from shipped hexes (no browser)
 node test/mobile.js           # touch + band/lot geometry + card states at mobile widths
-node test/desktop.js          # desktop grammar, rail presence, card link semantics, PDF-free (no export here)
+node test/desktop.js          # desktop grammar: full-viewport sheet, no rail, card link semantics, PDF-free (no export here)
 ```
 
 There is **no `test/sw-update.js`** — the site ships **no service worker**

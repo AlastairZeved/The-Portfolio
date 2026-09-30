@@ -68,9 +68,11 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     return getComputedStyle(el).pointerEvents !== 'none' && !!h && getComputedStyle(h).display !== 'none';
   }));
 
-  // rail hidden on mobile (B15: wide only)
-  const railVisible = await page.locator('#pane').isVisible();
-  ok('rail hidden on mobile', !railVisible);
+  // no All Boards rail anywhere (issue #71: removed entirely, both grammars)
+  const railNodes = await page.locator('#pane').count();
+  ok('no All Boards rail in the DOM', railNodes === 0);
+  const boardBox = await page.locator('#board').boundingBox();
+  ok('board spans the full viewport width', boardBox && Math.abs(boardBox.x) < 1 && Math.abs(boardBox.width - 390) < 1);
 
   // form present with three fields, required message + honeypot (B6)
   const formAction = await page.locator('#contact-form').getAttribute('action');

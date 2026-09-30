@@ -679,3 +679,29 @@ values, ported verbatim from TheBoards' own numbers.
 and placed in the \"Requirements\" section, do not come to me. Look at repo
 AlastairZeved/TheBoards for how the \"Requirements\" section works because it was
 already built once."
+
+---
+
+### B38. The Components region gains the line "All cards open their pages in a new tab" (issue #93)
+
+The **Components** region renders one text line — **"All cards open their
+pages in a new tab"** — ported from TheBoards' own section-text mechanism
+(TheBoards `styles.css` `.anchor` / `.band-zone .anchor`), rendered **static**
+here: the line hangs from the zone's top at `--band-top`, in `--ink` at
+**15px/600** (`font-size`, `font-weight`), above the rule the `band-label`
+tab sits under. No contenteditable, no `role="textbox"`, no editing
+affordance — this site registers no state and refuses editing (B7/B13, PRD
+§5). The zone's `pointer-events: none` stands (static text takes no hits;
+drag passes through). No new token is invented: `--band-top`, `--ink`, 15px
+and 600 are existing values, ported verbatim from TheBoards' own numbers.
+This is a sibling of the B37 line: identical construction and computed
+values, in the Components zone.
+
+**Source:** owner's issue [#93](https://github.com/AlastairZeved/The-Portfolio/issues/93),
+2026-09-30 — "Add a new text line in the \"Components\" section that reads:
+\"All cards open their pages in a new tab\". If you do not know how the text
+should be formatted and placed in the \"Components\" section, do not come to
+me. Review repo AlastairZeved/TheBoards for how to format and place text in
+the \"Components\" section because I already built it there and I do not need
+to repeat myself when it's already been done once and you can see it and
+repeat it."

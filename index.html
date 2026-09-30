@@ -124,9 +124,10 @@ body {
   max-width: calc(100% - 2 * var(--gutter));
   display: flex;
   flex-direction: column; justify-content: center;
-  padding: calc(var(--band-top) + 6px) 18px 12px;
+  padding: calc(var(--band-top) + 6px) 12px 12px;
   border: 2px solid var(--frame);
   border-top: 0;
+  border-radius: 0 0 3px 3px;                  /* only the corners that exist */
   background: var(--card);
   text-align: center;
   z-index: 2;

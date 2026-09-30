@@ -588,3 +588,35 @@ came from me or twist my words around. Agents do not make rules, they follow
 them. Period.", and "I never set a px explicit floor."; plus the
 [issue #72 screenshot](https://github.com/user-attachments/assets/0b406ea2-9d55-4cf5-af15-b359c2690f37),
 which defines the Apple Music and Spotify card sizes the owner drew.
+
+---
+
+### B34. The LinkedIn note links to the Career note (issue #74)
+
+Issue #74 pairs the new **LinkedIn** note with the existing **Career** note
+(previously Professional). Issue #74 item 3 reads verbatim: "Link the new note
+card to the existing \"Career\" note card (previously Professional)". The two
+join exactly like every link before them (the B28 / UIUX §4.3 per-authored-pair
+mechanism): one `<line>` in `#link-layer` with `data-from="career"
+data-to="linkedin"`, a thin straight 1px `--frame` line between the two cards'
+centres, no label, no arrowhead, non-scaling-stroke, below the notes,
+`pointer-events: none`. **No card gains or loses a state:** Career keeps its door
+(href `https://razgregory.com/career`, `target="_blank"`, the full hover/click
+link states of `UIUX §4.1`), and the LinkedIn card keeps the same door
+(`https://www.linkedin.com/in/robertagregory`) with the same full link states.
+The LinkedIn card's size and placement are read from the owner's issue #74
+screenshot (embedded below): at Career's authored 220×96, LinkedIn draws
+**110×47** (0.500 w / 0.492 h of Career), **below-left of Career**, its top edge
+a small gap under Career's bottom edge and its right side overlapping Career's
+left edge. Authored `left:31.5%; top:40%`. LinkedIn's hover shows the blue
+bloom (`0 0 32px 4px` `--glow-blue`/0.9) and its press the 1px inset + green
+bloom (`B25` follow-up), both from `.door-card` CSS.
+
+**No Music ↔ LinkedIn pairing exists, and none is authorized.** B32's clause
+"(Music ↔ LinkedIn, issue #74)" names the wrong pair: issue #74 item 3 links
+LinkedIn to **Career**, not Music. **This entry supersedes B32's "(Music ↔
+LinkedIn, issue #74)" clause on that point**, and B32's own text stands
+byte-identical. Nobody asked for Music → LinkedIn; the record must read
+Career ↔ LinkedIn.
+
+**Source:** owner's issue [#74](https://github.com/AlastairZeved/The-Portfolio/issues/74), 2026-09-29 — item 3: "Link the new note card to the existing \"Career\" note card (previously Professional)" (screenshot: [issue #74](https://github.com/user-attachments/assets/3bc427e8-5062-480d-b110-2e8ec37a9f49)).

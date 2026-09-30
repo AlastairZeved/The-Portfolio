@@ -395,7 +395,7 @@ body {
     Spotify
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="linkedin" style="left:10%; top:70%; width:180px; height:80px;" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="linkedin" style="left:33%; top:33%; width:110px; height:47px;" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">
     LinkedIn
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
@@ -429,9 +429,9 @@ body {
     </div>
   </div>
 
-  <!-- The link layer (UIUX §4.3, B28): the eight straight 1px --frame lines
+  <!-- The link layer (UIUX §4.3, B28): the nine straight 1px --frame lines
        that join the note cards, one `<line>` per pair the owner names in
-       issue #75 and #72. TheBoards' link idiom ported verbatim (TheBoards'
+       issue #75, #72 and #74. TheBoards' link idiom ported verbatim (TheBoards'
        UIUX §4.6 / B91) — a line between two cards' centres, below the notes,
        never a hit target. Endpoints are computed from live card geometry
        in the script below, so a line follows a card that is dragged or
@@ -445,6 +445,7 @@ body {
     <line data-link="6" data-from="software-ai" data-to="music"></line>
     <line data-link="7" data-from="music" data-to="apple-music"></line>
     <line data-link="8" data-from="music" data-to="spotify"></line>
+    <line data-link="9" data-from="career" data-to="linkedin"></line>
   </svg>
 
 </div>
@@ -497,7 +498,7 @@ body {
   }
   function toLogical(px) { return px / renderScale(); }
 
-  /* ---- The link layer (UIUX §4.3, B28): eight straight 1px --frame lines
+  /* ---- The link layer (UIUX §4.3, B28): nine straight 1px --frame lines
      between card centres, one per pair authored in the markup. The pairing
      is authored; the geometry is computed, so a line stays true while a
      card is dragged or resized (TheBoards' link idiom, UIUX §4.6 / B91 —

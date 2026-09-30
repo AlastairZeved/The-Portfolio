@@ -255,7 +255,7 @@ legible floor wins (a card smaller than legible is never produced).
 | **hover** | blue bloom: `--accent-page` `#6d9cb0` at `0 0 32px 4px` / `0.9` — no second shadow layer (B14 hover member, settled by #67 → B25) | the bloom *is* the elevation — a temporary lifting, permitted by §1 |
 || **active (pressed)** | green bloom: `--glow-green` #b9d2b2 at `0 0 32px 4px` / `0.9` — no elevation layer (matches hover geometry, #67 follow-up ruling) | **1px inset** — the card presses into the page |
 | **focus-visible** | a focus ring in the surface's ink (never a tint) | the ring is the geometry; keyboard users are never left to colour alone |
-| **rest-only note** (the Music card) | note surface, ink border, **no hover, no click, no focus ring** — it is not a link and not a control (B26) | — nothing blooms and nothing moves; the note only sits |
+| **rest-only note** (the Music card) | note surface, ink border, **no hover, no click, no focus ring** — it is not a link and not a control (B26); it still drags and resizes like any note (B7) | — nothing blooms and nothing moves; the note only sits |
 
 Transitions between states use TheBoards' closed motion set — short, quiet,
 no bounce; nothing moves on its own after the interaction ends.

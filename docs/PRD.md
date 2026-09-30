@@ -126,15 +126,15 @@ door.
 A single static `index.html` (all CSS and JS inline, truly one file — owner
 ruling, `DECISIONS.md` B12) that renders TheBoards' four regions — **Title,
 Components, Requirements, Parking Lot** — plus the **All Boards rail**, with
-six door-cards in the free board space linking out to the owner's sites, and a
+door-cards in the free board space linking out to the owner's sites, and a
 Formspree contact form in the Parking Lot.
 
 - **Title card:** "The Portfolio of" / "Robert Alastair Zeved Gregory" — two
   lines (B17, superseding B5), one font size, borders that hug the text
   (B19), the same title card as TheBoards, not a link.
-- **Six door-cards** (`DECISIONS.md` B3), each a real link opening in a new
-  tab: Community, Professional, Writing, Software & AI, Plants & Rocks,
-  Music.
+- **Door-cards** (`DECISIONS.md` B3, B26), each a real link opening in a new
+  tab. The **Music** card is not a link — it is the plain parent note the
+  Apple Music and Spotify doors hang under (B26).
 - **Contact form** (`DECISIONS.md` B6): Name (optional), Email (optional),
   Message (required), with Formspree's captcha and bot protections.
 - **Notes that drag and resize** — entertainment only, no persistence
@@ -148,7 +148,7 @@ argued here — boundedness is a feature of this site, not a gap.
 | Not built | Reason |
 |---|---|
 | Accounts, sync, sharing, collaboration | There is no backend; adding one changes what the site is |
-| Tags, folders, search, filters, auto-grouping | P2, P4 — the six cards are the whole index |
+| Tags, folders, search, filters, auto-grouping | P2, P4 — the cards are the whole index |
 | Rich text, images, attachments, drawing | P5 — static is the point; and TheBoards refuses them too |
 | A blog / CMS | Owner ruling (issue #51) — Writing is a door to Substack, not a feature here |
 | Analytics / tracking | Owner ruling (issue #51) — this page asks for nothing and reports nothing |
@@ -165,8 +165,8 @@ argued here — boundedness is a feature of this site, not a gap.
 ### §2.4 Success
 
 The site succeeds if a visitor who lands on it can reach every one of the
-owner's six doors in a single glance, understands without instruction that
-each card is a door, and leaves with the sense that the page itself is
+owner's doors in a single glance, understands without instruction that each
+linked card is a door, and leaves with the sense that the page itself is
 evidence of the tool it advertises. Everything else is secondary.
 
 ### §2.5 Deferred, with reason
@@ -242,9 +242,10 @@ submission as spam.)
 5. **All Boards rail** — present with the single To Do tray carrying the
    Portfolio board card, the New board control and the pager (B24).
 
-The six door-cards sit **in the free board space** — the empty canvas
+The door-cards sit **in the free board space** — the empty canvas
 between the regions — never inside Components, Requirements or the Parking
-Lot (B2).
+Lot (B2). The **Music** note is the plain parent the Apple Music and Spotify
+doors hang under (B26, `UIUX §4.2`).
 
 ---
 
@@ -264,7 +265,7 @@ Lot (B2).
 
 ## §6 Success is measured by
 
-- All six doors reachable in one glance and one click each.
+- All doors reachable in one glance and one click each.
 - Zero invented design values: every rendered token resolves in `UIUX.md`.
 - The three suites (`test/tokens.js`, `test/mobile.js`, `test/desktop.js`)
   pass; there is deliberately no `sw-update.js` (no service worker, B13).

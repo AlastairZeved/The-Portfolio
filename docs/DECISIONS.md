@@ -378,3 +378,23 @@ The hover glow's blue is **`--accent-page` `#6d9cb0`** — an existing palette b
 **Follow-up ruling (owner chat, 2026-09-29):** the active/pressed state takes the hover's full bloom geometry (`0 0 32px 4px` / `0.9`) in the green channels (`--glow-green` #b9d2b2), with the elevation layer dropped — so the press holds the bloom while the card sinks 1px, instead of contracting it.
 
 **Source:** owner's issue [#67](https://github.com/AlastairZeved/The-Portfolio/issues/67), 2026-09-29 — "Hovering over a button barely emits a glow. Not enough to warrant even calling it a hover state. Either use a different blue from the palette or increase the intensity and size of the glow so it's actually visible on the dark background. It's useless as it is right now." Both doors his sentence opens are taken: the different palette blue is `--accent-page`, the intensity and size are the bloom above (a ≥3×-ground band of 23px, against 7px shipped). **Active follow-up source:** owner chat, 2026-09-29 — "Yes full bloom jesus christ"
+
+### B26. Apple Music and Spotify doors hang under the Music note (issue #72)
+
+The board **gains two doors and loses one**. A **"Spotify"** door
+(`https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ`) and an
+**"Apple Music"** door
+(`https://music.apple.com/us/artist/aboveaveragerob/1815357064`) are added,
+both **real anchors** carrying the full link states (`UIUX §4.1`): the blue
+hover bloom and the 1px-inset green press. The **"Music" card stops being a
+door** — it keeps its note surface at rest and takes **no hover state and no
+click state**, because it is no longer a link (a **rest-only note**,
+`UIUX §4.1`). The link the Music card used to carry (Spotify) moves to the new
+Spotify door. The two new doors sit **below the Music card as a mirrored
+pair** — Apple Music lower-left, Spotify lower-right — at the spatial
+placement the owner's issue screenshot gives. This entry changes **no design
+value**: the two music doors reuse `UIUX §4.1`'s existing hover/click states,
+and the rest-only note reuses the resting note surface. The owner's statement
+names **no colour** — B25's `--accent-page` hover blue stands unchanged.
+
+**Source:** owner's issue [#72](https://github.com/AlastairZeved/The-Portfolio/issues/72), 2026-09-29 — "1. Add the note card with text "Apple Music" 2. Link it to the "Music" card 3. Add the note card with text "Spotify" 4. Link it to the "Music" card 5. Cut the link from the "Music" card that currently links to Spotify and put it on the new "Spotify" note card 6. For the "Music" card, remove the hover state and the click state from the card since it is no longer a link 7. Make the new "Apple Music" card a link as well that leads to: https://music.apple.com/us/artist/aboveaveragerob/1815357064 and add hover state and click state to the "Apple Music" card since it is now a link 8. For spatial placement of both the "Apple Music" and the "Spotify" note cards, see the below screenshot." (screenshot: [issue #72](https://github.com/AlastairZeved/The-Portfolio/issues/72))

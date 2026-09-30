@@ -218,7 +218,7 @@ exceeds the sheet minus the side gutters.
 
 ### §3.4 The door-cards live in the board space
 
-The six door-cards sit **in the free board space** — the empty canvas between
+The door-cards sit **in the free board space** — the empty canvas between
 the regions — at the positions the owner's wireframe illustrates (owner
 ruling, `B2`: "the empty space is literally FOR those cards"). The wireframe
 is committed as an **illustrative reference only**:
@@ -255,11 +255,12 @@ legible floor wins (a card smaller than legible is never produced).
 | **hover** | blue bloom: `--accent-page` `#6d9cb0` at `0 0 32px 4px` / `0.9` — no second shadow layer (B14 hover member, settled by #67 → B25) | the bloom *is* the elevation — a temporary lifting, permitted by §1 |
 || **active (pressed)** | green bloom: `--glow-green` #b9d2b2 at `0 0 32px 4px` / `0.9` — no elevation layer (matches hover geometry, #67 follow-up ruling) | **1px inset** — the card presses into the page |
 | **focus-visible** | a focus ring in the surface's ink (never a tint) | the ring is the geometry; keyboard users are never left to colour alone |
+| **rest-only note** (the Music card) | note surface, ink border, **no hover, no click, no focus ring** — it is not a link and not a control (B26) | — nothing blooms and nothing moves; the note only sits |
 
 Transitions between states use TheBoards' closed motion set — short, quiet,
 no bounce; nothing moves on its own after the interaction ends.
 
-### §4.2 The six doors
+### §4.2 The doors
 
 | Card | Destination (all `target="_blank"`) | Status |
 |---|---|---|
@@ -268,7 +269,13 @@ no bounce; nothing moves on its own after the interaction ends.
 | Writing | `https://substack.com/@theaboveaveragerob` | live |
 | Software & AI | `https://alastairzeved.com` | live |
 | Plants & Rocks | `https://razgregory.com/plantsandrocks` | **stub** (built after the landing page, B4) |
-| Music | `https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ` | live (owner's correction: Spotify, not Apple Music) |
+| Apple Music | `https://music.apple.com/us/artist/aboveaveragerob/1815357064` | live (B26) |
+| Spotify | `https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ` | live (B26 — the link the Music card carried) |
+
+The **Music** card is not a door (§4.1, B26): it is the plain parent note the
+**Apple Music** and **Spotify** doors hang under. The two music doors sit
+**below the Music card as a mirrored pair** — Apple Music lower-left, Spotify
+lower-right — at the placement the owner's screenshot gives (issue #72).
 
 ---
 
@@ -324,8 +331,9 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 
 ## §7 Accessibility
 
-- Every door-card is a real link: keyboard-focusable, announced by its
-  visible name, `target="_blank"` with `rel="noopener noreferrer"`.
+- Every door is a real link: keyboard-focusable, announced by its
+  visible name, `target="_blank"` with `rel="noopener noreferrer"`. The
+  **Music** note is not a door and is not a control (B26).
 - Focus is a visible ring (§4.1), never a tint alone.
 - The title compartment is not a control and must not be announced as one.
 - Form fields carry labels; the Message field is `required` and announced so.

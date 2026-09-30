@@ -1,4 +1,4 @@
-/* test/mobile.js — mobile render + six new-tab door-cards + form (black-box, Playwright).
+/* test/mobile.js — mobile render + eight new-tab door-cards + form (black-box, Playwright).
    Run: node test/mobile.js   (BOARDS_URL default http://localhost:8000/index.html) */
 
 const { chromium } = require('playwright');
@@ -37,22 +37,34 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('title card borders hug text', titleBox && hug < 2);
   ok('title card stays centred', titleBox && Math.abs((titleBox.x + titleBox.width / 2) - 390 / 2) < 2);
 
-  // six door-cards, each a real new-tab anchor
+  // eight door-cards, each a real new-tab anchor (B26); the Music card is a plain note
   const cards = await page.locator('a.door-card').count();
-  ok('six door-cards', cards === 6);
+  ok('eight door-cards', cards === 8);
   const hrefs = await page.locator('a.door-card').evaluateAll(as => as.map(a => [a.textContent.trim(), a.href, a.target, a.rel]));
   const expected = [
     ['Community', 'https://earp-street-park.netlify.app/'],
-    ['Professional', 'https://razgregory.com/career'],
+    ['Career', 'https://razgregory.com/career'],
     ['Writing', 'https://substack.com/@theaboveaveragerob'],
     ['Software & AI', 'https://alastairzeved.com/'],
     ['Plants & Rocks', 'https://razgregory.com/plantsandrocks'],
-    ['Music', 'https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ'],
+    ['LinkedIn', 'https://www.linkedin.com/in/robertagregory'],
+    ['Apple Music', 'https://music.apple.com/us/artist/aboveaveragerob/1815357064'],
+    ['Spotify', 'https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ'],
   ];
   for (const [name, url] of expected) {
     const hit = hrefs.find(([n]) => n === name);
     ok(`${name} links to ${url}`, hit && hit[1] === url && hit[2] === '_blank' && hit[3].includes('noopener'));
   }
+
+  // the Music card is a rest-only note, not a link (B26)
+  const musicNotes = page.locator('div.door-card.note-card');
+  ok('Music card is a non-link note', await musicNotes.count() === 1
+    && (await musicNotes.first().innerText()).trim().split('\n')[0].trim() === 'Music');
+  ok('Music note has no href', await musicNotes.first().evaluate(el => !el.hasAttribute('href')));
+  ok('Music note carries no hover/click shadow', await musicNotes.first().evaluate(el => {
+    const s = getComputedStyle(el);
+    return s.boxShadow === 'none' && s.pointerEvents === 'none';
+  }));
 
   // rail hidden on mobile (B15: wide only)
   const railVisible = await page.locator('#pane').isVisible();

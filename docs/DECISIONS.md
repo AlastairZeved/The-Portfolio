@@ -399,3 +399,20 @@ and the rest-only note reuses the resting note surface. The owner's statement
 names **no colour** — B25's `--accent-page` hover blue stands unchanged.
 
 **Source:** owner's issue [#72](https://github.com/AlastairZeved/The-Portfolio/issues/72), 2026-09-29 — "1. Add the note card with text "Apple Music" 2. Link it to the "Music" card 3. Add the note card with text "Spotify" 4. Link it to the "Music" card 5. Cut the link from the "Music" card that currently links to Spotify and put it on the new "Spotify" note card 6. For the "Music" card, remove the hover state and the click state from the card since it is no longer a link 7. Make the new "Apple Music" card a link as well that leads to: https://music.apple.com/us/artist/aboveaveragerob/1815357064 and add hover state and click state to the "Apple Music" card since it is now a link 8. For spatial placement of both the "Apple Music" and the "Spotify" note cards, see the below screenshot." (screenshot: [issue #72](https://github.com/AlastairZeved/The-Portfolio/issues/72))
+
+---
+
+### B27. The All Boards rail is removed; the board spans the full viewport (#71)
+The **All Boards rail is deleted** — out of the DOM and out of the layout, on
+every viewport. Nothing replaces it: **no navigation, no second surface, no
+stand-in.** The single board — "The Portfolio of Robert Alastair Zeved Gregory"
+— **re-scales to fill the whole viewport**, taking the space the rail occupied.
+The sheet is `inset: 0` on `#board`; the rail's `300px` desktop offset, its
+`html.wide` gate, and every rail node (`.board-cat`, `.cat-head`, `.cat-add`,
+`.pane-card`, `.cat-pager`, `.pager-btn`, `.cat-pages`) are gone. The door-cards
+keep the authored wireframe geometry (B2) and simply spread across the wider
+sheet. **Supersedes B24** (the rail's To Do tray), and the rail clauses of
+**B15** and **B18**; `--accent-page` `#6d9cb0` survives as the hover glow's blue
+(B25), no longer as a rail fill.
+
+**Source:** owner's issue [#71](https://github.com/AlastairZeved/The-Portfolio/issues/71), 2026-09-29 — "Remove the left-most pane, \"All Boards\" entirely and re-scale to fit the board for \"The Portfolio of Robert Alastair Zeved Gregory\" across the entire viewport. … Do not replace the pane with something else. The site does not need navigation to other pages. Everything else needs to be re-scaled to fit."

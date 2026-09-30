@@ -61,7 +61,7 @@ below are the To-Do ladder's, quoted as shipped in TheBoards
 | Token | Value | What it is | Rel. luminance |
 |---|---|---|---|
 | `--deep` | `#020812` | the canvas — the deepest surface on the page | 0.0023 |
-| `--chrome` | `#020812` | the room behind the page — the rail's ground and any summoned surface | 0.0023 |
+| `--chrome` | `#020812` | the room behind the page — the board's ground and any summoned surface | 0.0023 |
 | `--card` | `#08152c` | the title compartment, sitting just above the deep | 0.0077 |
 | `--water` | `#34697f` → `#255265` → `#163646` | the water, as a field — closing both ends of the sheet | 0.1237 … 0.0325 |
 | `--frame` | `#698ebf` | the card's border and both full-width rules | 0.2611 |
@@ -98,15 +98,12 @@ new colour (owner ruling, `DECISIONS.md` B14). The binding is **hover glow =
 `--accent-page` `#6d9cb0`** — the water's hue and the brighter of the two
 existing blues (0.3016 against `--frame`'s 0.2611; 6.72:1 against 5.95:1 on
 `--chrome`) — settled by the owner's issue #67 (`DECISIONS.md` B25). The same
-blue is the rail's primary fill — the **New board** button and the enabled
-pager pair (B24) — and the binding the governing issue names as the hover
-alternative. The v1 member, `--frame` `#698ebf`, stands below as superseded
-history.
+blue is the binding the governing issue names as the hover alternative. The v1
+member, `--frame` `#698ebf`, stands below as superseded history.
 
 | Token | Value | Role |
 |---|---|---|
 | `--accent-page` (hover glow) | `#6d9cb0` | the hover glow's blue, blooming on hover — the brighter existing blue on `--chrome` (B25) |
-| `--accent-page` (rail fill) | `#6d9cb0` | the rail's primary fill — the New board button and the enabled pager buttons (B24) |
 | `--frame` (superseded member) | `#698ebf` | the v1 hover-glow blue, superseded by #67 (B25); still the page's linework blue where it is drawn |
 
 The bloom's rendering values (`index.html`):
@@ -140,8 +137,7 @@ holds the bloom while the card sinks 1px, instead of contracting it.
 --elevation: 0 2px 8px rgb(0 0 0 / 0.45);   /* pressed, transient only — hover's elevation is the bloom, §2.4 */
 ```
 
-**Resting door-cards take no shadow** (§1). The rail is embedded in the page
-and takes an inset treatment, not a float shadow.
+**Resting door-cards take no shadow** (§1).
 
 ### §2.7 Edges, rules and hairlines
 
@@ -163,8 +159,7 @@ and takes an inset treatment, not a float shadow.
 
 TheBoards' grammar, carried whole: **near-square**. The door-card radius is
 `symmetric 3px`; the title compartment hangs beneath its rule with bottom-only
-corners (`border-radius: 0 0 3px 3px`); the rail's To Do tray takes the tray's
-6px radius (TheBoards §10.5) and its board card the 3px hand.
+corners (`border-radius: 0 0 3px 3px`).
 
 ### §2.9 Type
 
@@ -179,11 +174,12 @@ law (`PRD §3.3`).
 
 ### §3.1 The scene
 
-One bounded sheet, no calendar rail, no hero (owner rulings). Reading top to
-bottom: the **band** (water) with the **title compartment** overhanging its
-rule, the **deep** through the middle where the **door-cards** sit in the
-free board space, and the **Parking Lot** (water) closing the foot. The
-**All Boards rail** sits beside the sheet (desktop), grounded in `--chrome`.
+One bounded sheet, no calendar rail, no All Boards rail, no hero (owner
+rulings). The sheet is the **whole viewport** — `#board` is `inset: 0`, edge to
+edge, with nothing beside it (#71). Reading top to bottom: the **band** (water)
+with the **title compartment** overhanging its rule, the **deep** through the
+middle where the **door-cards** sit in the free board space, and the **Parking
+Lot** (water) closing the foot.
 
 Everything is visible at once: one viewport, no internal scrolling. If the
 sheet is full, it is full — that boundary is the point.
@@ -214,7 +210,9 @@ exceeds the sheet minus the side gutters.
 | Components | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
 | Requirements | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
 | Parking Lot | water field closing the sheet; holds the contact form (§6) |
-| All Boards rail | `--chrome`-grounded side rail, the single **To Do tray** — TheBoards' `.board-cat` construction carrying the Portfolio board card, the New board control and the pager `< ‹ 1/5 › »` (B24) |
+
+There is **no All Boards rail** — it is removed from the DOM and the layout
+(#71, B27); the sheet takes its width.
 
 ### §3.4 The door-cards live in the board space
 
@@ -338,9 +336,8 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 - The title compartment is not a control and must not be announced as one.
 - Form fields carry labels; the Message field is `required` and announced so.
 - Text contrast holds to §2.3's table on every surface it lands on.
-- The rail's single To Do tray announces as one group — `aria-label="To Do,
-  page 1 of 5"` — with the visual head and pager-state spans `aria-hidden` so
-  AT hears each section once, not twice (the B63/B42 pattern from TheBoards).
+- There is **no rail** to announce: the All Boards pane is gone (#71, B27), so
+  no tray group, pager, or category label reaches AT at all.
 
 ---
 
@@ -349,8 +346,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | What is pinned | By |
 |---|---|
 | §2's tokens, ratios, crossover | `test/tokens.js` — recomputed from shipped hexes |
-| card states, region layout, rail presence | `test/mobile.js`, `test/desktop.js` |
-| the single To Do rail tray (B24) | `test/desktop.js` |
+| card states, region layout, the full-viewport sheet, no rail in the DOM | `test/mobile.js`, `test/desktop.js` |
 | card drag + resize floor/ceiling, link still opens a new tab | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 

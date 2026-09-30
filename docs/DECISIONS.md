@@ -531,3 +531,27 @@ the door-cards, the band zones, the link layer, and the drag machinery.
 — "Increase the size of the title card. Not aggressively, but it's too small
 to read as a title right now. Increase the text's font size in the title card
 too, proportionately to the increase in the size of the title card."
+
+---
+
+### B32. The Music note links to the Apple Music and Spotify notes below it — the two pairings the owner re-asked for (#72, reopen)
+
+The **Music** note streams **two new links** down to its two music doors —
+**Music ↔ Apple Music** and **Music ↔ Spotify** — the pairings the owner
+explicitly re-asked for when he reopened issue #72 on 2026-09-30. They are
+authored exactly like every other link (`B28`): one `<line>` per pair in
+`#link-layer` with `data-from="music" data-to="apple-music"` and
+`data-from="music" data-to="spotify"`, inheriting the whole `B28`/`UIUX §4.3`
+idiom — thin straight 1px `--frame` line between the two cards' centres, no
+label, no arrowhead, non-scaling-stroke, below the notes, `pointer-events:
+none` — because the link layer's geometry is computed, not authored. **The
+count clause of B28 (\"six links\") is superseded** — the ruling of record is
+now the per-authored-pair mechanism (`UIUX §4.3`): one 1px `--frame` line per
+authored pair, named by `data-id`. **No card changes:** the Music note stays a
+rest-only note (`B26` — no href, no hover/click states), and the Apple Music
+and Spotify doors keep their real anchor links and full link states. The board
+now carries **eight** links, two of which (this PR) plus a third pair
+(**Music ↔ LinkedIn**, issue #74) are the new pairings this chain family adds.
+
+**Source:** the owner's reopen on [issue #72's comment
+5917810423](https://github.com/AlastairZeved/The-Portfolio/issues/72#issuecomment-5917810423), 2026-09-30 — "I asked for the two new cards "Apple Music" and "Spotify" to be linked to the "Music" card. Did you link them? No you did not. If you don't know how, look at repo AlastairZeved/TheBoards to learn. Do not disregard my instructions again. Re-open the closed issue that addressed this. It even had fucking screenshots for you to see the placement of them spatially. Idiot."

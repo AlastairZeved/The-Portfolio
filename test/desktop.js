@@ -1,6 +1,6 @@
 /* test/desktop.js — desktop grammar: no All Boards rail; the single board
    spans the full viewport, the door-cards re-scale inside it. Card states
-   (hover glow, pressed green, never colour alone). The six note links
+   (hover glow, pressed green, never colour alone). The eight note links
    (B28, UIUX §4.3) — pairs, 1px --frame line, card-centre endpoints.
    Black-box Playwright.
    Run: node test/desktop.js   (PORTFOLIO_URL default http://localhost:8000/index.html) */
@@ -65,12 +65,13 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   }), { w: VW, h: VH });
   ok('all door-cards sit inside the viewport (no clipping)', inside);
 
-  // the six note links (B28, UIUX §4.3): one <line> per owner-named pair
-  // (issue #75), 1px --frame between the two cards' centres, on a hitless
-  // layer below the notes. [L0] is the layer, [L1]–[L6] the six pairs.
+  // the eight note links (B28, UIUX §4.3): one <line> per owner-named pair
+  // (issue #75 and #72), 1px --frame between the two cards' centres, on a hitless
+  // layer below the notes. [L0] is the layer, [L1]–[L8] the eight pairs.
   const WANT = [
     ['music', 'writing'], ['software-ai', 'community'], ['software-ai', 'writing'],
-    ['plants-rocks', 'community'], ['plants-rocks', 'writing'], ['software-ai', 'music']
+    ['plants-rocks', 'community'], ['plants-rocks', 'writing'], ['software-ai', 'music'],
+    ['music', 'apple-music'], ['music', 'spotify']
   ];
   const lk = await page.evaluate(() => {
     const board = document.getElementById('board');
@@ -99,7 +100,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     };
   });
   ok('[L0] link layer draws below the notes (z 1 under z 2) and never takes a hit',
-    !!lk && lk.pe === 'none' && lk.z === '1' && lk.noteZ === '2' && lk.lines.length === 6);
+    !!lk && lk.pe === 'none' && lk.z === '1' && lk.noteZ === '2' && lk.lines.length === 8);
   lk.lines.forEach((l, i) => {
     const w = WANT[i] || ['?', '?'];
     ok(`[L${i + 1}] link ${i + 1}: ${w[0]} <-> ${w[1]}`,

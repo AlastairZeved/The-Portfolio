@@ -536,10 +536,34 @@ body {
   // the percentage-authored layout re-scales with the viewport: recompute
   window.addEventListener('resize', drawLinks);
 
+  // issue #94 — native anchor drag must not steal the gesture. The door-cards
+  // are real <a href> anchors, so a real press-and-move would otherwise fire
+  // the browser's own HTML5 drag: `dragstart` fires, the pointer flow cancels,
+  // and the drag ghost wanders while the card never moves. TheBoards' cards
+  // are divs, so this suppression is the one piece this page must add. It is
+  // scoped to the door-cards ONLY — never the whole page — and lives entirely
+  // here: there is no `draggable` attribute anywhere and no preventDefault on
+  // pointerdown (that would kill the :active click glow, B29).
+  board.addEventListener('dragstart', function (e) {
+    if (e.target.closest('.door-card')) e.preventDefault();
+  });
+
+  // TheBoards' pointer idiom (attachBoardCardGestures): the grabbed card takes
+  // over the pointer stream so a drag still tracks even when the pointer
+  // leaves the card's own bounds. A browser rejects an unknown pointerId — a
+  // synthetic PointerEvent (as the regression suite and dragstart assertions
+  // dispatch) carries no active pointer — so a throw here is benign: the
+  // window-level pointermove/up listeners plus the dragstart suppression above
+  // carry the gesture either way.
+  function capturePointer(card, e) {
+    try { card.setPointerCapture(e.pointerId); } catch (_) { /* no active pointer */ }
+  }
+
   board.addEventListener('pointerdown', function (e) {
     var handle = e.target.closest('.resize-handle');
     var card = e.target.closest('.door-card');
     if (!card) return;
+    capturePointer(card, e);
     var rect = board.getBoundingClientRect();
     var cr = card.getBoundingClientRect();
     if (handle) {

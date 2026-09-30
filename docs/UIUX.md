@@ -129,6 +129,11 @@ the Idea boards' colour family** — no new colour, no new token (owner ruling,
 rung, `#b9d2b2`**, the lightest green the Idea family ships (`TheBoards'
 UIUX.md §2.2.2`). Pending one-word confirmation on #51.
 
+**Follow-up ruling (owner chat, 2026-09-29):** the press takes the hover's
+full bloom geometry (`0 0 32px 4px` / `0.9`) in the green channels
+(`--glow-green` #b9d2b2), with the elevation layer dropped — so the press
+holds the bloom while the card sinks 1px, instead of contracting it.
+
 ### §2.6 Elevation
 
 ```css
@@ -248,7 +253,7 @@ legible floor wins (a card smaller than legible is never produced).
 |---|---|---|
 | **rest** | note surface, border in the note's own ink (`var(--ink)`), no glow, no underline | — the ink border itself is the resting edge |
 | **hover** | blue bloom: `--accent-page` `#6d9cb0` at `0 0 32px 4px` / `0.9` — no second shadow layer (B14 hover member, settled by #67 → B25) | the bloom *is* the elevation — a temporary lifting, permitted by §1 |
-| **active (pressed)** | glow shifts to the Idea green `#b9d2b2` (B14, binding **pending owner confirmation**) | **1px inset** — the card presses into the page |
+|| **active (pressed)** | green bloom: `--glow-green` #b9d2b2 at `0 0 32px 4px` / `0.9` — no elevation layer (matches hover geometry, #67 follow-up ruling) | **1px inset** — the card presses into the page |
 | **focus-visible** | a focus ring in the surface's ink (never a tint) | the ring is the geometry; keyboard users are never left to colour alone |
 
 Transitions between states use TheBoards' closed motion set — short, quiet,

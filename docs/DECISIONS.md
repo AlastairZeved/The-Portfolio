@@ -642,3 +642,20 @@ byte-identical as well.
 #99 (merge `a06525c`) closing issue [#74](https://github.com/AlastairZeved/The-Portfolio/issues/74).
 The anchor string above is quoted verbatim from `git show origin/main:index.html`,
 not paraphrased.
+
+---
+
+### B36. The shipped LinkedIn anchor is agent-derived implementation, never an owner ruling — B35's `Source:` corrected to the owner (issue #101, record provenance repair)
+
+On 2026-09-30 the owner directed that this provenance defect be fixed
+permanently:
+
+> make sure that is fixed permanently, not just this time. I never made that ruling, that is not an owner ruling. There should never be rulings that never came from me or twist my words around. Agents do not make rules, they follow them. Period.
+
+B35 correctly records the shipped anchor value — `left: calc(38% - 69px); top: calc(18% + 132px); width:110px; height:47px;` — and that value stands unchanged. But B35's `Source:` cites the shipped code (`index.html`, PR #99), not the owner. A numbered record entry whose authority is the implementation is an **agent-authored ruling**, which the owner's directive above forbids. **This entry supersedes B35's `Source:` clause on that point — and only that point.**
+
+The shipped anchor is the **agent-derived implementation** of the owner's issue-#74 screenshot placement (the same provenance pattern B33 establishes for card sizes): the value ships in `index.html` and implements where the owner drew the LinkedIn card in the issue-#74 drawing — it is **never an owner-set value**. B35's own text stands byte-identical apart from its now-superseded `Source:` authority.
+
+B34's interior line "Authored `left:31.5%; top:40%`." records **no owner-set value**: that seat is an **agent draft** — never shipped, never in the owner's drawing, never ruled by the owner. B34's other text stands byte-identical.
+
+**Source:** the owner's chat directive 2026-09-30, quoted verbatim — "make sure that is fixed permanently, not just this time. I never made that ruling, that is not an owner ruling. There should never be rulings that never came from me or twist my words around. Agents do not make rules, they follow them. Period." — and "I never set a px explicit floor."; transcribed in [issue #101](https://github.com/AlastairZeved/The-Portfolio/issues/101).

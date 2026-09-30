@@ -430,10 +430,10 @@ body {
     </div>
   </div>
 
-  <!-- The link layer (UIUX §4.3, B28): the six straight 1px --frame lines
+  <!-- The link layer (UIUX §4.3, B28): the eight straight 1px --frame lines
        that join the note cards, one `<line>` per pair the owner names in
-       issue #75. TheBoards' link idiom ported verbatim (TheBoards' UIUX
-       §4.6 / B91) — a line between two cards' centres, below the notes,
+       issue #75 and #72. TheBoards' link idiom ported verbatim (TheBoards'
+       UIUX §4.6 / B91) — a line between two cards' centres, below the notes,
        never a hit target. Endpoints are computed from live card geometry
        in the script below, so a line follows a card that is dragged or
        resized; only the pairing is authored here. -->
@@ -444,6 +444,8 @@ body {
     <line data-link="4" data-from="plants-rocks" data-to="community"></line>
     <line data-link="5" data-from="plants-rocks" data-to="writing"></line>
     <line data-link="6" data-from="software-ai" data-to="music"></line>
+    <line data-link="7" data-from="music" data-to="apple-music"></line>
+    <line data-link="8" data-from="music" data-to="spotify"></line>
   </svg>
 
 </div>
@@ -496,7 +498,7 @@ body {
   }
   function toLogical(px) { return px / renderScale(); }
 
-  /* ---- The link layer (UIUX §4.3, B28): six straight 1px --frame lines
+  /* ---- The link layer (UIUX §4.3, B28): eight straight 1px --frame lines
      between card centres, one per pair authored in the markup. The pairing
      is authored; the geometry is computed, so a line stays true while a
      card is dragged or resized (TheBoards' link idiom, UIUX §4.6 / B91 —

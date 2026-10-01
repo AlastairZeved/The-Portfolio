@@ -236,7 +236,10 @@ is committed as an **illustrative reference only**:
 [`docs/proofs/wireframe-illustration-2026-09-29.png`](proofs/wireframe-illustration-2026-09-29.png)
 — it is not law; where the wireframe and this document disagree, this
 document wins. The cards do **not** live inside Components, Requirements, or
-the Parking Lot.
+the Parking Lot. The current placement authority is the owner's issue #112
+drawing (`B43`): every card's authored `left/top %` and `px width/height`
+is an agent-derived measurement of that screenshot, labelled as such in
+`B43`.
 
 On narrow viewports the cards shrink with the board as a whole through the
 **one render scale** (§3.1, B30): their authored `left/top %` and `px

@@ -816,3 +816,46 @@ numbers.
 note cards. It's too difficult to find the resize area you can click, there's
 just no padding at all. Expand the resize button's clickable area with correct
 padding too." (the owner's wording in that issue, transcribed as filed).
+### B43. Every note card's placement and size follows the owner's issue #112 drawing (issue #112; rebuild after PR #115)
+
+The nine door-cards are re-placed and re-sized to the owner's spatial
+geometry: the screenshot in issue #112 is the authority for where every
+card sits and how large it is — **including the linked notes** (LinkedIn,
+Apple Music, Spotify). The values below are **agent-derived measurements
+of that screenshot** (method: pixel measurement of the owner's 2560×1440
+screenshot; render-scale calibration `z=1.3037` derived from the shipped
+`calc()` offsets in the pre-#115 geometry; fit residuals ±0.4 screen px ≈
+±0.3 logical px). This entry **supersedes the placement and size values
+shipped by PR #115** (measured against a mis-scaled coordinate system:
+that PR divided the drawing's screen measurements by viewport/REF_W ≈
+2.37, but the render scale is clamped to 1 at desktop, so the sheet is
+the viewport and the drawing's pixels are the logical values) and the
+placement clauses of **B26** for the two music doors. **B2** (free board
+space), **B28** (the nine link pairs), **B33** (drawings rule authored
+sizes) and **B40** (text scales with card height) stand unchanged; the
+link pairs are untouched and their lines recompute from card centres
+(B28). `UIUX §3.4` is updated to name this drawing as the placement
+authority.
+
+Authored geometry (left%, top%, width×height in logical px):
+- Community: 13.6% / 18.3% / 310×140
+- Career: 42.3% / 18.5% / 329×110
+- Writing: 66% / 24% / 176×80
+- LinkedIn: 37.3% / 32.7% / 110×48
+- Software & AI: 12.3% / 51.7% / 251×110
+- Plants & Rocks: 42.6% / 64.4% / 219×96
+- Music: 73% / 54% / 220×96
+- Apple Music: 88.3% / 61.3% / 120×50
+- Spotify: 81.7% / 68.6% / 110×48
+
+**Source:** owner's issue [#112](https://github.com/AlastairZeved/The-Portfolio/issues/112),
+2026-10-01 — "The placement of note cards and the sizing of each individual
+note card has to be updated to reflect the new spatial geometry. Use the
+below screenshots to resize and move every single note card on the board.
+visually it will be much more inviting." — and the owner's comment on the
+same issue, 2026-10-01 — "The original screenshot in the open issue #112
+above indicates exactly where every single note card on the board should be
+placed - including linked note cards. It also indicates exactly how to
+resize every single note card - each individual has a placement change and
+a size change that was not built as instructed. Fix."
+

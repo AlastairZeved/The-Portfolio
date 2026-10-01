@@ -144,7 +144,12 @@ async function runScenario(page, tag, width, height) {
   // semantics are only trustworthy through a real press-move-release — which is
   // exactly how the bug reproduces. Assert on the tab count, like the B3 check.
   await page.goto(URL, { waitUntil: 'networkidle' });
-  const resizeCard = page.locator('a.door-card').first();
+  // issue #112 (B43): the first door-card (Community) is now authored 310px
+  // wide — above the B21 gesture ceiling (1/5 of the viewport) at these test
+  // widths, so an outward drag clamps DOWN to the ceiling. The real-mouse
+  // resize proof runs on the Spotify door (110px authored, under the ceiling
+  // at every tested width) so the gesture still grows what it grabs.
+  const resizeCard = page.locator('[data-id="spotify"]');
   const resizeBox = await resizeCard.boundingBox();
   const handleBox = await resizeCard.locator('.resize-handle').boundingBox();
   const pagesBeforeResize = (await page.context().pages()).length;
@@ -154,7 +159,7 @@ async function runScenario(page, tag, width, height) {
   await page.mouse.up();
   await page.waitForTimeout(1500);
   const grownWidth = (await resizeCard.boundingBox()).width;
-  ok(`${tag}: the resize itself still works (real mouse, 170 -> ${grownWidth.toFixed(1)})`, grownWidth > resizeBox.width);
+  ok(`${tag}: the resize itself still works (real mouse, ${resizeBox.width.toFixed(0)} -> ${grownWidth.toFixed(1)})`, grownWidth > resizeBox.width);
   const pagesResize = (await page.context().pages()).length;
   ok(`${tag}: releasing a resize opens nothing (issue #109)`, pagesResize === pagesBeforeResize);
   for (const p of pagesResize > pagesBeforeResize ? page.context().pages() : []) {

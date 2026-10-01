@@ -762,3 +762,32 @@ Again, the source of truth was already built in repo AlastairZeved/TheBoards
 and should be referenced." — plus owner chat ruling of 2026-10-01: "the rules
 for TheBoards should be trusted over the rules for The-Portfolio."
 
+
+### B41. A resize is never a click: releasing the corner handle must not navigate (issue #109)
+
+Resizing a note card must never register as a click. The door-cards are real
+`<a href>` anchors and the corner resize handle is a `<span>` **inside** the
+anchor, so the browser's own click fires on pointer release and the page
+navigates away mid-gesture. A gesture is not a click: if the pointer crossed
+the movement threshold, the card moves or resizes and **nothing opens**. This
+extends the existing drag suppression (issue #94/B29's rule) to the resize
+branch, which carried no such guard at all.
+
+The click survives where it should: a press that never moved is a click, not a
+gesture, and still opens the door in a new tab (`B3`) — including a tap squarely
+on the corner handle. The movement threshold is the same 4px the drag already
+used, so both gestures share one rule and one guard.
+
+**Implementation note (agent-derived):** the 4px threshold, its reuse across both
+gestures, and the single `{once}` capture guard in `endDrag` are the agent's
+implementation of the owner's words "should never register resizing as a click" —
+the same labelling as `B33`'s 132×80 and `B40`'s scale law. The owner ruled the
+behavior, not the threshold.
+
+**Source:** owner's issue [#109](https://github.com/AlastairZeved/The-Portfolio/issues/109),
+2026-10-01 — "When resizing a note card, the site is treating it as a click and
+opening the linked page once the click is released. Even if the card was only
+resized, it still clicks it once the pointer is released. This is inappropriate
+behavior and should never register resizing as a click. Fix this by removing
+the clicking mechanics from the resize function." (the owner's wording in that
+issue, transcribed as filed).

@@ -115,7 +115,12 @@ body {
 }
 #zone-components   { left: var(--gutter);
                      right: calc(100% - var(--card-l) + var(--card-gap)); }
-#zone-requirements { left: calc(var(--card-l) + var(--card-w) + var(--card-gap));
+/* issue #107: the Requirements zone anchors to the TITLE CARD's rendered right
+   border (see the scale block) — the door-column calc below assumes the card
+   spans the whole --card-w slot, but the card hugs its text (B19), so the calc
+   strand leaves a dead gap between the border and the line. Kept as the
+   no-JS fallback; the scale block overrides --req-left from the rendered card. */
+#zone-requirements { left: var(--req-left, calc(var(--card-l) + var(--card-w) + var(--card-gap)));
                      right: var(--gutter); }
 .band-label {
   position: absolute;
@@ -498,9 +503,16 @@ body {
     board.style.setProperty('--rs', rs);
     board.style.setProperty('--logical-w', (vw / rs) + 'px');
     board.style.setProperty('--logical-h', (vh / rs) + 'px');
+    // issue #107: the Requirements zone anchors to the title card's actual
+    // right border (the card hugs its text, B19 — the slot calc leaves dead
+    // space). The card's rendered right edge / rs = logical px, + one gutter.
+    var title = document.getElementById('anchor-title');
+    var gutter = parseFloat(getComputedStyle(board).getPropertyValue('--gutter')) || 16;
+    board.style.setProperty('--req-left', (title.getBoundingClientRect().right / rs + gutter) + 'px');
   }
   frame();
   window.addEventListener('resize', frame);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(frame);
 })();
 
 /* ---- Entertainment only: drag to move, corner to resize (B7) ----

@@ -638,7 +638,7 @@ body {
     var rect = board.getBoundingClientRect();
     var cr = card.getBoundingClientRect();
     if (handle) {
-      resizing = { card: card, startX: e.clientX, startY: e.clientY, w: toLogical(cr.width), h: toLogical(cr.height) };
+      resizing = { card: card, startX: e.clientX, startY: e.clientY, w: toLogical(cr.width), h: toLogical(cr.height), moved: false };
     } else if (e.target === card || card.contains(e.target)) {
       // don't hijack the link's own click; only move on real drag
       drag = { card: card, startX: e.clientX, startY: e.clientY, left: toLogical(cr.left - rect.left), top: toLogical(cr.top - rect.top), moved: false };
@@ -667,8 +667,10 @@ body {
     if (resizing) {
       var r = resizing;
       var c = getConstraints(rs);
-      var nw = Math.min(c.maxW, Math.max(c.minW, r.w + (e.clientX - r.startX) / rs));
-      var nh = Math.min(c.maxH, Math.max(c.minH, r.h + (e.clientY - r.startY) / rs));
+      var radx = e.clientX - r.startX, rady = e.clientY - r.startY;   // physical
+      if (Math.abs(radx) + Math.abs(rady) > 4) r.moved = true;       // 4 physical px — same gesture as the drag
+      var nw = Math.min(c.maxW, Math.max(c.minW, r.w + radx / rs));
+      var nh = Math.min(c.maxH, Math.max(c.minH, r.h + rady / rs));
       r.card.style.width = nw + 'px';
       r.card.style.height = nh + 'px';
       applyCardFs(r.card, nh);   // issue #111: a bigger card, bigger text
@@ -687,9 +689,16 @@ body {
   });
 
   function endDrag() {
-    if (drag && drag.moved) {
-      // a dragged card must not also navigate (entertainment beat the link)
-      drag.card.addEventListener('click', function (e) { e.preventDefault(); }, { once: true, capture: true });
+    // A gesture that MOVED is not a click and must never navigate (issue #109).
+    // The resize handle is a span inside the <a>, so releasing a resize fires
+    // the anchor's own click and navigates away mid-gesture — the resize branch
+    // carries the same `moved` flag the drag branch already had, so both
+    // gestures route through one guard and one test.
+    // A press that never crossed the 4px threshold is still a click and must
+    // still open the door (B3) — including a tap squarely on the handle.
+    var gesture = (drag && drag.moved) ? drag : (resizing && resizing.moved ? resizing : null);
+    if (gesture) {
+      gesture.card.addEventListener('click', function (e) { e.preventDefault(); }, { once: true, capture: true });
     }
     drag = null;
     resizing = null;

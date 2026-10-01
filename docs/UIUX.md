@@ -282,6 +282,14 @@ legible floor wins (a card smaller than legible is never produced).
 > chat of 2026-09-30 rule **authored** card sizes; the gesture floor does not
 > bound authored geometry.
 
+**A gesture is never a click** (`B41`, issue #109): the corner resize handle is
+a `<span>` **inside** the card's `<a>`, so a pointer release over it fires the
+anchor's own click and navigates away mid-resize. Any gesture that moved — drag
+*or* resize, past the same 4px threshold both share — opens nothing; a press
+that never moved is still a click and still opens the door in a new tab (`B3`),
+including a tap squarely on the handle. The 4px threshold and the single shared
+guard are agent-derived (B41 provenance).
+
 Both bounds and the gesture are read in the board's **logical coordinate
 space** (§3.1, `B30`): a card's `left/top` and `width/height` are authored in
 logical px, so pointer input (`clientX`/`clientY`, physical) is converted with
@@ -434,6 +442,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L8]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
 | card drag + resize floor/ceiling, link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
+| releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 
 ---

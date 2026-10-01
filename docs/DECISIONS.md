@@ -706,6 +706,7 @@ the \"Components\" section because I already built it there and I do not need
 to repeat myself when it's already been done once and you can see it and
 repeat it."
 
+
 ### B39. The Requirements line "Click around, explore!" anchors to the title card's right border, one gutter of padding (issue #107)
 
 The **Requirements** line — **"Click around, explore!"** (B37) — is **left-anchored:
@@ -727,3 +728,37 @@ padding)." — confirmed in issue
 [#107](https://github.com/AlastairZeved/The-Portfolio/issues/107), "Fix this.
 Center the text \"Click around, explore!\" to the left of the 'Requirements'
 section." (the owner's wording in that issue, transcribed as filed).
+
+
+### B40. Door-cards take TheBoards' note grammar: the 2px ink border and text that scales with card size (issue #111)
+
+The door-card renders as a TheBoards note, exactly as TheBoards itself
+teaches it: a **2px border in the note's own ink** (`--ink-dark`, dark on
+this surface) with the 3px near-square radius — the border is what makes the
+corners read not-rounded — and **text sized to the card**: 17px at the
+authored 96px standard, scaling linearly with the card's height within
+TheBoards' own 0.5–2.0 note-scale band ([8.5, 34]px; TheBoards
+`state.js` MIN/MAX_SCALE × 17). Resting cards keep their authored geometry;
+the visitor's resize gesture now scales the text with the card instead of
+stretching the box around fixed 17px type.
+
+The 96px anchor is the six door-cards' authored height (B33 provenance:
+authored sizes are the owner's drawings, never agent-set); the 0.5–2.0 band
+and the 17px base are TheBoards' shipped values, ported verbatim. The scale
+law itself — `fs = 17 × clamp(h/96, 0.5, 2.0)` — is an agent-derived
+implementation of the owner's "text scales with the size of the card" words,
+the same way B33 labelled the 132×80 gesture floor agent-derived.
+
+**Source:** owner's issue [#111](https://github.com/AlastairZeved/The-Portfolio/issues/111),
+2026-10-01 — "The note cards have rounded corners by a substantial degree.
+Repo AlastairZeved/TheBoards (the source of all design decisions) resolved
+this in the original build, but was not used for some reason. The note cards
+should be formatted the same as they are in AlastairZeved/TheBoards. The have
+different corners and they feel different for some reason. The text sizes are
+not formatted to be sized in line with the note card. Smaller cards should be
+scaling the text size downwards - not the same font size across all cards.
+And larger note cards should be sizing the text larger as card size grows.
+Again, the source of truth was already built in repo AlastairZeved/TheBoards
+and should be referenced." — plus owner chat ruling of 2026-10-01: "the rules
+for TheBoards should be trusted over the rules for The-Portfolio."
+

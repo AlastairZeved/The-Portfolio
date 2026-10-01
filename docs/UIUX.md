@@ -251,11 +251,21 @@ unchanged.
 
 A door-card is a **real anchor** — `<a target="_blank"
 rel="noopener noreferrer">` — not a scripted button. It renders as a TheBoards
-note: `--note` fill, 2px border in the **note's own ink** (`var(--ink)`,
-dark on this surface — the shipped `.note-text` border; the reference border
-is ink, not `--frame`), 3px radius, `--ink-dark` text, draggable and
+note: `--note` fill, **2px border in the note's own ink** (`--ink-dark` on
+this surface — the reference border is the note's ink, not `--frame`; the
+border is what makes the 3px radius read near-square, TheBoards' own demo:
+"See how this card has a border and is different? The corners are not as
+rounded at all" — `B40`), 3px radius, `--ink-dark` text, draggable and
 resizable for the visitor's entertainment only (no persistence, no state —
 `B7`).
+
+**Text scales with the card** (`B40`, issue #111): `--card-fs` is set per
+card from its height — 17px at the authored 96px standard, `17 × clamp(h/96,
+0.5, 2.0)` — clamped to TheBoards' own note-scale band **[8.5, 34]px**. The
+gesture's resize handler updates it live, so a grown card grows its text and
+a shrunk card shrinks it; the six authored 96px door-cards rest at exactly
+17px. The law is an agent-derived implementation of the owner's ruling (B40
+provenance), like the 132×80 gesture floor (B33).
 
 **Resize constraints** (issue #58, `B21`): a card may be dragged anywhere on
 the sheet, and resized by its corner handle only between a **legible floor**

@@ -796,17 +796,20 @@ issue, transcribed as filed).
 ### B42. The resize handle's clickable area is larger than its glyph (issue #108)
 
 The corner resize handle's clickable area is too narrow to find and grab, so
-it is expanded: the handle's box becomes a **28×28** grab target while the
-visible grip lines stay a 14×14 corner mark pinned to the box's bottom-right
-corner — growing the box extends the target up and left, and the glyph stays
-exactly where it was. Nothing else about the gesture changes: a press that
-never moved is still a click and still opens the door (`B41`, `B3`), and a
-gesture that moved still resizes and opens nothing.
+it is expanded: the handle's box becomes a **28×28** grab target anchored **2px
+outside** the card's outer corner — the whole bottom-right corner resizes, and a
+**2px padding ring extends beyond the note itself**. The visible grip lines are
+unchanged: they are pinned 9px inside the box's bottom-right corner, exactly
+where they already sat, so the box grew around them and the mark did not move.
+Nothing else about the gesture changes: a press that never moved is still a
+click and still opens the door (`B41`, `B3`), and a gesture that moved still
+resizes and opens nothing.
 
-**Implementation note (agent-derived):** the `28×28` figure is the agent's
-implementation of the owner's "expand the resize button's clickable area"
-words — the same labelling as `B33`'s 132×80 and `B40`/`B41`'s derived values.
-The owner ruled the behavior, not the number.
+**Implementation note (agent-derived):** the `28×28` figure and the 2px ring
+are the agent's implementation of the owner's "expand the resize button's
+clickable area with correct padding" words — the same labelling as `B33`'s
+132×80 and `B40`/`B41`'s derived values. The owner ruled the behavior, not the
+numbers.
 
 **Source:** owner's issue [#108](https://github.com/AlastairZeved/The-Portfolio/issues/108),
 2026-10-01 — "The pointer is too sensitive around the \"resize\" function on the

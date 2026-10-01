@@ -234,13 +234,16 @@ body {
 }
 .door-card .resize-handle {
   position: absolute;
-  /* issue #108: this box is the GRAB AREA, not the glyph. The grip lines
-     (::before/::after) are pinned to this box's bottom-right corner, so
-     growing the box extends the hit target up and left and the visible grip
-     stays exactly where it was. 28x28 doubles the reach of the old 14x14
-     glyph box on each axis (~4x the area), and still sits well inside the
-     132x80 minimum card (B21). The number is agent-derived (B42). */
-  right: 4px; bottom: 4px;
+  /* issue #108: this box is the GRAB AREA, not the glyph. It is anchored
+     2px OUTSIDE the card's outer corner — a 2px padding ring around the
+     corner, half of it off the note — so the whole bottom-right corner plus
+     a 2px margin beyond it resizes. (The old 4px inset left the outer 6px
+     ungrabbable, and flush-at-the-corner still left nothing to grab outside
+     the note.) The grip lines are pinned 9px inside the box's bottom-right
+     corner, which is exactly where they already sat, so the visible grip
+     does not move. 28x28 still sits well inside the 132x80 minimum card
+     (B21). Agent-derived (B42). */
+  right: -4px; bottom: -4px;
   width: 28px; height: 28px;
   cursor: nwse-resize;
   opacity: 0.5;
@@ -250,7 +253,7 @@ body {
 .door-card .resize-handle::after {
   content: "";
   position: absolute;
-  right: 1px; bottom: 1px;
+  right: 9px; bottom: 9px;
   width: 7px; height: 1px;
   background: currentColor;
   transform-origin: bottom right;

@@ -221,7 +221,7 @@ exceeds the sheet minus the side gutters.
 |---|---|
 | Title | the compartment above (§3.2) |
 | Components | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
-| Requirements | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
+| Requirements | the line **"Click around, explore!"** (B37), **15px/600 `--ink`**, **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
 | Parking Lot | water field closing the sheet; holds the contact form (§6) |
 
 There is **no All Boards rail** — it is removed from the DOM and the layout

@@ -706,7 +706,31 @@ the \"Components\" section because I already built it there and I do not need
 to repeat myself when it's already been done once and you can see it and
 repeat it."
 
-### B39. Door-cards take TheBoards' note grammar: the 2px ink border and text that scales with card size (issue #111)
+
+### B39. The Requirements line "Click around, explore!" anchors to the title card's right border, one gutter of padding (issue #107)
+
+The **Requirements** line — **"Click around, explore!"** (B37) — is **left-anchored:
+it starts just to the right of the title card's rendered right border, with one
+`--gutter` (16px) of padding, at the top of the band right of the title card.**
+It is not centred in the region. The anchor is measured at render time: the
+one-render-scale block (`frame()`) reads the title card's real right edge in
+logical px (the card hugs its text, B19 — `width: max-content` — so the static
+`--card-l + --card-w + --card-gap` calc sits ~119px right of the border at
+1440) and sets `--req-left`; the CSS keeps the door-column calc as the no-JS
+fallback. The line's format stands as B37 ruled (15px/600, `--ink`,
+`--band-top`). One gutter of padding is the existing `--gutter` token — no new
+value is invented.
+
+**Source:** owner's chat directive 2026-10-01, quoted verbatim — "The text in
+the 'requirements' section should be anchored to the left, meaning the text
+should start just to the right of the title card border line (with a little
+padding)." — confirmed in issue
+[#107](https://github.com/AlastairZeved/The-Portfolio/issues/107), "Fix this.
+Center the text \"Click around, explore!\" to the left of the 'Requirements'
+section." (the owner's wording in that issue, transcribed as filed).
+
+
+### B40. Door-cards take TheBoards' note grammar: the 2px ink border and text that scales with card size (issue #111)
 
 The door-card renders as a TheBoards note, exactly as TheBoards itself
 teaches it: a **2px border in the note's own ink** (`--ink-dark`, dark on
@@ -737,3 +761,4 @@ And larger note cards should be sizing the text larger as card size grows.
 Again, the source of truth was already built in repo AlastairZeved/TheBoards
 and should be referenced." — plus owner chat ruling of 2026-10-01: "the rules
 for TheBoards should be trusted over the rules for The-Portfolio."
+

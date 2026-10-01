@@ -52,6 +52,21 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   const tb = await page.locator('#anchor-title').boundingBox();
   ok('title card centred on the full-width sheet', tb && Math.abs((tb.x + tb.width / 2) - VW / 2) < 2);
 
+  // issue #107: the Requirements line anchors to the title card's right border
+  // (the card hugs its text, B19 — so the door-column calc would leave a dead
+  // gap between the border and the line). One --gutter of padding, no more.
+  const reqAnchor = await page.evaluate(() => {
+    const board = document.getElementById('board');
+    const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
+    const gutter = parseFloat(getComputedStyle(board).getPropertyValue('--gutter')) || 0;
+    const toLogical = v => v / rs;
+    const title = document.querySelector('#anchor-title').getBoundingClientRect();
+    const req = document.querySelector('#zone-requirements .anchor').getBoundingClientRect();
+    return { gap: toLogical(req.left - title.right), gutter };
+  });
+  ok('Requirements line starts one gutter past the title card border (issue #107)',
+     reqAnchor.gap >= reqAnchor.gutter - 2 && reqAnchor.gap <= reqAnchor.gutter + 2);
+
   // regions still render their furniture
   ok('Components zone label', (await page.locator('#zone-components .band-label').innerText()) === 'Components');
   ok('Requirements zone label', (await page.locator('#zone-requirements .band-label').innerText()) === 'Requirements');

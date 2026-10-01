@@ -221,7 +221,7 @@ exceeds the sheet minus the side gutters.
 |---|---|
 | Title | the compartment above (§3.2) |
 | Components | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
-| Requirements | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
+| Requirements | the line **"Click around, explore!"** (B37), **15px/600 `--ink`**, **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
 | Parking Lot | water field closing the sheet; holds the contact form (§6) |
 
 There is **no All Boards rail** — it is removed from the DOM and the layout
@@ -255,16 +255,16 @@ note: `--note` fill, **2px border in the note's own ink** (`--ink-dark` on
 this surface — the reference border is the note's ink, not `--frame`; the
 border is what makes the 3px radius read near-square, TheBoards' own demo:
 "See how this card has a border and is different? The corners are not as
-rounded at all" — `B39`), 3px radius, `--ink-dark` text, draggable and
+rounded at all" — `B40`), 3px radius, `--ink-dark` text, draggable and
 resizable for the visitor's entertainment only (no persistence, no state —
 `B7`).
 
-**Text scales with the card** (`B39`, issue #111): `--card-fs` is set per
+**Text scales with the card** (`B40`, issue #111): `--card-fs` is set per
 card from its height — 17px at the authored 96px standard, `17 × clamp(h/96,
 0.5, 2.0)` — clamped to TheBoards' own note-scale band **[8.5, 34]px**. The
 gesture's resize handler updates it live, so a grown card grows its text and
 a shrunk card shrinks it; the six authored 96px door-cards rest at exactly
-17px. The law is an agent-derived implementation of the owner's ruling (B39
+17px. The law is an agent-derived implementation of the owner's ruling (B40
 provenance), like the 132×80 gesture floor (B33).
 
 **Resize constraints** (issue #58, `B21`): a card may be dragged anywhere on

@@ -136,6 +136,48 @@ async function runScenario(page, tag, width, height) {
   ok(`${tag}: min height stays legible (got ${shrunk.h.toFixed(1)} physical = ${shrunk.styleH.toFixed(1)} logical, want >= ${MIN_H})`,
      shrunk.styleH >= MIN_H - 0.5 && shrunk.h >= MIN_H * shrunk.rs - 1);
 
+  // --- issue #109: releasing a RESIZE must not navigate. The handle is a span
+  // inside the <a>, so before the fix the release fired the anchor's own click
+  // and opened the door mid-gesture.
+  // REAL MOUSE, not synthetic pointer events: this suite dispatches synthetic
+  // events for GEOMETRY (a real drag coalesces pointermove here), but click
+  // semantics are only trustworthy through a real press-move-release — which is
+  // exactly how the bug reproduces. Assert on the tab count, like the B3 check.
+  await page.goto(URL, { waitUntil: 'networkidle' });
+  // issue #112 (B43): the first door-card (Community) is now authored 310px
+  // wide — above the B21 gesture ceiling (1/5 of the viewport) at these test
+  // widths, so an outward drag clamps DOWN to the ceiling. The real-mouse
+  // resize proof runs on the Spotify door (110px authored, under the ceiling
+  // at every tested width) so the gesture still grows what it grabs.
+  const resizeCard = page.locator('[data-id="spotify"]');
+  const resizeBox = await resizeCard.boundingBox();
+  const handleBox = await resizeCard.locator('.resize-handle').boundingBox();
+  const pagesBeforeResize = (await page.context().pages()).length;
+  await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2);
+  await page.mouse.down();
+  for (let i = 1; i <= 8; i++) await page.mouse.move(handleBox.x + i * 10, handleBox.y + i * 8);
+  await page.mouse.up();
+  await page.waitForTimeout(1500);
+  const grownWidth = (await resizeCard.boundingBox()).width;
+  ok(`${tag}: the resize itself still works (real mouse, ${resizeBox.width.toFixed(0)} -> ${grownWidth.toFixed(1)})`, grownWidth > resizeBox.width);
+  const pagesResize = (await page.context().pages()).length;
+  ok(`${tag}: releasing a resize opens nothing (issue #109)`, pagesResize === pagesBeforeResize);
+  for (const p of pagesResize > pagesBeforeResize ? page.context().pages() : []) {
+    if (p !== page) await p.close();
+  }
+
+  // --- B3 preserved: a TAP on the handle that never moved is still a click.
+  // The 4px threshold is shared with the drag, so a tap on the corner must
+  // still open the door rather than being eaten by the gesture guard.
+  await page.goto(URL, { waitUntil: 'networkidle' });
+  const tapTarget = page.locator('a.door-card').first().locator('.resize-handle');
+  const pagesBeforeTap = (await page.context().pages()).length;
+  await tapTarget.click();
+  await page.waitForTimeout(1500);
+  const pagesTap = page.context().pages();
+  ok(`${tag}: a tap on the resize handle (no movement) still opens the door`, pagesTap.length === pagesBeforeTap + 1);
+  for (const p of pagesTap) if (p !== page) await p.close();
+
   // --- Link still opens in a new tab on a plain click (B3) ---
   // Reload so no drag-suppression handler is pending (a real browser drag
   // emits a click that consumes the {once} guard; synthetic pointer events

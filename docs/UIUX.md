@@ -221,7 +221,7 @@ exceeds the sheet minus the side gutters.
 |---|---|
 | Title | the compartment above (§3.2) |
 | Components | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
-| Requirements | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
+| Requirements | the line **"Click around, explore!"** (B37), **15px/600 `--ink`**, **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
 | Parking Lot | water field closing the sheet; holds the contact form (§6) |
 
 There is **no All Boards rail** — it is removed from the DOM and the layout
@@ -236,7 +236,10 @@ is committed as an **illustrative reference only**:
 [`docs/proofs/wireframe-illustration-2026-09-29.png`](proofs/wireframe-illustration-2026-09-29.png)
 — it is not law; where the wireframe and this document disagree, this
 document wins. The cards do **not** live inside Components, Requirements, or
-the Parking Lot.
+the Parking Lot. The current placement authority is the owner's issue #112
+drawing (`B43`): every card's authored `left/top %` and `px width/height`
+is an agent-derived measurement of that screenshot, labelled as such in
+`B43`.
 
 On narrow viewports the cards shrink with the board as a whole through the
 **one render scale** (§3.1, B30): their authored `left/top %` and `px
@@ -251,11 +254,21 @@ unchanged.
 
 A door-card is a **real anchor** — `<a target="_blank"
 rel="noopener noreferrer">` — not a scripted button. It renders as a TheBoards
-note: `--note` fill, 2px border in the **note's own ink** (`var(--ink)`,
-dark on this surface — the shipped `.note-text` border; the reference border
-is ink, not `--frame`), 3px radius, `--ink-dark` text, draggable and
+note: `--note` fill, **2px border in the note's own ink** (`--ink-dark` on
+this surface — the reference border is the note's ink, not `--frame`; the
+border is what makes the 3px radius read near-square, TheBoards' own demo:
+"See how this card has a border and is different? The corners are not as
+rounded at all" — `B40`), 3px radius, `--ink-dark` text, draggable and
 resizable for the visitor's entertainment only (no persistence, no state —
 `B7`).
+
+**Text scales with the card** (`B40`, issue #111): `--card-fs` is set per
+card from its height — 17px at the authored 96px standard, `17 × clamp(h/96,
+0.5, 2.0)` — clamped to TheBoards' own note-scale band **[8.5, 34]px**. The
+gesture's resize handler updates it live, so a grown card grows its text and
+a shrunk card shrinks it; the six authored 96px door-cards rest at exactly
+17px. The law is an agent-derived implementation of the owner's ruling (B40
+provenance), like the 132×80 gesture floor (B33).
 
 **Resize constraints** (issue #58, `B21`): a card may be dragged anywhere on
 the sheet, and resized by its corner handle only between a **legible floor**
@@ -271,6 +284,24 @@ legible floor wins (a card smaller than legible is never produced).
 > owner-set number**. The owner's drawings (issue #72/#74 screenshots) and his
 > chat of 2026-09-30 rule **authored** card sizes; the gesture floor does not
 > bound authored geometry.
+
+**A gesture is never a click** (`B41`, issue #109): the corner resize handle is
+a `<span>` **inside** the card's `<a>`, so a pointer release over it fires the
+anchor's own click and navigates away mid-resize. Any gesture that moved — drag
+*or* resize, past the same 4px threshold both share — opens nothing; a press
+that never moved is still a click and still opens the door in a new tab (`B3`),
+including a tap squarely on the handle. The 4px threshold and the single shared
+guard are agent-derived (B41 provenance).
+
+**The handle's hit area is bigger than its glyph** (`B42`, issue #108): the
+corner handle's box is a **28×28** grab target anchored **2px outside** the
+card's outer corner, so the whole bottom-right corner resizes and a **2px
+padding ring extends beyond the note itself**. The visible grip is unchanged —
+it is pinned 9px inside the box's bottom-right corner, exactly where it already
+sat, so the box grew around it and the mark did not move. The size and the 2px
+ring are an **agent-derived implementation** of the owner's "expand the resize
+button's clickable area with correct padding" words (`B42` provenance), never
+owner-set numbers.
 
 Both bounds and the gesture are read in the board's **logical coordinate
 space** (§3.1, `B30`): a card's `left/top` and `width/height` are authored in
@@ -424,6 +455,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L8]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
 | card drag + resize floor/ceiling, link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
+| releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 
 ---

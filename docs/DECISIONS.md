@@ -705,3 +705,157 @@ me. Review repo AlastairZeved/TheBoards for how to format and place text in
 the \"Components\" section because I already built it there and I do not need
 to repeat myself when it's already been done once and you can see it and
 repeat it."
+
+
+### B39. The Requirements line "Click around, explore!" anchors to the title card's right border, one gutter of padding (issue #107)
+
+The **Requirements** line — **"Click around, explore!"** (B37) — is **left-anchored:
+it starts just to the right of the title card's rendered right border, with one
+`--gutter` (16px) of padding, at the top of the band right of the title card.**
+It is not centred in the region. The anchor is measured at render time: the
+one-render-scale block (`frame()`) reads the title card's real right edge in
+logical px (the card hugs its text, B19 — `width: max-content` — so the static
+`--card-l + --card-w + --card-gap` calc sits ~119px right of the border at
+1440) and sets `--req-left`; the CSS keeps the door-column calc as the no-JS
+fallback. The line's format stands as B37 ruled (15px/600, `--ink`,
+`--band-top`). One gutter of padding is the existing `--gutter` token — no new
+value is invented.
+
+**Source:** owner's chat directive 2026-10-01, quoted verbatim — "The text in
+the 'requirements' section should be anchored to the left, meaning the text
+should start just to the right of the title card border line (with a little
+padding)." — confirmed in issue
+[#107](https://github.com/AlastairZeved/The-Portfolio/issues/107), "Fix this.
+Center the text \"Click around, explore!\" to the left of the 'Requirements'
+section." (the owner's wording in that issue, transcribed as filed).
+
+
+### B40. Door-cards take TheBoards' note grammar: the 2px ink border and text that scales with card size (issue #111)
+
+The door-card renders as a TheBoards note, exactly as TheBoards itself
+teaches it: a **2px border in the note's own ink** (`--ink-dark`, dark on
+this surface) with the 3px near-square radius — the border is what makes the
+corners read not-rounded — and **text sized to the card**: 17px at the
+authored 96px standard, scaling linearly with the card's height within
+TheBoards' own 0.5–2.0 note-scale band ([8.5, 34]px; TheBoards
+`state.js` MIN/MAX_SCALE × 17). Resting cards keep their authored geometry;
+the visitor's resize gesture now scales the text with the card instead of
+stretching the box around fixed 17px type.
+
+The 96px anchor is the six door-cards' authored height (B33 provenance:
+authored sizes are the owner's drawings, never agent-set); the 0.5–2.0 band
+and the 17px base are TheBoards' shipped values, ported verbatim. The scale
+law itself — `fs = 17 × clamp(h/96, 0.5, 2.0)` — is an agent-derived
+implementation of the owner's "text scales with the size of the card" words,
+the same way B33 labelled the 132×80 gesture floor agent-derived.
+
+**Source:** owner's issue [#111](https://github.com/AlastairZeved/The-Portfolio/issues/111),
+2026-10-01 — "The note cards have rounded corners by a substantial degree.
+Repo AlastairZeved/TheBoards (the source of all design decisions) resolved
+this in the original build, but was not used for some reason. The note cards
+should be formatted the same as they are in AlastairZeved/TheBoards. The have
+different corners and they feel different for some reason. The text sizes are
+not formatted to be sized in line with the note card. Smaller cards should be
+scaling the text size downwards - not the same font size across all cards.
+And larger note cards should be sizing the text larger as card size grows.
+Again, the source of truth was already built in repo AlastairZeved/TheBoards
+and should be referenced." — plus owner chat ruling of 2026-10-01: "the rules
+for TheBoards should be trusted over the rules for The-Portfolio."
+
+
+### B41. A resize is never a click: releasing the corner handle must not navigate (issue #109)
+
+Resizing a note card must never register as a click. The door-cards are real
+`<a href>` anchors and the corner resize handle is a `<span>` **inside** the
+anchor, so the browser's own click fires on pointer release and the page
+navigates away mid-gesture. A gesture is not a click: if the pointer crossed
+the movement threshold, the card moves or resizes and **nothing opens**. This
+extends the existing drag suppression (issue #94/B29's rule) to the resize
+branch, which carried no such guard at all.
+
+The click survives where it should: a press that never moved is a click, not a
+gesture, and still opens the door in a new tab (`B3`) — including a tap squarely
+on the corner handle. The movement threshold is the same 4px the drag already
+used, so both gestures share one rule and one guard.
+
+**Implementation note (agent-derived):** the 4px threshold, its reuse across both
+gestures, and the single `{once}` capture guard in `endDrag` are the agent's
+implementation of the owner's words "should never register resizing as a click" —
+the same labelling as `B33`'s 132×80 and `B40`'s scale law. The owner ruled the
+behavior, not the threshold.
+
+**Source:** owner's issue [#109](https://github.com/AlastairZeved/The-Portfolio/issues/109),
+2026-10-01 — "When resizing a note card, the site is treating it as a click and
+opening the linked page once the click is released. Even if the card was only
+resized, it still clicks it once the pointer is released. This is inappropriate
+behavior and should never register resizing as a click. Fix this by removing
+the clicking mechanics from the resize function." (the owner's wording in that
+issue, transcribed as filed).
+
+
+### B42. The resize handle's clickable area is larger than its glyph (issue #108)
+
+The corner resize handle's clickable area is too narrow to find and grab, so
+it is expanded: the handle's box becomes a **28×28** grab target anchored **2px
+outside** the card's outer corner — the whole bottom-right corner resizes, and a
+**2px padding ring extends beyond the note itself**. The visible grip lines are
+unchanged: they are pinned 9px inside the box's bottom-right corner, exactly
+where they already sat, so the box grew around them and the mark did not move.
+Nothing else about the gesture changes: a press that never moved is still a
+click and still opens the door (`B41`, `B3`), and a gesture that moved still
+resizes and opens nothing.
+
+**Implementation note (agent-derived):** the `28×28` figure and the 2px ring
+are the agent's implementation of the owner's "expand the resize button's
+clickable area with correct padding" words — the same labelling as `B33`'s
+132×80 and `B40`/`B41`'s derived values. The owner ruled the behavior, not the
+numbers.
+
+**Source:** owner's issue [#108](https://github.com/AlastairZeved/The-Portfolio/issues/108),
+2026-10-01 — "The pointer is too sensitive around the \"resize\" function on the
+note cards. It's too difficult to find the resize area you can click, there's
+just no padding at all. Expand the resize button's clickable area with correct
+padding too." (the owner's wording in that issue, transcribed as filed).
+### B43. Every note card's placement and size follows the owner's issue #112 drawing (issue #112; rebuild after PR #115)
+
+The nine door-cards are re-placed and re-sized to the owner's spatial
+geometry: the screenshot in issue #112 is the authority for where every
+card sits and how large it is — **including the linked notes** (LinkedIn,
+Apple Music, Spotify). The values below are **agent-derived measurements
+of that screenshot** (method: pixel measurement of the owner's 2560×1440
+screenshot; render-scale calibration `z=1.3037` derived from the shipped
+`calc()` offsets in the pre-#115 geometry; fit residuals ±0.4 screen px ≈
+±0.3 logical px). This entry **supersedes the placement and size values
+shipped by PR #115** (measured against a mis-scaled coordinate system:
+that PR divided the drawing's screen measurements by viewport/REF_W ≈
+2.37, but the render scale is clamped to 1 at desktop, so the sheet is
+the viewport and the drawing's pixels are the logical values) and the
+placement clauses of **B26** for the two music doors. **B2** (free board
+space), **B28** (the nine link pairs), **B33** (drawings rule authored
+sizes) and **B40** (text scales with card height) stand unchanged; the
+link pairs are untouched and their lines recompute from card centres
+(B28). `UIUX §3.4` is updated to name this drawing as the placement
+authority.
+
+Authored geometry (left%, top%, width×height in logical px):
+- Community: 13.6% / 18.3% / 310×140
+- Career: 42.3% / 18.5% / 329×110
+- Writing: 66% / 24% / 176×80
+- LinkedIn: 37.3% / 32.7% / 110×48
+- Software & AI: 12.3% / 51.7% / 251×110
+- Plants & Rocks: 42.6% / 64.4% / 219×96
+- Music: 73% / 54% / 220×96
+- Apple Music: 88.3% / 61.3% / 120×50
+- Spotify: 81.7% / 68.6% / 110×48
+
+**Source:** owner's issue [#112](https://github.com/AlastairZeved/The-Portfolio/issues/112),
+2026-10-01 — "The placement of note cards and the sizing of each individual
+note card has to be updated to reflect the new spatial geometry. Use the
+below screenshots to resize and move every single note card on the board.
+visually it will be much more inviting." — and the owner's comment on the
+same issue, 2026-10-01 — "The original screenshot in the open issue #112
+above indicates exactly where every single note card on the board should be
+placed - including linked note cards. It also indicates exactly how to
+resize every single note card - each individual has a placement change and
+a size change that was not built as instructed. Fix."
+

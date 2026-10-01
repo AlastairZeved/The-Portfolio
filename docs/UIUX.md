@@ -290,6 +290,13 @@ that never moved is still a click and still opens the door in a new tab (`B3`),
 including a tap squarely on the handle. The 4px threshold and the single shared
 guard are agent-derived (B41 provenance).
 
+**The handle's hit area is bigger than its glyph** (`B42`, issue #108): the
+corner handle's box is a **28×28** grab target, while the visible grip stays a
+14×14 corner mark — the grip lines are pinned to the box's bottom-right corner,
+so enlarging the box only extends the target up and left. The size is an
+**agent-derived implementation** of the owner's "expand the resize button's
+clickable area" words (`B42` provenance), never an owner-set number.
+
 Both bounds and the gesture are read in the board's **logical coordinate
 space** (§3.1, `B30`): a card's `left/top` and `width/height` are authored in
 logical px, so pointer input (`clientX`/`clientY`, physical) is converted with

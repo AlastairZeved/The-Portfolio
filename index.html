@@ -234,8 +234,14 @@ body {
 }
 .door-card .resize-handle {
   position: absolute;
+  /* issue #108: this box is the GRAB AREA, not the glyph. The grip lines
+     (::before/::after) are pinned to this box's bottom-right corner, so
+     growing the box extends the hit target up and left and the visible grip
+     stays exactly where it was. 28x28 doubles the reach of the old 14x14
+     glyph box on each axis (~4x the area), and still sits well inside the
+     132x80 minimum card (B21). The number is agent-derived (B42). */
   right: 4px; bottom: 4px;
-  width: 14px; height: 14px;
+  width: 28px; height: 28px;
   cursor: nwse-resize;
   opacity: 0.5;
   z-index: 3;

@@ -791,3 +791,25 @@ resized, it still clicks it once the pointer is released. This is inappropriate
 behavior and should never register resizing as a click. Fix this by removing
 the clicking mechanics from the resize function." (the owner's wording in that
 issue, transcribed as filed).
+
+
+### B42. The resize handle's clickable area is larger than its glyph (issue #108)
+
+The corner resize handle's clickable area is too narrow to find and grab, so
+it is expanded: the handle's box becomes a **28×28** grab target while the
+visible grip lines stay a 14×14 corner mark pinned to the box's bottom-right
+corner — growing the box extends the target up and left, and the glyph stays
+exactly where it was. Nothing else about the gesture changes: a press that
+never moved is still a click and still opens the door (`B41`, `B3`), and a
+gesture that moved still resizes and opens nothing.
+
+**Implementation note (agent-derived):** the `28×28` figure is the agent's
+implementation of the owner's "expand the resize button's clickable area"
+words — the same labelling as `B33`'s 132×80 and `B40`/`B41`'s derived values.
+The owner ruled the behavior, not the number.
+
+**Source:** owner's issue [#108](https://github.com/AlastairZeved/The-Portfolio/issues/108),
+2026-10-01 — "The pointer is too sensitive around the \"resize\" function on the
+note cards. It's too difficult to find the resize area you can click, there's
+just no padding at all. Expand the resize button's clickable area with correct
+padding too." (the owner's wording in that issue, transcribed as filed).

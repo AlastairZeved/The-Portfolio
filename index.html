@@ -192,9 +192,18 @@ body {
   align-items: center; justify-content: center;
   background: var(--note);
   color: var(--ink-dark);
+  /* TheBoards' note grammar (TheBoards UIUX §4, ported whole): the note
+     carries a 2px border in its own ink — dark on this surface — and the
+     border is what makes the 3px radius read near-square. The reference demo
+     card in TheBoards states it: "See how this card has a border and is
+     different? The corners are not as rounded at all." (issue #111). */
+  border: 2px solid var(--ink-dark);
   border-radius: 3px;
   padding: 10px 12px;
-  font-size: 17px; font-weight: 600; line-height: 1.4;
+  /* Base 17px like TheBoards; JS sets --card-fs from the card's height so
+     text scales with the card (issue #111), clamped to TheBoards' own
+     0.5-2.0 note-scale band (17px * [0.5, 2.0] = [8.5, 34]px). */
+  font-size: var(--card-fs, 17px); font-weight: 600; line-height: 1.4;
   text-align: center;
   text-decoration: none;
   z-index: 2;
@@ -526,6 +535,18 @@ body {
   }
   function toLogical(px) { return px / renderScale(); }
 
+  /* ---- Issue #111: text scales with the card (TheBoards' grammar) ----
+     TheBoards notes render 17px text at scale 1 and scale the whole note
+     0.5–2.0, so text grows with the card. This board authors px footprints
+     instead of a per-note scale, so the same law lands as a per-card font
+     size anchored at the authored 96px standard (the six door-cards are all
+     authored 96px tall at 17px): fs = 17 × h/96, clamped to the identical
+     0.5–2.0 band → [8.5, 34]px (TheBoards state.js MIN/MAX_SCALE × 17). */
+  function cardFs(h) {
+    return 17 * Math.min(2, Math.max(0.5, h / 96)) + 'px';
+  }
+  function applyCardFs(card, h) { card.style.setProperty('--card-fs', cardFs(h)); }
+
   /* ---- The link layer (UIUX §4.3, B28): nine straight 1px --frame lines
      between card centres, one per pair authored in the markup. The pairing
      is authored; the geometry is computed, so a line stays true while a
@@ -563,6 +584,14 @@ body {
   }
 
   drawLinks();
+  // issue #111: seed each card's font from its authored height (the inline
+  // style is the authored geometry, in logical px — same source the resize
+  // gesture writes), so small cards carry small text at rest. The font var
+  // is logical px like every authored size: it scales with the sheet (B30).
+  cards.forEach(function (card) {
+    var h = parseFloat(card.style.height);
+    if (isFinite(h) && h > 0) applyCardFs(card, h);
+  });
   // the percentage-authored layout re-scales with the viewport: recompute
   window.addEventListener('resize', drawLinks);
 
@@ -630,6 +659,7 @@ body {
       var nh = Math.min(c.maxH, Math.max(c.minH, r.h + (e.clientY - r.startY) / rs));
       r.card.style.width = nw + 'px';
       r.card.style.height = nh + 'px';
+      applyCardFs(r.card, nh);   // issue #111: a bigger card, bigger text
     } else {
       var d = drag;
       var adx = e.clientX - d.startX, ady = e.clientY - d.startY;   // physical

@@ -859,3 +859,44 @@ placed - including linked note cards. It also indicates exactly how to
 resize every single note card - each individual has a placement change and
 a size change that was not built as instructed. Fix."
 
+### B44. The board scales to any viewport size — one uncapped scale over the #112 drawing's own space (issue #121)
+
+The board must scale to **any** viewport size — larger than mobile — not be
+designed for specific viewport sizes. The one render scale stays exactly
+`B30`'s mechanism (one uniform `transform: scale()` over a fixed logical
+coordinate space, `transform-origin: 0 0`, logical width/height `vw/rs ×
+vh/rs` so the scaled sheet fills the viewport edge to edge), but the scale
+is now **uncapped**: `rs = min(vw/REF_W, vh/REF_H)` — it shrinks below the
+reference space AND grows above it, so the sheet renders the owner's issue
+#112 drawing (`B43`) at **every** viewport size, not at one privileged size.
+
+The reference space is **the #112 drawing's own coordinate space**:
+`REF_W = 2560/z`, `REF_H = 1440/z` with `z = 1.3037` — `B43`'s calibration of
+the owner's 2560×1440 screenshot — i.e. **1963.64 × 1104.55** logical px. The
+`B43` authored geometry (every card's `left/top %` and `px width/height`) is
+exact in this space, so rendering the scene here and scaling it uniformly
+reproduces the drawing at every viewport: no overlapping note cards, no link
+line obscured behind a card. The old `B30` constants (`REF_W = 1080`,
+`REF_H = 600`) predate the #112 geometry rebuild — under them the drawing's
+spacing collided (Career×Writing, Music×Apple Music, Community×LinkedIn and
+others) at common laptop viewports, exactly the defect #121 reports. **This
+entry supersedes `B30`'s cap clause ("capped at 1 — never upscales") and
+`B30`'s `REF_W`/`REF_H` constants on those points**; `B30`'s mechanism, its
+logical-space conversion rule (physical readings ÷ `rs`), and its
+narrow-viewport shrink behaviour stand unchanged. Mobile viewports remain
+out of scope.
+
+The uncapped formula and the drawing-space constants are **agent-derived
+implementations of the owner's words below** — the same labelling as `B33`,
+`B40`, `B41`, `B42`. The owner ruled the behavior, not the numbers.
+
+**Source:** owner's issue
+[#121](https://github.com/AlastairZeved/The-Portfolio/issues/121),
+2026-10-03 — "There are severe scaling issues when viewing the website on
+various viewport sizes. Some viewports have overlapping note cards and link
+lines obscured. The site should be scaling to different viewport sizes, not
+designed to be viewed on specific viewport sizes. It needs to scale to any
+viewport size and be viewable on devices larger than a mobile viewport.
+Mobile viewports are out of scope and will be visited again in a future PR
+release."
+

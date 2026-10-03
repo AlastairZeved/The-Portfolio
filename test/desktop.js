@@ -93,6 +93,10 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     const layer = document.getElementById('link-layer');
     if (!layer) return null;
     const br = board.getBoundingClientRect();
+    /* measured rects arrive PHYSICAL px; the line attrs are LOGICAL (B30's
+       ÷ rs conversion — issue #121/B44 renders the desktop below REF too,
+       where rs ≠ 1, so the conversion is no longer the identity). */
+    const RS = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
     const note = document.querySelector('.door-card');
     return {
       pe: getComputedStyle(layer).pointerEvents,
@@ -106,8 +110,8 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         return {
           from: l.dataset.from, to: l.dataset.to,
           stroke: cs.stroke, width: cs.strokeWidth, ve: cs.vectorEffect,
-          cA: ca && [ca.left - br.left + ca.width / 2, ca.top - br.top + ca.height / 2],
-          cB: cb && [cb.left - br.left + cb.width / 2, cb.top - br.top + cb.height / 2],
+          cA: ca && [(ca.left - br.left + ca.width / 2) / RS, (ca.top - br.top + ca.height / 2) / RS],
+          cB: cb && [(cb.left - br.left + cb.width / 2) / RS, (cb.top - br.top + cb.height / 2) / RS],
           x1: +l.getAttribute('x1'), y1: +l.getAttribute('y1'),
           x2: +l.getAttribute('x2'), y2: +l.getAttribute('y2')
         };

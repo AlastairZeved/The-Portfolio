@@ -192,10 +192,12 @@ middle where the **door-cards** sit in the free board space, and the **Parking
 Lot** (water) closing the foot.
 
 Everything is visible at once: one viewport, no internal scrolling. The one
-render scale keeps `scrollWidth <= innerWidth` at **every** width — at desktop
-(≥`REF_W`×`REF_H` = 1080×600) the scale is exactly 1 and the render is
-unchanged; below it the sheet shrinks to fit the viewport. If the
-sheet is full, it is full — that boundary is the point.
+render scale keeps `scrollWidth <= innerWidth` at **every** width. The scale
+is **uncapped** (`B44`, issue #121): `rs = min(vw/REF_W, vh/REF_H)` over the
+issue #112 drawing's own reference space (`REF_W×REF_H` = 2560/z × 1440/z,
+z = 1.3037 ≈ 1963.64×1104.55, `B43`) — the sheet renders that drawing at
+**every** viewport size, shrinking below the reference space and growing
+above it, nothing reflows and nothing clips at either end.
 
 ### §3.2 The band and the title compartment
 
@@ -242,11 +244,13 @@ is an agent-derived measurement of that screenshot, labelled as such in
 `B43`.
 
 On narrow viewports the cards shrink with the board as a whole through the
-**one render scale** (§3.1, B30): their authored `left/top %` and `px
-width/height` are never re-authored — the whole sheet scales, so every card
+**one render scale** (§3.1, B30): their authored `left/top %` and
+`px width/height` are never re-authored — the whole sheet scales, so every card
 stays fully inside the sheet edge to edge (no left/right clipping, no
-horizontal overflow) at 320–1023px. Desktop (≥1080×600) renders at scale 1,
-unchanged.
+horizontal overflow) at 320–1023px. Since `B44` (issue #121) the scale is
+uncapped, so desktop viewports render the drawing geometry scaled too — at
+**every** viewport size the sheet shows the #112 drawing (`B43`), no note
+cards overlapping and no link line obscured.
 
 ---
 

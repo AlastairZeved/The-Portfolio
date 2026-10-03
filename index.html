@@ -502,22 +502,30 @@ body {
 </div>
 
 <script>
-/* ---- The one render scale (issue #87, B30) ----
+/* ---- The one render scale (issue #87, B30; #121, B44) ----
    The sheet is a fixed reference scene (REF_W × REF_H) rendered through a
    single uniform transform: scale(). On narrow viewports the whole sheet
    shrinks as one: the B2 authored % left/top and px width/height stand
    untouched, every card scales with the scene, nothing reflows, nothing
-   clips. At desktop widths (vw >= REF_W and vh >= REF_H) the scale is exactly
-   1 — the render is unchanged. Logical width/height are set so the scaled
+   clips. Above REF_W×REF_H the sheet now scales UP as one, too — the render
+   is the owner's issue #112 drawing at EVERY viewport size (issue #121, B44),
+   not at one privileged size. Logical width/height are set so the scaled
    sheet always fills the viewport edge to edge. (TheBoards AGENTS.md
    architecture point 1; LOGICAL_W/H and --rs/--logical-w/h ported verbatim.) */
 (function () {
   var board = document.getElementById('board');
-  var REF_W = 1080;   // the narrowest authored geometry fits without clipping
-  var REF_H = 600;    // the content's minimum height at width (measured; no scale above this)
+  /* The reference space is the owner's issue #112 drawing's own coordinate
+     space (B43: the 2560×1440 screenshot, measured through the calibration
+     z = 1.3037 — 2560/z × 1440/z). The B43 authored geometry (left/top % and
+     px width/height) is exact in THIS space, so rendering the scene here and
+     scaling it uniformly reproduces the drawing at every viewport (issue
+     #121, B44). The old 1080×600 constants predate the #112 geometry rebuild
+     and clipped that geometry's spacing at widths the cap held the scale at. */
+  var REF_W = 2560 / 1.3037;   // 1963.64 — the #112 drawing's own logical width
+  var REF_H = 1440 / 1.3037;   // 1104.55 — the #112 drawing's own logical height
   function frame() {
     var vw = window.innerWidth, vh = window.innerHeight;
-    var rs = Math.min(vw / REF_W, vh / REF_H, 1);   // never upscale; 1 at desktop
+    var rs = Math.min(vw / REF_W, vh / REF_H);   // one scale, down AND up (issue #121, B44)
     board.style.setProperty('--rs', rs);
     board.style.setProperty('--logical-w', (vw / rs) + 'px');
     board.style.setProperty('--logical-h', (vh / rs) + 'px');

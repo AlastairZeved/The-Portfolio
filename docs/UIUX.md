@@ -206,16 +206,34 @@ overhangs the band's rule (`--frame`, full-width `left: 0; right: 0`),
 bottom corners only, centred, **not a link, not a control** (no `role`, no
 `tabindex`, no caret).
 
-Its two lines, in order (B17, superseding B5; sizes and width per B31,
-superseding B19, which superseded the B17 sizes):
+**The band sizes to its tallest zone, from a two-line floor** (B46, issue
+#128 — TheBoards' own law, `TheBoards' UIUX §3.1` / B47/B76, ported verbatim;
+`bandRuleY` in `index.html`):
+
+```
+rule-y = 14 + max(2, lines) × 19.5 + 8   = 61px at the floor, 81px at three lines
+```
+
+`lines` is the tallest band zone's line count at 15px/1.3 (`band-top` 14,
+line 19.5, gap 8 — TheBoards `state.js`). The label term is gone from the
+budget: the header hangs below the rule as a tab, so it reserves no height
+above it.
+
+**The title compartment overhangs the band by 22px and occludes the rule**
+(B46 — TheBoards B38, kept by B47): `min-height: calc(var(--rule-y) + 22px)`,
+so a long title grows it downward. Its box is TheBoards' own
+(`padding: calc(var(--band-top) + 6px) 12px 12px`, B46 — superseding B31's
+16px horizontal padding); its interior never exceeds the sheet minus the side
+gutters.
+
+Its two lines, in order (B17, superseding B5; sizes per B31):
 
 1. **"The Portfolio of"** — same size as the name: 20px, `line-height: 1.2`.
 2. **"Robert Alastair Zeved Gregory"** — the title rung: 20px / **600**.
 
 The compartment's two lines render at **one font size** (20px). Its width hugs
-the title text: the `--frame` left/right borders close in on the text with
-comfortable padding (`16px`), the card stays centred, and the interior never
-exceeds the sheet minus the side gutters.
+the title text (issue #59): the `--frame` left/right borders close in on the
+text, the card stays centred.
 
 ### §3.3 The regions
 
@@ -224,7 +242,7 @@ exceeds the sheet minus the side gutters.
 | Title | the compartment above (§3.2) |
 | Components | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
 | Requirements | the line **"Click around, explore!"** (B37), **15px/600 `--ink`**, **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
-| Parking Lot | water field closing the sheet; holds the contact form (§6) |
+| Parking Lot | water field closing the sheet; sized by its measured contents from the two-row floor (§3.2's own law mirrored at the foot, B46); holds the contact form (§6) |
 
 There is **no All Boards rail** — it is removed from the DOM and the layout
 (#71, B27); the sheet takes its width.
@@ -442,8 +460,14 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
   under the Message field, also left-anchored.
 - The **right side of the pane is deliberately empty** — free space lives
   free; it is never filled.
-- The pane's `--lot-h` grows to `180px` so the stacked pair fits
-  comfortably (from `122px` when the three fields sat side by side).
+- The **lot's height follows its measured contents** (B46, issue #128 —
+  superseding B18's fixed `180px` as a mechanism, which stands only as the
+  no-JS fallback): TheBoards' own law, `TheBoards' UIUX §3.2` / B73, ported
+  verbatim as `lotH` in `index.html` —
+  `lot-h = min(34 + max(2 × 44, Σ rowHeight), ⌈0.5 × logical-h⌉)`, the section
+  bottom-anchored so it grows **upward** past the two-row floor, with
+  `#lot-items` clipping past the half-sheet ceiling. (B18's stacked-pair
+  arrangement above is unchanged.)
 
 - **Captcha:** Formspree's reCAPTCHA — on by default, runs on Formspree's
   side; it adds no third-party script to the page. Never add a second
@@ -479,6 +503,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | card states, region layout, the full-viewport sheet, no rail in the DOM | `test/mobile.js`, `test/desktop.js` |
 | the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L8]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
+| the band / title-card / lot laws (B46): rule-y formula, 22px overhang, (band-top+6) 12 12 box, lot-h formula, lot clip | `test/scaling.js` (every viewport) and `test/parity_boards.js` — rendered side-by-side against the local TheBoards checkout at identical viewports |
 | card drag + scale-based resize (B45: own scale clamped 0.5–2.0, content-sized floor NOTE_MIN_W 132), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |

@@ -89,13 +89,38 @@ function ok(label, cond) {
                  devH: Math.abs(b.height - c.offsetHeight * s * rs),
                  logicalW: c.offsetWidth * s };
       });
+      // issue #128 (B46): the band, the title card and the Parking Lot size by
+      // TheBoards' own laws, re-derived here from the same measurements the
+      // page's bandRuleY/lotH use.
+      const bandRuleY = () => {
+        let lines = 2;
+        for (const n of document.querySelectorAll('.band-zone .anchor'))
+          lines = Math.max(lines, Math.round(n.scrollHeight / 19.5));
+        return Math.round(14 + lines * 19.5 + 8);
+      };
+      const ruleY = parseFloat(getComputedStyle(board).getPropertyValue('--rule-y'));
+      const bandTop = getComputedStyle(document.getElementById('band-fill')).getPropertyValue('--band-top');
+      const card = document.getElementById('anchor-title');
+      const cardMinH = parseFloat(getComputedStyle(card).minHeight);   // logical px: the var space is unscaled
+      const cardPad = getComputedStyle(card).padding;
+      const lotH = () => {
+        const items = document.getElementById('lot-items');
+        let sum = 0;
+        for (const n of items.querySelectorAll(':scope > *')) sum += n.offsetHeight;
+        return Math.min(34 + Math.max(88, Math.round(sum)),
+                        Math.round(board.offsetHeight * 0.5));
+      };
+      const lotHval = parseFloat(getComputedStyle(board).getPropertyValue('--lot-h'));
+      const lotItemsClip = getComputedStyle(document.getElementById('lot-items')).overflow;
       return {
         rs, boardRect: [br.left, br.top, br.width, br.height],
         vw: innerWidth, vh: innerHeight,
         scrollW: document.documentElement.scrollWidth, scrollH: document.documentElement.scrollHeight,
         overlaps, obscured: obscured,
         lineMaxDev: Math.max(...lines.map(l => l.d)),
-        dims
+        dims,
+        band: { expectedRuleY: bandRuleY(), ruleY, bandTop, cardMinH, cardPad, lotH: lotH(), lotHval, lotItemsClip,
+                cardBottomLogical: (card.getBoundingClientRect().bottom - br.top) / rs }
       };
     }, { REF_W, REF_H });
 
@@ -111,6 +136,17 @@ function ok(label, cond) {
       r.dims.every(d => d.devW < 1 && d.devH < 1));
     ok(`${tag}: every card floored at NOTE_MIN_W 132 logical px (× own scale)`,
       r.dims.every(d => d.logicalW >= 132 * d.s - 0.5));
+    // issue #128 (B46): the band / title card / lot follow TheBoards' laws
+    ok(`${tag}: band rule-y = 14 + max(2, lines) × 19.5 + 8 (TheBoards B47/B76)`,
+      Math.abs(r.band.ruleY - r.band.expectedRuleY) < 0.5, JSON.stringify(r.band));
+    ok(`${tag}: band-top is 14 (TheBoards state.js)`, r.band.bandTop.trim() === '14px');
+    ok(`${tag}: title card min-height = rule-y + 22 (overhang, TheBoards B38)`,
+      Math.abs(r.band.cardMinH - (r.band.ruleY + 22)) < 0.5);
+    ok(`${tag}: title card box = TheBoards' (band-top+6) 12 12 padding, occluding the rule`,
+      r.band.cardPad === '20px 12px 12px' && r.band.cardBottomLogical >= r.band.ruleY + 21);
+    ok(`${tag}: lot-h = min(34 + max(88, Σ rows), half the sheet) (TheBoards B73)`,
+      Math.abs(r.band.lotHval - r.band.lotH) < 0.5, `lot-h ${r.band.lotHval} vs expected ${r.band.lotH}`);
+    ok(`${tag}: #lot-items clips past the lot ceiling`, r.band.lotItemsClip === 'hidden');
   }
   await browser.close();
   console.log(`\nSCALING PASS=${pass} FAIL=${fail}`);

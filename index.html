@@ -48,8 +48,8 @@
   --card-w: min(37.7778%, 100% - 2 * (var(--gutter) + 100px + var(--card-gap)));
   --card-l: calc((100% - var(--card-w)) / 2);
   --band-top: 14px;
-  --rule-y: 61px;
-  --lot-h: 180px;
+  --rule-y: 61px;    /* no-JS fallback: the two-line floor — JS re-derives it (#128/B46) */
+  --lot-h: 180px;    /* no-JS fallback: B18's fixed value — JS re-derives it (#128/B46) */
 }
 
 /* ---- Ink poles (UIUX §2.3): flip at the surface boundary ---- */
@@ -165,14 +165,20 @@ body {
 #anchor-title {
   position: absolute;
   left: 50%; transform: translateX(-50%);
-  top: 0; min-height: calc(var(--rule-y) + 29px);
+  /* issue #128 (B46): TheBoards' own box law, ported verbatim (TheBoards
+     styles.css #anchor-title): the card overhangs the band's rule by 22px
+     (B38, kept by B47) — min-height rule-y + 22, so a long title grows it
+     downward — and its padding is TheBoards' own (band-top + 6px) 12px 12px,
+     superseding B31's 16px horizontal padding. Width still hugs the title
+     text (issue #59). */
+  top: 0; min-height: calc(var(--rule-y) + 22px);
   /* issue #59: hug the title text — the borders close in instead of
-    spanning the full card width, staying centred and comfortably padded */
+    spanning the full card width, staying centred */
   width: max-content;
   max-width: calc(100% - 2 * var(--gutter));
   display: flex;
   flex-direction: column; justify-content: center;
-  padding: calc(var(--band-top) + 8px) 16px 16px;
+  padding: calc(var(--band-top) + 6px) 12px 12px;
   border: 2px solid var(--frame);
   border-top: 0;
   border-radius: 0 0 3px 3px;                  /* only the corners that exist */
@@ -349,8 +355,12 @@ body {
   font-size: 15px; font-weight: 600; color: var(--ink);
   z-index: 1;
 }
+/* issue #128 (B46): TheBoards' lot-items box, ported verbatim — content hangs
+   from top 34px (LOT_HEAD) with no bottom padding, and the ceiling clips:
+   the lot grows upward to its measured content, never past half the sheet. */
 #lot-items {
-  position: absolute; left: var(--gutter); right: var(--gutter); top: 34px; bottom: 8px;
+  position: absolute; left: var(--gutter); right: var(--gutter); top: 34px; bottom: 0;
+  overflow: hidden;
   display: flex; align-items: flex-start; gap: 12px;
   z-index: 1;
 }
@@ -569,6 +579,51 @@ body {
   frame();
   window.addEventListener('resize', frame);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(frame);
+})();
+
+/* ---- Issue #128 (B46): the band and the Parking Lot are TheBoards' sections,
+   sized by their MEASURED contents from a floor — TheBoards' own law ported
+   verbatim (geometry.js bandRuleY / lotH; constants state.js) ----
+
+   The band: rule-y = 14 + max(2, lines) x 19.5 + 8 — band-top, the tallest
+   zone's line count at 15px/1.3, and the gap to the rule (61 at the two-line
+   floor, 81 at three; TheBoards B47/B76). The Parking Lot: 34 + max(2 x 44,
+   sum of the rows' rendered heights), bottom-anchored so it grows UPWARD,
+   ceiling half the sheet with #lot-items clipping past it (TheBoards B73,
+   UIUX TheBoards §3.1/§3.2). B18's fixed 180px --lot-h is superseded as a
+   mechanism — the same measured-content law both sections follow, so the
+   header, the title card and the lot size exactly as TheBoards sizes them.
+   All px here are board-logical (B30): the sheet is never reflowed, so the
+   line counts and row heights are scale-stable. */
+(function () {
+  var board = document.getElementById('board');
+  var BAND_TOP = 14, BAND_LINE = 19.5, BAND_GAP = 8;                    // state.js
+  var LOT_HEAD = 34, LOT_ROW = 44, LOT_FLOOR = 2 * LOT_ROW, LOT_MAX_FRAC = 0.5;
+  function bandRuleY() {
+    var lines = 2;                       // the two-line floor
+    document.querySelectorAll('.band-zone .anchor').forEach(function (node) {
+      // scrollHeight is content only (the band anchor carries no padding), so
+      // it reads as whole line boxes; min-height 44 keeps the floor's answer 2.
+      lines = Math.max(lines, Math.round(node.scrollHeight / BAND_LINE));
+    });
+    return Math.round(BAND_TOP + lines * BAND_LINE + BAND_GAP);
+  }
+  function lotH() {
+    var sum = 0;
+    var items = document.getElementById('lot-items');
+    if (items) items.querySelectorAll(':scope > *').forEach(function (node) {
+      sum += node.offsetHeight;
+    });
+    return Math.min(LOT_HEAD + Math.max(LOT_FLOOR, Math.round(sum)),
+                    Math.round(board.offsetHeight * LOT_MAX_FRAC));
+  }
+  function updateBoardGeometry() {
+    board.style.setProperty('--rule-y', bandRuleY() + 'px');
+    board.style.setProperty('--lot-h', lotH() + 'px');
+  }
+  updateBoardGeometry();
+  window.addEventListener('resize', updateBoardGeometry);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(updateBoardGeometry);
 })();
 
 /* ---- Entertainment only: drag to move, corner to resize (B7) ----

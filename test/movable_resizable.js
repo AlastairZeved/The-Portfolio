@@ -4,7 +4,8 @@
 
    Since issue #87 (B30) the sheet renders through ONE uniform scale, so this
    scenario runs at two widths in one pass:
-     desktop 1440x900 — scale = min(vw/REF_W, vh/REF_H) < 1 (issue #121/B44:
+     desktop 1440x900 — scale = vh/REF_H, height-anchored (issue #121/B44:
+     uncapped; issue #128/B46: height-anchored on landscape) < 1 on this
                         the drawing's own space is 2560/z × 1440/z, z = 1.3037,
                         so 1440×900 renders scaled, un-capped), and
      narrow  390x844  — scale < 1: every pointer reading must be converted into
@@ -40,12 +41,14 @@ async function runScenario(page, tag, width, height) {
 
   const rs = await page.evaluate(() =>
     parseFloat(getComputedStyle(document.querySelector('#board')).getPropertyValue('--rs')) || 1);
-  /* issue #121 (B44): the one scale is min(vw/REF_W, vh/REF_H) with NO cap —
-     the sheet renders the #112 drawing at every viewport, down AND up. The
-     old "exactly 1 at desktop" pin was the superseded B30 cap clause. */
+  /* issue #121 (B44): the one scale is uncapped — the sheet renders the #112
+     drawing at every viewport, down AND up. issue #128 (B46): the law is
+     HEIGHT-ANCHORED on landscape (rs = vh/REF_H, TheBoards' desktop frame
+     law) and min(vw/REF_W, vh/REF_H) in portrait; B44's single-min() clause
+     is superseded for landscape viewports only. */
   const REF_W = 2560 / 1.3037, REF_H = 1440 / 1.3037;
-  const expectRs = Math.min(width / REF_W, height / REF_H);
-  ok(`${tag}: render scale is min(vw/REF_W, vh/REF_H) = ${expectRs.toFixed(3)} (rs=${rs.toFixed(3)})`,
+  const expectRs = (width >= height) ? height / REF_H : Math.min(width / REF_W, height / REF_H);
+  ok(`${tag}: render scale is height-anchored on landscape (vh/REF_H), min() in portrait (B46) = ${expectRs.toFixed(3)} (rs=${rs.toFixed(3)})`,
      Math.abs(rs - expectRs) < 1e-6);
 
   // --- issue #94: the native HTML5 anchor drag is suppressed on door-cards ---

@@ -47,9 +47,9 @@
   --card-gap: 24px;
   --card-w: min(37.7778%, 100% - 2 * (var(--gutter) + 100px + var(--card-gap)));
   --card-l: calc((100% - var(--card-w)) / 2);
-  --band-top: 14px;
-  --rule-y: 61px;
-  --lot-h: 180px;
+  --band-top: 15.46px;   /* 14 × 1.10455 (#128/B46 — the band literals are TheBoards' 1000-tall frame mapped into the 1104.55-tall drawing space) */
+  --rule-y: 67.38px;  /* no-JS fallback: the rescaled two-line floor — JS re-derives it (#128/B46) */
+  --lot-h: 180px;    /* no-JS fallback: B18's fixed value — JS re-derives it (#128/B46) */
 }
 
 /* ---- Ink poles (UIUX §2.3): flip at the surface boundary ---- */
@@ -128,7 +128,7 @@ body {
   width: max-content;
   padding: 2px 6px;
   text-align: center;
-  font-size: 13px; font-weight: 600;
+  font-size: 14.36px; font-weight: 600;   /* 13 × 1.10455 (#128/B46) */
   color: var(--ink);
   line-height: 1.3;
   background: var(--frame);
@@ -158,7 +158,7 @@ body {
   width: auto;
   min-height: 44px;
   padding: 0;
-  font-size: 15px; font-weight: 600;
+  font-size: 16.57px; font-weight: 600;   /* 15 × 1.10455 (#128/B46) — keeps the band anchor on the same rescaled rung as the band's own literals */
 }
 
 /* ---- The title compartment (UIUX §3.2, B17; TheBoards #anchor-title) ---- */
@@ -166,6 +166,11 @@ body {
   position: absolute;
   left: 50%; transform: translateX(-50%);
   top: 0; min-height: calc(var(--rule-y) + 29px);
+  /* issue #128 (B46): the owner ruled B31 STANDS — this box (the +29px
+     overhang, the (band-top + 8px) 16px 16px padding, the 20px type) is
+     untouched. The band literals beneath it are rescaled and the height
+     grows around the box; the card itself keeps B31's law. Width still
+     hugs the title text (issue #59). */
   /* issue #59: hug the title text — the borders close in instead of
     spanning the full card width, staying centred and comfortably padded */
   width: max-content;
@@ -346,11 +351,16 @@ body {
 }
 #lot-header {
   position: absolute; left: var(--gutter); top: 8px;
-  font-size: 15px; font-weight: 600; color: var(--ink);
+  font-size: 16.57px; font-weight: 600; color: var(--ink);   /* 15 × 1.10455 (#128/B46) — same rescaled rung as the band anchors */
   z-index: 1;
 }
+/* issue #128 (B46): TheBoards' lot-items box, ported — content hangs
+   from top 34px (LOT_HEAD, kept unscaled) with no bottom padding, and the
+   ceiling clips: the lot grows upward to its measured content from the
+   rescaled two-row shelf (134.76px), never past half the sheet. */
 #lot-items {
-  position: absolute; left: var(--gutter); right: var(--gutter); top: 34px; bottom: 8px;
+  position: absolute; left: var(--gutter); right: var(--gutter); top: 34px; bottom: 0;
+  overflow: hidden;
   display: flex; align-items: flex-start; gap: 12px;
   z-index: 1;
 }
@@ -532,16 +542,21 @@ body {
 </div>
 
 <script>
-/* ---- The one render scale (issue #87, B30; #121, B44) ----
+/* ---- The one render scale (issue #87, B30; #121, B44; #128, B46) ----
    The sheet is a fixed reference scene (REF_W × REF_H) rendered through a
-   single uniform transform: scale(). On narrow viewports the whole sheet
-   shrinks as one: the B2 authored % left/top and px width/height stand
-   untouched, every card scales with the scene, nothing reflows, nothing
-   clips. Above REF_W×REF_H the sheet now scales UP as one, too — the render
-   is the owner's issue #112 drawing at EVERY viewport size (issue #121, B44),
-   not at one privileged size. Logical width/height are set so the scaled
-   sheet always fills the viewport edge to edge. (TheBoards AGENTS.md
-   architecture point 1; LOGICAL_W/H and --rs/--logical-w/h ported verbatim.) */
+   single uniform transform: scale(). The scale law is HEIGHT-ANCHORED ON
+   LANDSCAPE (issue #128, B46 — TheBoards' own desktop frame law, geometry.js
+   computeFrame `renderScale = min(vh/1000, (vw − panes)/900)`, ported): on a
+   landscape screen rs = vh/REF_H, so the band — whose literals are fixed
+   logical px — renders at the same fraction of the viewport height at every
+   landscape size, exactly as TheBoards' band renders 61/1000 = 6.1% of vh.
+   Portrait keeps B30's down-scale min(vw/REF_W, vh/REF_H), the only way the
+   wide drawing fits a narrow screen. This supersedes B44's min() formula
+   clause for landscape viewports only (B46). Above and below the reference
+   space the sheet scales as one: the authored geometry stands, nothing
+   reflows, nothing clips (issue #121, B44). Logical width/height are set so
+   the scaled sheet always fills the viewport edge to edge. (TheBoards
+   AGENTS.md architecture point 1; LOGICAL_W/H and --rs/--logical-w/h.) */
 (function () {
   var board = document.getElementById('board');
   /* The reference space is the owner's issue #112 drawing's own coordinate
@@ -555,7 +570,38 @@ body {
   var REF_H = 1440 / 1.3037;   // 1104.55 — the #112 drawing's own logical height
   function frame() {
     var vw = window.innerWidth, vh = window.innerHeight;
-    var rs = Math.min(vw / REF_W, vh / REF_H);   // one scale, down AND up (issue #121, B44)
+    /* issue #128 (B46): height-anchored landscape — TheBoards' desktop frame
+       law ported. Portrait keeps B30's min() down-scale. The height anchor is
+       then floored by the content's own measured minimum width (B42's
+       "measured, never a constant" law): a door-card is placed by a percentage
+       left and content-sized in logical px, so on a near-square landscape
+       window the height anchor alone compresses the logical width below the
+       cards' right edges and the sheet would clip (~4px at 800×800, the
+       branch's own edge-probe finding). lw_min = max(cardW / (1 − left%)) is
+       the narrowest logical width at which no door-card overflows; it only
+       binds at square-ish aspects and leaves every ordinary screen untouched. */
+    var rs = (vw >= vh) ? (vh / REF_H) : Math.min(vw / REF_W, vh / REF_H);
+    if (vw >= vh) {
+      var rsPrev = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
+      var lwMin = 0;
+      document.querySelectorAll('.door-card').forEach(function (card) {
+        var left = parseFloat(card.style.left) || 0;          // authored percentage (B45)
+        if (left >= 100) return;
+        /* the card's rightmost content in logical px — its own box PLUS any
+           child that sticks out of it (the resize handle sits 2px past the
+           right border), measured from the live rects; rect deltas ÷ rs are
+           board-logical and stable across scales (B30). */
+        var cr = card.getBoundingClientRect();
+        var rightLogical = cr.width / rsPrev;
+        card.querySelectorAll('*').forEach(function (child) {
+          var r2 = child.getBoundingClientRect();
+          var over = (r2.right - cr.left) / rsPrev;
+          if (over > rightLogical) rightLogical = over;
+        });
+        lwMin = Math.max(lwMin, rightLogical / (1 - left / 100));
+      });
+      if (lwMin > 0) rs = Math.min(rs, vw / lwMin);
+    }
     board.style.setProperty('--rs', rs);
     board.style.setProperty('--logical-w', (vw / rs) + 'px');
     board.style.setProperty('--logical-h', (vh / rs) + 'px');
@@ -569,6 +615,59 @@ body {
   frame();
   window.addEventListener('resize', frame);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(frame);
+})();
+
+/* ---- Issue #128 (B46): the band and the Parking Lot are TheBoards' sections,
+   sized by their MEASURED contents from a floor — TheBoards' own law ported
+   (geometry.js bandRuleY / lotH; constants state.js), with the band literals
+   RESCALED ×1.10455 (issue #128, B46): TheBoards' literals live in its
+   1000-tall logical frame; this board's logical space is the issue #112
+   drawing's 1104.55-tall frame, so every TheBoards band literal maps through
+   k = 1104.55/1000 = 1.10455 — with the height-anchored landscape scale law
+   above, the band then renders at EXACTLY TheBoards' physical size on every
+   landscape screen (54.9px rule at 1440×900 = 6.1% of vh, both boards).
+
+   The band: rule-y = 15.46 + max(2, lines) × 21.54 + 8.84 — band-top, the
+   tallest zone's line count at 16.57px/1.3, and the gap to the rule (67.38
+   at the two-line floor, 88.92 at three). The Parking Lot: measured from its
+   content from the rescaled two-row shelf (TheBoards B73), bottom-anchored so
+   it grows UPWARD, ceiling half the sheet with #lot-items clipping past it.
+   B18's fixed 180px --lot-h is superseded as a mechanism — fallback only.
+   The lot's 34px head and 8px base literal are kept UNSCALED (TheBoards'
+   chrome is not part of the rescale; noted per the B33 provenance pattern).
+   All px here are board-logical (B30): the sheet is never reflowed, so the
+   line counts and row heights are scale-stable. */
+(function () {
+  var board = document.getElementById('board');
+  var BAND_TOP = 15.46, BAND_LINE = 21.54, BAND_GAP = 8.84;             // state.js × 1.10455
+  var LOT_HEAD = 34, LOT_SHELF = 134.76, LOT_MAX_FRAC = 0.5;            // 34 unscaled; 122-shelf × 1.10455
+  function bandRuleY() {
+    var lines = 2;                       // the two-line floor
+    document.querySelectorAll('.band-zone .anchor').forEach(function (node) {
+      // scrollHeight is content only (the band anchor carries no padding), so
+      // it reads as whole line boxes; min-height 44 keeps the floor's answer 2.
+      lines = Math.max(lines, Math.round(node.scrollHeight / BAND_LINE));
+    });
+    return Math.round(BAND_TOP + lines * BAND_LINE + BAND_GAP);
+  }
+  function lotH() {
+    var sum = 0;
+    var items = document.getElementById('lot-items');
+    if (items) items.querySelectorAll(':scope > *').forEach(function (node) {
+      sum += node.offsetHeight;
+    });
+    // The rescaled two-row shelf (122 × k = 134.76, header included) is the
+    // floor; measured content grows it; half the logical sheet caps it.
+    return Math.min(Math.max(LOT_SHELF, LOT_HEAD + Math.round(sum)),
+                    Math.ceil(board.offsetHeight * LOT_MAX_FRAC));
+  }
+  function updateBoardGeometry() {
+    board.style.setProperty('--rule-y', bandRuleY() + 'px');
+    board.style.setProperty('--lot-h', lotH() + 'px');
+  }
+  updateBoardGeometry();
+  window.addEventListener('resize', updateBoardGeometry);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(updateBoardGeometry);
 })();
 
 /* ---- Entertainment only: drag to move, corner to resize (B7) ----

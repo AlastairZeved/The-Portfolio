@@ -16,6 +16,7 @@ const REF_W = 2560 / Z, REF_H = 1440 / Z;
 const VIEWPORTS = [
   [1080, 600], [1280, 700], [1366, 768], [1440, 750], [1600, 850],
   [1920, 1080], [1920, 700], [1920, 640], [2560, 1000], [2560, 620],
+  [800, 800], [640, 640], [1080, 1080],   // square-ish landscape: B46's width floor binds here (issue #128 edge-probe finding)
   [768, 900], [390, 844],
 ];
 
@@ -116,8 +117,19 @@ function ok(label, cond) {
       };
       const lotHval = parseFloat(getComputedStyle(board).getPropertyValue('--lot-h'));
       const lotItemsClip = getComputedStyle(document.getElementById('lot-items')).overflow;
+      const lwMin = Math.max(...[...document.querySelectorAll('.door-card')].map(c => {
+        const left = parseFloat(c.style.left) || 0;
+        if (left >= 100) return 0;
+        const cr = c.getBoundingClientRect();
+        let rightLogical = cr.width / rs;
+        for (const child of c.querySelectorAll('*')) {
+          const over = (child.getBoundingClientRect().right - cr.left) / rs;
+          if (over > rightLogical) rightLogical = over;
+        }
+        return rightLogical / (1 - left / 100);
+      }));
       return {
-        rs, boardRect: [br.left, br.top, br.width, br.height],
+        rs, lwMin, boardRect: [br.left, br.top, br.width, br.height],
         vw: innerWidth, vh: innerHeight,
         scrollW: document.documentElement.scrollWidth, scrollH: document.documentElement.scrollHeight,
         overlaps, obscured: obscured,
@@ -131,8 +143,9 @@ function ok(label, cond) {
     ok(`${tag}: the sheet fills the viewport edge to edge, no overflow`,
       r.boardRect[2] + 0.5 >= r.vw && r.boardRect[3] + 0.5 >= r.vh &&
       r.scrollW <= r.vw + 1 && r.scrollH <= r.vh + 1);
-    ok(`${tag}: the scale is height-anchored on landscape (rs = vh/REF_H), min() in portrait (B46, issue #128)`,
-      Math.abs(r.rs - (r.vw >= r.vh ? r.vh / REF_H : Math.min(r.vw / REF_W, r.vh / REF_H))) < 1e-6);
+    ok(`${tag}: the scale is height-anchored on landscape (rs = min(vh/REF_H, vw/lw_min)), min() in portrait (B46, issue #128)`,
+      Math.abs(r.rs - (r.vw >= r.vh ? Math.min(r.vh / REF_H, r.vw / r.lwMin)
+                                    : Math.min(r.vw / REF_W, r.vh / REF_H))) < 1e-6);
     ok(`${tag}: no overlapping note cards`, r.overlaps.length === 0);
     ok(`${tag}: no link line obscured behind a card`, r.obscured.length === 0);
     ok(`${tag}: every link endpoint on its card centre (≤0.6 logical px)`, r.lineMaxDev < 0.6);

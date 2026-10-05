@@ -571,8 +571,37 @@ body {
   function frame() {
     var vw = window.innerWidth, vh = window.innerHeight;
     /* issue #128 (B46): height-anchored landscape — TheBoards' desktop frame
-       law ported. Portrait keeps B30's min() down-scale. */
+       law ported. Portrait keeps B30's min() down-scale. The height anchor is
+       then floored by the content's own measured minimum width (B42's
+       "measured, never a constant" law): a door-card is placed by a percentage
+       left and content-sized in logical px, so on a near-square landscape
+       window the height anchor alone compresses the logical width below the
+       cards' right edges and the sheet would clip (~4px at 800×800, the
+       branch's own edge-probe finding). lw_min = max(cardW / (1 − left%)) is
+       the narrowest logical width at which no door-card overflows; it only
+       binds at square-ish aspects and leaves every ordinary screen untouched. */
     var rs = (vw >= vh) ? (vh / REF_H) : Math.min(vw / REF_W, vh / REF_H);
+    if (vw >= vh) {
+      var rsPrev = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
+      var lwMin = 0;
+      document.querySelectorAll('.door-card').forEach(function (card) {
+        var left = parseFloat(card.style.left) || 0;          // authored percentage (B45)
+        if (left >= 100) return;
+        /* the card's rightmost content in logical px — its own box PLUS any
+           child that sticks out of it (the resize handle sits 2px past the
+           right border), measured from the live rects; rect deltas ÷ rs are
+           board-logical and stable across scales (B30). */
+        var cr = card.getBoundingClientRect();
+        var rightLogical = cr.width / rsPrev;
+        card.querySelectorAll('*').forEach(function (child) {
+          var r2 = child.getBoundingClientRect();
+          var over = (r2.right - cr.left) / rsPrev;
+          if (over > rightLogical) rightLogical = over;
+        });
+        lwMin = Math.max(lwMin, rightLogical / (1 - left / 100));
+      });
+      if (lwMin > 0) rs = Math.min(rs, vw / lwMin);
+    }
     board.style.setProperty('--rs', rs);
     board.style.setProperty('--logical-w', (vw / rs) + 'px');
     board.style.setProperty('--logical-h', (vh / rs) + 'px');

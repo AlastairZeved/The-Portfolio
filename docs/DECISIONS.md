@@ -1910,7 +1910,13 @@ second-round confirmation). The ruling:
   `renderScale = Math.min(vh/1000, (vw − panes)/900)`) is ported: on a
   landscape viewport `rs = vh/REF_H`, so the band renders at a fixed fraction
   of the viewport height at every landscape size, exactly as TheBoards renders
-  61/1000 = 6.1% of vh; portrait keeps B30's `min()` down-scale. **This
+  61/1000 = 6.1% of vh; portrait keeps B30's `min()` down-scale. The height
+  anchor is floored by the content's own **measured** minimum logical width
+  (`rs = min(vh/REF_H, vw/lw_min)`, `lw_min = max(cardW/(1 − left%))` over the
+  door-cards — B42's "measured, never a constant" law; agent-derived, and
+  inert at every ordinary aspect: it binds only on square-ish windows, where
+  the pure height anchor would compress the sheet below the cards' right
+  edges and clip it). **This
   supersedes B44's scale-formula clause for landscape viewports only.** The
   band literals follow TheBoards' B37/B47 chain through k: `rule-y =
   15.46 + max(2, lines) × 21.54 + 8.84` (67.38 at the two-line floor), the

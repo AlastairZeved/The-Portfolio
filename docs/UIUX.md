@@ -198,9 +198,17 @@ is **uncapped** (`B44`, issue #121) and **height-anchored on landscape**
 `computeFrame`, ported):
 
 ```
-landscape (vw >= vh):  rs = vh / REF_H
+landscape (vw >= vh):  rs = min(vh / REF_H, vw / lw_min)
 portrait  (vw <  vh):  rs = min(vw / REF_W, vh / REF_H)   — B30's down-scale
 ```
+
+where `lw_min` is the content's own **measured** minimum logical width —
+`max(doorCardW / (1 − left%))` over the door-cards (B42's "measured, never a
+constant" law; agent-derived, `B46`). The width floor binds only on
+square-ish landscape windows, where the pure height anchor would compress the
+logical width below the cards' right edges and clip the sheet (~4px at
+800×800); at every ordinary aspect the height term is smaller and the floor
+is inert.
 
 over the issue #112 drawing's own reference space (`REF_W×REF_H` = 2560/z ×
 1440/z, z = 1.3037 ≈ 1963.64×1104.55, `B43`). On landscape the height term

@@ -900,3 +900,49 @@ viewport size and be viewable on devices larger than a mobile viewport.
 Mobile viewports are out of scope and will be visited again in a future PR
 release."
 
+---
+
+### B45. Every note card matches TheBoards' note font and sizing mechanics (record amendment, owner chat 2026-10-05)
+
+Every note card on the board — **all nine**, not only the three issue #126
+names — adopts **TheBoards' own note mechanics**, exactly as TheBoards builds
+notes. The mechanism of record:
+
+- **Font:** note text renders at **17px, `line-height: 1.4`** (TheBoards
+  `styles.css` §4 `.note-text`), scaled only by the note's own scale factor
+  (clamped **0.5–2.0**, TheBoards `state.js` `MIN_SCALE`/`MAX_SCALE`) — not
+  by card height. This **supersedes B40's height-driven text-scale law**
+  (`17 × clamp(h/96, 0.5, 2.0)`).
+- **Sizing:** cards are **content-sized**, as TheBoards sizes notes —
+  `width: max-content` capped at the sheet's edge, floored at **min-width
+  132** (TheBoards' `NOTE_MIN_W`, TheBoards `UIUX §4.5`, B84), height
+  following the wrapped text. This **supersedes B43's authored fixed
+  boxes** (`left/top %` + `px width/height`) as a sizing mechanism; the
+  placements remain the owner's drawing authority.
+- **Resize:** the gesture acts as **TheBoards' scale-based resize** (the
+  frame drag changes the note's scale 0.5–2.0), replacing independent
+  width/height corner dragging. This **supersedes B21's corner w/h resize
+  bounds** for the gesture.
+
+This entry also answers issue #126 at the mechanism level: the three
+visibly unmatched cards (Apple Music, Spotify, LinkedIn) become uniform
+with every other note card rather than being patched individually. The
+implementation ships in a follow-up PR with the matching `UIUX §4` edits;
+this entry is the ruling of record. Any agent-derived implementation
+specifics are labelled as such there, per the `B33`/`B43` provenance
+pattern.
+
+**Source:** the owner's chat directives of 2026-10-05, quoted verbatim,
+given while reviewing the agent's issue-#126 work — "the resizing and note
+card sizes in general should match how AlastairZeved/TheBoards built its
+note cards" and "Every single note card should match TheBoards note font
+and card sizing mechanics. All of them. The three mentioned were brought
+up because they were visibly unmatched, but all note cards should be
+uniform in font and card mechanics. The three mentioned should be sized
+like note cards would be sized on TheBoards." Context: owner's issue
+[#126](https://github.com/AlastairZeved/The-Portfolio/issues/126), 2026-10-05
+— "The \"Apple Music\", \"Spotify\", and \"LinkedIn\" cards are too small -
+they're actually smaller than the note cards minimum sizing even allows. Make
+them larger to the minimum card size allowed."
+
+

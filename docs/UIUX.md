@@ -239,13 +239,14 @@ is committed as an **illustrative reference only**:
 — it is not law; where the wireframe and this document disagree, this
 document wins. The cards do **not** live inside Components, Requirements, or
 the Parking Lot. The current placement authority is the owner's issue #112
-drawing (`B43`): every card's authored `left/top %` and `px width/height`
-is an agent-derived measurement of that screenshot, labelled as such in
-`B43`.
+drawing (`B43`): every card's authored `left/top %` is an agent-derived
+measurement of that screenshot, labelled as such in `B43`. Since `B45`
+(issue #126) the placements are the **only** authored card geometry — the
+cards are content-sized (§4), no px width/height is authored.
 
 On narrow viewports the cards shrink with the board as a whole through the
-**one render scale** (§3.1, B30): their authored `left/top %` and
-`px width/height` are never re-authored — the whole sheet scales, so every card
+**one render scale** (§3.1, B30): their authored `left/top %` is never
+re-authored — the whole sheet scales, so every card
 stays fully inside the sheet edge to edge (no left/right clipping, no
 horizontal overflow) at 320–1023px. Since `B44` (issue #121) the scale is
 uncapped, so desktop viewports render the drawing geometry scaled too — at
@@ -266,28 +267,46 @@ rounded at all" — `B40`), 3px radius, `--ink-dark` text, draggable and
 resizable for the visitor's entertainment only (no persistence, no state —
 `B7`).
 
-**Text scales with the card** (`B40`, issue #111): `--card-fs` is set per
-card from its height — 17px at the authored 96px standard, `17 × clamp(h/96,
-0.5, 2.0)` — clamped to TheBoards' own note-scale band **[8.5, 34]px**. The
-gesture's resize handler updates it live, so a grown card grows its text and
-a shrunk card shrinks it; the six authored 96px door-cards rest at exactly
-17px. The law is an agent-derived implementation of the owner's ruling (B40
-provenance), like the 132×80 gesture floor (B33).
+**Font and sizing are TheBoards' own note mechanics** (`B45`, issue #126,
+superseding `B40`'s height-driven text law and `B43`'s authored fixed boxes
+as a sizing mechanism; the `left/top %` placements remain the owner's
+drawing authority, `B43`):
 
-**Resize constraints** (issue #58, `B21`): a card may be dragged anywhere on
-the sheet, and resized by its corner handle only between a **legible floor**
-and a **one-fifth-of-viewport ceiling** — never below `132×80` (enough room
-for ~3 lines of the 17px title) and never above `1/5` of the viewport width,
-`1/5` of the viewport height. The floor and ceiling are independent per axis;
-on a narrow viewport where `1/5` width falls below the legible floor, the
-legible floor wins (a card smaller than legible is never produced).
+- **Font:** 17px, `line-height: 1.4` — TheBoards `styles.css` §4
+  `.note-text` — **fixed**. The card's own scale factor is the only thing
+  that sizes the text: it rides a uniform `transform: scale()` on the card,
+  `transform-origin: top left` (TheBoards `styles.css` §4 `.note`), so text
+  grows and shrinks with the card, never independently of it. No
+  `--card-fs`; the height-driven updater is gone.
+- **Sizing:** cards are **content-sized** — `width: max-content`,
+  `min-width: 132px` (= TheBoards' `NOTE_MIN_W`, `state.js` / `styles.css`
+  `.note-text`, TheBoards `UIUX §4.5`, `B84`), `height` following the
+  wrapped text. The width is **capped at the sheet's right edge**: the cap
+  is the distance from the card's left edge to the sheet's right edge,
+  divided by the card's own scale, floored at `NOTE_MIN_W` — TheBoards
+  `geometry.js` `noteMaxW` ported verbatim (`--card-max-w`, set per card in
+  JS, re-derived when the card is dragged or its scale changes).
+- **Resize:** the corner gesture acts as **TheBoards' scale-based resize**
+  (`interactions.js` frame-drag resize): the drag changes the card's own
+  scale — the pointer's distance to the card's fixed top-left origin,
+  divided by its distance at grab — clamped to TheBoards' note-scale band
+  **[0.5, 2.0]** (`state.js` `MIN_SCALE`/`MAX_SCALE`). This supersedes
+  `B21`'s independent width/height corner bounds (the `132×80` floor and
+  the 1/5-viewport ceiling) for the gesture; the legibility figure itself
+  survives only as `NOTE_MIN_W`'s 132 unscaled width. The clamped footprint
+  is re-fitted into the sheet after a scale change (TheBoards
+  `applyNoteScale`'s re-clamp, including its inverted min/max idiom for a
+  footprint that outgrows the sheet), and the links recompute (§4.3).
 
-> **Provenance (issue #72, `B33`):** the `132×80` figure is an
-> **agent-derived implementation** of the owner's "legible" word for the
-> **visitor's resize gesture** — the script's `getConstraints` — **never an
-> owner-set number**. The owner's drawings (issue #72/#74 screenshots) and his
-> chat of 2026-09-30 rule **authored** card sizes; the gesture floor does not
-> bound authored geometry.
+> **Provenance (`B45`):** the mechanism above is the owner's ruling —
+> "every single note card should match TheBoards note font and card sizing
+> mechanics. All of them." The *port specifics* are agent-derived
+> implementations of it, per the `B33`/`B43` provenance pattern: the
+> `--card-scale` / `--card-max-w` CSS custom properties and their JS
+> updaters, the scale computed from pointer distance to the top-left
+> origin (TheBoards' own `startResize` idiom), and the footprint re-clamp.
+> The 0.5–2.0 band and the 132px floor are TheBoards' own values
+> (`state.js`), not agent inventions.
 
 **A gesture is never a click** (`B41`, issue #109): the corner resize handle is
 a `<span>` **inside** the card's `<a>`, so a pointer release over it fires the
@@ -307,14 +326,16 @@ ring are an **agent-derived implementation** of the owner's "expand the resize
 button's clickable area with correct padding" words (`B42` provenance), never
 owner-set numbers.
 
-Both bounds and the gesture are read in the board's **logical coordinate
-space** (§3.1, `B30`): a card's `left/top` and `width/height` are authored in
-logical px, so pointer input (`clientX`/`clientY`, physical) is converted with
-`÷ rs` before it touches card geometry — the same rule the scale cites
-(TheBoards AGENTS.md architecture point 1; `toLogical` divides by the render
-scale). A dragged card therefore tracks the pointer 1:1 on screen at every
-scale, the ceiling stays exactly `1/5` of the viewport **on screen**, and the
-authored `132×80` floor is a logical size that scales with the sheet — it is
+Both the gesture and the geometry are read in the board's **logical
+coordinate space** (§3.1, `B30`): a card's `left/top` is authored in
+logical px (as a `%` of the sheet), so pointer input (`clientX`/`clientY`,
+physical) is converted with `÷ rs` before it touches card geometry — the
+same rule the scale cites (TheBoards AGENTS.md architecture point 1;
+`toLogical` divides by the render scale). A dragged card therefore tracks
+the pointer 1:1 on screen at every scale, and the scale-based resize
+computes its distances in the same logical space (TheBoards'
+`updateResize` reads `toLogical(e.clientX, e.clientY)`). The `NOTE_MIN_W`
+132 floor is an unscaled logical size that scales with the sheet — it is
 never re-authored and never a fixed physical px.
 
 ### §4.1 States
@@ -458,7 +479,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | card states, region layout, the full-viewport sheet, no rail in the DOM | `test/mobile.js`, `test/desktop.js` |
 | the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L8]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
-| card drag + resize floor/ceiling, link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
+| card drag + scale-based resize (B45: own scale clamped 0.5–2.0, content-sized floor NOTE_MIN_W 132), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 

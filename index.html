@@ -191,10 +191,24 @@ body {
 }
 
 /* ---- The door-cards (UIUX §4): notes that are doors ---- */
+/* Sizing per B45 (issue #126): TheBoards' own note mechanics, ported whole
+   (TheBoards styles.css §4 .note/.note-text). A card is CONTENT-SIZED:
+   width: max-content floored at min-width 132px (= TheBoards' NOTE_MIN_W,
+   state.js / styles.css .note-text, UIUX §4.5 B84), height following the
+   wrapped text — no authored px footprint. Its own scale factor — the var
+   --card-scale, clamped 0.5–2.0 by the resize gesture (TheBoards state.js
+   MIN_SCALE/MAX_SCALE) — is the ONLY thing that sizes the text: the font is
+   17px / line-height 1.4 (TheBoards .note-text) and the transform scales
+   the whole card uniformly, transform-origin top left (.note §4.1 — the
+   stored left/top stays truthful). This supersedes B40's height-driven
+   --card-fs law; the owner's authored left/top placements stand (B43). */
 .door-card {
   position: absolute;
-  display: flex;
-  align-items: center; justify-content: center;
+  width: max-content;
+  min-width: 132px;                 /* = NOTE_MIN_W (TheBoards UIUX §4.5) */
+  max-width: var(--card-max-w, none); /* set per card in JS: the distance
+     from the card's left edge to the sheet's right edge, divided by the
+     card's own scale — TheBoards geometry.js noteMaxW, issue #53 / B39 */
   background: var(--note);
   color: var(--ink-dark);
   /* TheBoards' note grammar (TheBoards UIUX §4, ported whole): the note
@@ -205,11 +219,11 @@ body {
   border: 2px solid var(--ink-dark);
   border-radius: 3px;
   padding: 10px 12px;
-  /* Base 17px like TheBoards; JS sets --card-fs from the card's height so
-     text scales with the card (issue #111), clamped to TheBoards' own
-     0.5-2.0 note-scale band (17px * [0.5, 2.0] = [8.5, 34]px). */
-  font-size: var(--card-fs, 17px); font-weight: 600; line-height: 1.4;
+  /* B45: 17px / 1.4 like TheBoards' .note-text, fixed — the card's own
+     scale factor (below) is the only text scaling; no --card-fs. */
+  font-size: 17px; font-weight: 600; line-height: 1.4;
   text-align: center;
+  overflow-wrap: break-word;
   text-decoration: none;
   z-index: 2;
   touch-action: none;
@@ -217,6 +231,19 @@ body {
   transition: box-shadow 150ms ease-out, transform 80ms ease-out;
   /* rest: no shadow, no glow (UIUX §1 — cards are ON the page) */
   box-shadow: none;
+  /* TheBoards .note: the card's own scale lives on the transform,
+     transform-origin top left so the authored left/top stays truthful. */
+  transform: scale(var(--card-scale, 1));
+  transform-origin: top left;
+}
+/* While a scale resize is active the card applies its scale instantly
+   (TheBoards fidelity, B45): the 80ms transform transition above is the
+   default state's, and left on it would rubber-band every resize move and
+   leave drawLinks' measured box mid-transition (B28 — endpoints read the
+   settled rect). Suppress just the transform member; the shadow keeps its
+   150ms. */
+.door-card.resizing {
+  transition: box-shadow 150ms ease-out;
 }
 /* hover: the blue bloom — --accent-page's channels, wide enough to register (B14 hover member; #67) */
 .door-card:hover {
@@ -224,7 +251,7 @@ body {
 }
 /* active: pressed 1px inset; full bloom geometry in green channels (B25 follow-up) */
 .door-card:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(var(--card-scale, 1));
   box-shadow: 0 0 32px 4px rgb(var(--glow-green) / 0.9);
 }
 /* focus-visible: a ring in the surface ink — never colour alone (UIUX §1) */
@@ -241,8 +268,8 @@ body {
      ungrabbable, and flush-at-the-corner still left nothing to grab outside
      the note.) The grip lines are pinned 9px inside the box's bottom-right
      corner, which is exactly where they already sat, so the visible grip
-     does not move. 28x28 still sits well inside the 132x80 minimum card
-     (B21). Agent-derived (B42). */
+     does not move. 28x28 sits inside the 132px min-width card (B45/TheBoards
+     NOTE_MIN_W). Agent-derived (B42). */
   right: -4px; bottom: -4px;
   width: 28px; height: 28px;
   cursor: nwse-resize;
@@ -268,7 +295,7 @@ body {
 .door-card.note-card:active,
 .door-card.note-card:focus-visible {
   box-shadow: none;
-  transform: none;
+  transform: scale(var(--card-scale, 1));   /* B45: the note's own scale stands under hover */
   outline: none;
 }
 
@@ -413,40 +440,43 @@ body {
   <!-- The door-cards, in the free board space (B2, B3); the Music note is not
        a door — the Apple Music and Spotify doors hang under it (B26). Each
        card carries a data-id: the link layer below names its pairs by it
-       (B28), so both ends of every link are greppable and readable. -->
-  <a class="door-card" data-id="community" style="left:13.6%; top:18.3%; width:310px; height:140px;" href="https://earp-street-park.netlify.app" target="_blank" rel="noopener noreferrer">
+       (B28), so both ends of every link are greppable and readable. B45
+       (issue #126): the authored inline geometry is the owner's left/top
+       placement only (B43) — the cards are content-sized with their own
+       scale factor, TheBoards' note mechanics. -->
+  <a class="door-card" data-id="community" style="left:13.6%; top:18.3%" href="https://earp-street-park.netlify.app" target="_blank" rel="noopener noreferrer">
     Community
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="career" style="left:42.3%; top:18.5%; width:329px; height:110px;" href="https://razgregory.com/career" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="career" style="left:42.3%; top:18.5%" href="https://razgregory.com/career" target="_blank" rel="noopener noreferrer">
     Career
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="writing" style="left:66%; top:24%; width:176px; height:80px;" href="https://substack.com/@theaboveaveragerob" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="writing" style="left:66%; top:24%" href="https://substack.com/@theaboveaveragerob" target="_blank" rel="noopener noreferrer">
     Writing
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="software-ai" style="left:12.3%; top:51.7%; width:251px; height:110px;" href="https://alastairzeved.com" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="software-ai" style="left:12.3%; top:51.7%" href="https://alastairzeved.com" target="_blank" rel="noopener noreferrer">
     Software & AI
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="plants-rocks" style="left:42.6%; top:64.4%; width:219px; height:96px;" href="https://razgregory.com/plantsandrocks" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="plants-rocks" style="left:42.6%; top:64.4%" href="https://razgregory.com/plantsandrocks" target="_blank" rel="noopener noreferrer">
     Plants & Rocks
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <div class="door-card note-card" data-id="music" style="left:73%; top:54%; width:220px; height:96px;">
+  <div class="door-card note-card" data-id="music" style="left:73%; top:54%">
     Music
     <span class="resize-handle" aria-hidden="true"></span>
   </div>
-  <a class="door-card" data-id="apple-music" style="left:88.3%; top:61.3%; width:120px; height:50px;" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="apple-music" style="left:88.3%; top:61.3%" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
     Apple Music
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="spotify" style="left:81.7%; top:68.6%; width:110px; height:48px;" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="spotify" style="left:81.7%; top:68.6%" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
     Spotify
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="linkedin" style="left:37.3%; top:32.7%; width:110px; height:48px;" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="linkedin" style="left:37.3%; top:32.7%" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">
     LinkedIn
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
@@ -545,8 +575,10 @@ body {
    No persistence. Nothing is saved; reload restores the authored layout.
 
    The sheet renders through ONE uniform scale (B30), so pointer input arrives
-   in PHYSICAL px while a card's inline left/top/width/height are authored in
-   the board's LOGICAL space. Every pointer reading is therefore converted with
+   in PHYSICAL px while a card's inline left/top is authored in the board's
+   LOGICAL space (B45: the % left/top placements are the only authored
+   geometry — cards are content-sized with their own scale factor). Every
+   pointer reading is therefore converted with
    toLogical() before it touches card geometry — the same rule TheBoards states
    for itself (TheBoards AGENTS.md architecture point 1; geometry.js toLogical
    divides by the render scale: never read clientX/clientY directly against
@@ -564,17 +596,46 @@ body {
   }
   function toLogical(px) { return px / renderScale(); }
 
-  /* ---- Issue #111: text scales with the card (TheBoards' grammar) ----
-     TheBoards notes render 17px text at scale 1 and scale the whole note
-     0.5–2.0, so text grows with the card. This board authors px footprints
-     instead of a per-note scale, so the same law lands as a per-card font
-     size anchored at the authored 96px standard (the six door-cards are all
-     authored 96px tall at 17px): fs = 17 × h/96, clamped to the identical
-     0.5–2.0 band → [8.5, 34]px (TheBoards state.js MIN/MAX_SCALE × 17). */
-  function cardFs(h) {
-    return 17 * Math.min(2, Math.max(0.5, h / 96)) + 'px';
+  /* ---- B45 (issue #126): TheBoards' note sizing + scale mechanics, ported ----
+     TheBoards state.js: NOTE_MIN_W = 132, MIN_SCALE = 0.5, MAX_SCALE = 2.0.
+     The card's own scale factor (a uniform transform: scale, origin top
+     left) is the ONLY text/size scaling: the font is a fixed 17px/1.4 and
+     the transform scales the card. This replaces the old height-driven
+     --card-fs updater (B40, superseded by B45). */
+  var MIN_SCALE = 0.5, MAX_SCALE = 2.0;   // TheBoards state.js MIN/MAX_SCALE
+  var NOTE_MIN_W = 132;                   // TheBoards state.js NOTE_MIN_W
+
+  function cardScale(card) {
+    var s = parseFloat(card.style.getPropertyValue('--card-scale'));
+    return (isFinite(s) && s > 0) ? s : 1;
   }
-  function applyCardFs(card, h) { card.style.setProperty('--card-fs', cardFs(h)); }
+  /* TheBoards geometry.js noteMaxW: the cap is the distance from the card's
+     left edge to the sheet's right edge, divided by the card's own scale,
+     floored at NOTE_MIN_W. The board's layout px ARE the logical px (B30),
+     so offsetLeft/offsetWidth read logical values directly. */
+  function applyCardMaxW(card) {
+    var lw = board.offsetWidth;
+    var cap = Math.max(NOTE_MIN_W, (lw - card.offsetLeft) / cardScale(card));
+    card.style.setProperty('--card-max-w', cap + 'px');
+  }
+  function layoutAllCards() { cards.forEach(applyCardMaxW); }
+  /* TheBoards interactions.js applyNoteScale (shared tail of pinch and the
+     desktop frame-drag resize): apply the scale, re-derive the cap (a scale
+     change rewraps the unscaled width), re-clamp the footprint into the
+     sheet, recompute the links (B91 — a scaled card's links track its new
+     centre). The min/max-of-the-same-pair clamp is TheBoards' inverted
+     constraint for a folded scale that outgrows the sheet. */
+  function applyCardScale(card, scale) {
+    card.style.setProperty('--card-scale', scale);
+    applyCardMaxW(card);
+    var lw = board.offsetWidth, lh = board.offsetHeight;
+    var footW = card.offsetWidth * scale, footH = card.offsetHeight * scale;
+    var x = Math.min(Math.max(card.offsetLeft, Math.min(0, lw - footW)), Math.max(0, lw - footW));
+    var y = Math.min(Math.max(card.offsetTop, Math.min(0, lh - footH)), Math.max(0, lh - footH));
+    card.style.left = x + 'px';
+    card.style.top = y + 'px';
+    drawLinks();
+  }
 
   /* ---- The link layer (UIUX §4.3, B28): nine straight 1px --frame lines
      between card centres, one per pair authored in the markup. The pairing
@@ -612,17 +673,25 @@ body {
     });
   }
 
-  drawLinks();
-  // issue #111: seed each card's font from its authored height (the inline
-  // style is the authored geometry, in logical px — same source the resize
-  // gesture writes), so small cards carry small text at rest. The font var
-  // is logical px like every authored size: it scales with the sheet (B30).
-  cards.forEach(function (card) {
-    var h = parseFloat(card.style.height);
-    if (isFinite(h) && h > 0) applyCardFs(card, h);
-  });
+  // B45: seed each card's content-width cap from its authored left/top (the
+  // owner's placements, B43 — the only inline geometry left). The cap is
+  // logical px like every authored size: it scales with the sheet (B30).
+  layoutAllCards();
   // the percentage-authored layout re-scales with the viewport: recompute
   window.addEventListener('resize', drawLinks);
+  window.addEventListener('resize', layoutAllCards);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
+    layoutAllCards();
+    drawLinks();
+  });
+
+  // When a card's transform transition settles (B45: the 80ms scale easing
+  // can still be in flight after a gesture ends), the settled box differs
+  // from the one drawLinks measured mid-flight (B28) — recompute once.
+  board.addEventListener('transitionend', function (e) {
+    if (e.target.classList && e.target.classList.contains('door-card') &&
+        e.propertyName === 'transform') drawLinks();
+  });
 
   // issue #94 — native anchor drag must not steal the gesture. The door-cards
   // are real <a href> anchors, so a real press-and-move would otherwise fire
@@ -655,27 +724,33 @@ body {
     var rect = board.getBoundingClientRect();
     var cr = card.getBoundingClientRect();
     if (handle) {
-      resizing = { card: card, startX: e.clientX, startY: e.clientY, w: toLogical(cr.width), h: toLogical(cr.height), moved: false };
+      // B45: the corner gesture is TheBoards' frame-drag scale resize
+      // (interactions.js startResize) — scale from the pointer's distance
+      // to the card's fixed top-left origin. All readings in logical px.
+      // .resizing suppresses the transform transition so the scale applies
+      // instantly, as TheBoards' does (see the CSS note).
+      card.classList.add('resizing');
+      var ox = toLogical(cr.left - rect.left), oy = toLogical(cr.top - rect.top);
+      var gpx = toLogical(e.clientX - rect.left), gpy = toLogical(e.clientY - rect.top);
+      resizing = {
+        card: card,
+        startX: e.clientX, startY: e.clientY,          // physical, for the 4px moved test (B41)
+        originX: ox, originY: oy,
+        grabDist: Math.hypot(gpx - ox, gpy - oy) || 1,
+        startScale: cardScale(card),
+        moved: false
+      };
     } else if (e.target === card || card.contains(e.target)) {
       // don't hijack the link's own click; only move on real drag
       drag = { card: card, startX: e.clientX, startY: e.clientY, left: toLogical(cr.left - rect.left), top: toLogical(cr.top - rect.top), moved: false };
     }
   });
 
-  function getConstraints(rs) {
-    // 1/5 of the viewport, but never below the legible minimums (UIUX §3.4).
-    // The board's logical space is exactly the viewport divided by the render
-    // scale (B30), so the ceiling is the LOGICAL width/height over 5 — which is
-    // 1/5 of the viewport on screen at any scale. The floor is an authored px
-    // like every other authored px: it scales with the sheet.
-    var lw = window.innerWidth / rs;
-    var lh = window.innerHeight / rs;
-    return {
-      minW: 132,
-      minH: 80,  // increased for legibility (fits ~3 lines of text at 17px)
-      maxW: Math.max(132, lw / 5),
-      maxH: Math.max(80, lh / 5)
-    };
+  /* TheBoards interactions.js gestureScale: the clamp bounds admit the start
+     value, so a scale outside [MIN_SCALE, MAX_SCALE] never snaps at gesture
+     start — yet it can always be scaled back into the authored range. */
+  function gestureScale(start, f) {
+    return Math.min(Math.max(start * f, Math.min(MIN_SCALE, start)), Math.max(MAX_SCALE, start));
   }
 
   window.addEventListener('pointermove', function (e) {
@@ -683,14 +758,15 @@ body {
     var rs = renderScale();
     if (resizing) {
       var r = resizing;
-      var c = getConstraints(rs);
       var radx = e.clientX - r.startX, rady = e.clientY - r.startY;   // physical
-      if (Math.abs(radx) + Math.abs(rady) > 4) r.moved = true;       // 4 physical px — same gesture as the drag
-      var nw = Math.min(c.maxW, Math.max(c.minW, r.w + radx / rs));
-      var nh = Math.min(c.maxH, Math.max(c.minH, r.h + rady / rs));
-      r.card.style.width = nw + 'px';
-      r.card.style.height = nh + 'px';
-      applyCardFs(r.card, nh);   // issue #111: a bigger card, bigger text
+      if (Math.abs(radx) + Math.abs(rady) > 4) r.moved = true;       // 4 physical px — same gesture as the drag (B41)
+      // TheBoards updateResize: scale from the pointer's distance to the
+      // card's top-left origin, in the board's logical space (÷ rs, B30).
+      var rect = board.getBoundingClientRect();
+      var d = Math.hypot(toLogical(e.clientX - rect.left) - r.originX,
+                         toLogical(e.clientY - rect.top) - r.originY);
+      applyCardScale(r.card, gestureScale(r.startScale, d / r.grabDist));
+      // drawLinks is applyCardScale's own tail — no second call here.
     } else {
       var d = drag;
       var adx = e.clientX - d.startX, ady = e.clientY - d.startY;   // physical
@@ -699,10 +775,11 @@ body {
         // the card tracks the pointer 1:1 on screen: logical + physical/scale
         d.card.style.left = (d.left + adx / rs) + 'px';
         d.card.style.top = (d.top + ady / rs) + 'px';
+        applyCardMaxW(d.card);   // B45: the cap follows the card's new left edge
+        // the moved card drags its links with it (UIUX §4.3)
+        drawLinks();
       }
     }
-    // the moved card drags its links with it (UIUX §4.3)
-    drawLinks();
   });
 
   function endDrag() {
@@ -718,6 +795,11 @@ body {
       gesture.card.addEventListener('click', function (e) { e.preventDefault(); }, { once: true, capture: true });
     }
     drag = null;
+    if (resizing) {
+      // the gesture is over: hand the transition back (any still-settling
+      // scale change then recomputes the links via the transitionend hook)
+      resizing.card.classList.remove('resizing');
+    }
     resizing = null;
   }
   window.addEventListener('pointerup', endDrag);

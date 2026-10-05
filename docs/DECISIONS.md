@@ -2014,3 +2014,79 @@ copy."; and the owner's ruling of 2026-10-05 on how those slots render,
 quoted verbatim: "Omit empty blocks entirely until content exists" (owner
 interview, 2026-10-05 — no filler text, no empty styled containers, no
 "coming soon" markers; slot structure lives in the markup only).
+
+
+### B48. razgregory.com/plantsandrocks is the dual-page-reader Plants & Rocks page on the literal idea-board green (issue #134)
+
+The owner logged the spec in issue #134: the Plants & Rocks page is a
+**dual-page reader** presenting two plant guides — **Plants on Poles**
+(Monstera Division and Moss Pole Guide) and **Plants in Rocks** (Planting in
+Semi-Hydroponics With Pon) — built on `career.html` (B47) as the structural
+template. Two title cards in the `.topband` grammar **overhang the header
+line** (per the owner's correction, same as the career page's cards);
+selecting a card selects that page — the cards are SELECTABLE radio-driven
+cards now, even though selection swaps nothing while the body is blank. The
+cards' oneliner slots are NOT blank: they carry the owner's copy verbatim.
+
+The body is **intentionally blank pending the PDF pass**: selection swaps
+between two bare empty reader containers (one per radio) driven by CSS
+`:has` — each an empty bare container, no styled content, no placeholder
+images, no text, no chevrons, no split furniture. The reader region is just
+reserved. SLOT comments mark the future PDF pass.
+
+The footer is the `.parking-lot` grammar split into **TWO** sections with
+**ONE** divider bar of 3/4 of the section's inner length. The left section
+is reserved and renders nothing (comment only, measures zero) —
+permanently empty per the spec. The right section holds the **Download**
+button, rendered but **DISABLED**: `aria-disabled="true"`, no handler, it
+visibly cannot yet work (dimmed at the 0.55 alpha — agent-derived,
+career.html's shipped dim value reused — with no hover/active bloom). The
+`.cta` is styled with career.html's `.cta` grammar re-tokened to the green
+palette.
+
+The palette is the **LITERAL TheBoards idea-board token block**
+(`styles.css` `#board[data-cat="idea"]`), transcribed byte-exact — NOT a
+re-hue: `--deep:#000a06; --card:#001a0e; --water-top:#486b49;
+--water-mid:#345439; --water-bot:#1f3825; --water-bot-a:31 56 37;
+--frame:#52997f; --note:#b9d2b2`. Ink and tokens the green block does not
+redefine come from TheBoards' `:root` verbatim (`--ink-light:#f4f5f1;
+--ink-dark:#031019; --ink:var(--ink-light)`). The selected-card glow token
+is **`--frame` `#52997f` itself** (`border-color: var(--frame);
+box-shadow: 0 0 8px 0 var(--frame)`) — **agent-derived** per the B33/B40
+provenance pattern: inventing a new "one rung down" hex would be a
+design-value invention (repo UIUX law), so an existing shipped value is
+reused. Unselected cards dim + italic at career.html's shipped
+`--ink-dim: rgb(244 245 241 / 0.55)`. The page stays a static single file
+with all CSS inline and **no script** — the selector is a two-way radio
+group (`role="radiogroup"`, `aria-label="Choose a page"`) driven by CSS
+`:has`, exactly career.html's mechanism; one visually-hidden `h1`
+("Plants & Rocks"); mobile and `prefers-reduced-motion` media blocks carry
+in career.html's pattern.
+
+This entry transcribes the owner's issue #134 spec and the owner's grill
+answers; it does not supersede B1 — the page is a sub-page of the hub
+wearing its own ruled binding, as the spec directs.
+
+**Source:** the owner's spec, issue
+[#134](https://github.com/AlastairZeved/The-Portfolio/issues/134) — the
+page structure (two title cards overhanging the header line per owner
+correction; dual-page reader body blank pending PDF, no placeholder
+scaffolding; two-section footer, left section permanently empty, right the
+disabled Download button; the literal idea-board green palette; blank slots
+list) — and the owner's four grill answers of 2026-10-05 (owner chat,
+2026-10-05), quoted verbatim:
+
+1. "The two title cards are selectable radio-driven cards, even though
+   selection swaps nothing while the body is blank. Two cards: Plants on
+   Poles (default checked) and Plants in Rocks."
+2. The oneliner copy, verbatim: "Plants on Poles | Monstera Division and
+   Moss Pole Guide" and "Plants in Rocks | Planting in Semi-Hydroponics
+   With Pon".
+3. The footer Download button is "rendered but disabled: aria-disabled,
+   no handler, visibly cannot yet work".
+4. The regression suite: a new black-box Playwright test file in the exact
+   style of `test/career.js`.
+
+Agent-derived values (labelled per the B33/B40 provenance pattern): the
+glow token = `--frame` itself; the disabled button's 0.55 alpha; the
+mobile/reduced-motion media blocks' port details.

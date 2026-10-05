@@ -403,7 +403,7 @@ no bounce; nothing moves on its own after the interaction ends.
 | Professional | `https://razgregory.com/career` | live — the employer-selector career page (B47, `UIUX §10`) |
 | Writing | `https://substack.com/@theaboveaveragerob` | live |
 | Software & AI | `https://alastairzeved.com` | live |
-| Plants & Rocks | `https://razgregory.com/plantsandrocks` | **stub** (built after the landing page, B4) |
+| Plants & Rocks | `https://razgregory.com/plantsandrocks` | live — the dual-page-reader Plants & Rocks page (B48, `UIUX §11`) |
 | Apple Music | `https://music.apple.com/us/artist/aboveaveragerob/1815357064` | live (B26) |
 | Spotify | `https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ` | live (B26 — the link the Music card carried) |
 
@@ -538,6 +538,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 | the career page (B47): employer selector, B132 glow, split body, three-section lot, sand/brown ladder, empty blocks omitted | `test/career.js` |
+| the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, disabled Download, literal idea-green ladder | `test/plantsandrocks.js` |
 
 ---
 
@@ -552,6 +553,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | `UIUX §6` — the contact form | §6 |
 | `UIUX §7` — accessibility | §7 |
 | `UIUX §10` — the career page | §10 |
+| `UIUX §11` — the Plants & Rocks page | §11 |
 
 The codebase's `UIUX §x` citations resolve to their own numbers here.
 
@@ -630,3 +632,90 @@ appear; until then the page invents no copy.
 **Pinned by:** `test/career.js` — selector mechanics, the B132 glow, the
 split, the three-section lot, the ladder tokens, and the omit-empty-block
 discipline.
+
+---
+
+## §11 The Plants & Rocks page (issue #134, B48)
+
+`plantsandrocks.html` is razgregory.com's dual-page-reader page. It is a
+static single file — all CSS inline, the typeface embedded as a data URI,
+**no script** — built on `career.html` (§10) as the structural template: the
+same `.topband` / `.topband__card` / `.topband__wordmark` /
+`.topband__oneliner` / `.topband__tab` / `.topband__card-hit` /
+`.parking-lot` / `.parking-lot__divider` / `.cta` grammar and the same CSS
+`:has` radio mechanism.
+
+### §11.1 Tokens — the literal idea-board green binding
+
+TheBoards' **idea-board token block** (`#board[data-cat="idea"]`),
+transcribed **byte-exact** — NOT a re-hue (issue #134 §4):
+
+| Token | Hex | Role |
+|---|---|---|
+| `--deep` | `#000a06` | idea `--deep` — page canvas |
+| `--card` | `#001a0e` | idea `--card` — band/card fill |
+| `--water-top` | `#486b49` | idea `--water-top` — gradient ladder, header band |
+| `--water-mid` | `#345439` | idea `--water-mid` — gradient ladder mid stop |
+| `--water-bot` | `#1f3825` | idea `--water-bot` — gradient ladder foot |
+| `--water-bot-a` | `31 56 37` | idea `--water-bot-a` (rgb channels) |
+| `--frame` | `#52997f` | idea `--frame` — borders, rules, AND the selected-card glow token |
+| `--note` | `#b9d2b2` | idea `--note` — brightest ink on the deep |
+
+Ink and tokens the green block does not redefine come from TheBoards'
+`:root` verbatim: `--ink-light` `#f4f5f1`, `--ink-dark` `#031019`,
+`--ink: var(--ink-light)`.
+
+**Agent-derived (B33/B40 provenance pattern):** the selected-card glow token
+is **`--frame` `#52997f` itself** (`border-color: var(--frame); box-shadow:
+0 0 8px 0 var(--frame)`) — the career mechanism's glow geometry with an
+existing shipped value; inventing a new "one rung down" hex would be a
+design-value invention. `--ink-dim: rgb(244 245 241 / 0.55)` (career.html's
+shipped dim value) and the disabled button's 0.55 alpha are reused shipped
+values, not new numbers.
+
+### §11.2 Regions
+
+- **Header (two-page selector):** the `.topband` grammar with **two** title
+  cards — "Plants on Poles" (default checked) and "Plants in Rocks". Both
+  cards **overhang the header line** (`margin-bottom: -14px`, career's exact
+  overhang). Each card carries its owner-authored oneliner — "Monstera
+  Division and Moss Pole Guide" / "Planting in Semi-Hydroponics With Pon" —
+  in the `.topband__oneliner` slot (these slots are NOT blank). Unselected
+  cards dim + italic (§10's grammar); the selected card wears the career
+  glow mechanism with `--frame` as the token. The header is
+  `role="radiogroup"` (`aria-label="Choose a page"`); the page's one `h1`
+  ("Plants & Rocks") is visually hidden.
+- **Body (dual-page reader, BLANK):** selection swaps between two bare empty
+  reader containers (one per radio) driven by `:has`. Each is an empty bare
+  container — no styled content, no placeholder images, no text, no
+  chevrons, no split furniture; the spec asks for no split here, the reader
+  region is just reserved pending the PDF pass. Nothing renders in the body.
+- **Footer (two sections):** the `.parking-lot` grammar — water gradient
+  over `--deep`, 1px `--frame`-mix top rule, career.html's exact
+  linear-gradient construction with the idea-green water tokens — split
+  **two** ways with **one** divider bar of 3/4 of the section's inner
+  length, vertically centred. Left section: reserved, renders nothing
+  (comment only, measures zero) — permanently empty. Right section: the
+  **Download** `.cta` — career's `.cta` grammar re-tokened to the green
+  palette (`background: var(--card); color: var(--ink-light); box-shadow:
+  var(--elevation), 0 0 6px 0 var(--frame)`; `--elevation` and `--ease` are
+  career's values verbatim) — rendered but **DISABLED**
+  (`aria-disabled="true"`, `disabled`, no handler, opacity 0.55, and the
+  hover/active bloom gated off by `:not([disabled])`).
+
+At ≤743px the band stacks to one column and the lot stacks (career.html's
+media pattern); transitions collapse under `prefers-reduced-motion: reduce`.
+
+### §11.3 Blank slots
+
+The PDF pass and everything it brings — the reader implementation inside
+each reader container, the Download target (which PDF the button serves, per
+selected page) — awaits the owner's fill passes; until then the body renders
+nothing and the button cannot work. The footer's left section is
+**permanently empty** by spec (not a pending fill). The slot structure lives
+in the markup as non-rendering `SLOT` comments so a targeted fill lands in
+place; the page invents no copy.
+
+**Pinned by:** `test/plantsandrocks.js` — selector mechanics, the `--frame`
+glow, the blank body, the two-section lot, the disabled Download, the
+literal idea-green tokens, and the single-file law.

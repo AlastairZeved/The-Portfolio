@@ -142,6 +142,32 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     lum(tokens.card) > lum(tokens.deep) && lum(tokens.card) / lum(tokens.deep) < 4 &&
     lum(tokens.glow) < lum(tokens.frame));
 
+  // ≤743px: the shown employer stacks — halves full-width, the rule
+  // horizontal (the mobile split law; the wrapper-less grid is the trap)
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(200);
+  ok('at 390px the shown employer stacks: full-width halves, horizontal rule, no overflow',
+    await page.evaluate(() => {
+      const shown = [...document.querySelectorAll('section.employer')]
+        .find(s => s.getBoundingClientRect().height > 0);
+      const half = shown.querySelector('.split__gallery').getBoundingClientRect();
+      const rule = shown.querySelector('.split__rule').getBoundingClientRect();
+      const overflow = document.documentElement.scrollWidth > document.documentElement.clientWidth;
+      return half.width > 300 && rule.height <= 2 && rule.width < half.width && !overflow;
+    }));
+  // a11y: the selector is a named radio group; one off-canvas h1, equal wordmarks
+  await page.setViewportSize({ width: 1440, height: 900 });
+  ok('the selector is a named radio group and headings do not encode selection',
+    await page.evaluate(() =>
+      document.querySelector('[role="radiogroup"]')?.getAttribute('aria-label') === 'Choose an employer' &&
+      document.querySelectorAll('h1').length === 1 &&
+      document.querySelector('h1').classList.contains('visually-hidden') &&
+      document.querySelectorAll('h2.topband__wordmark').length === 3));
+  ok('transitions collapse under prefers-reduced-motion', await page.evaluate(() => {
+    const sheet = [...document.styleSheets].find(s => s.ownerNode && !s.href);
+    return [...sheet.cssRules].some(r => r.media && r.media.mediaText.includes('prefers-reduced-motion'));
+  }));
+
   await browser.close();
   console.log(failures === 0 ? '\nAll career checks passed.' : `\n${failures} failure(s).`);
   process.exit(failures === 0 ? 0 : 1);

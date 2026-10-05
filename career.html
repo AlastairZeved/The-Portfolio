@@ -39,6 +39,13 @@
 
 html, body { min-height: 100dvh; }
 
+/* The page's one h1, off-canvas: the visible headings are the three selector
+   wordmarks, all the same level, none of them encoding selection state. */
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
 body {
   margin: 0;
   display: flex;
@@ -292,22 +299,37 @@ body:has(#employer-brinker:checked) .employer--brinker {
   .topband { grid-template-columns: 1fr; row-gap: 0.75rem; padding: 0.8rem 16px 0.9rem; }
   .topband__card { margin-bottom: 0; }
   .topband__oneliner { font-size: 0.8rem; }
-  .split { display: flex; flex-direction: column; gap: 0.75rem; }
+  /* The mobile stack targets the shown employer itself — the split grid lives
+     on .employer, not on a .split wrapper (the landing reference has no such
+     wrapper), so the :has selectors keep the specificity race won. */
+  body:has(#employer-pnc-bank:checked) .employer--pnc-bank,
+  body:has(#employer-pnc-private:checked) .employer--pnc-private,
+  body:has(#employer-brinker:checked) .employer--brinker {
+    display: flex; flex-direction: column; align-items: stretch; gap: 0.75rem;
+  }
   .split__rule { width: 33.333%; height: 1px; }
   .parking-lot { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .parking-lot__divider { width: auto; align-self: flex-start; }
   .parking-lot__divider::before { width: 75%; height: 1px; }
 }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
 </style>
 </head>
 <body>
+<h1 class="visually-hidden">Career</h1>
 
-<header class="topband">
+<header class="topband" role="radiogroup" aria-label="Choose an employer">
   <!-- Selector card 1 of 3: PNC Bank (default selection) -->
   <div class="topband__card">
     <input class="topband__tab" type="radio" name="employer"
            id="employer-pnc-bank" checked aria-label="PNC Bank">
-    <h1 class="topband__wordmark">PNC Bank</h1>
+    <h2 class="topband__wordmark">PNC Bank</h2>
     <!-- SLOT (blank #1): employment dates/years — owner fills in -->
     <p class="topband__oneliner"></p>
     <label class="topband__card-hit" for="employer-pnc-bank" aria-label="Select PNC Bank"></label>
@@ -406,13 +428,13 @@ body:has(#employer-brinker:checked) .employer--brinker {
 
 <footer class="parking-lot">
   <div class="parking-lot__facts">
-    <!-- SLOT (blank #7): professional blurb — owner fills in -->
-    <p></p>
+    <!-- SLOT (blank #7): professional blurb — owner fills in; per B47 the
+         block ships as this comment only until content exists. -->
   </div>
   <div class="parking-lot__divider" aria-hidden="true"></div>
   <div class="parking-lot__facts parking-lot__facts--contact">
-    <!-- SLOT (blank #8): contact info — owner fills in -->
-    <p></p>
+    <!-- SLOT (blank #8): contact info — owner fills in; per B47 the block
+         ships as this comment only until content exists. -->
   </div>
   <div class="parking-lot__divider" aria-hidden="true"></div>
   <div class="parking-lot__links">

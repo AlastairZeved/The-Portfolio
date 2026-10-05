@@ -594,10 +594,16 @@ one rung below frame — are the law.
   rule (`margin-bottom: -14px`). Unselected cards are dim + italic
   (§4's unselected grammar); the selected card wears the B132 glow verbatim:
   `border-color: var(--glow-sand); box-shadow: 0 0 8px 0 var(--glow-sand);`
-  and no other state. Default selection: PNC Bank.
+  and no other state. Default selection: PNC Bank. The header is the
+  selector's `role="radiogroup"` (`aria-label="Choose an employer"`); the
+  page's one `h1` ("Career") is visually hidden so no wordmark encodes
+  selection state in the heading outline.
 - **Body (per-employer detail):** the shown employer is the split grid —
   `1fr 1px 1fr` with a 2rem gutter, the ruled bar `--frame` at 33.333% of a
   definite row track, the landing page's `.split`/`.split__rule` verbatim.
+  At ≤743px the shown employer stacks (`flex-direction: column`), the rule
+  running horizontal at 33.333% width. Transitions collapse under
+  `prefers-reduced-motion: reduce`.
   Left half: role heading box (2px `--frame` border) only — "Blurb about
   role" and "Notes about role & responsibilities" render only once the owner
   fills them. Right half: "Accomplishments" and "Learnings/Skills" (section

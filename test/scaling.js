@@ -16,6 +16,7 @@ const REF_W = 2560 / Z, REF_H = 1440 / Z;
 const VIEWPORTS = [
   [1080, 600], [1280, 700], [1366, 768], [1440, 750], [1600, 850],
   [1920, 1080], [1920, 700], [1920, 640], [2560, 1000], [2560, 620],
+  [800, 800], [640, 640], [1080, 1080],   // square-ish landscape: B46's width floor binds here (issue #128 edge-probe finding)
   [768, 900], [390, 844],
 ];
 
@@ -34,7 +35,7 @@ function ok(label, cond) {
     await page.goto(URL, { waitUntil: 'networkidle' });
     await page.waitForTimeout(250);
 
-    const r = await page.evaluate(({ REF_W, REF_H }) => {
+    const r = await page.evaluate(async ({ REF_W, REF_H }) => {
       const board = document.getElementById('board');
       const br = board.getBoundingClientRect();
       const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
@@ -78,29 +79,91 @@ function ok(label, cond) {
           }
         }
       }
-      // authored size × rs (uniform scale, no reflow)
-      const firstCard = document.querySelector('.door-card');
-      const aw = parseFloat(firstCard.style.width), ah = parseFloat(firstCard.style.height);
-      const fb = firstCard.getBoundingClientRect();
+      // B45 (issue #126): cards are content-sized — physical box = the unscaled
+      // layout box × the card's own scale × rs (uniform, no reflow), floored at
+      // TheBoards' NOTE_MIN_W 132 logical px (× the card's scale, × rs).
+      const dims = [...document.querySelectorAll('.door-card')].map(c => {
+        const s = parseFloat(c.style.getPropertyValue('--card-scale')) || 1;
+        const b = c.getBoundingClientRect();
+        return { id: c.getAttribute('data-id'), s, rs,
+                 devW: Math.abs(b.width - c.offsetWidth * s * rs),
+                 devH: Math.abs(b.height - c.offsetHeight * s * rs),
+                 logicalW: c.offsetWidth * s };
+      });
+      // issue #128 (B46): the band, the title card and the Parking Lot size by
+      // TheBoards' own laws — band literals RESCALED ×1.10455 (k = 1104.55/1000,
+      // TheBoards' 1000-tall frame mapped into the drawing's 1104.55-tall space),
+      // re-derived here from the same measurements the page's bandRuleY/lotH use.
+      const k = 1104.55 / 1000;
+      const bandRuleY = () => {
+        let lines = 2;
+        for (const n of document.querySelectorAll('.band-zone .anchor'))
+          lines = Math.max(lines, Math.round(n.scrollHeight / (19.5 * k)));
+        return Math.round(14 * k + lines * 19.5 * k + 8 * k);
+      };
+      const ruleY = parseFloat(getComputedStyle(board).getPropertyValue('--rule-y'));
+      const bandTop = getComputedStyle(document.getElementById('band-fill')).getPropertyValue('--band-top');
+      const card = document.getElementById('anchor-title');
+      const cardMinH = parseFloat(getComputedStyle(card).minHeight);   // logical px: the var space is unscaled
+      const cardPad = getComputedStyle(card).padding;
+      const lotH = () => {
+        const items = document.getElementById('lot-items');
+        let sum = 0;
+        for (const n of items.querySelectorAll(':scope > *')) sum += n.offsetHeight;
+        // the rescaled two-row shelf 122 × k = 134.76 floors the lot (B46);
+        // the 34px LOT_HEAD chrome is unscaled; cap half the logical sheet.
+        return Math.min(Math.max(122 * k, 34 + Math.round(sum)),
+                        Math.ceil(board.offsetHeight * 0.5));
+      };
+      const lotHval = parseFloat(getComputedStyle(board).getPropertyValue('--lot-h'));
+      const lotItemsClip = getComputedStyle(document.getElementById('lot-items')).overflow;
+      const lwMin = Math.max(...[...document.querySelectorAll('.door-card')].map(c => {
+        const left = parseFloat(c.style.left) || 0;
+        if (left >= 100) return 0;
+        const cr = c.getBoundingClientRect();
+        let rightLogical = cr.width / rs;
+        for (const child of c.querySelectorAll('*')) {
+          const over = (child.getBoundingClientRect().right - cr.left) / rs;
+          if (over > rightLogical) rightLogical = over;
+        }
+        return rightLogical / (1 - left / 100);
+      }));
       return {
-        rs, boardRect: [br.left, br.top, br.width, br.height],
+        rs, lwMin, boardRect: [br.left, br.top, br.width, br.height],
         vw: innerWidth, vh: innerHeight,
         scrollW: document.documentElement.scrollWidth, scrollH: document.documentElement.scrollHeight,
         overlaps, obscured: obscured,
         lineMaxDev: Math.max(...lines.map(l => l.d)),
-        sizeDev: Math.max(Math.abs(fb.width - aw * rs), Math.abs(fb.height - ah * rs)),
+        dims,
+        band: { expectedRuleY: bandRuleY(), ruleY, bandTop, cardMinH, cardPad, lotH: lotH(), lotHval, lotItemsClip,
+                cardBottomLogical: (card.getBoundingClientRect().bottom - br.top) / rs }
       };
     }, { REF_W, REF_H });
 
     ok(`${tag}: the sheet fills the viewport edge to edge, no overflow`,
       r.boardRect[2] + 0.5 >= r.vw && r.boardRect[3] + 0.5 >= r.vh &&
       r.scrollW <= r.vw + 1 && r.scrollH <= r.vh + 1);
-    ok(`${tag}: the scale is min(vw/REF_W, vh/REF_H) — one scale, down and up`,
-      Math.abs(r.rs - Math.min(r.vw / REF_W, r.vh / REF_H)) < 1e-6);
+    ok(`${tag}: the scale is height-anchored on landscape (rs = min(vh/REF_H, vw/lw_min)), min() in portrait (B46, issue #128)`,
+      Math.abs(r.rs - (r.vw >= r.vh ? Math.min(r.vh / REF_H, r.vw / r.lwMin)
+                                    : Math.min(r.vw / REF_W, r.vh / REF_H))) < 1e-6);
     ok(`${tag}: no overlapping note cards`, r.overlaps.length === 0);
     ok(`${tag}: no link line obscured behind a card`, r.obscured.length === 0);
     ok(`${tag}: every link endpoint on its card centre (≤0.6 logical px)`, r.lineMaxDev < 0.6);
-    ok(`${tag}: cards render at authored size × scale (uniform, no reflow)`, r.sizeDev < 1);
+    ok(`${tag}: cards render content-sized × own scale × rs (uniform, no reflow)`,
+      r.dims.every(d => d.devW < 1 && d.devH < 1));
+    ok(`${tag}: every card floored at NOTE_MIN_W 132 logical px (× own scale)`,
+      r.dims.every(d => d.logicalW >= 132 * d.s - 0.5));
+    // issue #128 (B46): the band / title card / lot follow TheBoards' laws
+    ok(`${tag}: band rule-y = 15.46 + max(2, lines) × 21.54 + 8.84 (TheBoards B47/B76 × 1.10455)`,
+      Math.abs(r.band.ruleY - r.band.expectedRuleY) < 0.5, JSON.stringify(r.band));
+    ok(`${tag}: band-top is 15.46 = 14 × 1.10455 (TheBoards state.js × k)`, r.band.bandTop.trim() === '15.46px');
+    ok(`${tag}: title card min-height = rule-y + 29 (B31 STANDS — B46, owner ruling 3)`,
+      Math.abs(r.band.cardMinH - (r.band.ruleY + 29)) < 0.5);
+    ok(`${tag}: title card box = B31's (band-top+8) 16px 16px padding, occluding the rule`,
+      r.band.cardPad === `${23.46.toFixed(2)}px 16px 16px` && r.band.cardBottomLogical >= r.band.ruleY + 28);
+    ok(`${tag}: lot-h = min(max(134.76 shelf, 34 + Σ rows), ⌈half the sheet⌉) (TheBoards B73 × k)`,
+      Math.abs(r.band.lotHval - r.band.lotH) < 0.5, `lot-h ${r.band.lotHval} vs expected ${r.band.lotH}`);
+    ok(`${tag}: #lot-items clips past the lot ceiling`, r.band.lotItemsClip === 'hidden');
   }
   await browser.close();
   console.log(`\nSCALING PASS=${pass} FAIL=${fail}`);

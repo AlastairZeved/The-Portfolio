@@ -34,7 +34,7 @@ function ok(label, cond) {
     await page.goto(URL, { waitUntil: 'networkidle' });
     await page.waitForTimeout(250);
 
-    const r = await page.evaluate(({ REF_W, REF_H }) => {
+    const r = await page.evaluate(async ({ REF_W, REF_H }) => {
       const board = document.getElementById('board');
       const br = board.getBoundingClientRect();
       const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
@@ -78,17 +78,24 @@ function ok(label, cond) {
           }
         }
       }
-      // authored size × rs (uniform scale, no reflow)
-      const firstCard = document.querySelector('.door-card');
-      const aw = parseFloat(firstCard.style.width), ah = parseFloat(firstCard.style.height);
-      const fb = firstCard.getBoundingClientRect();
+      // B45 (issue #126): cards are content-sized — physical box = the unscaled
+      // layout box × the card's own scale × rs (uniform, no reflow), floored at
+      // TheBoards' NOTE_MIN_W 132 logical px (× the card's scale, × rs).
+      const dims = [...document.querySelectorAll('.door-card')].map(c => {
+        const s = parseFloat(c.style.getPropertyValue('--card-scale')) || 1;
+        const b = c.getBoundingClientRect();
+        return { id: c.getAttribute('data-id'), s, rs,
+                 devW: Math.abs(b.width - c.offsetWidth * s * rs),
+                 devH: Math.abs(b.height - c.offsetHeight * s * rs),
+                 logicalW: c.offsetWidth * s };
+      });
       return {
         rs, boardRect: [br.left, br.top, br.width, br.height],
         vw: innerWidth, vh: innerHeight,
         scrollW: document.documentElement.scrollWidth, scrollH: document.documentElement.scrollHeight,
         overlaps, obscured: obscured,
         lineMaxDev: Math.max(...lines.map(l => l.d)),
-        sizeDev: Math.max(Math.abs(fb.width - aw * rs), Math.abs(fb.height - ah * rs)),
+        dims
       };
     }, { REF_W, REF_H });
 
@@ -100,7 +107,10 @@ function ok(label, cond) {
     ok(`${tag}: no overlapping note cards`, r.overlaps.length === 0);
     ok(`${tag}: no link line obscured behind a card`, r.obscured.length === 0);
     ok(`${tag}: every link endpoint on its card centre (≤0.6 logical px)`, r.lineMaxDev < 0.6);
-    ok(`${tag}: cards render at authored size × scale (uniform, no reflow)`, r.sizeDev < 1);
+    ok(`${tag}: cards render content-sized × own scale × rs (uniform, no reflow)`,
+      r.dims.every(d => d.devW < 1 && d.devH < 1));
+    ok(`${tag}: every card floored at NOTE_MIN_W 132 logical px (× own scale)`,
+      r.dims.every(d => d.logicalW >= 132 * d.s - 0.5));
   }
   await browser.close();
   console.log(`\nSCALING PASS=${pass} FAIL=${fail}`);

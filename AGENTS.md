@@ -62,6 +62,7 @@ npm install playwright        # onto NODE_PATH; not committed, no package.json
 node test/tokens.js           # design contract: UIUX §2 recomputed from shipped hexes (no browser)
 node test/mobile.js           # touch + band/lot geometry + card states at mobile widths
 node test/desktop.js          # desktop grammar: full-viewport sheet, no rail, card link semantics, PDF-free (no export here)
+node test/career.js           # the career page (issue #133/B47): employer selector, glow, split, three-section lot
 node test/scaling.js          # issue #121/B44: the board scales to ANY viewport — no overlaps, no obscured links (B44's own suite); since B46 also pins the band/title-card/lot laws
 node test/parity_boards.js    # issue #128/B46: rendered side-by-side against a local TheBoards checkout (BOARDS_DIR) — band, title card and lot size by the same convention
 ```

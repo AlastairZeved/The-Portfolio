@@ -90,13 +90,15 @@ function ok(label, cond) {
                  logicalW: c.offsetWidth * s };
       });
       // issue #128 (B46): the band, the title card and the Parking Lot size by
-      // TheBoards' own laws, re-derived here from the same measurements the
-      // page's bandRuleY/lotH use.
+      // TheBoards' own laws — band literals RESCALED ×1.10455 (k = 1104.55/1000,
+      // TheBoards' 1000-tall frame mapped into the drawing's 1104.55-tall space),
+      // re-derived here from the same measurements the page's bandRuleY/lotH use.
+      const k = 1104.55 / 1000;
       const bandRuleY = () => {
         let lines = 2;
         for (const n of document.querySelectorAll('.band-zone .anchor'))
-          lines = Math.max(lines, Math.round(n.scrollHeight / 19.5));
-        return Math.round(14 + lines * 19.5 + 8);
+          lines = Math.max(lines, Math.round(n.scrollHeight / (19.5 * k)));
+        return Math.round(14 * k + lines * 19.5 * k + 8 * k);
       };
       const ruleY = parseFloat(getComputedStyle(board).getPropertyValue('--rule-y'));
       const bandTop = getComputedStyle(document.getElementById('band-fill')).getPropertyValue('--band-top');
@@ -107,8 +109,10 @@ function ok(label, cond) {
         const items = document.getElementById('lot-items');
         let sum = 0;
         for (const n of items.querySelectorAll(':scope > *')) sum += n.offsetHeight;
-        return Math.min(34 + Math.max(88, Math.round(sum)),
-                        Math.round(board.offsetHeight * 0.5));
+        // the rescaled two-row shelf 122 × k = 134.76 floors the lot (B46);
+        // the 34px LOT_HEAD chrome is unscaled; cap half the logical sheet.
+        return Math.min(Math.max(122 * k, 34 + Math.round(sum)),
+                        Math.ceil(board.offsetHeight * 0.5));
       };
       const lotHval = parseFloat(getComputedStyle(board).getPropertyValue('--lot-h'));
       const lotItemsClip = getComputedStyle(document.getElementById('lot-items')).overflow;
@@ -127,8 +131,8 @@ function ok(label, cond) {
     ok(`${tag}: the sheet fills the viewport edge to edge, no overflow`,
       r.boardRect[2] + 0.5 >= r.vw && r.boardRect[3] + 0.5 >= r.vh &&
       r.scrollW <= r.vw + 1 && r.scrollH <= r.vh + 1);
-    ok(`${tag}: the scale is min(vw/REF_W, vh/REF_H) — one scale, down and up`,
-      Math.abs(r.rs - Math.min(r.vw / REF_W, r.vh / REF_H)) < 1e-6);
+    ok(`${tag}: the scale is height-anchored on landscape (rs = vh/REF_H), min() in portrait (B46, issue #128)`,
+      Math.abs(r.rs - (r.vw >= r.vh ? r.vh / REF_H : Math.min(r.vw / REF_W, r.vh / REF_H))) < 1e-6);
     ok(`${tag}: no overlapping note cards`, r.overlaps.length === 0);
     ok(`${tag}: no link line obscured behind a card`, r.obscured.length === 0);
     ok(`${tag}: every link endpoint on its card centre (≤0.6 logical px)`, r.lineMaxDev < 0.6);
@@ -137,14 +141,14 @@ function ok(label, cond) {
     ok(`${tag}: every card floored at NOTE_MIN_W 132 logical px (× own scale)`,
       r.dims.every(d => d.logicalW >= 132 * d.s - 0.5));
     // issue #128 (B46): the band / title card / lot follow TheBoards' laws
-    ok(`${tag}: band rule-y = 14 + max(2, lines) × 19.5 + 8 (TheBoards B47/B76)`,
+    ok(`${tag}: band rule-y = 15.46 + max(2, lines) × 21.54 + 8.84 (TheBoards B47/B76 × 1.10455)`,
       Math.abs(r.band.ruleY - r.band.expectedRuleY) < 0.5, JSON.stringify(r.band));
-    ok(`${tag}: band-top is 14 (TheBoards state.js)`, r.band.bandTop.trim() === '14px');
-    ok(`${tag}: title card min-height = rule-y + 22 (overhang, TheBoards B38)`,
-      Math.abs(r.band.cardMinH - (r.band.ruleY + 22)) < 0.5);
-    ok(`${tag}: title card box = TheBoards' (band-top+6) 12 12 padding, occluding the rule`,
-      r.band.cardPad === '20px 12px 12px' && r.band.cardBottomLogical >= r.band.ruleY + 21);
-    ok(`${tag}: lot-h = min(34 + max(88, Σ rows), half the sheet) (TheBoards B73)`,
+    ok(`${tag}: band-top is 15.46 = 14 × 1.10455 (TheBoards state.js × k)`, r.band.bandTop.trim() === '15.46px');
+    ok(`${tag}: title card min-height = rule-y + 29 (B31 STANDS — B46, owner ruling 3)`,
+      Math.abs(r.band.cardMinH - (r.band.ruleY + 29)) < 0.5);
+    ok(`${tag}: title card box = B31's (band-top+8) 16px 16px padding, occluding the rule`,
+      r.band.cardPad === `${23.46.toFixed(2)}px 16px 16px` && r.band.cardBottomLogical >= r.band.ruleY + 28);
+    ok(`${tag}: lot-h = min(max(134.76 shelf, 34 + Σ rows), ⌈half the sheet⌉) (TheBoards B73 × k)`,
       Math.abs(r.band.lotHval - r.band.lotH) < 0.5, `lot-h ${r.band.lotHval} vs expected ${r.band.lotH}`);
     ok(`${tag}: #lot-items clips past the lot ceiling`, r.band.lotItemsClip === 'hidden');
   }

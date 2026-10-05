@@ -1956,3 +1956,56 @@ be sized was already declared in github repo AlastairZeved/TheBoards. The
 \"Components\", \"requirements\" and title card should match it for
 consistency and cohesion." (issue title: "The header and title card are still
 too small vertically.")
+
+### B47. razgregory.com/career is the employer-selector career page on a sand/brown binding of TheBoards' ladder (issue #133)
+
+The owner logged the hand-drawn wireframe spec in issue #133: the career page
+presents Robert Gregory's banking career as an **employer selector** — three
+title cards in the landing page's top-band grammar (**PNC Bank**, **PNC
+Private Bank**, **Brinker Capital**, left→right chronological), each hanging
+over the header line exactly as the landing page's title card does; selecting
+a card swaps the body to that employer (a selector, not a carousel), the
+default state being **PNC Bank**. The selected card wears the B132 glow
+verbatim — `border-color: <glow token>; box-shadow: 0 0 8px 0 <glow token>` —
+one glow token, a soft bloom, no other states.
+
+The body reuses the landing page's `.split` with `.split__rule`: the left half
+holds the employer's role heading box, a "Blurb about role" block (one
+paragraph per role held) and a "Notes about role & responsibilities" block;
+the right half holds "Accomplishments" and "Learnings/Skills". The footer is
+the landing page's `.parking-lot` grammar split into **three** sections —
+professional blurb, contact info, and a `.cta` button "Learn More about Rob"
+linking back to razgregory.com — separated by divider bars of **3/4 section
+length**.
+
+The palette is **TheBoards' token ladder re-hued to sand + deep brown**: the
+ladder's structure, luminance relationships and role assignments are
+preserved (`--deep` near-black canvas, `--card` one step above, `--frame` the
+lifted rule hue, `--note` the brightest ink on the deep, the same
+three-stop water mix), and the glow sits **one rung below its base** per the
+B132 rung rule. The page stays a static single file with all CSS inline and
+**no script** — the selector is a three-way radio group driven by CSS
+`:has`, exactly the landing reference's own mechanism. Nine content slots
+(dates, role titles, blurbs, notes, accomplishments, learnings, footer
+blurb, contact info, final palette hexes) ship **empty-but-slotted** for the
+owner's targeted fill passes; no placeholder copy is invented.
+
+This entry transcribes the owner's issue #133 spec; it does not supersede
+B1 — the career page is a sub-page of the hub wearing its own ruled binding,
+as the spec directs.
+
+**Source:** the owner's spec, issue
+[#133](https://github.com/AlastairZeved/The-Portfolio/issues/133) — quoted
+verbatim: "The page presents Robert Gregory's banking career as an employer
+selector with a per-employer detail body."; "selecting a title card switches
+the body content below to that employer (wireframe shows PNC Bank selected).
+There is no scrolling carousel — it's a selector."; "the selected card gets a
+soft bloom exactly like TheBoards' card glow (B132 mechanism):
+`border-color: <glow token>; box-shadow: 0 0 8px 0 <glow token>;` — one glow
+token, soft bloom, no other states."; "Use TheBoards' default blue palette
+(`styles.css` root tokens) **as the structural template** — same token
+ladder, same luminance steps, same role assignments — re-hued to a **sand /
+deep-brown** scheme"; "glow one rung below its base"; "Structural build
+(layout, selection mechanics, glow, split, footer) can proceed against
+placeholders; text slots ship empty-but-slotted rather than with invented
+copy."

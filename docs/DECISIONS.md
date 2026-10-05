@@ -1987,8 +1987,10 @@ B132 rung rule. The page stays a static single file with all CSS inline and
 **no script** — the selector is a three-way radio group driven by CSS
 `:has`, exactly the landing reference's own mechanism. Nine content slots
 (dates, role titles, blurbs, notes, accomplishments, learnings, footer
-blurb, contact info, final palette hexes) ship **empty-but-slotted** for the
-owner's targeted fill passes; no placeholder copy is invented.
+blurb, contact info, final palette hexes) await the owner's targeted fill
+passes; **per the owner's ruling of 2026-10-05, empty blocks are omitted
+from the rendered page entirely until content exists** — no empty styled
+container, no section heading, no invented placeholder copy.
 
 This entry transcribes the owner's issue #133 spec; it does not supersede
 B1 — the career page is a sub-page of the hub wearing its own ruled binding,
@@ -2008,4 +2010,7 @@ ladder, same luminance steps, same role assignments — re-hued to a **sand /
 deep-brown** scheme"; "glow one rung below its base"; "Structural build
 (layout, selection mechanics, glow, split, footer) can proceed against
 placeholders; text slots ship empty-but-slotted rather than with invented
-copy."
+copy."; and the owner's ruling of 2026-10-05 on how those slots render,
+quoted verbatim: "Omit empty blocks entirely until content exists" (owner
+interview, 2026-10-05 — no filler text, no empty styled containers, no
+"coming soon" markers; slot structure lives in the markup only).

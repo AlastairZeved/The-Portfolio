@@ -77,23 +77,29 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     return shadows[1].includes('rgb(125, 99, 64)') && !shadows[0].includes('rgb(125, 99, 64)');
   }));
 
-  // Each employer body has the full slot structure, empty but slotted
-  const slots = await page.evaluate(() => {
-    const sections = document.querySelectorAll('section.employer');
-    return Array.from(sections).map(s => ({
-      role: !!s.querySelector('.role-heading'),
-      blurb: !!s.querySelector('.blurb h3'),
-      notes: !!s.querySelector('.role-notes h3'),
-      accomplishments: !!s.querySelector('.accomplishments h3'),
-      learnings: !!s.querySelector('.learnings h3'),
-      empty: [...s.querySelectorAll('.blurb, .role-notes, .accomplishments, .learnings')]
-        .every(b => !b.querySelector('p, li') &&
-          b.innerText.trim() === b.querySelector('h3').innerText.trim()),
+  // Blank slots are OMITTED from the rendered page entirely (B47, owner
+  // ruling 2026-10-05) — no empty styled block, no section heading, no filler
+  const slotText = ['Blurb about role', 'Notes about role & responsibilities',
+    'Accomplishments', 'Learnings/Skills'];
+  ok('no blank-slot block or heading renders for any employer (B47: empty blocks omitted entirely)',
+    await page.evaluate(texts => {
+      const visible = el => el && el.getBoundingClientRect().height > 0;
+      const els = [...document.querySelectorAll('.blurb, .role-notes, .accomplishments, .learnings')];
+      if (els.some(visible)) return false;
+      const body = document.body.innerText;
+      return !texts.some(t => body.includes(t));
+    }, slotText));
+  ok('no invented copy anywhere: role headings are the employer name (PNC Bank uses the spec\'s provisional example), no dates render',
+    await page.evaluate(() => {
+      const heads = [...document.querySelectorAll('.role-heading')].map(h => h.innerText.trim());
+      const years = /\b(19|20)\d{2}\b/.test(document.body.innerText);
+      return JSON.stringify(heads) === JSON.stringify([
+        'PNC — Branch Service Associate', 'PNC Private Bank', 'Brinker Capital']) && !years;
     }));
-  });
-  ok('every employer body has all five slots (heading, blurb, notes, accomplishments, learnings)',
-    slots.every(s => s.role && s.blurb && s.notes && s.accomplishments && s.learnings));
-  ok('blank slots ship empty — no invented copy (issue #133 §5)', slots.every(s => s.empty));
+  ok('each employer body still carries its role heading and slot comments for the owner\'s fill passes',
+    await page.evaluate(() =>
+      [...document.querySelectorAll('section.employer')].every(s =>
+        !!s.querySelector('.role-heading') && s.innerHTML.includes('SLOT (blank #'))));
 
   // §3: the footer is the parking-lot grammar, three sections, two dividers
   ok('footer has three content sections',

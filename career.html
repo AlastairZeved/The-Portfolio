@@ -188,7 +188,6 @@ body:has(#employer-brinker:checked) .employer--brinker {
   font-weight: 600;
   line-height: 1.3;
 }
-.role-heading .role-dates { font-weight: 400; font-size: 0.85rem; color: var(--note); }
 
 .blurb, .role-notes, .accomplishments, .learnings { margin: 0 0 1.25rem; }
 .blurb p, .role-notes p, .accomplishments p, .learnings p { margin: 0 0 0.6em; }
@@ -339,60 +338,66 @@ body:has(#employer-brinker:checked) .employer--brinker {
     <!-- PNC Bank detail (default) -->
     <section class="employer employer--pnc-bank" aria-labelledby="role-pnc-bank">
       <div class="split__gallery">
-        <!-- SLOT (blank #2): exact role title — owner finalizes (BSSR/BSSA wording undecided) -->
-        <h2 class="role-heading" id="role-pnc-bank">PNC — Branch Service Associate
-          <span class="role-dates"></span></h2>
-        <!-- SLOT (blank #3): role blurb(s), one per role held — owner fills in -->
-        <div class="blurb"><h3>Blurb about role</h3></div>
-        <!-- SLOT (blank #4): notes about role &amp; responsibilities — owner fills in -->
-        <div class="role-notes"><h3>Notes about role &amp; responsibilities</h3></div>
+        <!-- SLOT (blank #2): exact role title — owner finalizes (BSSR/BSSA wording
+             undecided); the heading below is the spec's own provisional example
+             (spec §5.2). SLOT (blank #1): employment dates — owner fills in;
+             no .role-dates span renders until then. -->
+        <h2 class="role-heading" id="role-pnc-bank">PNC — Branch Service Associate</h2>
+        <!-- SLOT (blank #3): role blurb(s), one per role held — owner fills in.
+             SLOT (blank #4): notes about role &amp; responsibilities — owner fills in.
+             Per B47 (owner ruling): empty blocks are OMITTED from the rendered
+             page entirely until owner content exists. -->
       </div>
       <div class="split__rule" aria-hidden="true"></div>
       <div class="split__copy">
-        <!-- SLOT (blank #5): accomplishments — owner fills in -->
-        <div class="accomplishments"><h3>Accomplishments</h3></div>
-        <!-- SLOT (blank #6): learnings/skills — owner fills in; section name pending ("Learnings/Skills?") -->
-        <div class="learnings"><h3>Learnings/Skills</h3></div>
+        <!-- SLOT (blank #5): accomplishments — owner fills in.
+             SLOT (blank #6): learnings/skills — owner fills in; section name
+             pending ("Learnings/Skills?"). Per B47 (owner ruling): empty blocks
+             are OMITTED from the rendered page entirely until owner content
+             exists — these blocks appear here (styled by the existing
+             .accomplishments/.learnings rules) only when filled. -->
       </div>
     </section>
 
     <!-- PNC Private Bank detail -->
     <section class="employer employer--pnc-private" aria-labelledby="role-pnc-private">
       <div class="split__gallery">
-        <!-- SLOT (blank #2): exact role title — owner finalizes -->
-        <h2 class="role-heading" id="role-pnc-private">PNC Private Bank — Role title
-          <span class="role-dates"></span></h2>
-        <!-- SLOT (blank #3): role blurb(s), one per role held — owner fills in -->
-        <div class="blurb"><h3>Blurb about role</h3></div>
-        <!-- SLOT (blank #4): notes about role &amp; responsibilities — owner fills in -->
-        <div class="role-notes"><h3>Notes about role &amp; responsibilities</h3></div>
+        <!-- SLOT (blank #2): exact role title — owner finalizes; until ruled,
+             the heading is the employer name alone. SLOT (blank #1): employment
+             dates — owner fills in; no .role-dates span renders until then. -->
+        <h2 class="role-heading" id="role-pnc-private">PNC Private Bank</h2>
+        <!-- SLOT (blank #3): role blurb(s), one per role held — owner fills in.
+             SLOT (blank #4): notes about role &amp; responsibilities — owner fills in.
+             Per B47 (owner ruling): empty blocks are OMITTED from the rendered
+             page entirely until owner content exists. -->
       </div>
       <div class="split__rule" aria-hidden="true"></div>
       <div class="split__copy">
-        <!-- SLOT (blank #5): accomplishments — owner fills in -->
-        <div class="accomplishments"><h3>Accomplishments</h3></div>
-        <!-- SLOT (blank #6): learnings/skills — owner fills in -->
-        <div class="learnings"><h3>Learnings/Skills</h3></div>
+        <!-- SLOT (blank #5): accomplishments — owner fills in.
+             SLOT (blank #6): learnings/skills — owner fills in.
+             Per B47 (owner ruling): empty blocks are OMITTED from the rendered
+             page entirely until owner content exists. -->
       </div>
     </section>
 
     <!-- Brinker Capital detail -->
     <section class="employer employer--brinker" aria-labelledby="role-brinker">
       <div class="split__gallery">
-        <!-- SLOT (blank #2): exact role title — owner finalizes -->
-        <h2 class="role-heading" id="role-brinker">Brinker Capital — Role title
-          <span class="role-dates"></span></h2>
-        <!-- SLOT (blank #3): role blurb(s), one per role held — owner fills in -->
-        <div class="blurb"><h3>Blurb about role</h3></div>
-        <!-- SLOT (blank #4): notes about role &amp; responsibilities — owner fills in -->
-        <div class="role-notes"><h3>Notes about role &amp; responsibilities</h3></div>
+        <!-- SLOT (blank #2): exact role title — owner finalizes; until ruled,
+             the heading is the employer name alone. SLOT (blank #1): employment
+             dates — owner fills in; no .role-dates span renders until then. -->
+        <h2 class="role-heading" id="role-brinker">Brinker Capital</h2>
+        <!-- SLOT (blank #3): role blurb(s), one per role held — owner fills in.
+             SLOT (blank #4): notes about role &amp; responsibilities — owner fills in.
+             Per B47 (owner ruling): empty blocks are OMITTED from the rendered
+             page entirely until owner content exists. -->
       </div>
       <div class="split__rule" aria-hidden="true"></div>
       <div class="split__copy">
-        <!-- SLOT (blank #5): accomplishments — owner fills in -->
-        <div class="accomplishments"><h3>Accomplishments</h3></div>
-        <!-- SLOT (blank #6): learnings/skills — owner fills in -->
-        <div class="learnings"><h3>Learnings/Skills</h3></div>
+        <!-- SLOT (blank #5): accomplishments — owner fills in.
+             SLOT (blank #6): learnings/skills — owner fills in.
+             Per B47 (owner ruling): empty blocks are OMITTED from the rendered
+             page entirely until owner content exists. -->
       </div>
     </section>
 

@@ -537,7 +537,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | card drag + scale-based resize (B45: own scale clamped 0.5–2.0, content-sized floor NOTE_MIN_W 132), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
-| the career page (B47): employer selector, B132 glow, split body, three-section lot, sand/brown ladder, blank slots empty | `test/career.js` |
+| the career page (B47): employer selector, B132 glow, split body, three-section lot, sand/brown ladder, empty blocks omitted | `test/career.js` |
 
 ---
 
@@ -598,9 +598,10 @@ one rung below frame — are the law.
 - **Body (per-employer detail):** the shown employer is the split grid —
   `1fr 1px 1fr` with a 2rem gutter, the ruled bar `--frame` at 33.333% of a
   definite row track, the landing page's `.split`/`.split__rule` verbatim.
-  Left half: role heading box (2px `--frame` border), "Blurb about role",
-  "Notes about role & responsibilities". Right half: "Accomplishments",
-  "Learnings/Skills" (section name pending, issue #133 slot 6).
+  Left half: role heading box (2px `--frame` border) only — "Blurb about
+  role" and "Notes about role & responsibilities" render only once the owner
+  fills them. Right half: "Accomplishments" and "Learnings/Skills" (section
+  name pending, issue #133 slot 6) render only once filled.
 - **Footer (three sections):** the landing page's `.parking-lot` grammar —
   water gradient over `--deep`, 1px `--frame`-mix top rule, same padding —
   split three ways (professional blurb · contact info · the `.cta` "Learn
@@ -609,12 +610,17 @@ one rung below frame — are the law.
 
 ### §10.3 Blank slots
 
-Nine slots ship **empty but slotted** (issue #133 §5): employment dates,
-exact role titles, role blurbs, role notes, accomplishments, learnings
+Nine slots await the owner's targeted fill passes (issue #133 §5): employment
+dates, exact role titles, role blurbs, role notes, accomplishments, learnings
 (×3 employers), the footer professional blurb, the footer contact info, and
-the final palette hexes. The owner fills them in targeted passes; the
-structural build never invents copy.
+the final palette hexes. **Owner ruling (2026-10-05): empty blocks are
+omitted from the rendered page entirely until content exists** — no empty
+styled container, no section heading, no filler text, no "coming soon"
+marker. The slot structure lives in the markup as non-rendering `SLOT`
+comments (and the footer's three-section frame, whose empty `<p>` slots
+measure zero height and carry no text) so a targeted fill makes each block
+appear; until then the page invents no copy.
 
 **Pinned by:** `test/career.js` — selector mechanics, the B132 glow, the
-split, the three-section lot, the ladder tokens, and the empty-slot
+split, the three-section lot, the ladder tokens, and the omit-empty-block
 discipline.

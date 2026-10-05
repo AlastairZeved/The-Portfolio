@@ -1,0 +1,182 @@
+/* test/plantsandrocks.js — the Plants & Rocks page (issue #134, B48):
+   two-page selector over the band rule, B132 glow mechanism on the selected
+   card, body intentionally BLANK (reader region renders nothing pending the
+   PDF pass), two-section parking lot with one divider, a rendered-but-
+   disabled Download button, and the literal TheBoards idea-board green
+   palette (byte-exact, NOT a re-hue). Single file, zero script, zero <link>.
+   Black-box Playwright, career.js's harness.
+   Run: node test/plantsandrocks.js   (PORTFOLIO_URL default http://localhost:8000/plantsandrocks.html) */
+
+const { chromium } = require('playwright');
+
+const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/plantsandrocks.html';
+let failures = 0;
+const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
+
+(async () => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await page.goto(URL, { waitUntil: 'networkidle' });
+
+  // Single-file law: no scripts, no stylesheets, no deps
+  ok('no <script> elements', await page.locator('script').count() === 0);
+  ok('no external stylesheets or links', await page.locator('link').count() === 0);
+  ok('no external network requests beyond the page itself', await page.evaluate(() => performance.getEntriesByType('resource')
+    .every(r => r.name.startsWith('data:') || r.name.startsWith(location.origin))));
+
+  // §1: two title cards, one per page, over the band rule
+  const names = await page.locator('.topband__card .topband__wordmark').allInnerTexts();
+  ok('two page cards', names.length === 2);
+  ok('cards are "Plants on Poles" and "Plants in Rocks"',
+    JSON.stringify(names) === JSON.stringify(['Plants on Poles', 'Plants in Rocks']));
+
+  // The owner's oneliner copy (B48, verbatim) — these slots are NOT blank
+  const oneliners = await page.locator('.topband__card .topband__oneliner').allInnerTexts();
+  ok('the owner\'s oneliner copy renders verbatim',
+    JSON.stringify(oneliners) === JSON.stringify(
+      ['Monstera Division and Moss Pole Guide', 'Planting in Semi-Hydroponics With Pon']));
+
+  // Cards hang over the header rule
+  const hang = await page.evaluate(() => {
+    const band = document.querySelector('.topband');
+    const card = document.querySelector('.topband__card');
+    return card.getBoundingClientRect().bottom > band.getBoundingClientRect().bottom &&
+           getComputedStyle(card).marginBottom === '-14px';
+  });
+  ok('title cards hang over the header line (career\'s -14px margin)', hang);
+
+  // Default selection: Plants on Poles, wearing the glow (one token, soft bloom)
+  await page.waitForTimeout(300);   // let the 200ms box-shadow transition settle
+  const glow = await page.evaluate(() => {
+    const card = document.querySelector('.topband__card');
+    const s = getComputedStyle(card);
+    return { borderColor: s.borderColor, shadow: s.boxShadow };
+  });
+  ok('default selection is Plants on Poles',
+    await page.locator('#page-poles').isChecked());
+  ok('selected card glows: border-color + 0 0 8px 0 bloom, one token (--frame #52997f)',
+    glow.borderColor === 'rgb(82, 153, 127)' &&
+    glow.shadow === 'rgb(82, 153, 127) 0px 0px 8px 0px');
+
+  // Unselected cards carry no glow
+  const unselectedGlow = await page.evaluate(() =>
+    getComputedStyle(document.querySelectorAll('.topband__card')[1]).boxShadow);
+  ok('unselected cards carry no bloom', !unselectedGlow.includes('rgb(82, 153, 127)'));
+
+  // §2: the body is intentionally blank — the reader region renders nothing
+  ok('the body is blank: no reader container renders any content',
+    await page.evaluate(() => {
+      const reader = [...document.querySelectorAll('.reader')]
+        .find(r => r.getBoundingClientRect().height > 0);
+      if (!reader) return false;
+      return reader.innerText.trim() === '' &&
+        reader.children.length === 0 &&
+        reader.querySelector('img, h2, h3, p, span') === null;
+    }));
+
+  await page.locator('.topband__card-hit[for="page-rocks"]').click();
+  ok('selecting Plants in Rocks swaps the selection (body swaps between bare empty containers)',
+    await page.locator('#page-rocks').isChecked() &&
+    !(await page.locator('#page-poles').isChecked()));
+  await page.waitForTimeout(300);
+  ok('the glow moved to the newly selected card',
+  await page.evaluate(() => {
+    const shadows = [...document.querySelectorAll('.topband__card')]
+      .map(c => getComputedStyle(c).boxShadow);
+    return shadows[1].includes('rgb(82, 153, 127)') && !shadows[0].includes('rgb(82, 153, 127)');
+  }));
+  ok('body still renders nothing after the swap',
+    await page.evaluate(() =>
+      [...document.querySelectorAll('.reader')].every(
+        r => r.innerText.trim() === '' && r.children.length === 0)));
+
+  // §3: the footer is the parking-lot grammar, two sections, one divider
+  ok('footer has two sections and one divider bar',
+    await page.locator('.parking-lot__facts').count() === 2 &&
+    await page.locator('.parking-lot__divider').count() === 1);
+  ok('the divider is 1px wide and 3/4 of the section length', await page.evaluate(() => {
+    const d = document.querySelector('.parking-lot__divider');
+    const bar = parseFloat(getComputedStyle(d, '::before').height);
+    const lot = document.querySelector('.parking-lot').getBoundingClientRect();
+    return getComputedStyle(d, '::before').width === '1px' &&
+      Math.abs(bar - 0.75 * (lot.height - 24)) < 6;
+  }));
+  ok('the left footer section renders nothing (measures zero)',
+    await page.evaluate(() => {
+      const f = document.querySelector('.parking-lot__facts');
+      return f.innerText.trim() === '' && f.getBoundingClientRect().height === 0;
+    }));
+
+  // The Download button: rendered but DISABLED (B48, owner ruling)
+  const cta = page.locator('.parking-lot .cta');
+  ok('the Download button renders', (await cta.innerText()).trim() === 'Download' && await cta.count() === 1);
+  ok('the Download button is disabled: aria-disabled + disabled + dimmed, no handler',
+    (await cta.getAttribute('aria-disabled')) === 'true' &&
+    (await cta.getAttribute('disabled')) !== null &&
+    (await cta.getAttribute('onclick')) === null);
+  ok('the Download button is dimmed at 0.55 and cannot hover-bloom', await page.evaluate(() => {
+    const b = document.querySelector('.parking-lot .cta');
+    const s = getComputedStyle(b);
+    const sheet = [...document.styleSheets].find(sh => sh.ownerNode && !sh.href);
+    let hover = null;
+    for (const r of sheet.cssRules) {
+      const inner = r.selectorText ? [r] : [...(r.cssRules || [])];
+      hover = inner.find(x => x.selectorText && x.selectorText.includes('.cta') && x.selectorText.includes(':hover'));
+      if (hover) break;
+    }
+    return s.opacity === '0.55' && s.cursor === 'not-allowed' &&
+      hover && hover.selectorText.includes(':not([disabled])');
+  }));
+
+  // §4: the palette is the LITERAL idea-board green block (byte-exact)
+  const tokens = await page.evaluate(() => {
+    const cs = getComputedStyle(document.documentElement);
+    return {
+      deep: cs.getPropertyValue('--deep').trim(),
+      card: cs.getPropertyValue('--card').trim(),
+      waterTop: cs.getPropertyValue('--water-top').trim(),
+      waterMid: cs.getPropertyValue('--water-mid').trim(),
+      waterBot: cs.getPropertyValue('--water-bot').trim(),
+      waterBotA: cs.getPropertyValue('--water-bot-a').trim(),
+      frame: cs.getPropertyValue('--frame').trim(),
+      note: cs.getPropertyValue('--note').trim(),
+      inkLight: cs.getPropertyValue('--ink-light').trim(),
+      inkDark: cs.getPropertyValue('--ink-dark').trim(),
+    };
+  });
+  ok('the palette is the literal idea-board green block (byte-exact, not a re-hue)',
+    tokens.deep === '#000a06' && tokens.card === '#001a0e' &&
+    tokens.waterTop === '#486b49' && tokens.waterMid === '#345439' &&
+    tokens.waterBot === '#1f3825' && tokens.waterBotA === '31 56 37' &&
+    tokens.frame === '#52997f' && tokens.note === '#b9d2b2');
+  ok('the ink neutrals come from TheBoards :root verbatim',
+    tokens.inkLight === '#f4f5f1' && tokens.inkDark === '#031019');
+
+  // ≤743px: the band stacks to one column, the lot stacks
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(200);
+  ok('at 390px the band stacks to one column and the lot stacks, no overflow',
+    await page.evaluate(() => {
+      const band = getComputedStyle(document.querySelector('.topband')).gridTemplateColumns;
+      const overflow = document.documentElement.scrollWidth > document.documentElement.clientWidth;
+      return !band.includes(' ') && !overflow;
+    }));
+
+  // a11y: the selector is a named radio group; one off-canvas h1
+  await page.setViewportSize({ width: 1440, height: 900 });
+  ok('the selector is a named radio group and headings do not encode selection',
+    await page.evaluate(() =>
+      document.querySelector('[role="radiogroup"]')?.getAttribute('aria-label') === 'Choose a page' &&
+      document.querySelectorAll('h1').length === 1 &&
+      document.querySelector('h1').classList.contains('visually-hidden') &&
+      document.querySelector('h1').innerText.trim() === 'Plants & Rocks' &&
+      document.querySelectorAll('h2.topband__wordmark').length === 2));
+  ok('transitions collapse under prefers-reduced-motion', await page.evaluate(() => {
+    const sheet = [...document.styleSheets].find(s => s.ownerNode && !s.href);
+    return [...sheet.cssRules].some(r => r.media && r.media.mediaText.includes('prefers-reduced-motion'));
+  }));
+
+  await browser.close();
+  console.log(failures === 0 ? '\nAll plantsandrocks checks passed.' : `\n${failures} failure(s).`);
+  process.exit(failures === 0 ? 0 : 1);
+})();

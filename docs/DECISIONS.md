@@ -1898,31 +1898,55 @@ them larger to the minimum card size allowed."
 
 ---
 
-### B46. The header, the title card and the Parking Lot size by TheBoards' own band/lot convention (issue #128)
+### B46. The band sizes by TheBoards' convention under the height-anchored landscape scale; the Parking Lot sizes by TheBoards' measured-content law; the title-card box stands (issue #128)
 
-The band's rule, the title compartment's overhang, and the Parking Lot's
-height are TheBoards' own section mechanics, carried whole:
+The owner ruled in a structured interview of 2026-10-05 (three rulings plus a
+second-round confirmation). The ruling:
 
-- **The band sizes to its tallest zone, from a two-line floor:**
-  `rule-y = 14 + max(2, lines) × 19.5 + 8` — 61px at the floor, 81px at three
-  lines (TheBoards `geometry.js` `bandRuleY`; `state.js` `BAND_TOP/LINE/GAP`
-  = 14/19.5/8).
-- **The title compartment overhangs the band by 22px** and occludes the rule:
-  `min-height: calc(var(--rule-y) + 22px)`, box padding
-  `calc(var(--band-top) + 6px) 12px 12px` (TheBoards `styles.css`
-  `#anchor-title`). This supersedes B31's 16px horizontal card padding and the
-  +29px overhang the shipped CSS carried.
-- **The Parking Lot's height follows its measured contents from a two-row
-  floor:** `lot-h = min(34 + max(2 × 44, Σ rowHeight), ⌈0.5 × logical-h⌉)` —
-  bottom-anchored, growing upward, half-sheet ceiling with the content clipped
-  past it (TheBoards `geometry.js` `lotH`; `state.js` `LOT_HEAD/ROW/FLOOR`,
-  `LOT_MAX_FRAC`). This supersedes B18's fixed `180px` `--lot-h` as a
-  mechanism; B18's stacked Name/Email arrangement stands.
+- **The scale is height-anchored on landscape and the band literals are
+  rescaled ×1.10455** (k = 1104.55/1000 — TheBoards' 1000-tall logical frame
+  mapped into the issue #112 drawing's 1104.55-tall space). TheBoards' own
+  desktop frame law (TheBoards `geometry.js` `computeFrame`,
+  `renderScale = Math.min(vh/1000, (vw − panes)/900)`) is ported: on a
+  landscape viewport `rs = vh/REF_H`, so the band renders at a fixed fraction
+  of the viewport height at every landscape size, exactly as TheBoards renders
+  61/1000 = 6.1% of vh; portrait keeps B30's `min()` down-scale. **This
+  supersedes B44's scale-formula clause for landscape viewports only.** The
+  band literals follow TheBoards' B37/B47 chain through k: `rule-y =
+  15.46 + max(2, lines) × 21.54 + 8.84` (67.38 at the two-line floor), the
+  band label 14.36px, the band anchors 16.57px. The numbers are agent-derived
+  (per the `B33` precedent: the owner ruled the behaviour, not the digits).
+- **The Parking Lot sizes by TheBoards' B73 measured-content law:** measure
+  the rendered rows, floor at the rescaled two-row shelf (TheBoards' 122-shelf
+  × k = 134.76px, header included), cap at half the logical sheet,
+  bottom-anchored, content clipped past the ceiling. This supersedes B18's
+  fixed `180px` `--lot-h` as a mechanism (B18's arrangement stands; the
+  180px value survives only as the no-JS fallback).
+- **The title card is untouched: B31 stands** — the 20px type, the
+  `(band-top + 8px) 16px 16px` padding and the `rule-y + 29px` overhang are
+  owner law; the rescaled band grows beneath the box, and the box grows
+  around it. Nothing in B46 supersedes B31.
 
-**Source:** the owner's issue
-[#128](https://github.com/AlastairZeved/The-Portfolio/issues/128), quoted
-verbatim — "Convention for how the header and the parking lot and the title
-card should be sized was already declared in github repo AlastairZeved/TheBoards.
-The \"Components\", \"requirements\" and title card should match it for
+The convention being matched is TheBoards' `B37`/`B47`/`B54`/`B76`/`B73`
+chain (band sized by the type it holds, fixed logical units, two-line floor;
+label 13px; header tab below the rule — already shipped; lot measured from
+content from the two-row shelf, half-sheet cap).
+
+**Source:** the owner's three interview rulings of 2026-10-05 (issue #128),
+quoted verbatim —
+
+1. "Height-anchor the scale AND rescale the band literals ×1.1046 (rule-y
+   61→67.4): every landscape screen then renders the band exactly at
+   TheBoards' size (54.9px rule at 1440×900, 6.1% of viewport height) — full
+   match, and the title card/labels also match exactly."
+2. "Port TheBoards B73's law: measure the rendered form, floor at the
+   rescaled two-row shelf, cap at half the logical sheet."
+3. "Keep 20px (B31 stands); the rescaled box grows around it."
+
+— with the second-round answer confirming ruling 1. Context: the owner's
+issue [#128](https://github.com/AlastairZeved/The-Portfolio/issues/128) —
+"Convention for how the header and the parking lot and the title card should
+be sized was already declared in github repo AlastairZeved/TheBoards. The
+\"Components\", \"requirements\" and title card should match it for
 consistency and cohesion." (issue title: "The header and title card are still
 too small vertically.")

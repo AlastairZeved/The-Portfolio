@@ -193,11 +193,23 @@ Lot** (water) closing the foot.
 
 Everything is visible at once: one viewport, no internal scrolling. The one
 render scale keeps `scrollWidth <= innerWidth` at **every** width. The scale
-is **uncapped** (`B44`, issue #121): `rs = min(vw/REF_W, vh/REF_H)` over the
-issue #112 drawing's own reference space (`REF_W×REF_H` = 2560/z × 1440/z,
-z = 1.3037 ≈ 1963.64×1104.55, `B43`) — the sheet renders that drawing at
-**every** viewport size, shrinking below the reference space and growing
-above it, nothing reflows and nothing clips at either end.
+is **uncapped** (`B44`, issue #121) and **height-anchored on landscape**
+(`B46`, issue #128 — TheBoards' own desktop frame law, `geometry.js`
+`computeFrame`, ported):
+
+```
+landscape (vw >= vh):  rs = vh / REF_H
+portrait  (vw <  vh):  rs = min(vw / REF_W, vh / REF_H)   — B30's down-scale
+```
+
+over the issue #112 drawing's own reference space (`REF_W×REF_H` = 2560/z ×
+1440/z, z = 1.3037 ≈ 1963.64×1104.55, `B43`). On landscape the height term
+binds by law, so the band — fixed logical literals — renders at the same
+fraction of the viewport height at every landscape size (6.1% of vh, exactly
+as TheBoards renders it); portrait keeps B30's `min()`, the only way the wide
+drawing fits a narrow screen. This supersedes B44's single-`min()` formula
+clause for landscape viewports only (`B46`). The sheet renders the drawing at
+**every** viewport size, nothing reflows and nothing clips at either end.
 
 ### §3.2 The band and the title compartment
 
@@ -207,24 +219,29 @@ bottom corners only, centred, **not a link, not a control** (no `role`, no
 `tabindex`, no caret).
 
 **The band sizes to its tallest zone, from a two-line floor** (B46, issue
-#128 — TheBoards' own law, `TheBoards' UIUX §3.1` / B47/B76, ported verbatim;
+#128 — TheBoards' own law, `TheBoards' UIUX §3.1` / B47/B76, with the band
+literals **rescaled ×1.10455**: TheBoards' literals live in its 1000-tall
+logical frame and this board's space is the issue #112 drawing's
+1104.55-tall frame, so every literal maps through
+k = 1104.55/1000 = 1.10455; numbers agent-derived per the `B33` pattern;
 `bandRuleY` in `index.html`):
 
 ```
-rule-y = 14 + max(2, lines) × 19.5 + 8   = 61px at the floor, 81px at three lines
+rule-y = 15.46 + max(2, lines) × 21.54 + 8.84
+       = 67.38px at the floor, 88.92px at three lines
 ```
 
-`lines` is the tallest band zone's line count at 15px/1.3 (`band-top` 14,
-line 19.5, gap 8 — TheBoards `state.js`). The label term is gone from the
-budget: the header hangs below the rule as a tab, so it reserves no height
+`lines` is the tallest band zone's line count at 16.57px/1.3 (`band-top`
+15.46, line 21.54, gap 8.84 — TheBoards `state.js` 14/19.5/8 × k). The label
+term is gone from the budget: the header hangs below the rule as a tab
+(`.band-label` 14.36px — TheBoards B54's 13px × k), so it reserves no height
 above it.
 
-**The title compartment overhangs the band by 22px and occludes the rule**
-(B46 — TheBoards B38, kept by B47): `min-height: calc(var(--rule-y) + 22px)`,
-so a long title grows it downward. Its box is TheBoards' own
-(`padding: calc(var(--band-top) + 6px) 12px 12px`, B46 — superseding B31's
-16px horizontal padding); its interior never exceeds the sheet minus the side
-gutters.
+**The title compartment is untouched: B31 stands** (`B46`, owner ruling 3).
+It occludes the rule and overhangs it by **29px**:
+`min-height: calc(var(--rule-y) + 29px)`, so a long title grows it downward;
+its box is B31's own, `padding: calc(var(--band-top) + 8px) 16px 16px`. The
+rescaled band grows beneath the box; the box grows around it.
 
 Its two lines, in order (B17, superseding B5; sizes per B31):
 
@@ -232,8 +249,9 @@ Its two lines, in order (B17, superseding B5; sizes per B31):
 2. **"Robert Alastair Zeved Gregory"** — the title rung: 20px / **600**.
 
 The compartment's two lines render at **one font size** (20px). Its width hugs
-the title text (issue #59): the `--frame` left/right borders close in on the
-text, the card stays centred.
+the title text: the `--frame` left/right borders close in on the text with
+comfortable padding (`16px`), the card stays centred, and the interior never
+exceeds the sheet minus the side gutters.
 
 ### §3.3 The regions
 
@@ -241,7 +259,7 @@ text, the card stays centred.
 |---|---|
 | Title | the compartment above (§3.2) |
 | Components | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
-| Requirements | the line **"Click around, explore!"** (B37), **15px/600 `--ink`**, **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
+| Requirements | the line **"Click around, explore!"** (B37), **16.57px/600 `--ink`** (15px × 1.10455, `B46`), **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
 | Parking Lot | water field closing the sheet; sized by its measured contents from the two-row floor (§3.2's own law mirrored at the foot, B46); holds the contact form (§6) |
 
 There is **no All Boards rail** — it is removed from the DOM and the layout
@@ -463,9 +481,13 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 - The **lot's height follows its measured contents** (B46, issue #128 —
   superseding B18's fixed `180px` as a mechanism, which stands only as the
   no-JS fallback): TheBoards' own law, `TheBoards' UIUX §3.2` / B73, ported
-  verbatim as `lotH` in `index.html` —
-  `lot-h = min(34 + max(2 × 44, Σ rowHeight), ⌈0.5 × logical-h⌉)`, the section
-  bottom-anchored so it grows **upward** past the two-row floor, with
+  as `lotH` in `index.html` — measure the rendered rows, floor at the
+  **rescaled two-row shelf** (TheBoards' 122-shelf × 1.10455 = **134.76px**,
+  header included; the 34px `LOT_HEAD` chrome is kept unscaled, agent-derived
+  per the `B33` pattern), cap at half the logical sheet:
+
+  `lot-h = min(max(134.76, 34 + Σ rowHeight), ⌈0.5 × logical-h⌉)`, the section
+  bottom-anchored so it grows **upward** past the shelf floor, with
   `#lot-items` clipping past the half-sheet ceiling. (B18's stacked-pair
   arrangement above is unchanged.)
 
@@ -503,7 +525,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | card states, region layout, the full-viewport sheet, no rail in the DOM | `test/mobile.js`, `test/desktop.js` |
 | the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L8]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
-| the band / title-card / lot laws (B46): rule-y formula, 22px overhang, (band-top+6) 12 12 box, lot-h formula, lot clip | `test/scaling.js` (every viewport) and `test/parity_boards.js` — rendered side-by-side against the local TheBoards checkout at identical viewports |
+| the band / title-card / lot laws (B46): height-anchored landscape scale, ×1.10455 rescale, 29px overhang, B31's (band-top+8) 16px 16px box, rescaled lot shelf, lot clip | `test/scaling.js` (every viewport) and `test/parity_boards.js` — rendered side-by-side against the local TheBoards checkout at identical viewports |
 | card drag + scale-based resize (B45: own scale clamped 0.5–2.0, content-sized floor NOTE_MIN_W 132), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |

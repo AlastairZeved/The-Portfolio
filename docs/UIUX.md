@@ -266,8 +266,8 @@ exceeds the sheet minus the side gutters.
 | Region | Render |
 |---|---|
 | Title | the compartment above (§3.2) |
-| Components | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
-| Requirements | the line **"Click around, explore!"** (B37), **16.57px/600 `--ink`** (15px × 1.10455, `B46`), **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
+| Components | the line **"Each card links to a page housing my work in that domain."** (B38's line, copy per B53), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B53`), hanging from the region top at `--band-top` |
+| Requirements | the line **"Click around to explore my works!"** (B37's line, copy per B53), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B53`), **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
 | Parking Lot | water field closing the sheet; sized by its measured contents from the two-row floor (§3.2's own law mirrored at the foot, B46); holds the contact form (§6) |
 
 There is **no All Boards rail** — it is removed from the DOM and the layout

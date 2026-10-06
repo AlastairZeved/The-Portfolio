@@ -192,8 +192,12 @@ resolved by ruling before or during the build:
   [#92](https://github.com/AlastairZeved/The-Portfolio/issues/92)) and
   **Components** holds "All cards open their pages in a new tab" (issue
   [#93](https://github.com/AlastairZeved/The-Portfolio/issues/93), the second
-  line's historical provenance). Each line is ported from TheBoards' own
-  section-text mechanism (`theboards styles.css .anchor /.band-zone .anchor`),
+  line's historical provenance). Issue
+  [#147](https://github.com/AlastairZeved/The-Portfolio/issues/147) (`B53`)
+  later revised the copy of record: **Components** reads "Each card links to
+  a page housing my work in that domain." and **Requirements** reads "Click
+  around to explore my works!", both lines rendered plain (weight 400). Each
+  line is ported from TheBoards' own section-text mechanism (`theboards styles.css .anchor /.band-zone .anchor`),
   rendered static here — no contenteditable, no editing affordance — because
   this site registers no state and refuses editing (B7/B13, PRD §5).
 - **The exact hover/click treatment of the door-cards beyond the owner's

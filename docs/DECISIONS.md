@@ -2303,3 +2303,38 @@ the bolding from the following cards:
 and the owner's chat answers of 2026-10-06: "400" (the plain weight) and
 "Only the three — keep the Music note and the six door-cards at 600" (the
 scope).
+
+---
+
+### B53. The band anchors render plain text and carry the owner's revised copy (issue #147)
+
+The two band-zone anchor lines — the Components line and the Requirements
+line — render at weight **400** (plain), not the 600 that B37/B38 shipped;
+their font size, colour and placement stand (16.57px `--ink`, hanging from
+the region top at `--band-top`, B39's left anchor for Requirements). The
+owner also ruled the copy of record for both lines: Components reads
+**"Each card links to a page housing my work in that domain."**
+(superseding B38's "All cards open their pages in a new tab"); Requirements
+reads **"Click around to explore my works!"** (superseding B37's "Click
+around, explore!"). B37/B38 stand as the historical record of where the
+lines came from; the strings above are the copy of record.
+
+**Source:** the owner's issue
+[#147](https://github.com/AlastairZeved/The-Portfolio/issues/147) — "Remove
+the bold from this text: "All cards open their pages in a new tab."
+
+Remove the bold from this text: "Click around, explore!"
+
+We're also making copy edits:
+
+Instead of:
+"All cards open their pages in a new tab."
+
+Replace it with:
+"Each card links to a page housing my work in that domain."
+
+Instead of:
+"Click around, explore!"
+
+Replace it with:
+"Click around to explore my works!""

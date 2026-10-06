@@ -72,6 +72,22 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('Requirements zone label', (await page.locator('#zone-requirements .band-label').innerText()) === 'Requirements');
   ok('Parking Lot header', (await page.locator('#lot-header').innerText()) === 'Parking Lot');
 
+  // issue #147/B53: the band anchors carry the owner's revised copy, plain (400)
+  const bandCopy = await page.evaluate(() => {
+    const g = sel => { const el = document.querySelector(sel); return el ? { text: el.textContent.trim(), weight: getComputedStyle(el).fontWeight } : null; };
+    return {
+      components: g('#zone-components .anchor'),
+      requirements: g('#zone-requirements .anchor'),
+    };
+  });
+  ok('Components line is the owner\'s revised copy (issue #147/B53)',
+    bandCopy.components && bandCopy.components.text === 'Each card links to a page housing my work in that domain.');
+  ok('Requirements line is the owner\'s revised copy (issue #147/B53)',
+    bandCopy.requirements && bandCopy.requirements.text === 'Click around to explore my works!');
+  ok('band anchors render plain 400 text (issue #147/B53)',
+    bandCopy.components && bandCopy.requirements &&
+    bandCopy.components.weight === '400' && bandCopy.requirements.weight === '400');
+
   // the six door-cards render inside the viewport (re-scaled to the wider sheet)
   ok('door-card links present (>=6)', await page.locator('a.door-card').count() >= 6);
   const inside = await page.locator('.door-card').evaluateAll((as, vp) => as.every(a => {

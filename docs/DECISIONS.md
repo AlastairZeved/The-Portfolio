@@ -2407,11 +2407,11 @@ on the sand cards reuses `--deep` (`#12100a`) — no new hex is invented.
 
 **Per employer tab** the left half holds that employer's roles as stacked
 component plates — **PNC Bank**: Branch Sales & Service Representative
-(2017–2018), Branch Sales & Service Associate (2018–2019), Branch Banker
-(2019–2020); **PNC Private Bank**: Client Service Associate (2020–2021),
-Portfolio & Trust Administrator (2021–2022); **Brinker Capital**: Trader
-(2022–2023), Portfolio Specialist (2023), Sr. Portfolio Specialist
-(2023–2025). Each plate is the component verbatim: the uppercase title in
+(2017-2018), Branch Sales & Service Associate (2018-2019), Branch Banker
+(2019-2020); **PNC Private Bank**: Client Service Associate (2020-2021),
+Portfolio & Trust Administrator (2021-2022); **Brinker Capital**: Trader
+(2022-2023), Portfolio Specialist (2023), Sr. Portfolio Specialist
+(2023-2025). Each plate is the component verbatim: the uppercase title in
 `.gm-title`, the year as the **italicized subscript** in the `.gm-uc`
 grammar (the Docket's own subscript precedent, issue #92), the description
 card `.gm-desc`. The description cards **render empty — the owner's

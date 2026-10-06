@@ -80,6 +80,20 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   }), { w: VW, h: VH });
   ok('all door-cards sit inside the viewport (no clipping)', inside);
 
+  // issue #145/B52: the three linked sub cards render plain (400) text,
+  // every other door-card keeps the 600 — UIUX §4's weight clause
+  const weights = await page.evaluate(() => {
+    const w = id => { const el = document.querySelector(`.door-card[data-id="${id}"]`); return el ? getComputedStyle(el).fontWeight : null; };
+    return {
+      sub: ['apple-music', 'spotify', 'linkedin'].map(w),
+      rest: ['music', 'community', 'career', 'writing', 'software-ai', 'plants-rocks'].map(w),
+    };
+  });
+  ok('sub cards render plain 400 text (issue #145/B52)',
+    weights.sub.length === 3 && weights.sub.every(x => x === '400'));
+  ok('the Music note and six board cards keep 600 (issue #145/B52)',
+    weights.rest.length === 6 && weights.rest.every(x => x === '600'));
+
   // the nine note links (B28, UIUX §4.3): one <line> per owner-named pair
   // (issue #75, #72 and #74), 1px --frame between the two cards' centres, on a hitless
   // layer below the notes. [L0] is the layer, [L1]–[L9] the nine pairs.

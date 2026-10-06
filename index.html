@@ -250,6 +250,12 @@ body {
   transform: scale(var(--card-scale, 1));
   transform-origin: top left;
 }
+/* B51 (issue #145): the three linked sub-cards render their text plain —
+   weight 400, the self-hosted regular rung — while every other door-card
+   keeps the 600. */
+.door-card.sub-card {
+  font-weight: 400;
+}
 /* While a scale resize is active the card applies its scale instantly
    (TheBoards fidelity, B45): the 80ms transform transition above is the
    default state's, and left on it would rubber-band every resize move and
@@ -490,15 +496,15 @@ body {
     Music
     <span class="resize-handle" aria-hidden="true"></span>
   </div>
-  <a class="door-card" data-id="apple-music" style="--card-scale: 0.78; left:88.3%; top:61.3%" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
+  <a class="door-card sub-card" data-id="apple-music" style="--card-scale: 0.78; left:88.3%; top:61.3%" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
     Apple Music
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="spotify" style="--card-scale: 0.79; left:81.7%; top:68.6%" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
+  <a class="door-card sub-card" data-id="spotify" style="--card-scale: 0.79; left:81.7%; top:68.6%" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
     Spotify
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="linkedin" style="--card-scale: 0.81; left:37.3%; top:32.7%" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">
+  <a class="door-card sub-card" data-id="linkedin" style="--card-scale: 0.81; left:37.3%; top:32.7%" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">
     LinkedIn
     <span class="resize-handle" aria-hidden="true"></span>
   </a>

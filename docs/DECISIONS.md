@@ -2281,3 +2281,25 @@ only supposed to be the sub cards \"LinkedIn\",\"Apple Music\", and
 \"Spotify\". Attached is a visual displaying how exactly each card should
 be sized." — with the attached visual (2560×1440 board rendering) as the
 size authority the quote names.
+
+---
+
+### B52. The three linked sub cards render plain text — no bold (issue #145)
+
+The LinkedIn, Apple Music and Spotify sub cards' text renders at weight
+**400** (the self-hosted Montserrat Alternates regular rung), not the
+door-card's shipped 600. Every other card — the six board cards and the
+Music note — keeps the 600. Nothing else about the sub cards changes: their
+size, placement, links and link states (`UIUX §4.1`) stand.
+
+**Source:** the owner's issue
+[#145](https://github.com/AlastairZeved/The-Portfolio/issues/145) — "Remove
+the bolding from the following cards:
+
+1. Apple Music
+2. LinkedIn
+3. Spotify"
+
+and the owner's chat answers of 2026-10-06: "400" (the plain weight) and
+"Only the three — keep the Music note and the six door-cards at 600" (the
+scope).

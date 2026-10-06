@@ -321,7 +321,9 @@ drawing authority, `B43`):
   that sizes the text: it rides a uniform `transform: scale()` on the card,
   `transform-origin: top left` (TheBoards `styles.css` §4 `.note`), so text
   grows and shrinks with the card, never independently of it. No
-  `--card-fs`; the height-driven updater is gone.
+  `--card-fs`; the height-driven updater is gone. **Weight:** the door-card's
+  text ships at **600**; the three linked sub cards (LinkedIn, Apple Music,
+  Spotify) render plain at **400** (`B52`, issue #145).
 - **Sizing:** cards are **content-sized** — `width: max-content`,
   `min-width: 132px` (= TheBoards' `NOTE_MIN_W`, `state.js` / `styles.css`
   `.note-text`, TheBoards `UIUX §4.5`, `B84`), `height` following the

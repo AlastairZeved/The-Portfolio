@@ -1,6 +1,8 @@
 /* test/movable_resizable.js — bug #58 regression: door-cards must be
    draggable, resizable via the corner handle, clamped to a 1/5-viewport max
    and a legible minimum, with each card's link still opening in a new tab.
+   Issue #138/B51 also pins each card's REST scale — the size it renders at
+   when the page loads (the gesture bounds are untouched by that pin).
 
    Since issue #87 (B30) the sheet renders through ONE uniform scale, so this
    scenario runs at two widths in one pass:
@@ -37,6 +39,15 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
 const DRAG_X = 180, DRAG_Y = 150;   // physical px the pointer travels (6 moves of +30/+25)
 const MIN_SCALE = 0.5;   // TheBoards' note-scale floor (B45); the ceiling is per-card (B50)
 
+/* B51 (issue #138): each card's REST scale of record — the owner's drawing
+   size at page load. The gesture bounds (0.5 floor, one-fifth ceiling) are
+   untouched; this pins the default rendered size per card only. */
+const REST_SCALES = {
+  'community': 2.25, 'career': 2.21, 'writing': 1.35, 'software-ai': 1.79,
+  'plants-rocks': 1.96, 'music': 1.70, 'apple-music': 0.78, 'spotify': 0.79,
+  'linkedin': 0.81
+};
+
 /* one scenario, run once per viewport; rs is the render scale the page reports */
 async function runScenario(page, tag, width, height) {
   await page.setViewportSize({ width, height });
@@ -53,6 +64,31 @@ async function runScenario(page, tag, width, height) {
   const expectRs = (width >= height) ? height / REF_H : Math.min(width / REF_W, height / REF_H);
   ok(`${tag}: render scale is height-anchored on landscape (vh/REF_H), min() in portrait (B46) = ${expectRs.toFixed(3)} (rs=${rs.toFixed(3)})`,
      Math.abs(rs - expectRs) < 1e-6);
+
+  // --- issue #138 (B51): each card renders at its own drawing rest scale ---
+  // Six board cards above 1, the three sub cards below 1, exactly as the
+  // owner's visual sizes them. The gesture bounds are untouched.
+  const rest = await page.evaluate(() => {
+    const out = {};
+    document.querySelectorAll('.door-card').forEach(c => {
+      const r = c.getBoundingClientRect();
+      const rs2 = parseFloat(getComputedStyle(document.querySelector('#board')).getPropertyValue('--rs')) || 1;
+      out[c.dataset.id] = { scale: parseFloat(c.style.getPropertyValue('--card-scale')) || 1,
+        logicalW: r.width / rs2, unscaledW: c.offsetWidth };
+    });
+    return out;
+  });
+  for (const [id, want] of Object.entries(REST_SCALES)) {
+    const got = rest[id];
+    ok(`${tag}: ${id} rest scale is the drawing scale ${want} (B51, got ${got && got.scale})`,
+       got && Math.abs(got.scale - want) < 1e-9);
+    ok(`${tag}: ${id} renders at unscaled × rest × rs (B51)`,
+       got && Math.abs(got.logicalW - got.unscaledW * got.scale) < 0.5);
+  }
+  const boardTier = ['community', 'career', 'writing', 'software-ai', 'plants-rocks', 'music']
+    .every(id => rest[id].scale > 1);
+  const subTier = ['apple-music', 'spotify', 'linkedin'].every(id => rest[id].scale < 1);
+  ok(`${tag}: six board cards above 1, three sub cards below 1 (B51 tiers)`, boardTier && subTier);
 
   // --- issue #94: the native HTML5 anchor drag is suppressed on door-cards ---
   // A real press-and-move on an <a href> would otherwise fire the browser's

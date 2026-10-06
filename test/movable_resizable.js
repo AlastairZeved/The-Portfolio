@@ -132,7 +132,7 @@ async function runScenario(page, tag, width, height) {
     const s = parseFloat(c.style.getPropertyValue('--card-scale'));
     // the expected ceiling, from the page's OWN values (B30: layout px are
     // logical px; offsetWidth/offsetHeight are unscaled under the transform)
-    return { w: a.width, scale: s, unscaledW: c.offsetWidth, unscaledH: c.offsetHeight,
+    return { w: a.width, h: a.height, scale: s, unscaledW: c.offsetWidth, unscaledH: c.offsetHeight,
              boardW: board.offsetWidth, boardH: board.offsetHeight, rs };
   });
   const wantMax = Math.min(0.2 * grown.boardW / grown.unscaledW, 0.2 * grown.boardH / grown.unscaledH);
@@ -140,13 +140,21 @@ async function runScenario(page, tag, width, height) {
      Math.abs(grown.scale - wantMax) < 1e-9);
   ok(`${tag}: a ceiling-scaled card renders at unscaled × ceiling × rs (got ${grown.w.toFixed(1)}, want ${(grown.unscaledW * wantMax * grown.rs).toFixed(1)})`,
      Math.abs(grown.w - grown.unscaledW * wantMax * grown.rs) < 1.5);
+  // INDEPENDENT observable: the rendered (physical) card itself must sit
+  // inside the viewport bound — width <= 0.2 × window.innerWidth (+1.5px
+  // tolerance), no matter what internal quantities the implementation used.
+  const vp = await page.evaluate(() => [window.innerWidth, window.innerHeight]);
+  ok(`${tag}: grown card width is viewport-bound (physical ${grown.w.toFixed(1)} <= 0.2 × innerWidth ${vp[0]} = ${(0.2 * vp[0]).toFixed(1)})`,
+     grown.w <= 0.2 * vp[0] + 1.5);
+  ok(`${tag}: grown card height is viewport-bound (physical ${grown.h.toFixed(1)} <= 0.2 × innerHeight ${vp[1]} = ${(0.2 * vp[1]).toFixed(1)})`,
+     grown.h <= 0.2 * vp[1] + 1.5);
 
   // --- RESIZE floor, B45: the scale floors at MIN_SCALE 0.5 — the card's
   // unscaled content width stays >= NOTE_MIN_W 132 (the CSS min-width), so
   // the smallest rendered card is 132 × 0.5 = 66 logical px wide. TheBoards'
   // resize is distance-to-origin based, so the shrink gesture pulls the
   // pointer TOWARD the card's top-left origin. Reload first so the gesture
-  // starts from the authored scale 1 (the previous gesture left 2.0 behind;
+  // starts from the authored scale 1 (the grow gesture leaves wantMax behind;
   // the page holds no state across a reload, B7).
   await page.goto(URL, { waitUntil: 'networkidle' });
   const shrunk = await page.evaluate(async () => {

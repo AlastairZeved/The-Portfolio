@@ -201,8 +201,10 @@ body {
    width: max-content floored at min-width 132px (= TheBoards' NOTE_MIN_W,
    state.js / styles.css .note-text, UIUX §4.5 B84), height following the
    wrapped text — no authored px footprint. Its own scale factor — the var
-   --card-scale, clamped 0.5–2.0 by the resize gesture (TheBoards state.js
-   MIN_SCALE/MAX_SCALE) — is the ONLY thing that sizes the text: the font is
+   --card-scale, floored at MIN_SCALE 0.5 (TheBoards state.js) and ceilinged
+   at one fifth of the viewport (issue #142 / B50 — supersedes the old fixed
+   MAX_SCALE 2.0 wherever it binds first) — is the ONLY thing that sizes the
+   text: the font is
    17px / line-height 1.4 (TheBoards .note-text) and the transform scales
    the whole card uniformly, transform-origin top left (.note §4.1 — the
    stored left/top stays truthful). This supersedes B40's height-driven
@@ -878,6 +880,11 @@ body {
       // px are logical px; the scale is a transform).
       var ceiling = Math.min(0.2 * board.offsetWidth / r.card.offsetWidth,
                              0.2 * board.offsetHeight / r.card.offsetHeight);
+      // guard as in renderScale()/cardScale(): if the card measures 0 or
+      // non-finite on an axis, don't let that axis' ratio poison the min —
+      // fall back to the other axis so the ceiling is never Infinity.
+      if (!(r.card.offsetWidth > 0)) ceiling = 0.2 * board.offsetHeight / r.card.offsetHeight;
+      if (!(r.card.offsetHeight > 0)) ceiling = 0.2 * board.offsetWidth / r.card.offsetWidth;
       applyCardScale(r.card, gestureScale(r.startScale, d / r.grabDist, ceiling));
       // drawLinks is applyCardScale's own tail — no second call here.
     } else {

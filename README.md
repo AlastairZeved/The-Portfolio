@@ -29,7 +29,7 @@ question. The governing issue of record is
   | Card | Dest |
   |---|---|
   | Community | earp-street-park.netlify.app |
-  | Professional | razgregory.com/career (stub) |
+  | Professional | razgregory.com/career — the employer-selector career page (B47) |
   | Writing | substack.com/@theaboveaveragerob |
   | Software & AI | alastairzeved.com |
   | Plants & Rocks | razgregory.com/plantsandrocks (stub) |
@@ -60,6 +60,7 @@ npm install playwright   # onto NODE_PATH; not committed
 node test/tokens.js      # design contract: UIUX §2 recomputed from shipped hexes
 node test/mobile.js      # touch + band/lot geometry + card states at mobile widths
 node test/desktop.js     # desktop grammar: full-viewport sheet, no rail, card link semantics
+node test/career.js      # the career page (issue #133/B47): employer selector, glow, split, three-section lot
 ```
 
 There is deliberately no `test/sw-update.js` — the site ships no service

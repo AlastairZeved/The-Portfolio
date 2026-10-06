@@ -1956,3 +1956,137 @@ be sized was already declared in github repo AlastairZeved/TheBoards. The
 \"Components\", \"requirements\" and title card should match it for
 consistency and cohesion." (issue title: "The header and title card are still
 too small vertically.")
+
+### B47. razgregory.com/career is the employer-selector career page on a sand/brown binding of TheBoards' ladder (issue #133)
+
+The owner logged the hand-drawn wireframe spec in issue #133: the career page
+presents Robert Gregory's banking career as an **employer selector** — three
+title cards in the landing page's top-band grammar (**PNC Bank**, **PNC
+Private Bank**, **Brinker Capital**, left→right chronological), each hanging
+over the header line exactly as the landing page's title card does; selecting
+a card swaps the body to that employer (a selector, not a carousel), the
+default state being **PNC Bank**. The selected card wears the B132 glow
+verbatim — `border-color: <glow token>; box-shadow: 0 0 8px 0 <glow token>` —
+one glow token, a soft bloom, no other states.
+
+The body reuses the landing page's `.split` with `.split__rule`: the left half
+holds the employer's role heading box, a "Blurb about role" block (one
+paragraph per role held) and a "Notes about role & responsibilities" block;
+the right half holds "Accomplishments" and "Learnings/Skills". The footer is
+the landing page's `.parking-lot` grammar split into **three** sections —
+professional blurb, contact info, and a `.cta` button "Learn More about Rob"
+linking back to razgregory.com — separated by divider bars of **3/4 section
+length**.
+
+The palette is **TheBoards' token ladder re-hued to sand + deep brown**: the
+ladder's structure, luminance relationships and role assignments are
+preserved (`--deep` near-black canvas, `--card` one step above, `--frame` the
+lifted rule hue, `--note` the brightest ink on the deep, the same
+three-stop water mix), and the glow sits **one rung below its base** per the
+B132 rung rule. The page stays a static single file with all CSS inline and
+**no script** — the selector is a three-way radio group driven by CSS
+`:has`, exactly the landing reference's own mechanism. Nine content slots
+(dates, role titles, blurbs, notes, accomplishments, learnings, footer
+blurb, contact info, final palette hexes) await the owner's targeted fill
+passes; **per the owner's ruling of 2026-10-05, empty blocks are omitted
+from the rendered page entirely until content exists** — no empty styled
+container, no section heading, no invented placeholder copy.
+
+This entry transcribes the owner's issue #133 spec; it does not supersede
+B1 — the career page is a sub-page of the hub wearing its own ruled binding,
+as the spec directs.
+
+**Source:** the owner's spec, issue
+[#133](https://github.com/AlastairZeved/The-Portfolio/issues/133) — quoted
+verbatim: "The page presents Robert Gregory's banking career as an employer
+selector with a per-employer detail body."; "selecting a title card switches
+the body content below to that employer (wireframe shows PNC Bank selected).
+There is no scrolling carousel — it's a selector."; "the selected card gets a
+soft bloom exactly like TheBoards' card glow (B132 mechanism):
+`border-color: <glow token>; box-shadow: 0 0 8px 0 <glow token>;` — one glow
+token, soft bloom, no other states."; "Use TheBoards' default blue palette
+(`styles.css` root tokens) **as the structural template** — same token
+ladder, same luminance steps, same role assignments — re-hued to a **sand /
+deep-brown** scheme"; "glow one rung below its base"; "Structural build
+(layout, selection mechanics, glow, split, footer) can proceed against
+placeholders; text slots ship empty-but-slotted rather than with invented
+copy."; and the owner's ruling of 2026-10-05 on how those slots render,
+quoted verbatim: "Omit empty blocks entirely until content exists" (owner
+interview, 2026-10-05 — no filler text, no empty styled containers, no
+"coming soon" markers; slot structure lives in the markup only).
+
+
+### B48. razgregory.com/plantsandrocks is the dual-page-reader Plants & Rocks page on the literal idea-board green (issue #134)
+
+The owner logged the spec in issue #134: the Plants & Rocks page is a
+**dual-page reader** presenting two plant guides — **Plants on Poles**
+(Monstera Division and Moss Pole Guide) and **Plants in Rocks** (Planting in
+Semi-Hydroponics With Pon) — built on `career.html` (B47) as the structural
+template. Two title cards in the `.topband` grammar **overhang the header
+line** (per the owner's correction, same as the career page's cards);
+selecting a card selects that page — the cards are SELECTABLE radio-driven
+cards now, even though selection swaps nothing while the body is blank. The
+cards' oneliner slots are NOT blank: they carry the owner's copy verbatim.
+
+The body is **intentionally blank pending the PDF pass**: selection swaps
+between two bare empty reader containers (one per radio) driven by CSS
+`:has` — each an empty bare container, no styled content, no placeholder
+images, no text, no chevrons, no split furniture. The reader region is just
+reserved. SLOT comments mark the future PDF pass.
+
+The footer is the `.parking-lot` grammar split into **TWO** sections with
+**ONE** divider bar of 3/4 of the section's inner length. The left section
+is reserved and renders nothing (comment only, measures zero) —
+permanently empty per the spec. The right section holds the **Download**
+button, rendered but **DISABLED**: `aria-disabled="true"`, no handler, it
+visibly cannot yet work (dimmed at the 0.55 alpha — agent-derived,
+career.html's shipped dim value reused — with no hover/active bloom). The
+`.cta` is styled with career.html's `.cta` grammar re-tokened to the green
+palette.
+
+The palette is the **LITERAL TheBoards idea-board token block**
+(`styles.css` `#board[data-cat="idea"]`), transcribed byte-exact — NOT a
+re-hue: `--deep:#000a06; --card:#001a0e; --water-top:#486b49;
+--water-mid:#345439; --water-bot:#1f3825; --water-bot-a:31 56 37;
+--frame:#52997f; --note:#b9d2b2`. Ink and tokens the green block does not
+redefine come from TheBoards' `:root` verbatim (`--ink-light:#f4f5f1;
+--ink-dark:#031019; --ink:var(--ink-light)`). The selected-card glow token
+is **`--frame` `#52997f` itself** (`border-color: var(--frame);
+box-shadow: 0 0 8px 0 var(--frame)`) — **agent-derived** per the B33/B40
+provenance pattern: inventing a new "one rung down" hex would be a
+design-value invention (repo UIUX law), so an existing shipped value is
+reused. Unselected cards dim + italic at career.html's shipped
+`--ink-dim: rgb(244 245 241 / 0.55)`. The page stays a static single file
+with all CSS inline and **no script** — the selector is a two-way radio
+group (`role="radiogroup"`, `aria-label="Choose a page"`) driven by CSS
+`:has`, exactly career.html's mechanism; one visually-hidden `h1`
+("Plants & Rocks"); mobile and `prefers-reduced-motion` media blocks carry
+in career.html's pattern.
+
+This entry transcribes the owner's issue #134 spec and the owner's grill
+answers; it does not supersede B1 — the page is a sub-page of the hub
+wearing its own ruled binding, as the spec directs.
+
+**Source:** the owner's spec, issue
+[#134](https://github.com/AlastairZeved/The-Portfolio/issues/134) — the
+page structure (two title cards overhanging the header line per owner
+correction; dual-page reader body blank pending PDF, no placeholder
+scaffolding; two-section footer, left section permanently empty, right the
+disabled Download button; the literal idea-board green palette; blank slots
+list) — and the owner's four grill answers of 2026-10-05 (owner chat,
+2026-10-05), quoted verbatim:
+
+1. "The two title cards are selectable radio-driven cards, even though
+   selection swaps nothing while the body is blank. Two cards: Plants on
+   Poles (default checked) and Plants in Rocks."
+2. The oneliner copy, verbatim: "Plants on Poles | Monstera Division and
+   Moss Pole Guide" and "Plants in Rocks | Planting in Semi-Hydroponics
+   With Pon".
+3. The footer Download button is "rendered but disabled: aria-disabled,
+   no handler, visibly cannot yet work".
+4. The regression suite: a new black-box Playwright test file in the exact
+   style of `test/career.js`.
+
+Agent-derived values (labelled per the B33/B40 provenance pattern): the
+glow token = `--frame` itself; the disabled button's 0.55 alpha; the
+mobile/reduced-motion media blocks' port details.

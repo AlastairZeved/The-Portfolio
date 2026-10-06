@@ -43,6 +43,7 @@
      ported so every band literal below renders at L × --rs and the career
      header matches razgregory.com's render exactly at every viewport, with
      zero script (the site's no-JS law). */
+  --rs: min(calc(100vh / 1104.55), calc(100vw / 1440));   /* vh fallback — dvh below wins where supported */
   --rs: min(calc(100dvh / 1104.55), calc(100vw / 1440));
   --band-top: calc(15.46 * var(--rs));   /* TheBoards' 14 × 1.10455 (B46) */
   --rule-y:   calc(67.38 * var(--rs));   /* the rescaled two-line floor (B46): wordmark + oneliner slot */
@@ -50,7 +51,8 @@
   --lot-floor: calc(134.76 * var(--rs)); /* the rescaled two-row shelf (B46/TheBoards B73) */
 }
 @media (min-aspect-ratio: 1) {
-  :root { --rs: calc(100dvh / 1104.55); }  /* landscape: the pure height anchor (B46) */
+  :root { --rs: calc(100vh / 1104.55);   /* vh fallback */
+          --rs: calc(100dvh / 1104.55); }  /* landscape: the pure height anchor (B46) */
 }
 
 html, body { min-height: 100dvh; }
@@ -118,7 +120,7 @@ body {
   justify-content: center;
   width: max-content;
   min-width: 0;
-  min-height: calc(var(--rule-y) + calc(29 * var(--rs)));
+  min-height: calc(var(--rule-y) + 29 * var(--rs));
   padding: calc(var(--band-top) + calc(8 * var(--rs))) var(--card-pad) var(--card-pad);
   border: calc(2 * var(--rs)) solid var(--frame);
   border-top: 0;
@@ -337,7 +339,14 @@ body:has(#employer-brinker:checked) .employer--brinker {
      desktop-render law; a 390px portrait rs ≈ 0.27 would render 5.4px type):
      the band grows to hold the stacked cards, no overhang. */
   .topband { grid-template-columns: 1fr; justify-items: stretch; row-gap: 0.75rem; height: auto; padding: 0.8rem 16px 0.9rem; }
-  .topband__card { min-height: 0; }
+  .topband__card { min-height: 0;
+    /* Reset the scaled card literals to the shipped readable mobile values:
+       --rs ≈ 0.27 at 390px would otherwise leave 4.3px padding on a 0.54px
+       hairline border. Rendered output is as shipped. */
+    padding: 0.25rem 1.1rem;
+    border: 2px solid var(--frame);
+    border-radius: 3px; }
+  .topband__card-hit { inset: -2px; }
   .topband__wordmark { font-size: 1.1rem; }
   .topband__oneliner { font-size: 0.8rem; }
   /* The mobile stack targets the shown employer itself — the split grid lives

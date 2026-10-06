@@ -2129,10 +2129,14 @@ the landing page's conventions, re-tokened to the B47 sand/brown binding:
   divider bars stand as shipped.
 
 The ≤743px mobile reflow renders as shipped — the readable adaptation, not
-part of the desktop-render mismatch the owner flagged. The block itself
-gained three resets (`min-height: 0`, `justify-items: stretch`, an explicit
-`1.1rem` wordmark) that neutralize the new desktop rules at mobile widths;
-the rendered output is unchanged.
+part of the desktop-render mismatch the owner flagged. The block gained
+resets that neutralize the new desktop rules at mobile widths — `min-height:
+0` and `height: auto`, `justify-items: stretch`, and the shipped card
+literals restored (`0.25rem 1.1rem` padding, full 2px `--frame` border and
+3px radius, `-2px` hit inset, the `1.1rem`/`0.8rem` wordmark/oneliner type) —
+so the rendered output is unchanged. The `--rs` scale also carries a plain
+`vh` fallback line ahead of the `dvh` declaration (agent-derived port
+mechanic: browsers without `dvh` would otherwise drop the scale entirely).
 
 **Source:** the owner's issue
 [#139](https://github.com/AlastairZeved/The-Portfolio/issues/139) — "There

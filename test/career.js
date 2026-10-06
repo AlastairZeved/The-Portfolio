@@ -58,6 +58,8 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('card type is the 20px logical rung: font-size = 20 × rs (B31/B49)',
     Math.abs(parseFloat(b49.font) - 20 * b49.rs) < 0.5);
   ok('card is the B31 box: border-top 0, radius only on the bottom corners, content-sized',
+    // content-sized hug: ~111px at 1440×900; <300 is a sanity bound against
+    // regression to the old full-width grid cell (~440px)
     b49.borderTop === '0px' && parseFloat(b49.radius) > 0 && b49.cardW < 300);
   ok('lot is floored at the rescaled two-row shelf: 134.76 × rs (B46/B73/B49)',
     b49.lotH >= 134.76 * b49.rs - 1);

@@ -1,0 +1,94 @@
+# Run the existing regression suite before merge.
+#
+# The repo has no package.json and no dependencies (AGENTS.md law), so until
+# now nothing ran the tests automatically — only a human remembering to,
+# locally, after the fact. This runs every suite on every PR and on push to
+# main, before a bad change can reach the Pages deploy.
+#
+# Shape ported from AlastairZeved/TheBoards' .github/workflows/ci.yml, the
+# owner-designated reference for issue #149.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Superseding a PR push mid-run is fine to cancel — unlike a Pages deploy,
+# there is nothing here that needs to finish once started.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # Every browser suite reads PORTFOLIO_URL. career.js and
+      # plantsandrocks.js default to their own pages on :8000; proof.js's
+      # default is a placeholder host, so the job-level default pins every
+      # suite to the served landing page.
+      PORTFOLIO_URL: http://localhost:8000/index.html
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      # No committed package.json/lockfile — the app itself stays
+      # dependency-free (AGENTS.md law). Install fresh into this ephemeral
+      # container instead of keeping a lockfile in sync.
+      - name: Install Playwright
+        run: |
+          npm install -D playwright@latest
+          npx playwright install --with-deps chromium
+
+      - name: Serve the app
+        run: |
+          python3 -m http.server 8000 &
+          for i in $(seq 1 20); do
+            curl -sf http://localhost:8000/index.html > /dev/null && break
+            sleep 0.5
+          done
+
+      # tokens.js needs no browser and no server: it parses the shipped files
+      # and reproduces the UIUX §2 tables from the declared hexes. First, so
+      # a broken design contract fails before a Chromium ever boots.
+      - name: tokens.js
+        run: node test/tokens.js
+
+      # records.js is the second browserless suite: it guards DECISIONS.md's
+      # `### B<n>` citation space — no duplicate number, ascending in file
+      # order (issue #149, ported from TheBoards' test/records.js). Also
+      # first, for the same reason: a broken record fails before Chromium.
+      - name: records.js
+        run: node test/records.js
+
+      # Browser suites follow. test/parity_boards.js is deliberately NOT run
+      # here: it requires a checkout of TheBoards, and CI stays single-repo
+      # (owner ruling on issue #149).
+      - name: career.js
+        run: node test/career.js
+
+      - name: desktop.js
+        run: node test/desktop.js
+
+      - name: mobile.js
+        run: node test/mobile.js
+
+      - name: movable_resizable.js
+        run: node test/movable_resizable.js
+
+      - name: plantsandrocks.js
+        run: node test/plantsandrocks.js
+
+      - name: proof.js
+        run: node test/proof.js
+
+      - name: scaling.js
+        run: node test/scaling.js

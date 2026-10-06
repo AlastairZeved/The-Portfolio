@@ -2203,7 +2203,7 @@ the blank-reader discipline.
 
 ---
 
-### B50. The note card's resize ceiling is one-fifth of the viewport — the 2.0 scale cap is superseded where it binds first (issue #142)
+### B51. The note card's resize ceiling is one-fifth of the viewport — the 2.0 scale cap is superseded where it binds first (issue #142)
 
 The note card's resize gesture keeps B45's mechanism — TheBoards' scale-based
 frame-drag, a uniform scale on the card (the owner: cards resize 1:1, never
@@ -2241,7 +2241,7 @@ binds first."
 
 ---
 
-### B51. The note cards size per the owner's issue #138 drawing — the six board cards at their drawing scales, the three sub cards at theirs (issue #138)
+### B52. The note cards size per the owner's issue #138 drawing — the six board cards at their drawing scales, the three sub cards at theirs (issue #138)
 
 The issue #126/#B45 rebuild left every note card content-sized at the
 minimum footprint (the `NOTE_MIN_W` 132 unscaled floor). That was only ever
@@ -2256,7 +2256,7 @@ record**: the six board cards (Community, Career, Writing, Software & AI,
 Plants & Rocks, Music) sit **above 1**; the three sub cards (LinkedIn,
 Apple Music, Spotify) sit **below 1**. The cards render at their drawing
 sizes; the drag and resize gestures still move the scale from there under
-B45's 0.5 floor and B50's one-fifth-of-viewport ceiling, unchanged.
+B45's 0.5 floor and B51's one-fifth-of-viewport ceiling, unchanged.
 
 The scale values themselves are **agent-derived arithmetic transcribing the
 owner's visual** (the `B33`/`B43` provenance pattern): each value is the
@@ -2272,7 +2272,7 @@ board already draws them.
 This ruling **supersedes issue #126's minimum-size footprint reading for
 the six board cards** (the sub cards' drawing footprints sit below it);
 issue #126's mechanism ruling (`B45`) stands everywhere else. It does not
-touch `B50`'s resize ceiling.
+touch `B51`'s resize ceiling.
 
 **Source:** the owner's issue
 [#138](https://github.com/AlastairZeved/The-Portfolio/issues/138) — "All
@@ -2284,7 +2284,7 @@ size authority the quote names.
 
 ---
 
-### B52. The three linked sub cards render plain text — no bold (issue #145)
+### B53. The three linked sub cards render plain text — no bold (issue #145)
 
 The LinkedIn, Apple Music and Spotify sub cards' text renders at weight
 **400** (the self-hosted Montserrat Alternates regular rung), not the
@@ -2306,7 +2306,7 @@ scope).
 
 ---
 
-### B53. The band anchors render plain text and carry the owner's revised copy (issue #147)
+### B54. The band anchors render plain text and carry the owner's revised copy (issue #147)
 
 The two band-zone anchor lines — the Components line and the Requirements
 line — render at weight **400** (plain), not the 600 that B37/B38 shipped;
@@ -2341,7 +2341,7 @@ Replace it with:
 
 ---
 
-### B54. Four new linked sub cards — Zeved Boards and Agentic Plugins under Software & AI, Plants on Poles and Plants in Rocks under Plants & Rocks; note cards, not doors (issue #146)
+### B55. Four new linked sub cards — Zeved Boards and Agentic Plugins under Software & AI, Plants on Poles and Plants in Rocks under Plants & Rocks; note cards, not doors (issue #146)
 
 Four sub cards join the board, each linked by a line to its parent:
 
@@ -2355,7 +2355,7 @@ Four sub cards join the board, each linked by a line to its parent:
    under it.
 
 Each new card renders **plain text, no bold** — the sub-card weight 400
-(`B52`'s selector covers them) — and meets the board's note-card and font
+(`B53`'s selector covers them) — and meets the board's note-card and font
 standards (`UIUX §4.1`). They are **note cards, not doors**: the owner ruled
 they carry no link and open no page, like the Music note. The issue's
 "underneath Plants & Rocks" placement for the Software & AI pair is
@@ -2392,7 +2392,7 @@ Rocks" for those two); "The existing sub-card scale band — ~0.78–0.81,
 matching Apple Music/Spotify/LinkedIn" (the size).
 
 
-### B55. The career body's left half carries the plugin components — one per role, per employer tab (issue #154)
+### B56. The career body's left half carries the plugin components — one per role, per employer tab (issue #154)
 
 The owner directed that the component that displays the plugins on the
 **Agentic Plugins page** of repo AlastairZeved/AlastairZeved

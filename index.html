@@ -158,7 +158,7 @@ body {
   width: auto;
   min-height: 44px;
   padding: 0;
-  font-size: 16.57px; font-weight: 400;   /* 15 × 1.10455 (#128/B46) — keeps the band anchor on the same rescaled rung as the band's own literals; weight plain per issue #147/B53 */
+  font-size: 16.57px; font-weight: 400;   /* 15 × 1.10455 (#128/B46) — keeps the band anchor on the same rescaled rung as the band's own literals; weight plain per issue #147/B54 */
 }
 
 /* ---- The title compartment (UIUX §3.2, B17; TheBoards #anchor-title) ---- */
@@ -202,7 +202,7 @@ body {
    state.js / styles.css .note-text, UIUX §4.5 B84), height following the
    wrapped text — no authored px footprint. Its own scale factor — the var
    --card-scale, floored at MIN_SCALE 0.5 (TheBoards state.js) and ceilinged
-   at one fifth of the viewport (issue #142 / B50 — supersedes the old fixed
+   at one fifth of the viewport (issue #142 / B51 — supersedes the old fixed
    MAX_SCALE 2.0 wherever it binds first) — is the ONLY thing that sizes the
    text: the font is
    17px / line-height 1.4 (TheBoards .note-text) and the transform scales
@@ -210,16 +210,16 @@ body {
    stored left/top stays truthful). This supersedes B40's height-driven
    --card-fs law; the owner's authored left/top placements stand (B43).
    The card's rest scale is the owner's drawing scale of record
-   (issue #138 / B51): each card ships its own inline --card-scale —
+   (issue #138 / B52): each card ships its own inline --card-scale —
    2.25 community, 2.21 career, 1.35 writing, 1.79 software-ai, 1.96
    plants-rocks, 1.70 music, 0.78 apple-music, 0.79 spotify, 0.81
    linkedin — so the six board cards render large and the sub
-   cards small, exactly as the owner's visual sizes them. B54 (issue
+   cards small, exactly as the owner's visual sizes them. B55 (issue
    #146) adds four more sub cards at 0.78 each — zeved-boards,
    agentic-plugins, plants-poles, plants-in-rocks — inside the sub-card
    band the owner set for them (~0.78–0.81); no drawing sizes these
    four, so the band's smallest scale of record stands. The gesture
-   still moves the scale from there (B45/B50 bounds unchanged). */
+   still moves the scale from there (B45/B51 bounds unchanged). */
 .door-card {
   position: absolute;
   width: max-content;
@@ -254,9 +254,9 @@ body {
   transform: scale(var(--card-scale, 1));
   transform-origin: top left;
 }
-/* B52 (issue #145): the three linked sub-cards render their text plain —
+/* B53 (issue #145): the three linked sub-cards render their text plain —
    weight 400, the self-hosted regular rung — while every other door-card
-   keeps the 600. B54 (issue #146): the four new note sub cards render
+   keeps the 600. B55 (issue #146): the four new note sub cards render
    plain too; the selector covers all seven sub cards. */
 .door-card.sub-card {
   font-weight: 400;
@@ -473,7 +473,7 @@ body {
        (B28), so both ends of every link are greppable and readable. B45
        (issue #126): the authored inline geometry is the owner's left/top
        placement only (B43) — the cards are content-sized with their own
-       scale factor, TheBoards' note mechanics. B51 (issue #138): each
+       scale factor, TheBoards' note mechanics. B52 (issue #138): each
        card also carries its drawing scale of record inline (--card-scale),
        derived from the owner's attached visual; the six board cards sit
        above 1, the sub cards below it. -->
@@ -514,7 +514,7 @@ body {
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
 
-  <!-- B54 (issue #146): four new linked sub cards. They are NOTE cards,
+  <!-- B55 (issue #146): four new linked sub cards. They are NOTE cards,
        not doors — the owner ruled no links, like the Music note — so they
        take the note-card rest-only class and no href. Sizes sit in the
        sub-card band the owner set (all at 0.78, the band's smallest scale
@@ -653,7 +653,7 @@ body {
         });
         lwMin = Math.max(lwMin, rightLogical / (1 - left / 100));
       });
-      /* B51 (issue #138): the cards' drawing rest scales widen the cards, so
+      /* B52 (issue #138): the cards' drawing rest scales widen the cards, so
          at square-ish landscape aspects the pure height anchor compresses the
          % horizontal spread until two cards OVERLAP — breaking B44's
          no-overlap law. Extend the measured width floor above (same
@@ -786,7 +786,7 @@ body {
 
   /* ---- B45 (issue #126): TheBoards' note sizing + scale mechanics, ported ----
      TheBoards state.js: NOTE_MIN_W = 132, MIN_SCALE = 0.5 (MAX_SCALE 2.0
-     superseded by B50 — see gestureScale).
+     superseded by B51 — see gestureScale).
      The card's own scale factor (a uniform transform: scale, origin top
      left) is the ONLY text/size scaling: the font is a fixed 17px/1.4 and
      the transform scales the card. This replaces the old height-driven
@@ -938,7 +938,7 @@ body {
   /* TheBoards interactions.js gestureScale: the clamp bounds admit the start
      value, so a scale outside [MIN_SCALE, ceiling] never snaps at gesture
      start — yet it can always be scaled back into the authored range.
-     issue #142 / B50: the fixed MAX_SCALE 2.0 ceiling is superseded by a
+     issue #142 / B51: the fixed MAX_SCALE 2.0 ceiling is superseded by a
      per-card ceiling derived from the 1/5-viewport bound — one uniform
      scale, so the card stops at the FIRST axis reaching one fifth of the
      viewport. The board's layout px ARE the logical px (B30), and a
@@ -962,7 +962,7 @@ body {
       var rect = board.getBoundingClientRect();
       var d = Math.hypot(toLogical(e.clientX - rect.left) - r.originX,
                          toLogical(e.clientY - rect.top) - r.originY);
-      // issue #142 / B50: the ceiling is per-card and per-axis — see
+      // issue #142 / B51: the ceiling is per-card and per-axis — see
       // gestureScale. offsetWidth/offsetHeight read unscaled (B30: layout
       // px are logical px; the scale is a transform).
       var ceiling = Math.min(0.2 * board.offsetWidth / r.card.offsetWidth,

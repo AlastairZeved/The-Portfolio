@@ -2,11 +2,11 @@
    selector, B132 glow on the selected title card, split body with ruled bar,
    three-section parking lot with dividers, CTA back to razgregory.com, the
    sand/brown token ladder, and the plugin components in the body's left
-   half (issue #154, B55 — desc cards render EMPTY on purpose). Single file,
+   half (issue #154, B56 — desc cards render EMPTY on purpose). Single file,
    zero script, zero <link>. Black-box Playwright.
    Run: node test/career.js   (PORTFOLIO_URL default http://localhost:8000/career.html)
    Viewport note: the desktop run is at the page's own design canvas
-   (REF_H ≈ 1104.55 → rs = 1), because the B55 component's geometry — like
+   (REF_H ≈ 1104.55 → rs = 1), because the B56 component's geometry — like
    the band's literals above it — renders at the B46 scale (--rs). */
 
 const { chromium } = require('playwright');
@@ -108,8 +108,8 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     return shadows[1].includes('rgb(125, 99, 64)') && !shadows[0].includes('rgb(125, 99, 64)');
   }));
 
-  // B55 (issue #154) rewrites the blank-slot assertions deliberately: the
-  // description cards now render EMPTY ON PURPOSE (B55 owner override of the
+  // B56 (issue #154) rewrites the blank-slot assertions deliberately: the
+  // description cards now render EMPTY ON PURPOSE (B56 owner override of the
   // omit-empty rule), so the subject is the plugin components themselves.
   // (1) each shown tab renders exactly the right number of components with
   // the exact titles + years from the issue body, verbatim; (2) every desc
@@ -144,7 +144,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     }, sel);
     ok(`${tab}: ${roles.length} components with the issue's exact titles+years`,
       JSON.stringify(got) === JSON.stringify(roles));
-    ok(`${tab}: desc cards empty, visible, min-height ≥ 116px (B55)`,
+    ok(`${tab}: desc cards empty, visible, min-height ≥ 116px (B56)`,
       await page.evaluate(s =>
         [...document.querySelector(s).querySelectorAll('.gm-desc')].every(d =>
           d.innerText.trim() === '' && d.getBoundingClientRect().height > 0 &&
@@ -162,7 +162,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
           .map(p => p.getBoundingClientRect().height);
         return hs.length > 0 && Math.max(...hs) - Math.min(...hs) < 1;
       }, sel));
-    ok(`${tab}: plates contained in the left half — right edge < the rule (B55)`,
+    ok(`${tab}: plates contained in the left half — right edge < the rule (B56)`,
       await page.evaluate(s => {
         const section = document.querySelector(s);
         const ruleLeft = section.querySelector('.split__rule').getBoundingClientRect().left;
@@ -172,7 +172,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   }
   // back to the default tab for the rest of the suite
   await page.locator('.topband__card-hit[for="employer-pnc-bank"]').click();
-  ok('no .gm-cta and no item selector row anywhere (B55)',
+  ok('no .gm-cta and no item selector row anywhere (B56)',
     await page.locator('.gm-cta').count() === 0 &&
     await page.evaluate(() =>
       !document.querySelector('[name="plugin-select"], .plugins__radio, .plugins__tab')));

@@ -333,11 +333,16 @@ drawing authority, `B43`):
 - **Resize:** the corner gesture acts as **TheBoards' scale-based resize**
   (`interactions.js` frame-drag resize): the drag changes the card's own
   scale — the pointer's distance to the card's fixed top-left origin,
-  divided by its distance at grab — clamped to TheBoards' note-scale band
-  **[0.5, 2.0]** (`state.js` `MIN_SCALE`/`MAX_SCALE`). This supersedes
-  `B21`'s independent width/height corner bounds (the `132×80` floor and
-  the 1/5-viewport ceiling) for the gesture; the legibility figure itself
-  survives only as `NOTE_MIN_W`'s 132 unscaled width. The clamped footprint
+  divided by its distance at grab — floored at `MIN_SCALE` **0.5**
+  (`state.js`) and **ceilinged by `B50` (issue #142): one-fifth of the
+  viewport**, as a single uniform-scale bound — the gesture stops at the
+  scale at which the card first reaches 1/5 of the viewport width or
+  height, whichever binds first. TheBoards' `MAX_SCALE` 2.0 is superseded
+  as a ceiling wherever it would stop a card below that bound. This
+  supersedes `B21`'s independent width/height corner bounds (the `132×80`
+  floor and the 1/5-viewport ceiling) for the gesture — `B21`'s one-fifth
+  ceiling survives as `B50`'s uniform-scale bound; the legibility figure
+  itself survives only as `NOTE_MIN_W`'s 132 unscaled width. The clamped footprint
   is re-fitted into the sheet after a scale change (TheBoards
   `applyNoteScale`'s re-clamp, including its inverted min/max idiom for a
   footprint that outgrows the sheet), and the links recompute (§4.3).
@@ -349,8 +354,10 @@ drawing authority, `B43`):
 > `--card-scale` / `--card-max-w` CSS custom properties and their JS
 > updaters, the scale computed from pointer distance to the top-left
 > origin (TheBoards' own `startResize` idiom), and the footprint re-clamp.
-> The 0.5–2.0 band and the 132px floor are TheBoards' own values
-> (`state.js`), not agent inventions.
+> The 0.5 floor and the 132px floor are TheBoards' own values
+> (`state.js`), not agent inventions; the one-fifth-of-viewport ceiling is
+> the owner's (`B50`, issue #142), and the per-card ceiling arithmetic is
+> agent-derived per the `B33`/`B43` pattern.
 
 **A gesture is never a click** (`B41`, issue #109): the corner resize handle is
 a `<span>` **inside** the card's `<a>`, so a pointer release over it fires the
@@ -534,7 +541,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L8]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
 | the band / title-card / lot laws (B46): height-anchored landscape scale, ×1.10455 rescale, 29px overhang, B31's (band-top+8) 16px 16px box, rescaled lot shelf, lot clip | `test/scaling.js` (every viewport) and `test/parity_boards.js` — rendered side-by-side against the local TheBoards checkout at identical viewports |
-| card drag + scale-based resize (B45: own scale clamped 0.5–2.0, content-sized floor NOTE_MIN_W 132), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
+| card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B50's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 | the career page (B47): employer selector, B132 glow, split body, three-section lot, sand/brown ladder, empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |

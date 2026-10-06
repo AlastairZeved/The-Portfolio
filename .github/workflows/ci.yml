@@ -27,12 +27,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      # Every browser suite reads PORTFOLIO_URL. career.js and
-      # plantsandrocks.js default to their own pages on :8000; proof.js's
-      # default is a placeholder host, so the job-level default pins every
-      # suite to the served landing page.
-      PORTFOLIO_URL: http://localhost:8000/index.html
     steps:
       - uses: actions/checkout@v7
 
@@ -88,6 +82,11 @@ jobs:
         run: node test/plantsandrocks.js
 
       - name: proof.js
+        # The only suite that needs the pin: its built-in default is a
+        # placeholder host. career.js and plantsandrocks.js keep their own
+        # defaults (career.html / plantsandrocks.html on :8000).
+        env:
+          PORTFOLIO_URL: http://localhost:8000/index.html
         run: node test/proof.js
 
       - name: scaling.js

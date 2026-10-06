@@ -24,7 +24,7 @@ const ok = (n, c, extra) => {
 const RECORD = 'docs/DECISIONS.md';
 let text = '';
 try { text = fs.readFileSync(path.join(ROOT, RECORD), 'utf8'); } catch (e) { /* asserted below */ }
-const lines = text.split('\n');
+
 
 console.log(`\n[0] ${RECORD} exists and is readable`);
 ok('the record file exists', text !== '', 'could not read ' + RECORD);

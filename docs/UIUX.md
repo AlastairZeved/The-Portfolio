@@ -537,8 +537,8 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | card drag + scale-based resize (B45: own scale clamped 0.5–2.0, content-sized floor NOTE_MIN_W 132), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
-| the career page (B47): employer selector, B132 glow, split body, three-section lot, sand/brown ladder, empty blocks omitted | `test/career.js` |
-| the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, disabled Download, literal idea-green ladder | `test/plantsandrocks.js` |
+| the career page (B47): employer selector, B132 glow, split body, three-section lot, sand/brown ladder, empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
+| the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, disabled Download, literal idea-green ladder, the B50 landing-convention band/card/lot render | `test/plantsandrocks.js` |
 
 ---
 
@@ -590,11 +590,25 @@ one rung below frame — are the law.
 
 ### §10.2 Regions
 
-- **Header (employer timeline):** the landing page's `.topband` grammar with
-  three title cards — PNC Bank, PNC Private Bank, Brinker Capital,
-  left→right chronological. Each card hangs over the header's 1px `--frame`
-  rule (`margin-bottom: -14px`). Unselected cards are dim + italic
-  (§4's unselected grammar); the selected card wears the B132 glow verbatim:
+*(Band, card and footer rendering law amended by B49, issue #139: the career
+page's header band, title cards and footer render at the landing page's
+conventions — B46's height-anchored scale, B31's title-card box, the lot's
+two-row-shelf floor — re-tokened to the sand/brown binding. The scale is a
+pure-CSS custom property `--rs` (`vh/1104.55` landscape, `min(vw/1440,
+vh/1104.55)` portrait) since the page ships no script; every band literal
+renders as `L × --rs`.)*
+
+- **Header (employer timeline):** the landing page's band grammar — the
+  water (radial foot + three-stop ladder + 0.05 dither) over the deep,
+  closed by the 1px `--frame` rule at `--rule-y` (`67.38 × --rs`, the
+  rescaled two-line floor) — with three title cards, PNC Bank, PNC Private
+  Bank, Brinker Capital, left→right chronological. Each card is the landing
+  title card's B31 box grammar verbatim: content-sized, top-anchored,
+  `border-top: 0`, radius only on the bottom corners, `(band-top + 8px)
+  16px 16px` padding, both lines at the 20px logical type (employer name
+  600, oneliner slot 400), `min-height: rule-y + 29px` hanging over the
+  rule. Unselected cards are dim + italic (§4's unselected grammar); the
+  selected card wears the B132 glow verbatim:
   `border-color: var(--glow-sand); box-shadow: 0 0 8px 0 var(--glow-sand);`
   and no other state. Default selection: PNC Bank. The header is the
   selector's `role="radiogroup"` (`aria-label="Choose an employer"`); the
@@ -612,9 +626,11 @@ one rung below frame — are the law.
   name pending, issue #133 slot 6) render only once filled.
 - **Footer (three sections):** the landing page's `.parking-lot` grammar —
   water gradient over `--deep`, 1px `--frame`-mix top rule, same padding —
-  split three ways (professional blurb · contact info · the `.cta` "Learn
-  More about Rob" → `https://razgregory.com/`), separated by 1px divider
-  bars of 3/4 of the section's inner length, vertically centred.
+  floored at the rescaled two-row shelf (`134.76 × --rs`, B49: the landing
+  lot's floor, taken statically; content grows past it), split three ways
+  (professional blurb · contact info · the `.cta` "Learn More about Rob" →
+  `https://razgregory.com/`), separated by 1px divider bars of 3/4 of the
+  section's inner length, vertically centred.
 
 ### §10.3 Blank slots
 
@@ -635,7 +651,13 @@ discipline.
 
 ---
 
-## §11 The Plants & Rocks page (issue #134, B48)
+## §11 The Plants & Rocks page (issue #134, B48; conventions fixed by B50)
+
+*(Band, card and footer rendering law amended by B50, issue #140: this
+page's header band, title cards and footer render at B49's landing-page
+conventions — B46's height-anchored scale as the pure-CSS `--rs` port, B31's
+title-card box, the lot's two-row-shelf floor — re-tokened to the idea-green
+binding.)*
 
 `plantsandrocks.html` is razgregory.com's dual-page-reader page. It is a
 static single file — all CSS inline, the typeface embedded as a data URI,
@@ -675,16 +697,20 @@ values, not new numbers.
 
 ### §11.2 Regions
 
-- **Header (two-page selector):** the `.topband` grammar with **two** title
-  cards — "Plants on Poles" (default checked) and "Plants in Rocks". Both
-  cards **overhang the header line** (`margin-bottom: -14px`, career's exact
-  overhang). Each card carries its owner-authored oneliner — "Monstera
-  Division and Moss Pole Guide" / "Planting in Semi-Hydroponics With Pon" —
-  in the `.topband__oneliner` slot (these slots are NOT blank). Unselected
-  cards dim + italic (§10's grammar); the selected card wears the career
-  glow mechanism with `--frame` as the token. The header is
-  `role="radiogroup"` (`aria-label="Choose a page"`); the page's one `h1`
-  ("Plants & Rocks") is visually hidden.
+- **Header (two-page selector):** B49's band grammar — the landing's water
+  (radial foot + three-stop ladder + 0.05 dither) over the deep, closed by
+  the 1px `--frame` rule at `--rule-y` (`67.38 × --rs`) — with **two** title
+  cards, "Plants on Poles" (default checked) and "Plants in Rocks". Both
+  cards are the B31 box verbatim at `--rs`: content-sized, top-anchored,
+  `border-top: 0`, bottom-only radius, `(band-top + 8px) 16px 16px` padding,
+  both lines at the 20px logical type (page name 600, oneliner 400),
+  `min-height: rule-y + 29px` hanging over the rule. Each card carries its
+  owner-authored oneliner — "Monstera Division and Moss Pole Guide" /
+  "Planting in Semi-Hydroponics With Pon" — in the `.topband__oneliner` slot
+  (these slots are NOT blank). Unselected cards dim + italic (§10's
+  grammar); the selected card wears the B48 glow with `--frame` as the
+  token. The header is `role="radiogroup"` (`aria-label="Choose a page"`);
+  the page's one `h1` ("Plants & Rocks") is visually hidden.
 - **Body (dual-page reader, BLANK):** selection swaps between two bare empty
   reader containers (one per radio) driven by `:has`. Each is an empty bare
   container — no styled content, no placeholder images, no text, no
@@ -692,8 +718,10 @@ values, not new numbers.
   region is just reserved pending the PDF pass. Nothing renders in the body.
 - **Footer (two sections):** the `.parking-lot` grammar — water gradient
   over `--deep`, 1px `--frame`-mix top rule, career.html's exact
-  linear-gradient construction with the idea-green water tokens — split
-  **two** ways with **one** divider bar of 3/4 of the section's inner
+  linear-gradient construction with the idea-green water tokens — floored at
+  the rescaled two-row shelf (`134.76 × --rs`, B50: the landing lot's floor,
+  taken statically; content grows past it), split **two** ways with **one**
+  divider bar of 3/4 of the section's inner
   length, vertically centred. Left section: reserved, renders nothing
   (comment only, measures zero) — permanently empty. Right section: the
   **Download** `.cta` — career's `.cta` grammar re-tokened to the green
@@ -718,4 +746,5 @@ place; the page invents no copy.
 
 **Pinned by:** `test/plantsandrocks.js` — selector mechanics, the `--frame`
 glow, the blank body, the two-section lot, the disabled Download, the
-literal idea-green tokens, and the single-file law.
+literal idea-green tokens, the single-file law, and the B50
+landing-convention band/card/lot render.

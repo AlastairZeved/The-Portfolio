@@ -2104,8 +2104,11 @@ the landing page's conventions, re-tokened to the B47 sand/brown binding:
   the landing's band-fill grammar — the water (radial foot at 118% 76% /
   50% 24%, the three-stop ladder, the 0.05 dither) over the deep, closed by
   the 1px `--frame` rule at `--rule-y` — and every band literal renders at
-  the B46 render scale: `rs = vh/REF_H` (REF_H = 1104.55) on landscape,
-  B30's `min(vw/REF_W, vh/REF_H)` on portrait. Because the career page
+  the B46 render scale: `rs = vh/REF_H` (REF_H = 1104.55) on landscape, the
+  owner-ruled `min(vw/1440, vh/1104.55)` on portrait — the owner's answer
+  named the `vw/1440` divisor explicitly for this page (the landing's own
+  B30 portrait term uses `vw/REF_W`, REF_W = 1963.64; the career divisor is
+  the owner's, not a transcription of B30). Because the career page
   ships **no script**, the scale is ported as a pure CSS custom property
   (`--rs`) and every literal renders as `L × --rs` — `--rule-y` 67.38 (the
   rescaled two-line floor: wordmark + oneliner slot), `--band-top` 15.46.
@@ -2125,8 +2128,11 @@ the landing page's conventions, re-tokened to the B47 sand/brown binding:
   The section padding, the three-section arrangement and the 3/4-length
   divider bars stand as shipped.
 
-The ≤743px mobile reflow is unchanged — it is the shipped readable
-adaptation, not part of the desktop-render mismatch the owner flagged.
+The ≤743px mobile reflow renders as shipped — the readable adaptation, not
+part of the desktop-render mismatch the owner flagged. The block itself
+gained three resets (`min-height: 0`, `justify-items: stretch`, an explicit
+`1.1rem` wordmark) that neutralize the new desktop rules at mobile widths;
+the rendered output is unchanged.
 
 **Source:** the owner's issue
 [#139](https://github.com/AlastairZeved/The-Portfolio/issues/139) — "There

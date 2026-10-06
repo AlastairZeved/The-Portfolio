@@ -220,15 +220,190 @@ body:has(#employer-brinker:checked) .employer--brinker {
   align-items: center;
 }
 
-.role-heading {
-  display: inline-block;
-  margin: 0 0 1.25rem;
-  padding: 0.25rem 1.1rem;
-  border: 2px solid var(--frame);
+/* ---- B55 (issue #154): the career body's left half carries the Agentic
+   Plugins page's plugin component — one per role, stacked, equally sized,
+   evenly spaced, contained in the half. Ported VERBATIM in structure from
+   the .gregorian-mode class set (.gm-back/.gm-title/.gm-uc/.gm-desc), with
+   NO .gm-cta and NO item selector row (B55). The re-hue re-points the
+   component's token ladder at this page's B47 sand/brown :root tokens —
+   --deep/--card/--frame/--note, the water ladder and --water-bot-a
+   (58 44 26), --elevation and --ink-light (#f4f5f1) all stand from :root;
+   no hex is duplicated here. Geometry is agent-derived per B33's provenance
+   pattern: the source's fixed 830px plate becomes a plate that fills its
+   flex cell, and the source's fixed insets (back 90px 165px 90px; title
+   top 55px; subscript top 153px; desc margin 89px) are re-derived so the
+   composition keeps the source's proportions at every viewport — its
+   vertical rhythm renders at the page's own B46 scale (--rs), exactly like
+   the band literals above. ---- */
+.split__gallery {
+  align-self: stretch;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;                 /* the page's existing gutter value */
+}
+.gregorian-mode {
+  --ink: var(--deep);           /* desc ink on the sand note: the deep itself */
+  --elevation-inset: inset -3px 0 8px rgb(0 0 0 / 0.16),
+    inset 0 2px 4px rgb(0 0 0 / 0.1);   /* the inset press value, verbatim */
+  position: relative;
+  box-sizing: border-box;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  padding: calc(140 * var(--rs)) 0 0;   /* clears the title card + subscript */
+  background: var(--deep);
+  font-family: "Montserrat Alternates", system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+.gregorian-mode::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.055;
+  pointer-events: none;
+}
+.gm-card {
+  box-sizing: border-box;
+  border: 2.1px solid var(--ink);
   border-radius: 3px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  line-height: 1.3;
+  background: var(--note);
+  color: var(--ink);
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
+/* Card 3 — the background card (the water ladder from :root) */
+.gm-back {
+  position: absolute;
+  inset: 6% 20% 2%;
+  z-index: 0;
+  background: radial-gradient(
+      118% 76% at 50% 24%,
+      rgb(0 0 0 / 0) 32%,
+      rgb(var(--water-bot-a) / 0.72) 128%
+    ),
+    linear-gradient(
+      180deg,
+      var(--water-top) 0%,
+      var(--water-mid) 46%,
+      var(--water-bot) 100%
+    );
+  box-shadow: var(--elevation);
+  overflow: hidden;
+}
+.gm-back::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 32%,
+    color-mix(in srgb, var(--frame) 70%, transparent) 50%,
+    transparent 68%
+  );
+  background-size: 250% 100%;
+  background-position: 130% 0;
+}
+.gm-back::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  pointer-events: none;
+  border-radius: 1px;
+}
+
+/* Card 1 — the title card */
+.gm-title {
+  position: absolute;
+  z-index: 1;
+  top: calc(24 * var(--rs));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(427px, 78%);
+  margin: 0;
+  padding: calc(26 * var(--rs)) 12px calc(30 * var(--rs));
+  border-color: var(--frame);
+  background: var(--card);
+  color: var(--ink-light);
+  font-size: calc(28 * var(--rs));   /* the source's 28px rung, at B46's scale */
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: normal;               /* wrap only if a title asks for it */
+  box-shadow: var(--elevation);
+  overflow: hidden;
+}
+.gm-title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 32%,
+    color-mix(in srgb, var(--frame) 70%, transparent) 50%,
+    transparent 68%
+  );
+  background-size: 250% 100%;
+  background-position: 130% 0;
+}
+@keyframes gm-marquee {
+  0%   { background-position: 130% 0; }
+  30%  { background-position: -30% 0; }
+  100% { background-position: -30% 0; }
+}
+/* The glimmer clock (the plugins page's issue #95 grammar): title card
+   first, background card 0.3s behind it. */
+.gm-title::after,
+.gm-back::after {
+  animation: gm-marquee 6s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+}
+.gm-title::after { animation-delay: 0s; }
+.gm-back::after { animation-delay: 0.3s; }
+
+/* The year — the italicized subscript in the .gm-uc grammar: own element,
+   positioned under the title card, exactly like the Docket's "Under
+   Construction" on the plugins page. */
+.gm-uc {
+  position: absolute;
+  z-index: 1;
+  top: calc(120 * var(--rs));
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: var(--ink-light);
+  font-size: calc(14 * var(--rs));
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.05em;
+}
+
+/* Card 2 — the description card. EMPTY on purpose (B55 owner override of
+   the omit-empty rule), sized for 2-3 sentences: min-height = 3 × 32px
+   line + 2 × 10px padding. */
+.gm-desc {
+  position: relative;
+  z-index: 1;
+  width: min(600px, 78%);
+  margin: 0 auto;
+  padding: calc(10 * var(--rs)) 18px;
+  border-color: var(--ink);
+  background: var(--note);
+  color: var(--ink);
+  font-size: calc(20 * var(--rs));
+  letter-spacing: 0.015em;
+  font-weight: 300;
+  line-height: calc(32 * var(--rs));
+  min-height: calc(116 * var(--rs));
+  box-shadow: var(--elevation);
 }
 
 .blurb, .role-notes, .accomplishments, .learnings { margin: 0 0 1.25rem; }
@@ -358,6 +533,14 @@ body:has(#employer-brinker:checked) .employer--brinker {
     display: flex; flex-direction: column; align-items: stretch; gap: 0.75rem;
   }
   .split__rule { width: 33.333%; height: 1px; }
+  /* B55 component stack on mobile: plates flow (auto height, page may
+     scroll), the composition drops its absolute layout for a static reflow
+     at readable sizes — the same reset the band's scaled literals get. */
+  .gregorian-mode { flex: 0 0 auto; display: flex; flex-direction: column; padding: 0.75rem; }
+  .gm-back { inset: 0; }
+  .gm-title { position: relative; top: auto; left: auto; transform: none; width: auto; max-width: 100%; margin: 0 auto; font-size: 1.05rem; padding: 0.6rem 0.75rem 0.7rem; }
+  .gm-uc { position: relative; top: auto; left: auto; transform: none; margin: 0.4rem auto 0; font-size: 0.85rem; }
+  .gm-desc { width: auto; max-width: 100%; margin: 0.6rem auto 0; min-height: 116px; font-size: 1rem; line-height: 1.6; }
   .parking-lot { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .parking-lot__divider { width: auto; align-self: flex-start; }
   .parking-lot__divider::before { width: 75%; height: 1px; }
@@ -368,6 +551,8 @@ body:has(#employer-brinker:checked) .employer--brinker {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+  /* B55: the component's glimmer dies outright with the motion preference. */
+  .gm-title::after, .gm-back::after { animation: none; content: none; }
 }
 </style>
 </head>
@@ -410,15 +595,33 @@ body:has(#employer-brinker:checked) .employer--brinker {
     <!-- PNC Bank detail (default) -->
     <section class="employer employer--pnc-bank" aria-labelledby="role-pnc-bank">
       <div class="split__gallery">
-        <!-- SLOT (blank #2): exact role title — owner finalizes (BSSR/BSSA wording
-             undecided); the heading below is the spec's own provisional example
-             (spec §5.2). SLOT (blank #1): employment dates — owner fills in;
-             no .role-dates span renders until then. -->
-        <h2 class="role-heading" id="role-pnc-bank">PNC — Branch Service Associate</h2>
-        <!-- SLOT (blank #3): role blurb(s), one per role held — owner fills in.
-             SLOT (blank #4): notes about role &amp; responsibilities — owner fills in.
-             Per B47 (owner ruling): empty blocks are OMITTED from the rendered
-             page entirely until owner content exists. -->
+        <!-- B55 (issue #154): the left half carries the Agentic Plugins page's
+             plugin component, one per role, stacked to fill the half — ported
+             verbatim in structure (.gregorian-mode → gm-back/gm-title/gm-uc/
+             gm-desc), re-hued to the B47 sand/brown ladder. The year is the
+             .gm-uc italicized subscript in the title card's grammar. -->
+        <!-- SLOT: description card text (2-3 sentences per role) — owner
+             fills in. Per B55 (owner ruling): the .gm-desc cards render EMPTY
+             on purpose until then — this overrides B47's omit-empty rule for
+             the desc cards only. -->
+        <div class="gregorian-mode">
+          <div class="gm-card gm-back" role="presentation"></div>
+          <h3 class="gm-card gm-title" id="role-pnc-bank">Branch Sales &amp; Service Representative</h3>
+          <p class="gm-uc">2017-2018</p>
+          <p class="gm-card gm-desc"></p>
+        </div>
+        <div class="gregorian-mode">
+          <div class="gm-card gm-back" role="presentation"></div>
+          <h3 class="gm-card gm-title">Branch Sales &amp; Service Associate</h3>
+          <p class="gm-uc">2018-2019</p>
+          <p class="gm-card gm-desc"></p>
+        </div>
+        <div class="gregorian-mode">
+          <div class="gm-card gm-back" role="presentation"></div>
+          <h3 class="gm-card gm-title">Branch Banker</h3>
+          <p class="gm-uc">2019-2020</p>
+          <p class="gm-card gm-desc"></p>
+        </div>
       </div>
       <div class="split__rule" aria-hidden="true"></div>
       <div class="split__copy">
@@ -434,14 +637,24 @@ body:has(#employer-brinker:checked) .employer--brinker {
     <!-- PNC Private Bank detail -->
     <section class="employer employer--pnc-private" aria-labelledby="role-pnc-private">
       <div class="split__gallery">
-        <!-- SLOT (blank #2): exact role title — owner finalizes; until ruled,
-             the heading is the employer name alone. SLOT (blank #1): employment
-             dates — owner fills in; no .role-dates span renders until then. -->
-        <h2 class="role-heading" id="role-pnc-private">PNC Private Bank</h2>
-        <!-- SLOT (blank #3): role blurb(s), one per role held — owner fills in.
-             SLOT (blank #4): notes about role &amp; responsibilities — owner fills in.
-             Per B47 (owner ruling): empty blocks are OMITTED from the rendered
-             page entirely until owner content exists. -->
+        <!-- B55 (issue #154): same component grammar as the PNC Bank tab —
+             one .gregorian-mode per role, stacked to fill the half. -->
+        <!-- SLOT: description card text (2-3 sentences per role) — owner
+             fills in. Per B55 (owner ruling): the .gm-desc cards render EMPTY
+             on purpose until then — this overrides B47's omit-empty rule for
+             the desc cards only. -->
+        <div class="gregorian-mode">
+          <div class="gm-card gm-back" role="presentation"></div>
+          <h3 class="gm-card gm-title" id="role-pnc-private">Client Service Associate</h3>
+          <p class="gm-uc">2020-2021</p>
+          <p class="gm-card gm-desc"></p>
+        </div>
+        <div class="gregorian-mode">
+          <div class="gm-card gm-back" role="presentation"></div>
+          <h3 class="gm-card gm-title">Portfolio &amp; Trust Administrator</h3>
+          <p class="gm-uc">2021-2022</p>
+          <p class="gm-card gm-desc"></p>
+        </div>
       </div>
       <div class="split__rule" aria-hidden="true"></div>
       <div class="split__copy">
@@ -455,14 +668,30 @@ body:has(#employer-brinker:checked) .employer--brinker {
     <!-- Brinker Capital detail -->
     <section class="employer employer--brinker" aria-labelledby="role-brinker">
       <div class="split__gallery">
-        <!-- SLOT (blank #2): exact role title — owner finalizes; until ruled,
-             the heading is the employer name alone. SLOT (blank #1): employment
-             dates — owner fills in; no .role-dates span renders until then. -->
-        <h2 class="role-heading" id="role-brinker">Brinker Capital</h2>
-        <!-- SLOT (blank #3): role blurb(s), one per role held — owner fills in.
-             SLOT (blank #4): notes about role &amp; responsibilities — owner fills in.
-             Per B47 (owner ruling): empty blocks are OMITTED from the rendered
-             page entirely until owner content exists. -->
+        <!-- B55 (issue #154): same component grammar as the PNC Bank tab —
+             one .gregorian-mode per role, stacked to fill the half. -->
+        <!-- SLOT: description card text (2-3 sentences per role) — owner
+             fills in. Per B55 (owner ruling): the .gm-desc cards render EMPTY
+             on purpose until then — this overrides B47's omit-empty rule for
+             the desc cards only. -->
+        <div class="gregorian-mode">
+          <div class="gm-card gm-back" role="presentation"></div>
+          <h3 class="gm-card gm-title" id="role-brinker">Trader</h3>
+          <p class="gm-uc">2022-2023</p>
+          <p class="gm-card gm-desc"></p>
+        </div>
+        <div class="gregorian-mode">
+          <div class="gm-card gm-back" role="presentation"></div>
+          <h3 class="gm-card gm-title">Portfolio Specialist</h3>
+          <p class="gm-uc">2023</p>
+          <p class="gm-card gm-desc"></p>
+        </div>
+        <div class="gregorian-mode">
+          <div class="gm-card gm-back" role="presentation"></div>
+          <h3 class="gm-card gm-title">Sr. Portfolio Specialist</h3>
+          <p class="gm-uc">2023-2025</p>
+          <p class="gm-card gm-desc"></p>
+        </div>
       </div>
       <div class="split__rule" aria-hidden="true"></div>
       <div class="split__copy">

@@ -117,7 +117,7 @@ function ok(label, cond) {
       };
       const lotHval = parseFloat(getComputedStyle(board).getPropertyValue('--lot-h'));
       const lotItemsClip = getComputedStyle(document.getElementById('lot-items')).overflow;
-      const lwMin = Math.max(...[...document.querySelectorAll('.door-card')].map(c => {
+      let lwMin = Math.max(...[...document.querySelectorAll('.door-card')].map(c => {
         const left = parseFloat(c.style.left) || 0;
         if (left >= 100) return 0;
         const cr = c.getBoundingClientRect();
@@ -128,6 +128,38 @@ function ok(label, cond) {
         }
         return rightLogical / (1 - left / 100);
       }));
+      /* B51 (issue #138): the drawing rest scales widen the cards, so at
+         square-ish landscape aspects the width floor also carries the
+         pairwise gap term (B44's no-overlap law; same agent-derived
+         provenance as B46's lw_min): for every pair whose vertical ranges
+         overlap, the left card's right edge must clear the right card's
+         left edge — lw >= (aW + handle ring) / (bLeft% − aLeft%). The
+         logical height (vh/rs) grows with the floor, spreading the % tops,
+         so the page re-measures until stable; re-derive the same way here. */
+      const geo = [...document.querySelectorAll('.door-card')].map(c => ({
+        lp: parseFloat(c.style.left) || 0, tp: parseFloat(c.style.top) || 0,
+        s: parseFloat(c.style.getPropertyValue('--card-scale')) || 1,
+        w: c.offsetWidth * (parseFloat(c.style.getPropertyValue('--card-scale')) || 1),
+        h: c.offsetHeight * (parseFloat(c.style.getPropertyValue('--card-scale')) || 1)
+      }));
+      for (let pass = 0; pass < 60; pass++) {
+        const lh = innerHeight / (innerWidth >= innerHeight
+                                        ? Math.min(innerHeight / REF_H, innerWidth / lwMin)
+                                        : Math.min(innerWidth / REF_W, innerHeight / REF_H));
+        let need = lwMin;
+        for (let i = 0; i < geo.length; i++)
+          for (let j = i + 1; j < geo.length; j++) {
+            let A = geo[i], B = geo[j];
+            if (A.lp > B.lp) { const T = A; A = B; B = T; }
+            const dLeft = (B.lp - A.lp) / 100;
+            if (dLeft <= 0) continue;
+            const aTop = (A.tp / 100) * lh, bTop = (B.tp / 100) * lh;
+            if (aTop + A.h <= bTop || bTop + B.h <= aTop) continue;
+            need = Math.max(need, (A.w + 4) / dLeft);
+          }
+        if (need <= lwMin + 0.5) break;
+        lwMin = need;
+      }
       return {
         rs, lwMin, boardRect: [br.left, br.top, br.width, br.height],
         vw: innerWidth, vh: innerHeight,

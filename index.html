@@ -158,7 +158,7 @@ body {
   width: auto;
   min-height: 44px;
   padding: 0;
-  font-size: 16.57px; font-weight: 600;   /* 15 × 1.10455 (#128/B46) — keeps the band anchor on the same rescaled rung as the band's own literals */
+  font-size: 16.57px; font-weight: 400;   /* 15 × 1.10455 (#128/B46) — keeps the band anchor on the same rescaled rung as the band's own literals; weight plain per issue #147/B54 */
 }
 
 /* ---- The title compartment (UIUX §3.2, B17; TheBoards #anchor-title) ---- */
@@ -202,13 +202,24 @@ body {
    state.js / styles.css .note-text, UIUX §4.5 B84), height following the
    wrapped text — no authored px footprint. Its own scale factor — the var
    --card-scale, floored at MIN_SCALE 0.5 (TheBoards state.js) and ceilinged
-   at one fifth of the viewport (issue #142 / B50 — supersedes the old fixed
+   at one fifth of the viewport (issue #142 / B51 — supersedes the old fixed
    MAX_SCALE 2.0 wherever it binds first) — is the ONLY thing that sizes the
    text: the font is
    17px / line-height 1.4 (TheBoards .note-text) and the transform scales
    the whole card uniformly, transform-origin top left (.note §4.1 — the
    stored left/top stays truthful). This supersedes B40's height-driven
-   --card-fs law; the owner's authored left/top placements stand (B43). */
+   --card-fs law; the owner's authored left/top placements stand (B43).
+   The card's rest scale is the owner's drawing scale of record
+   (issue #138 / B52): each card ships its own inline --card-scale —
+   2.25 community, 2.21 career, 1.35 writing, 1.79 software-ai, 1.96
+   plants-rocks, 1.70 music, 0.78 apple-music, 0.79 spotify, 0.81
+   linkedin — so the six board cards render large and the sub
+   cards small, exactly as the owner's visual sizes them. B55 (issue
+   #146) adds four more sub cards at 0.78 each — zeved-boards,
+   agentic-plugins, plants-poles, plants-in-rocks — inside the sub-card
+   band the owner set for them (~0.78–0.81); no drawing sizes these
+   four, so the band's smallest scale of record stands. The gesture
+   still moves the scale from there (B45/B51 bounds unchanged). */
 .door-card {
   position: absolute;
   width: max-content;
@@ -242,6 +253,13 @@ body {
      transform-origin top left so the authored left/top stays truthful. */
   transform: scale(var(--card-scale, 1));
   transform-origin: top left;
+}
+/* B53 (issue #145): the three linked sub-cards render their text plain —
+   weight 400, the self-hosted regular rung — while every other door-card
+   keeps the 600. B55 (issue #146): the four new note sub cards render
+   plain too; the selector covers all seven sub cards. */
+.door-card.sub-card {
+  font-weight: 400;
 }
 /* While a scale resize is active the card applies its scale instantly
    (TheBoards fidelity, B45): the 80ms transform transition above is the
@@ -437,11 +455,11 @@ body {
 
   <div id="zone-components" class="band-zone">
     <span class="band-label on-light">Components</span>
-    <div class="anchor">All cards open their pages in a new tab.</div>
+    <div class="anchor">Each card links to a page housing my work in that domain.</div>
   </div>
   <div id="zone-requirements" class="band-zone">
     <span class="band-label on-light">Requirements</span>
-    <div class="anchor">Click around, explore!</div>
+    <div class="anchor">Click around to explore my works!</div>
   </div>
 
   <div id="anchor-title">
@@ -455,43 +473,71 @@ body {
        (B28), so both ends of every link are greppable and readable. B45
        (issue #126): the authored inline geometry is the owner's left/top
        placement only (B43) — the cards are content-sized with their own
-       scale factor, TheBoards' note mechanics. -->
-  <a class="door-card" data-id="community" style="left:13.6%; top:18.3%" href="https://earp-street-park.netlify.app" target="_blank" rel="noopener noreferrer">
+       scale factor, TheBoards' note mechanics. B52 (issue #138): each
+       card also carries its drawing scale of record inline (--card-scale),
+       derived from the owner's attached visual; the six board cards sit
+       above 1, the sub cards below it. -->
+  <a class="door-card" data-id="community" style="--card-scale: 2.25; left:13.6%; top:18.3%" href="https://earp-street-park.netlify.app" target="_blank" rel="noopener noreferrer">
     Community
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="career" style="left:42.3%; top:18.5%" href="https://razgregory.com/career" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="career" style="--card-scale: 2.21; left:42.3%; top:18.5%" href="https://razgregory.com/career" target="_blank" rel="noopener noreferrer">
     Career
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="writing" style="left:66%; top:24%" href="https://substack.com/@theaboveaveragerob" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="writing" style="--card-scale: 1.35; left:66%; top:24%" href="https://substack.com/@theaboveaveragerob" target="_blank" rel="noopener noreferrer">
     Writing
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="software-ai" style="left:12.3%; top:51.7%" href="https://alastairzeved.com" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="software-ai" style="--card-scale: 1.79; left:12.3%; top:51.7%" href="https://alastairzeved.com" target="_blank" rel="noopener noreferrer">
     Software & AI
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="plants-rocks" style="left:42.6%; top:64.4%" href="https://razgregory.com/plantsandrocks" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="plants-rocks" style="--card-scale: 1.96; left:42.6%; top:64.4%" href="https://razgregory.com/plantsandrocks" target="_blank" rel="noopener noreferrer">
     Plants & Rocks
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <div class="door-card note-card" data-id="music" style="left:73%; top:54%">
+  <div class="door-card note-card" data-id="music" style="--card-scale: 1.7; left:73%; top:54%">
     Music
     <span class="resize-handle" aria-hidden="true"></span>
   </div>
-  <a class="door-card" data-id="apple-music" style="left:88.3%; top:61.3%" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
+  <a class="door-card sub-card" data-id="apple-music" style="--card-scale: 0.78; left:88.3%; top:61.3%" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
     Apple Music
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="spotify" style="left:81.7%; top:68.6%" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
+  <a class="door-card sub-card" data-id="spotify" style="--card-scale: 0.79; left:81.7%; top:68.6%" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
     Spotify
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="linkedin" style="left:37.3%; top:32.7%" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">
+  <a class="door-card sub-card" data-id="linkedin" style="--card-scale: 0.81; left:37.3%; top:32.7%" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">
     LinkedIn
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
+
+  <!-- B55 (issue #146): four new linked sub cards. They are NOTE cards,
+       not doors — the owner ruled no links, like the Music note — so they
+       take the note-card rest-only class and no href. Sizes sit in the
+       sub-card band the owner set (all at 0.78, the band's smallest scale
+       of record); the placements follow the board's own diagonal idiom:
+       each pair hangs under its parent, the left-diagonal child at the
+       LinkedIn offsets (−5.0, +14.2) and the right-diagonal child at the
+       Spotify offsets (+8.7, +14.6). -->
+  <div class="door-card note-card sub-card" data-id="zeved-boards" style="--card-scale: 0.78; left:7.3%; top:65.9%">
+    Zeved Boards
+    <span class="resize-handle" aria-hidden="true"></span>
+  </div>
+  <div class="door-card note-card sub-card" data-id="agentic-plugins" style="--card-scale: 0.78; left:21%; top:66.3%">
+    Agentic Plugins
+    <span class="resize-handle" aria-hidden="true"></span>
+  </div>
+  <div class="door-card note-card sub-card" data-id="plants-poles" style="--card-scale: 0.78; left:37.6%; top:78.6%">
+    Plants on Poles
+    <span class="resize-handle" aria-hidden="true"></span>
+  </div>
+  <div class="door-card note-card sub-card" data-id="plants-in-rocks" style="--card-scale: 0.78; left:51.3%; top:79%">
+    Plants in Rocks
+    <span class="resize-handle" aria-hidden="true"></span>
+  </div>
 
   <!-- Parking Lot: water field closing the sheet (B6) -->
   <div id="lot">
@@ -522,10 +568,11 @@ body {
     </div>
   </div>
 
-  <!-- The link layer (UIUX §4.3, B28): the nine straight 1px --frame lines
-       that join the note cards, one `<line>` per pair the owner names in
-       issue #75, #72 and #74. TheBoards' link idiom ported verbatim (TheBoards'
-       UIUX §4.6 / B91) — a line between two cards' centres, below the notes,
+  <!-- The link layer (UIUX §4.3, B28): the thirteen straight 1px --frame
+       lines that join the note cards, one `<line>` per pair the owner names
+       in issue #75, #72, #74 and #146. TheBoards' link idiom ported verbatim
+       (TheBoards' UIUX §4.6 / B91) — a line between two cards' centres,
+       below the notes,
        never a hit target. Endpoints are computed from live card geometry
        in the script below, so a line follows a card that is dragged or
        resized; only the pairing is authored here. -->
@@ -539,6 +586,10 @@ body {
     <line data-link="7" data-from="music" data-to="apple-music"></line>
     <line data-link="8" data-from="music" data-to="spotify"></line>
     <line data-link="9" data-from="career" data-to="linkedin"></line>
+    <line data-link="10" data-from="software-ai" data-to="zeved-boards"></line>
+    <line data-link="11" data-from="software-ai" data-to="agentic-plugins"></line>
+    <line data-link="12" data-from="plants-rocks" data-to="plants-poles"></line>
+    <line data-link="13" data-from="plants-rocks" data-to="plants-in-rocks"></line>
   </svg>
 
 </div>
@@ -602,6 +653,42 @@ body {
         });
         lwMin = Math.max(lwMin, rightLogical / (1 - left / 100));
       });
+      /* B52 (issue #138): the cards' drawing rest scales widen the cards, so
+         at square-ish landscape aspects the pure height anchor compresses the
+         % horizontal spread until two cards OVERLAP — breaking B44's
+         no-overlap law. Extend the measured width floor above (same
+         agent-derived provenance as B46's lw_min, per the B33/B43 pattern)
+         with the pairwise gap term: for every pair of cards whose rendered
+         vertical ranges overlap, the left card's right edge must clear the
+         right card's left edge — lw >= aW / (bLeft% − aLeft%). The logical
+         height (vh/rs) grows as the floor widens the sheet, so the % tops
+         spread and vertical overlaps only shrink: re-measure until the floor
+         is stable (it converges monotonically). */
+      for (var pass = 0; pass < 60; pass++) {
+        var lh = vh / rs;
+        var need = lwMin;
+        var geo = [];
+        document.querySelectorAll('.door-card').forEach(function (card) {
+          var lp = parseFloat(card.style.left) || 0, tp = parseFloat(card.style.top) || 0;
+          var s = parseFloat(card.style.getPropertyValue('--card-scale')) || 1;
+          geo.push({ lp: lp, tp: tp, w: card.offsetWidth * s, h: card.offsetHeight * s });
+        });
+        for (var i = 0; i < geo.length; i++) for (var j = i + 1; j < geo.length; j++) {
+          var A = geo[i], B = geo[j];
+          if (A.lp > B.lp) { var T = A; A = B; B = T; }
+          var dLeft = (B.lp - A.lp) / 100;   // left/top are authored in % (B45)
+          if (dLeft <= 0) continue;
+          var aTop = (A.tp / 100) * lh, bTop = (B.tp / 100) * lh;   // top is authored in % (B45)
+          if (aTop + A.h <= bTop || bTop + B.h <= aTop) continue;   // vertically clear
+          /* +4: the resize-handle ring sits 4px past the card's right border
+             (issue #108's grab area) and must not reach the neighbour either */
+          var w = (A.w + 4) / dLeft;
+          if (w > need) need = w;
+        }
+        if (need <= lwMin + 0.5) break;
+        lwMin = need;
+        rs = Math.min(rs, vw / lwMin);
+      }
       if (lwMin > 0) rs = Math.min(rs, vw / lwMin);
     }
     board.style.setProperty('--rs', rs);
@@ -699,7 +786,7 @@ body {
 
   /* ---- B45 (issue #126): TheBoards' note sizing + scale mechanics, ported ----
      TheBoards state.js: NOTE_MIN_W = 132, MIN_SCALE = 0.5 (MAX_SCALE 2.0
-     superseded by B50 — see gestureScale).
+     superseded by B51 — see gestureScale).
      The card's own scale factor (a uniform transform: scale, origin top
      left) is the ONLY text/size scaling: the font is a fixed 17px/1.4 and
      the transform scales the card. This replaces the old height-driven
@@ -739,7 +826,7 @@ body {
     drawLinks();
   }
 
-  /* ---- The link layer (UIUX §4.3, B28): nine straight 1px --frame lines
+  /* ---- The link layer (UIUX §4.3, B28): thirteen straight 1px --frame lines
      between card centres, one per pair authored in the markup. The pairing
      is authored; the geometry is computed, so a line stays true while a
      card is dragged or resized (TheBoards' link idiom, UIUX §4.6 / B91 —
@@ -851,7 +938,7 @@ body {
   /* TheBoards interactions.js gestureScale: the clamp bounds admit the start
      value, so a scale outside [MIN_SCALE, ceiling] never snaps at gesture
      start — yet it can always be scaled back into the authored range.
-     issue #142 / B50: the fixed MAX_SCALE 2.0 ceiling is superseded by a
+     issue #142 / B51: the fixed MAX_SCALE 2.0 ceiling is superseded by a
      per-card ceiling derived from the 1/5-viewport bound — one uniform
      scale, so the card stops at the FIRST axis reaching one fifth of the
      viewport. The board's layout px ARE the logical px (B30), and a
@@ -875,7 +962,7 @@ body {
       var rect = board.getBoundingClientRect();
       var d = Math.hypot(toLogical(e.clientX - rect.left) - r.originX,
                          toLogical(e.clientY - rect.top) - r.originY);
-      // issue #142 / B50: the ceiling is per-card and per-axis — see
+      // issue #142 / B51: the ceiling is per-card and per-axis — see
       // gestureScale. offsetWidth/offsetHeight read unscaled (B30: layout
       // px are logical px; the scale is a transform).
       var ceiling = Math.min(0.2 * board.offsetWidth / r.card.offsetWidth,

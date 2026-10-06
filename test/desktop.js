@@ -72,6 +72,22 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('Requirements zone label', (await page.locator('#zone-requirements .band-label').innerText()) === 'Requirements');
   ok('Parking Lot header', (await page.locator('#lot-header').innerText()) === 'Parking Lot');
 
+  // issue #147/B54: the band anchors carry the owner's revised copy, plain (400)
+  const bandCopy = await page.evaluate(() => {
+    const g = sel => { const el = document.querySelector(sel); return el ? { text: el.textContent.trim(), weight: getComputedStyle(el).fontWeight } : null; };
+    return {
+      components: g('#zone-components .anchor'),
+      requirements: g('#zone-requirements .anchor'),
+    };
+  });
+  ok('Components line is the owner\'s revised copy (issue #147/B54)',
+    bandCopy.components && bandCopy.components.text === 'Each card links to a page housing my work in that domain.');
+  ok('Requirements line is the owner\'s revised copy (issue #147/B54)',
+    bandCopy.requirements && bandCopy.requirements.text === 'Click around to explore my works!');
+  ok('band anchors render plain 400 text (issue #147/B54)',
+    bandCopy.components && bandCopy.requirements &&
+    bandCopy.components.weight === '400' && bandCopy.requirements.weight === '400');
+
   // the six door-cards render inside the viewport (re-scaled to the wider sheet)
   ok('door-card links present (>=6)', await page.locator('a.door-card').count() >= 6);
   const inside = await page.locator('.door-card').evaluateAll((as, vp) => as.every(a => {
@@ -80,13 +96,29 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   }), { w: VW, h: VH });
   ok('all door-cards sit inside the viewport (no clipping)', inside);
 
-  // the nine note links (B28, UIUX §4.3): one <line> per owner-named pair
-  // (issue #75, #72 and #74), 1px --frame between the two cards' centres, on a hitless
-  // layer below the notes. [L0] is the layer, [L1]–[L9] the nine pairs.
+  // issue #145/B53 + #146/B55: the seven linked sub cards render plain (400)
+  // text, every other door-card keeps the 600 — UIUX §4's weight clause
+  const weights = await page.evaluate(() => {
+    const w = id => { const el = document.querySelector(`.door-card[data-id="${id}"]`); return el ? getComputedStyle(el).fontWeight : null; };
+    return {
+      sub: ['apple-music', 'spotify', 'linkedin', 'zeved-boards', 'agentic-plugins', 'plants-poles', 'plants-in-rocks'].map(w),
+      rest: ['music', 'community', 'career', 'writing', 'software-ai', 'plants-rocks'].map(w),
+    };
+  });
+  ok('sub cards render plain 400 text (issue #145/B53, #146/B55)',
+    weights.sub.length === 7 && weights.sub.every(x => x === '400'));
+  ok('the Music note and six board cards keep 600 (issue #145/B53)',
+    weights.rest.length === 6 && weights.rest.every(x => x === '600'));
+
+  // the thirteen note links (B28, UIUX §4.3): one <line> per owner-named pair
+  // (issue #75, #72, #74 and #146), 1px --frame between the two cards' centres, on a hitless
+  // layer below the notes. [L0] is the layer, [L1]–[L13] the thirteen pairs.
   const WANT = [
     ['music', 'writing'], ['software-ai', 'community'], ['software-ai', 'writing'],
     ['plants-rocks', 'community'], ['plants-rocks', 'writing'], ['software-ai', 'music'],
-    ['music', 'apple-music'], ['music', 'spotify'], ['career', 'linkedin']
+    ['music', 'apple-music'], ['music', 'spotify'], ['career', 'linkedin'],
+    ['software-ai', 'zeved-boards'], ['software-ai', 'agentic-plugins'],
+    ['plants-rocks', 'plants-poles'], ['plants-rocks', 'plants-in-rocks']
   ];
   const lk = await page.evaluate(() => {
     const board = document.getElementById('board');
@@ -119,7 +151,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     };
   });
   ok('[L0] link layer draws below the notes (z 1 under z 2) and never takes a hit',
-    !!lk && lk.pe === 'none' && lk.z === '1' && lk.noteZ === '2' && lk.lines.length === 9);
+    !!lk && lk.pe === 'none' && lk.z === '1' && lk.noteZ === '2' && lk.lines.length === 13);
   lk.lines.forEach((l, i) => {
     const w = WANT[i] || ['?', '?'];
     ok(`[L${i + 1}] link ${i + 1}: ${w[0]} <-> ${w[1]}`,

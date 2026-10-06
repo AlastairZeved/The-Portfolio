@@ -266,8 +266,8 @@ exceeds the sheet minus the side gutters.
 | Region | Render |
 |---|---|
 | Title | the compartment above (§3.2) |
-| Components | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
-| Requirements | the line **"Click around, explore!"** (B37), **16.57px/600 `--ink`** (15px × 1.10455, `B46`), **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
+| Components | the line **"Each card links to a page housing my work in that domain."** (B38's line, copy per B54), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), hanging from the region top at `--band-top` |
+| Requirements | the line **"Click around to explore my works!"** (B37's line, copy per B54), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
 | Parking Lot | water field closing the sheet; sized by its measured contents from the two-row floor (§3.2's own law mirrored at the foot, B46); holds the contact form (§6) |
 
 There is **no All Boards rail** — it is removed from the DOM and the layout
@@ -321,7 +321,10 @@ drawing authority, `B43`):
   that sizes the text: it rides a uniform `transform: scale()` on the card,
   `transform-origin: top left` (TheBoards `styles.css` §4 `.note`), so text
   grows and shrinks with the card, never independently of it. No
-  `--card-fs`; the height-driven updater is gone.
+  `--card-fs`; the height-driven updater is gone. **Weight:** the door-card's
+  text ships at **600**; the linked sub cards (LinkedIn, Apple Music,
+  Spotify, Zeved Boards, Agentic Plugins, Plants on Poles, Plants in Rocks)
+  render plain at **400** (`B53`, issue #145; `B55`, issue #146).
 - **Sizing:** cards are **content-sized** — `width: max-content`,
   `min-width: 132px` (= TheBoards' `NOTE_MIN_W`, `state.js` / `styles.css`
   `.note-text`, TheBoards `UIUX §4.5`, `B84`), `height` following the
@@ -330,18 +333,33 @@ drawing authority, `B43`):
   divided by the card's own scale, floored at `NOTE_MIN_W` — TheBoards
   `geometry.js` `noteMaxW` ported verbatim (`--card-max-w`, set per card in
   JS, re-derived when the card is dragged or its scale changes).
+- **Rest scale (B52, issue #138):** each card's rest scale is its **drawing
+  scale of record** — the owner's attached visual sizes every card —
+  shipped inline per card: **2.25** community, **2.21** career, **1.35**
+  writing, **1.79** software-ai, **1.96** plants-rocks, **1.70** music,
+  **0.78** apple-music, **0.79** spotify, **0.81** linkedin. The six board
+  cards render above 1 (large display type), the sub cards below 1
+  (small chips), exactly as the visual sizes them; the gesture still moves
+  the scale from there under the floor and ceiling above, unchanged. The
+  values are agent-derived from the visual (the `B33`/`B43` provenance
+  pattern) — drawing footprint at 2560×1440 ÷ 1.3037 ÷ the card's measured
+  unscaled content width. `B55` (issue #146) adds four more sub cards at **0.78** each —
+  **zeved-boards**, **agentic-plugins**, **plants-poles**,
+  **plants-in-rocks** — inside the sub-card band the owner set for them
+  (~0.78–0.81); no drawing sizes these four, so the band's smallest scale
+  of record stands.
 - **Resize:** the corner gesture acts as **TheBoards' scale-based resize**
   (`interactions.js` frame-drag resize): the drag changes the card's own
   scale — the pointer's distance to the card's fixed top-left origin,
   divided by its distance at grab — floored at `MIN_SCALE` **0.5**
-  (`state.js`) and **ceilinged by `B50` (issue #142): one-fifth of the
+  (`state.js`) and **ceilinged by `B51` (issue #142): one-fifth of the
   viewport**, as a single uniform-scale bound — the gesture stops at the
   scale at which the card first reaches 1/5 of the viewport width or
   height, whichever binds first. TheBoards' `MAX_SCALE` 2.0 is superseded
   as a ceiling wherever it would stop a card below that bound. This
   supersedes `B21`'s independent width/height corner bounds (the `132×80`
   floor and the 1/5-viewport ceiling) for the gesture — `B21`'s one-fifth
-  ceiling survives as `B50`'s uniform-scale bound; the legibility figure
+  ceiling survives as `B51`'s uniform-scale bound; the legibility figure
   itself survives only as `NOTE_MIN_W`'s 132 unscaled width. The clamped footprint
   is re-fitted into the sheet after a scale change (TheBoards
   `applyNoteScale`'s re-clamp, including its inverted min/max idiom for a
@@ -356,8 +374,10 @@ drawing authority, `B43`):
 > origin (TheBoards' own `startResize` idiom), and the footprint re-clamp.
 > The 0.5 floor and the 132px floor are TheBoards' own values
 > (`state.js`), not agent inventions; the one-fifth-of-viewport ceiling is
-> the owner's (`B50`, issue #142), and the per-card ceiling arithmetic is
-> agent-derived per the `B33`/`B43` pattern.
+> the owner's (`B51`, issue #142), and the per-card ceiling arithmetic is
+> agent-derived per the `B33`/`B43` pattern. The per-card **rest scales**
+> are likewise agent-derived, transcribing the owner's issue #138 visual
+> (`B52`).
 
 **A gesture is never a click** (`B41`, issue #109): the corner resize handle is
 a `<span>` **inside** the card's `<a>`, so a pointer release over it fires the
@@ -427,7 +447,9 @@ Apple Music and Spotify notes below it) are:
 
 Music ↔ Writing · Software & AI ↔ Community · Software & AI ↔ Writing ·
 Plants & Rocks ↔ Community · Plants & Rocks ↔ Writing · Software & AI ↔ Music ·
-Music ↔ Apple Music · Music ↔ Spotify.
+Music ↔ Apple Music · Music ↔ Spotify. `B55` (issue #146) adds four more —
+Software & AI ↔ Zeved Boards · Software & AI ↔ Agentic Plugins ·
+Plants & Rocks ↔ Plants on Poles · Plants & Rocks ↔ Plants in Rocks.
 
 A link is the card-to-card relationship drawn as the board's own linework:
 a thin straight line between two cards' **centres**, no label, no arrowhead.
@@ -477,9 +499,9 @@ A Formspree form with fields and protections per the owner's ruling (B6):
 | Email | no |
 | Message | **yes** |
 
-### §6.1 Spatial layout (B18)
+### §6.1 Spatial layout (B20)
 
-The form's userspace, per the owner's ruling `B18`, renders left-anchored:
+The form's userspace, per the owner's ruling `B20`, renders left-anchored:
 
 - **Name** and **Email** sit **stacked vertically** at the **left wall**,
   directly under the "Parking Lot" header, each at **half their original
@@ -494,7 +516,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 - The **right side of the pane is deliberately empty** — free space lives
   free; it is never filled.
 - The **lot's height follows its measured contents** (B46, issue #128 —
-  superseding B18's fixed `180px` as a mechanism, which stands only as the
+  superseding B20's fixed `180px` as a mechanism, which stands only as the
   no-JS fallback): TheBoards' own law, `TheBoards' UIUX §3.2` / B73, ported
   as `lotH` in `index.html` — measure the rendered rows, floor at the
   **rescaled two-row shelf** (TheBoards' 122-shelf × 1.10455 = **134.76px**,
@@ -503,7 +525,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 
   `lot-h = min(max(134.76, 34 + Σ rowHeight), ⌈0.5 × logical-h⌉)`, the section
   bottom-anchored so it grows **upward** past the shelf floor, with
-  `#lot-items` clipping past the half-sheet ceiling. (B18's stacked-pair
+  `#lot-items` clipping past the half-sheet ceiling. (B20's stacked-pair
   arrangement above is unchanged.)
 
 - **Captcha:** Formspree's reCAPTCHA — on by default, runs on Formspree's
@@ -541,7 +563,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L8]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
 | the band / title-card / lot laws (B46): height-anchored landscape scale, ×1.10455 rescale, 29px overhang, B31's (band-top+8) 16px 16px box, rescaled lot shelf, lot clip | `test/scaling.js` (every viewport) and `test/parity_boards.js` — rendered side-by-side against the local TheBoards checkout at identical viewports |
-| card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B50's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
+| card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B52 drawing rest scales per card, link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 | the career page (B47): employer selector, B132 glow, split body, three-section lot, sand/brown ladder, empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
@@ -595,6 +617,13 @@ The final hexes are the owner's sign-off (issue #133 blank slot 9); the
 **relationships** above — card above deep, note brightest on the deep, glow
 one rung below frame — are the law.
 
+*(B56, issue #154: the ported component's `.gm-title` carries the source's
+800-weight type. The page's font set gains the **800 face** —
+`MontserratAlternates-800.woff2` from the source repo, embedded as a data
+URI like the existing 400/600 faces — so the title weight is served, not
+browser-synthesized. The desc card's 300 weight has no face in the source
+either; it renders synthesized there and here, unchanged.)*
+
 ### §10.2 Regions
 
 *(Band, card and footer rendering law amended by B49, issue #139: the career
@@ -627,10 +656,23 @@ renders as `L × --rs`.)*
   At ≤743px the shown employer stacks (`flex-direction: column`), the rule
   running horizontal at 33.333% width. Transitions collapse under
   `prefers-reduced-motion: reduce`.
-  Left half: role heading box (2px `--frame` border) only — "Blurb about
-  role" and "Notes about role & responsibilities" render only once the owner
-  fills them. Right half: "Accomplishments" and "Learnings/Skills" (section
-  name pending, issue #133 slot 6) render only once filled.
+  Left half *(amended by B56, issue #154)*: the employer's roles as stacked
+  **plugin components** — the Agentic Plugins page's `.gregorian-mode` class
+  set ported verbatim in structure (water back card `.gm-back`, uppercase
+  title card `.gm-title`, the italic lowered year subscript in the `.gm-uc`
+  grammar, description card `.gm-desc`), re-hued to this page's own
+  sand/brown tokens (§10.1) with `--ink` on the sand cards reusing `--deep`
+  `#12100a`. One component per role, equally sized and evenly spaced with
+  comfortable padding between each to fit the space, contained within the
+  left half. The component's "Github" CTA is not ported. The description
+  cards **render empty** (B56's explicit override of the omit-empty rule for
+  these components), each with min-height for 2–3 sentences at the
+  component's own 20px/32px desc type. Plate geometry is agent-derived
+  under the B33 provenance pattern: plate width = the half's own width,
+  plates flex-equal in the stack, desc min-height `3 × 32px + 2 × 10px =
+  116px`, stack padding the page's existing 1.25rem gutter value.
+  Right half: "Accomplishments" and "Learnings/Skills" (section name
+  pending, issue #133 slot 6) render only once filled.
 - **Footer (three sections):** the landing page's `.parking-lot` grammar —
   water gradient over `--deep`, 1px `--frame`-mix top rule, same padding —
   floored at the rescaled two-row shelf (`134.76 × --rs`, B49: the landing
@@ -651,6 +693,13 @@ marker. The slot structure lives in the markup as non-rendering `SLOT`
 comments (and the footer's three-section frame, whose empty `<p>` slots
 measure zero height and carry no text) so a targeted fill makes each block
 appear; until then the page invents no copy.
+
+*(Amended by B56, issue #154: the left half's role-title and dates slots
+ship as the components' `.gm-title` and `.gm-uc` year subscript, with the
+exact strings the owner's issue #154 lists; the blurb/notes slot structure
+is carried by the components' empty `.gm-desc` cards, which render empty
+per B56's explicit override. The omit-empty rule stands unchanged for the
+right half and the footer.)*
 
 **Pinned by:** `test/career.js` — selector mechanics, the B132 glow, the
 split, the three-section lot, the ladder tokens, and the omit-empty-block

@@ -537,7 +537,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 | card drag + scale-based resize (B45: own scale clamped 0.5–2.0, content-sized floor NOTE_MIN_W 132), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
-| the career page (B47): employer selector, B132 glow, split body, three-section lot, sand/brown ladder, empty blocks omitted | `test/career.js` |
+| the career page (B47): employer selector, B132 glow, split body, three-section lot, sand/brown ladder, empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
 | the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, disabled Download, literal idea-green ladder | `test/plantsandrocks.js` |
 
 ---
@@ -590,11 +590,25 @@ one rung below frame — are the law.
 
 ### §10.2 Regions
 
-- **Header (employer timeline):** the landing page's `.topband` grammar with
-  three title cards — PNC Bank, PNC Private Bank, Brinker Capital,
-  left→right chronological. Each card hangs over the header's 1px `--frame`
-  rule (`margin-bottom: -14px`). Unselected cards are dim + italic
-  (§4's unselected grammar); the selected card wears the B132 glow verbatim:
+*(Band, card and footer rendering law amended by B49, issue #139: the career
+page's header band, title cards and footer render at the landing page's
+conventions — B46's height-anchored scale, B31's title-card box, the lot's
+two-row-shelf floor — re-tokened to the sand/brown binding. The scale is a
+pure-CSS custom property `--rs` (`vh/1104.55` landscape, `min(vw/1440,
+vh/1104.55)` portrait) since the page ships no script; every band literal
+renders as `L × --rs`.)*
+
+- **Header (employer timeline):** the landing page's band grammar — the
+  water (radial foot + three-stop ladder + 0.05 dither) over the deep,
+  closed by the 1px `--frame` rule at `--rule-y` (`67.38 × --rs`, the
+  rescaled two-line floor) — with three title cards, PNC Bank, PNC Private
+  Bank, Brinker Capital, left→right chronological. Each card is the landing
+  title card's B31 box grammar verbatim: content-sized, top-anchored,
+  `border-top: 0`, radius only on the bottom corners, `(band-top + 8px)
+  16px 16px` padding, both lines at the 20px logical type (employer name
+  600, oneliner slot 400), `min-height: rule-y + 29px` hanging over the
+  rule. Unselected cards are dim + italic (§4's unselected grammar); the
+  selected card wears the B132 glow verbatim:
   `border-color: var(--glow-sand); box-shadow: 0 0 8px 0 var(--glow-sand);`
   and no other state. Default selection: PNC Bank. The header is the
   selector's `role="radiogroup"` (`aria-label="Choose an employer"`); the
@@ -612,9 +626,11 @@ one rung below frame — are the law.
   name pending, issue #133 slot 6) render only once filled.
 - **Footer (three sections):** the landing page's `.parking-lot` grammar —
   water gradient over `--deep`, 1px `--frame`-mix top rule, same padding —
-  split three ways (professional blurb · contact info · the `.cta` "Learn
-  More about Rob" → `https://razgregory.com/`), separated by 1px divider
-  bars of 3/4 of the section's inner length, vertically centred.
+  floored at the rescaled two-row shelf (`134.76 × --rs`, B49: the landing
+  lot's floor, taken statically; content grows past it), split three ways
+  (professional blurb · contact info · the `.cta` "Learn More about Rob" →
+  `https://razgregory.com/`), separated by 1px divider bars of 3/4 of the
+  section's inner length, vertically centred.
 
 ### §10.3 Blank slots
 

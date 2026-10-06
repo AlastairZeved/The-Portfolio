@@ -45,7 +45,8 @@ const MIN_SCALE = 0.5;   // TheBoards' note-scale floor (B45); the ceiling is pe
 const REST_SCALES = {
   'community': 2.25, 'career': 2.21, 'writing': 1.35, 'software-ai': 1.79,
   'plants-rocks': 1.96, 'music': 1.70, 'apple-music': 0.78, 'spotify': 0.79,
-  'linkedin': 0.81
+  'linkedin': 0.81, 'zeved-boards': 0.78, 'agentic-plugins': 0.78,
+  'plants-poles': 0.78, 'plants-in-rocks': 0.78
 };
 
 /* one scenario, run once per viewport; rs is the render scale the page reports */
@@ -65,9 +66,10 @@ async function runScenario(page, tag, width, height) {
   ok(`${tag}: render scale is height-anchored on landscape (vh/REF_H), min() in portrait (B46) = ${expectRs.toFixed(3)} (rs=${rs.toFixed(3)})`,
      Math.abs(rs - expectRs) < 1e-6);
 
-  // --- issue #138 (B51): each card renders at its own drawing rest scale ---
-  // Six board cards above 1, the three sub cards below 1, exactly as the
-  // owner's visual sizes them. The gesture bounds are untouched.
+  // --- issue #138 (B51) + #146 (B54): each card renders at its own rest scale ---
+  // Six board cards above 1, the sub cards below 1, exactly as the owner
+  // sizes them (B51's drawing; B54's four note sub cards in the owner's
+  // sub-card band at 0.78). The gesture bounds are untouched.
   const rest = await page.evaluate(() => {
     const out = {};
     document.querySelectorAll('.door-card').forEach(c => {
@@ -87,8 +89,8 @@ async function runScenario(page, tag, width, height) {
   }
   const boardTier = ['community', 'career', 'writing', 'software-ai', 'plants-rocks', 'music']
     .every(id => rest[id].scale > 1);
-  const subTier = ['apple-music', 'spotify', 'linkedin'].every(id => rest[id].scale < 1);
-  ok(`${tag}: six board cards above 1, three sub cards below 1 (B51 tiers)`, boardTier && subTier);
+  const subTier = ['apple-music', 'spotify', 'linkedin', 'zeved-boards', 'agentic-plugins', 'plants-poles', 'plants-in-rocks'].every(id => rest[id].scale < 1);
+  ok(`${tag}: six board cards above 1, seven sub cards below 1 (B51/B54 tiers)`, boardTier && subTier);
 
   // --- issue #94: the native HTML5 anchor drag is suppressed on door-cards ---
   // A real press-and-move on an <a href> would otherwise fire the browser's

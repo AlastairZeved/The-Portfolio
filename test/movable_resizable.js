@@ -1,7 +1,7 @@
 /* test/movable_resizable.js — bug #58 regression: door-cards must be
    draggable, resizable via the corner handle, clamped to a 1/5-viewport max
    and a legible minimum, with each card's link still opening in a new tab.
-   Issue #138/B51 also pins each card's REST scale — the size it renders at
+   Issue #138/B52 also pins each card's REST scale — the size it renders at
    when the page loads (the gesture bounds are untouched by that pin).
 
    Since issue #87 (B30) the sheet renders through ONE uniform scale, so this
@@ -15,7 +15,7 @@
                         pointer 1:1 on screen (physical dx/dy unchanged), the
                         corner resize changes the card's own scale: floored at
                         TheBoards' 0.5 (B45) and CEILINGED at the issue
-                        #142/B50 one-fifth-of-the-viewport bound — one uniform
+                        #142/B51 one-fifth-of-the-viewport bound — one uniform
                         scale, the card stops at the first axis reaching 1/5
                         of the viewport, superseding the old 2.0 MAX_SCALE.
                         The NOTE_MIN_W 132 floor is an unscaled logical size
@@ -37,9 +37,9 @@ let failures = 0;
 const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
 
 const DRAG_X = 180, DRAG_Y = 150;   // physical px the pointer travels (6 moves of +30/+25)
-const MIN_SCALE = 0.5;   // TheBoards' note-scale floor (B45); the ceiling is per-card (B50)
+const MIN_SCALE = 0.5;   // TheBoards' note-scale floor (B45); the ceiling is per-card (B51)
 
-/* B51 (issue #138): each card's REST scale of record — the owner's drawing
+/* B52 (issue #138): each card's REST scale of record — the owner's drawing
    size at page load. The gesture bounds (0.5 floor, one-fifth ceiling) are
    untouched; this pins the default rendered size per card only. */
 const REST_SCALES = {
@@ -66,9 +66,9 @@ async function runScenario(page, tag, width, height) {
   ok(`${tag}: render scale is height-anchored on landscape (vh/REF_H), min() in portrait (B46) = ${expectRs.toFixed(3)} (rs=${rs.toFixed(3)})`,
      Math.abs(rs - expectRs) < 1e-6);
 
-  // --- issue #138 (B51) + #146 (B54): each card renders at its own rest scale ---
+  // --- issue #138 (B52) + #146 (B55): each card renders at its own rest scale ---
   // Six board cards above 1, the sub cards below 1, exactly as the owner
-  // sizes them (B51's drawing; B54's four note sub cards in the owner's
+  // sizes them (B52's drawing; B55's four note sub cards in the owner's
   // sub-card band at 0.78). The gesture bounds are untouched.
   const rest = await page.evaluate(() => {
     const out = {};
@@ -82,15 +82,15 @@ async function runScenario(page, tag, width, height) {
   });
   for (const [id, want] of Object.entries(REST_SCALES)) {
     const got = rest[id];
-    ok(`${tag}: ${id} rest scale is the drawing scale ${want} (B51, got ${got && got.scale})`,
+    ok(`${tag}: ${id} rest scale is the drawing scale ${want} (B52, got ${got && got.scale})`,
        got && Math.abs(got.scale - want) < 1e-9);
-    ok(`${tag}: ${id} renders at unscaled × rest × rs (B51)`,
+    ok(`${tag}: ${id} renders at unscaled × rest × rs (B52)`,
        got && Math.abs(got.logicalW - got.unscaledW * got.scale) < 0.5);
   }
   const boardTier = ['community', 'career', 'writing', 'software-ai', 'plants-rocks', 'music']
     .every(id => rest[id].scale > 1);
   const subTier = ['apple-music', 'spotify', 'linkedin', 'zeved-boards', 'agentic-plugins', 'plants-poles', 'plants-in-rocks'].every(id => rest[id].scale < 1);
-  ok(`${tag}: six board cards above 1, seven sub cards below 1 (B51/B54 tiers)`, boardTier && subTier);
+  ok(`${tag}: six board cards above 1, seven sub cards below 1 (B52/B55 tiers)`, boardTier && subTier);
 
   // --- issue #94: the native HTML5 anchor drag is suppressed on door-cards ---
   // A real press-and-move on an <a href> would otherwise fire the browser's
@@ -148,7 +148,7 @@ async function runScenario(page, tag, width, height) {
 
   // --- RESIZE, B45 (issue #126): the corner gesture is TheBoards' scale-based
   // resize — the drag changes the card's own scale, floored at 0.5 (TheBoards
-  // state.js MIN_SCALE) and ceilinged at the issue #142/B50 one-fifth-of-the-
+  // state.js MIN_SCALE) and ceilinged at the issue #142/B51 one-fifth-of-the-
   // viewport bound: one uniform scale, the card stops at the first axis that
   // reaches 0.2 × the board's logical dimensions (the board fills the
   // viewport, so board-logical == viewport). The old fixed MAX_SCALE 2.0 and
@@ -174,7 +174,7 @@ async function runScenario(page, tag, width, height) {
              boardW: board.offsetWidth, boardH: board.offsetHeight, rs };
   });
   const wantMax = Math.min(0.2 * grown.boardW / grown.unscaledW, 0.2 * grown.boardH / grown.unscaledH);
-  ok(`${tag}: resize scale capped at the 1/5-viewport ceiling (issue #142/B50, got ${grown.scale}, want ${wantMax})`,
+  ok(`${tag}: resize scale capped at the 1/5-viewport ceiling (issue #142/B51, got ${grown.scale}, want ${wantMax})`,
      Math.abs(grown.scale - wantMax) < 1e-9);
   ok(`${tag}: a ceiling-scaled card renders at unscaled × ceiling × rs (got ${grown.w.toFixed(1)}, want ${(grown.unscaledW * wantMax * grown.rs).toFixed(1)})`,
      Math.abs(grown.w - grown.unscaledW * wantMax * grown.rs) < 1.5);
@@ -233,7 +233,7 @@ async function runScenario(page, tag, width, height) {
   // exactly how the bug reproduces. Assert on the tab count, like the B3 check.
   await page.goto(URL, { waitUntil: 'networkidle' });
   // issue #112 (B43) authored the first door-card 310px wide. B45 removed
-  // the w/h ceiling entirely (scale-based resize); B50 (issue #142) sets the
+  // the w/h ceiling entirely (scale-based resize); B51 (issue #142) sets the
   // per-card 1/5-viewport ceiling in its place, so the proof still runs on
   // the Spotify door, far from the sheet edges.
   const resizeCard = page.locator('[data-id="spotify"]');

@@ -193,7 +193,7 @@ resolved by ruling before or during the build:
   **Components** holds "All cards open their pages in a new tab" (issue
   [#93](https://github.com/AlastairZeved/The-Portfolio/issues/93), the second
   line's historical provenance). Issue
-  [#147](https://github.com/AlastairZeved/The-Portfolio/issues/147) (`B53`)
+  [#147](https://github.com/AlastairZeved/The-Portfolio/issues/147) (`B54`)
   later revised the copy of record: **Components** reads "Each card links to
   a page housing my work in that domain." and **Requirements** reads "Click
   around to explore my works!", both lines rendered plain (weight 400). Each

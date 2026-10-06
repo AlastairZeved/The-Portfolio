@@ -128,7 +128,7 @@ function ok(label, cond) {
         }
         return rightLogical / (1 - left / 100);
       }));
-      /* B51 (issue #138): the drawing rest scales widen the cards, so at
+      /* B52 (issue #138): the drawing rest scales widen the cards, so at
          square-ish landscape aspects the width floor also carries the
          pairwise gap term (B44's no-overlap law; same agent-derived
          provenance as B46's lw_min): for every pair whose vertical ranges

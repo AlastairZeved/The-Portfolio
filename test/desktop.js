@@ -72,7 +72,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('Requirements zone label', (await page.locator('#zone-requirements .band-label').innerText()) === 'Requirements');
   ok('Parking Lot header', (await page.locator('#lot-header').innerText()) === 'Parking Lot');
 
-  // issue #147/B53: the band anchors carry the owner's revised copy, plain (400)
+  // issue #147/B54: the band anchors carry the owner's revised copy, plain (400)
   const bandCopy = await page.evaluate(() => {
     const g = sel => { const el = document.querySelector(sel); return el ? { text: el.textContent.trim(), weight: getComputedStyle(el).fontWeight } : null; };
     return {
@@ -80,11 +80,11 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       requirements: g('#zone-requirements .anchor'),
     };
   });
-  ok('Components line is the owner\'s revised copy (issue #147/B53)',
+  ok('Components line is the owner\'s revised copy (issue #147/B54)',
     bandCopy.components && bandCopy.components.text === 'Each card links to a page housing my work in that domain.');
-  ok('Requirements line is the owner\'s revised copy (issue #147/B53)',
+  ok('Requirements line is the owner\'s revised copy (issue #147/B54)',
     bandCopy.requirements && bandCopy.requirements.text === 'Click around to explore my works!');
-  ok('band anchors render plain 400 text (issue #147/B53)',
+  ok('band anchors render plain 400 text (issue #147/B54)',
     bandCopy.components && bandCopy.requirements &&
     bandCopy.components.weight === '400' && bandCopy.requirements.weight === '400');
 
@@ -96,7 +96,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   }), { w: VW, h: VH });
   ok('all door-cards sit inside the viewport (no clipping)', inside);
 
-  // issue #145/B52 + #146/B54: the seven linked sub cards render plain (400)
+  // issue #145/B53 + #146/B55: the seven linked sub cards render plain (400)
   // text, every other door-card keeps the 600 — UIUX §4's weight clause
   const weights = await page.evaluate(() => {
     const w = id => { const el = document.querySelector(`.door-card[data-id="${id}"]`); return el ? getComputedStyle(el).fontWeight : null; };
@@ -105,9 +105,9 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       rest: ['music', 'community', 'career', 'writing', 'software-ai', 'plants-rocks'].map(w),
     };
   });
-  ok('sub cards render plain 400 text (issue #145/B52, #146/B54)',
+  ok('sub cards render plain 400 text (issue #145/B53, #146/B55)',
     weights.sub.length === 7 && weights.sub.every(x => x === '400'));
-  ok('the Music note and six board cards keep 600 (issue #145/B52)',
+  ok('the Music note and six board cards keep 600 (issue #145/B53)',
     weights.rest.length === 6 && weights.rest.every(x => x === '600'));
 
   // the thirteen note links (B28, UIUX §4.3): one <line> per owner-named pair

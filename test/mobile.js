@@ -81,9 +81,10 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
                       Math.abs(+l.getAttribute('x2') - cb[0]), Math.abs(+l.getAttribute('y2') - cb[1]));
     });
   });
-  ok('all nine links land on their card centres at scale < 1', linkFit.length === 9 && linkFit.every(d => d < 1));
+  ok('all thirteen links land on their card centres at scale < 1', linkFit.length === 13 && linkFit.every(d => d < 1));
 
-  // eight door-cards, each a real new-tab anchor (B26); the Music card is a plain note
+  // eight door-cards, each a real new-tab anchor (B26); the Music card and
+  // the four B54 sub cards (issue #146) are plain notes
   const cards = await page.locator('a.door-card').count();
   ok('eight door-cards', cards === 8);
   const hrefs = await page.locator('a.door-card').evaluateAll(as => as.map(a => [a.textContent.trim(), a.href, a.target, a.rel]));
@@ -102,10 +103,15 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     ok(`${name} links to ${url}`, hit && hit[1] === url && hit[2] === '_blank' && hit[3].includes('noopener'));
   }
 
-  // the Music card is a rest-only note, not a link (B26)
+  // the Music card is a rest-only note, not a link (B26); B54 (issue #146)
+  // adds four more non-link note sub cards, so five div.door-card.note-card
+  // exist now and Music remains the first
   const musicNotes = page.locator('div.door-card.note-card');
-  ok('Music card is a non-link note', await musicNotes.count() === 1
+  ok('Music card is a non-link note (first of five notes — B26, B54)', await musicNotes.count() === 5
     && (await musicNotes.first().innerText()).trim().split('\n')[0].trim() === 'Music');
+  ok('the four B54 sub cards are non-link notes too', await musicNotes.evaluateAll(els =>
+    ['Zeved Boards', 'Agentic Plugins', 'Plants on Poles', 'Plants in Rocks'].every((t, i) =>
+      els[i + 1] && els[i + 1].innerText.trim().split('\n')[0].trim() === t && !els[i + 1].hasAttribute('href'))));
   ok('Music note has no href', await musicNotes.first().evaluate(el => !el.hasAttribute('href')));
   ok('Music note carries no hover/click shadow', await musicNotes.first().evaluate(el =>
     getComputedStyle(el).boxShadow === 'none'));

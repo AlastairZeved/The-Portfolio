@@ -2338,3 +2338,55 @@ Instead of:
 
 Replace it with:
 "Click around to explore my works!""
+
+---
+
+### B54. Four new linked sub cards — Zeved Boards and Agentic Plugins under Software & AI, Plants on Poles and Plants in Rocks under Plants & Rocks; note cards, not doors (issue #146)
+
+Four sub cards join the board, each linked by a line to its parent:
+
+1. **Zeved Boards** — child of **Software & AI**, on the left diagonal
+   under it.
+2. **Agentic Plugins** — child of **Software & AI**, on the right diagonal
+   under it.
+3. **Plants on Poles** — child of **Plants & Rocks**, on the left diagonal
+   under it.
+4. **Plants in Rocks** — child of **Plants & Rocks**, on the right diagonal
+   under it.
+
+Each new card renders **plain text, no bold** — the sub-card weight 400
+(`B52`'s selector covers them) — and meets the board's note-card and font
+standards (`UIUX §4.1`). They are **note cards, not doors**: the owner ruled
+they carry no link and open no page, like the Music note. The issue's
+"underneath Plants & Rocks" placement for the Software & AI pair is
+superseded by the owner's clarification: those two hang under **Software &
+AI**, their own parent. No drawing sizes these four; the owner set their
+size at the existing sub-card scale band (~0.78–0.81, Apple Music's band),
+and they ship at **0.78** each, the band's smallest scale of record. The
+placements follow the board's own diagonal idiom — the left-diagonal child
+at the LinkedIn offsets (−5.0, +14.2), the right-diagonal child at the
+Spotify offsets (+8.7, +14.6), agent-derived transcriptions of the owner's
+statement under the `B33`/`B43` provenance pattern.
+
+**Source:** the owner's issue
+[#146](https://github.com/AlastairZeved/The-Portfolio/issues/146) — "Add
+the following linked cards to their parent as below:
+
+1. Software & AI --- "Zeved Boards" (Positioned underneath Plants & Rocks,
+   to the left diagonal)
+2. Software & AI --- "Agentic Plugins" (Positioned underneath Plants &
+   Rocks, to the right diagonal)
+3. Plants & Rocks --- "Plants on Poles" (Positioned underneath Plants &
+   Rocks, to the left diagonal)
+4. Plants & Rocks --- "Plants in Rocks" (Positioned underneath Plants &
+   Rocks, to the right diagonal)
+
+Each new card should be plain text, no bold, and meet the standards for
+note cards and fonts on this board."
+
+and the owner's chat answers of 2026-10-06: "No links — plain note cards
+like the Music note" (the cards are not doors); "No — the two Software & AI
+children should hang under Software & AI instead" (the placement of the
+Software & AI pair, superseding the issue's literal "underneath Plants &
+Rocks" for those two); "The existing sub-card scale band — ~0.78–0.81,
+matching Apple Music/Spotify/LinkedIn" (the size).

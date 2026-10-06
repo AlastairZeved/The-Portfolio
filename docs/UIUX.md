@@ -322,8 +322,9 @@ drawing authority, `B43`):
   `transform-origin: top left` (TheBoards `styles.css` §4 `.note`), so text
   grows and shrinks with the card, never independently of it. No
   `--card-fs`; the height-driven updater is gone. **Weight:** the door-card's
-  text ships at **600**; the three linked sub cards (LinkedIn, Apple Music,
-  Spotify) render plain at **400** (`B52`, issue #145).
+  text ships at **600**; the linked sub cards (LinkedIn, Apple Music,
+  Spotify, Zeved Boards, Agentic Plugins, Plants on Poles, Plants in Rocks)
+  render plain at **400** (`B52`, issue #145; `B54`, issue #146).
 - **Sizing:** cards are **content-sized** — `width: max-content`,
   `min-width: 132px` (= TheBoards' `NOTE_MIN_W`, `state.js` / `styles.css`
   `.note-text`, TheBoards `UIUX §4.5`, `B84`), `height` following the
@@ -337,12 +338,16 @@ drawing authority, `B43`):
   shipped inline per card: **2.25** community, **2.21** career, **1.35**
   writing, **1.79** software-ai, **1.96** plants-rocks, **1.70** music,
   **0.78** apple-music, **0.79** spotify, **0.81** linkedin. The six board
-  cards render above 1 (large display type), the three sub cards below 1
+  cards render above 1 (large display type), the sub cards below 1
   (small chips), exactly as the visual sizes them; the gesture still moves
   the scale from there under the floor and ceiling above, unchanged. The
   values are agent-derived from the visual (the `B33`/`B43` provenance
   pattern) — drawing footprint at 2560×1440 ÷ 1.3037 ÷ the card's measured
-  unscaled content width.
+  unscaled content width. `B54` (issue #146) adds four more sub cards at **0.78** each —
+  **zeved-boards**, **agentic-plugins**, **plants-poles**,
+  **plants-in-rocks** — inside the sub-card band the owner set for them
+  (~0.78–0.81); no drawing sizes these four, so the band's smallest scale
+  of record stands.
 - **Resize:** the corner gesture acts as **TheBoards' scale-based resize**
   (`interactions.js` frame-drag resize): the drag changes the card's own
   scale — the pointer's distance to the card's fixed top-left origin,
@@ -442,7 +447,9 @@ Apple Music and Spotify notes below it) are:
 
 Music ↔ Writing · Software & AI ↔ Community · Software & AI ↔ Writing ·
 Plants & Rocks ↔ Community · Plants & Rocks ↔ Writing · Software & AI ↔ Music ·
-Music ↔ Apple Music · Music ↔ Spotify.
+Music ↔ Apple Music · Music ↔ Spotify. `B54` (issue #146) adds four more —
+Software & AI ↔ Zeved Boards · Software & AI ↔ Agentic Plugins ·
+Plants & Rocks ↔ Plants on Poles · Plants & Rocks ↔ Plants in Rocks.
 
 A link is the card-to-card relationship drawn as the board's own linework:
 a thin straight line between two cards' **centres**, no label, no arrowhead.

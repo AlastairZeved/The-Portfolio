@@ -214,7 +214,11 @@ body {
    2.25 community, 2.21 career, 1.35 writing, 1.79 software-ai, 1.96
    plants-rocks, 1.70 music, 0.78 apple-music, 0.79 spotify, 0.81
    linkedin — so the six board cards render large and the three sub
-   cards small, exactly as the owner's visual sizes them. The gesture
+   cards small, exactly as the owner's visual sizes them. B54 (issue
+   #146) adds four more sub cards at 0.78 each — zeved-boards,
+   agentic-plugins, plants-poles, plants-in-rocks — inside the sub-card
+   band the owner set for them (~0.78–0.81); no drawing sizes these
+   four, so the band's smallest scale of record stands. The gesture
    still moves the scale from there (B45/B50 bounds unchanged). */
 .door-card {
   position: absolute;
@@ -252,7 +256,8 @@ body {
 }
 /* B52 (issue #145): the three linked sub-cards render their text plain —
    weight 400, the self-hosted regular rung — while every other door-card
-   keeps the 600. */
+   keeps the 600. B54 (issue #146): the four new note sub cards render
+   plain too; the selector covers all seven sub cards. */
 .door-card.sub-card {
   font-weight: 400;
 }
@@ -509,6 +514,31 @@ body {
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
 
+  <!-- B54 (issue #146): four new linked sub cards. They are NOTE cards,
+       not doors — the owner ruled no links, like the Music note — so they
+       take the note-card rest-only class and no href. Sizes sit in the
+       sub-card band the owner set (all at 0.78, the band's smallest scale
+       of record); the placements follow the board's own diagonal idiom:
+       each pair hangs under its parent, the left-diagonal child at the
+       LinkedIn offsets (−5.0, +14.2) and the right-diagonal child at the
+       Spotify offsets (+8.7, +14.6). -->
+  <div class="door-card note-card sub-card" data-id="zeved-boards" style="--card-scale: 0.78; left:7.3%; top:65.9%">
+    Zeved Boards
+    <span class="resize-handle" aria-hidden="true"></span>
+  </div>
+  <div class="door-card note-card sub-card" data-id="agentic-plugins" style="--card-scale: 0.78; left:21%; top:66.3%">
+    Agentic Plugins
+    <span class="resize-handle" aria-hidden="true"></span>
+  </div>
+  <div class="door-card note-card sub-card" data-id="plants-poles" style="--card-scale: 0.78; left:37.6%; top:78.6%">
+    Plants on Poles
+    <span class="resize-handle" aria-hidden="true"></span>
+  </div>
+  <div class="door-card note-card sub-card" data-id="plants-in-rocks" style="--card-scale: 0.78; left:51.3%; top:79%">
+    Plants in Rocks
+    <span class="resize-handle" aria-hidden="true"></span>
+  </div>
+
   <!-- Parking Lot: water field closing the sheet (B6) -->
   <div id="lot">
     <div id="lot-rule"></div>
@@ -538,10 +568,11 @@ body {
     </div>
   </div>
 
-  <!-- The link layer (UIUX §4.3, B28): the nine straight 1px --frame lines
-       that join the note cards, one `<line>` per pair the owner names in
-       issue #75, #72 and #74. TheBoards' link idiom ported verbatim (TheBoards'
-       UIUX §4.6 / B91) — a line between two cards' centres, below the notes,
+  <!-- The link layer (UIUX §4.3, B28): the thirteen straight 1px --frame
+       lines that join the note cards, one `<line>` per pair the owner names
+       in issue #75, #72, #74 and #146. TheBoards' link idiom ported verbatim
+       (TheBoards' UIUX §4.6 / B91) — a line between two cards' centres,
+       below the notes,
        never a hit target. Endpoints are computed from live card geometry
        in the script below, so a line follows a card that is dragged or
        resized; only the pairing is authored here. -->
@@ -555,6 +586,10 @@ body {
     <line data-link="7" data-from="music" data-to="apple-music"></line>
     <line data-link="8" data-from="music" data-to="spotify"></line>
     <line data-link="9" data-from="career" data-to="linkedin"></line>
+    <line data-link="10" data-from="software-ai" data-to="zeved-boards"></line>
+    <line data-link="11" data-from="software-ai" data-to="agentic-plugins"></line>
+    <line data-link="12" data-from="plants-rocks" data-to="plants-poles"></line>
+    <line data-link="13" data-from="plants-rocks" data-to="plants-in-rocks"></line>
   </svg>
 
 </div>

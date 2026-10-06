@@ -37,6 +37,33 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   });
   ok('title cards hang over the header line', hang);
 
+  // B49 (issue #139): the band, cards and lot render at the landing page's
+  // conventions — B46's height-anchored scale (rs = vh/1104.55), B31's card
+  // box, the lot's two-row-shelf floor. At 1440×900, rs = 0.81455.
+  const b49 = await page.evaluate(() => {
+    const band = document.querySelector('.topband').getBoundingClientRect();
+    const card = document.querySelector('.topband__card');
+    const r = card.getBoundingClientRect();
+    const cs = getComputedStyle(card);
+    const lot = document.querySelector('.parking-lot').getBoundingClientRect();
+    const rs = innerHeight / 1104.55;
+    return { bandH: band.height, hang: r.bottom - band.bottom, font: cs.fontSize,
+             borderTop: cs.borderTopWidth, radius: cs.borderBottomLeftRadius,
+             cardW: r.width, lotH: lot.height, rs };
+  });
+  ok('band renders at the landing height-anchored scale: rule-y = 67.38 × vh/1104.55 (B46/B49)',
+    Math.abs(b49.bandH - 67.38 * b49.rs) < 1);
+  ok('card hangs 29 × rs over the rule (B31/B49)',
+    Math.abs(b49.hang - 29 * b49.rs) < 1);
+  ok('card type is the 20px logical rung: font-size = 20 × rs (B31/B49)',
+    Math.abs(parseFloat(b49.font) - 20 * b49.rs) < 0.5);
+  ok('card is the B31 box: border-top 0, radius only on the bottom corners, content-sized',
+    // content-sized hug: ~111px at 1440×900; <300 is a sanity bound against
+    // regression to the old full-width grid cell (~440px)
+    b49.borderTop === '0px' && parseFloat(b49.radius) > 0 && b49.cardW < 300);
+  ok('lot is floored at the rescaled two-row shelf: 134.76 × rs (B46/B73/B49)',
+    b49.lotH >= 134.76 * b49.rs - 1);
+
   // Default selection: PNC Bank, wearing the B132 glow (one token, soft bloom)
   await page.waitForTimeout(300);   // let the 200ms box-shadow transition settle
   const glow = await page.evaluate(() => {

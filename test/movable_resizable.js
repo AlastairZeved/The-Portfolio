@@ -11,10 +11,13 @@
      narrow  390x844  — scale < 1: every pointer reading must be converted into
                         the board's LOGICAL space. A dragged card tracks the
                         pointer 1:1 on screen (physical dx/dy unchanged), the
-                        corner resize changes the card's own scale clamped to
-                        TheBoards' 0.5–2.0 note-scale band (B45), and the
-                        NOTE_MIN_W 132 floor is an unscaled logical size that
-                        scales with the sheet.
+                        corner resize changes the card's own scale: floored at
+                        TheBoards' 0.5 (B45) and CEILINGED at the issue
+                        #142/B50 one-fifth-of-the-viewport bound — one uniform
+                        scale, the card stops at the first axis reaching 1/5
+                        of the viewport, superseding the old 2.0 MAX_SCALE.
+                        The NOTE_MIN_W 132 floor is an unscaled logical size
+                        that scales with the sheet.
    The style.left values are asserted in LOGICAL px directly, so a
    regression that reads clientX/clientY against card geometry again (the
    issue #87 review finding) fails here at 390x844.
@@ -32,7 +35,7 @@ let failures = 0;
 const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
 
 const DRAG_X = 180, DRAG_Y = 150;   // physical px the pointer travels (6 moves of +30/+25)
-const MIN_SCALE = 0.5, MAX_SCALE = 2.0;   // TheBoards' note-scale band (B45)
+const MIN_SCALE = 0.5;   // TheBoards' note-scale floor (B45); the ceiling is per-card (B50)
 
 /* one scenario, run once per viewport; rs is the render scale the page reports */
 async function runScenario(page, tag, width, height) {
@@ -106,9 +109,13 @@ async function runScenario(page, tag, width, height) {
      Math.abs(drag.styleLeft - drag.wantLeft) < 1 && Math.abs(drag.styleTop - drag.wantTop) < 1);
 
   // --- RESIZE, B45 (issue #126): the corner gesture is TheBoards' scale-based
-  // resize — the drag changes the card's own scale, clamped [0.5, 2.0]
-  // (TheBoards state.js MIN/MAX_SCALE), a uniform transform on the card.
-  // The old B21 1/5-viewport w/h ceiling and the 132x80 floor are superseded.
+  // resize — the drag changes the card's own scale, floored at 0.5 (TheBoards
+  // state.js MIN_SCALE) and ceilinged at the issue #142/B50 one-fifth-of-the-
+  // viewport bound: one uniform scale, the card stops at the first axis that
+  // reaches 0.2 × the board's logical dimensions (the board fills the
+  // viewport, so board-logical == viewport). The old fixed MAX_SCALE 2.0 and
+  // the old B21 1/5-viewport w/h ceiling are superseded by this per-card
+  // ceiling; the 132x80 unscaled floor still stands.
   const grown = await page.evaluate(async () => {
     const board = document.querySelector('#board');
     const c = document.querySelector('a.door-card');
@@ -123,18 +130,31 @@ async function runScenario(page, tag, width, height) {
     const a = c.getBoundingClientRect();
     const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
     const s = parseFloat(c.style.getPropertyValue('--card-scale'));
-    return { w: a.width, scale: s, unscaledW: c.offsetWidth, rs };
+    // the expected ceiling, from the page's OWN values (B30: layout px are
+    // logical px; offsetWidth/offsetHeight are unscaled under the transform)
+    return { w: a.width, h: a.height, scale: s, unscaledW: c.offsetWidth, unscaledH: c.offsetHeight,
+             boardW: board.offsetWidth, boardH: board.offsetHeight, rs };
   });
-  ok(`${tag}: resize scale capped at MAX_SCALE 2.0 (got ${grown.scale})`, Math.abs(grown.scale - 2) < 1e-9);
-  ok(`${tag}: a max-scaled card renders at unscaled × 2 × rs (got ${grown.w.toFixed(1)}, want ${(grown.unscaledW * 2 * grown.rs).toFixed(1)})`,
-     Math.abs(grown.w - grown.unscaledW * 2 * grown.rs) < 1.5);
+  const wantMax = Math.min(0.2 * grown.boardW / grown.unscaledW, 0.2 * grown.boardH / grown.unscaledH);
+  ok(`${tag}: resize scale capped at the 1/5-viewport ceiling (issue #142/B50, got ${grown.scale}, want ${wantMax})`,
+     Math.abs(grown.scale - wantMax) < 1e-9);
+  ok(`${tag}: a ceiling-scaled card renders at unscaled × ceiling × rs (got ${grown.w.toFixed(1)}, want ${(grown.unscaledW * wantMax * grown.rs).toFixed(1)})`,
+     Math.abs(grown.w - grown.unscaledW * wantMax * grown.rs) < 1.5);
+  // INDEPENDENT observable: the rendered (physical) card itself must sit
+  // inside the viewport bound — width <= 0.2 × window.innerWidth (+1.5px
+  // tolerance), no matter what internal quantities the implementation used.
+  const vp = await page.evaluate(() => [window.innerWidth, window.innerHeight]);
+  ok(`${tag}: grown card width is viewport-bound (physical ${grown.w.toFixed(1)} <= 0.2 × innerWidth ${vp[0]} = ${(0.2 * vp[0]).toFixed(1)})`,
+     grown.w <= 0.2 * vp[0] + 1.5);
+  ok(`${tag}: grown card height is viewport-bound (physical ${grown.h.toFixed(1)} <= 0.2 × innerHeight ${vp[1]} = ${(0.2 * vp[1]).toFixed(1)})`,
+     grown.h <= 0.2 * vp[1] + 1.5);
 
   // --- RESIZE floor, B45: the scale floors at MIN_SCALE 0.5 — the card's
   // unscaled content width stays >= NOTE_MIN_W 132 (the CSS min-width), so
   // the smallest rendered card is 132 × 0.5 = 66 logical px wide. TheBoards'
   // resize is distance-to-origin based, so the shrink gesture pulls the
   // pointer TOWARD the card's top-left origin. Reload first so the gesture
-  // starts from the authored scale 1 (the previous gesture left 2.0 behind;
+  // starts from the authored scale 1 (the grow gesture leaves wantMax behind;
   // the page holds no state across a reload, B7).
   await page.goto(URL, { waitUntil: 'networkidle' });
   const shrunk = await page.evaluate(async () => {
@@ -174,10 +194,10 @@ async function runScenario(page, tag, width, height) {
   // semantics are only trustworthy through a real press-move-release — which is
   // exactly how the bug reproduces. Assert on the tab count, like the B3 check.
   await page.goto(URL, { waitUntil: 'networkidle' });
-  // issue #112 (B43) authored the first door-card 310px wide — above the old
-  // B21 ceiling, so an outward drag clamped DOWN to it. B45 removes the w/h
-  // ceiling entirely (scale-based resize, clamped 0.5–2.0), so the proof
-  // still runs on the Spotify door, far from the sheet edges.
+  // issue #112 (B43) authored the first door-card 310px wide. B45 removed
+  // the w/h ceiling entirely (scale-based resize); B50 (issue #142) sets the
+  // per-card 1/5-viewport ceiling in its place, so the proof still runs on
+  // the Spotify door, far from the sheet edges.
   const resizeCard = page.locator('[data-id="spotify"]');
   const resizeBox = await resizeCard.boundingBox();
   const handleBox = await resizeCard.locator('.resize-handle').boundingBox();

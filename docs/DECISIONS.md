@@ -2090,3 +2090,151 @@ list) — and the owner's four grill answers of 2026-10-05 (owner chat,
 Agent-derived values (labelled per the B33/B40 provenance pattern): the
 glow token = `--frame` itself; the disabled button's 0.55 alpha; the
 mobile/reduced-motion media blocks' port details.
+
+### B49. The career page's header band, title cards and footer render at the landing page's conventions (issue #139)
+
+The owner ruled that razgregory.com/career's header pane, title cards and
+footer pane were "wildly incorrect" against the site's own established
+conventions, whose source of truth is the landing page (`index.html`,
+razgregory.com) in this same repo, and that the design must be adhered to.
+The career page's header band, title cards and footer therefore render at
+the landing page's conventions, re-tokened to the B47 sand/brown binding:
+
+- **The header band renders at B46's height-anchored scale.** The band is
+  the landing's band-fill grammar — the water (radial foot at 118% 76% /
+  50% 24%, the three-stop ladder, the 0.05 dither) over the deep, closed by
+  the 1px `--frame` rule at `--rule-y` — and every band literal renders at
+  the B46 render scale: `rs = vh/REF_H` (REF_H = 1104.55) on landscape, the
+  owner-ruled `min(vw/1440, vh/1104.55)` on portrait — the owner's answer
+  named the `vw/1440` divisor explicitly for this page (the landing's own
+  B30 portrait term uses `vw/REF_W`, REF_W = 1963.64; the career divisor is
+  the owner's, not a transcription of B30). Because the career page
+  ships **no script**, the scale is ported as a pure CSS custom property
+  (`--rs`) and every literal renders as `L × --rs` — `--rule-y` 67.38 (the
+  rescaled two-line floor: wordmark + oneliner slot), `--band-top` 15.46.
+  The digits are agent-derived per the B33 precedent (the owner ruled the
+  behaviour — match the landing's render — not the CSS mechanics).
+- **The three selector cards take the landing title card's B31 box grammar
+  verbatim**: content-sized (hug their text), top-anchored in the band,
+  `border-top: 0`, radius only on the corners that exist, `(band-top +
+  8px) 16px 16px` padding, both lines at the 20px logical type (the
+  employer name the pinned 600 line, the oneliner slot the eyebrow 400
+  line), `min-height: rule-y + 29px` hanging each card over the header
+  line — all rendered at `--rs`. B47's selection mechanics stand unchanged:
+  the B132 glow verbatim, unselected cards dim + italic, default PNC Bank.
+- **The footer takes the landing lot's floor statically**: the rescaled
+  two-row shelf (TheBoards' 122-shelf × k = 134.76 logical, B46/TheBoards
+  B73) rendered at `--rs` as a `min-height`; content grows past the floor.
+  The section padding, the three-section arrangement and the 3/4-length
+  divider bars stand as shipped.
+
+The ≤743px mobile reflow renders as shipped — the readable adaptation, not
+part of the desktop-render mismatch the owner flagged. The block gained
+resets that neutralize the new desktop rules at mobile widths — `min-height:
+0` and `height: auto`, `justify-items: stretch`, and the shipped card
+literals restored (`0.25rem 1.1rem` padding, full 2px `--frame` border and
+3px radius, `-2px` hit inset, the `1.1rem`/`0.8rem` wordmark/oneliner type) —
+so the rendered output is unchanged. The `--rs` scale also carries a plain
+`vh` fallback line ahead of the `dvh` declaration (agent-derived port
+mechanic: browsers without `dvh` would otherwise drop the scale entirely).
+
+**Source:** the owner's issue
+[#139](https://github.com/AlastairZeved/The-Portfolio/issues/139) — "There
+are already established conventions for what the header, the footer, and
+the title cards should look like, how they should be styled, and how they
+should be formatted and bordered, their vertical height, etc.. Source of
+truth is razgregory.com in this same repo and that design must be adhered
+to. Fix the header pane. Fix the title cards. Fix the footer pane." — and
+the owner's three grill answers of 2026-10-06 (owner chat), quoted
+verbatim:
+
+1. "vh-anchored pure-CSS calc: each band literal renders as calc(L ×
+   100dvh / 1104.55) on landscape (min() with the vw term on portrait) —
+   matches the landing's render exactly at every viewport, keeps zero-JS."
+2. "Yes — all three cards take the landing title-card's B31 box grammar
+   verbatim (border-top 0, bottom-only radius, +29px overhang, 20px type),
+   content-sized, spread across the band; selection glow unchanged."
+3. "Keep the current fixed padding but match the landing's floor height
+   statically (134.76px logical)."
+
+This entry transcribes the owner's rulings; it supersedes §10.2's shipped
+band/card/lot values as the rendering law and does not touch B47's
+selection mechanics or the B47/B48 page structure.
+
+### B50. The plantsandrocks page's header band, title cards and footer render at the same landing-page conventions (issue #140)
+
+The owner ruled that razgregory.com/plantsandrocks had "wildly incorrect"
+header pane, title cards and footer pane against the same established
+conventions whose source of truth is the landing page in this same repo,
+and directed the same resolution as the career page's (B49). The
+plantsandrocks page's header band, title cards and footer therefore render
+at B49's conventions verbatim, re-tokened to the B48 idea-green block:
+
+- **The header band** is B49's band — the landing's water grammar (radial
+  foot, three-stop ladder, 0.05 dither) over the deep, closed by the 1px
+  `--frame` rule at `--rule-y` (67.38 × --rs, the rescaled two-line floor)
+  — with B49's pure-CSS `--rs` scale and its plain-`vh` fallback line.
+- **The two selector cards** take B31's box grammar verbatim (content-sized,
+  top-anchored, border-top 0, bottom-only radius, (band-top + 8px) 16px 16px
+  padding, the 20px logical type — page name the pinned 600 line, the B48
+  oneliner copy the eyebrow 400 line — and the rule-y + 29px overhang), all
+  at `--rs`. B48's selection mechanics stand unchanged: the `--frame` glow
+  verbatim, unselected cards dim + italic, default Plants on Poles.
+- **The footer lot** takes the rescaled two-row-shelf floor (134.76 × --rs)
+  as a `min-height`; the padding, the two-section arrangement, the single
+  3/4-length divider bar and the disabled Download button stand as shipped.
+
+The ≤743px mobile reflow renders as shipped; the block gained the same
+resets as B49's (min-height/height, justify-items, the shipped card
+literals restored).
+
+**Source:** the owner's issue
+[#140](https://github.com/AlastairZeved/The-Portfolio/issues/140) — "There
+are already established conventions for what the header, the footer, and
+the title cards should look like, how they should be styled, and how they
+should be formatted and bordered, their vertical height, etc.. Source of
+truth is razgregory.com in this same repo and that design must be adhered
+to. Fix the header pane. Fix the title cards. Fix the footer pane." — and
+the owner's chat direction of 2026-10-06 to resolve it as "the exact same
+header/footer/title card issue" as the career page's and roll the work into
+the same PR (i.e. B49's three owner-ruled mechanics, unchanged). This entry
+transcribes the owner's rulings; it does not touch B48's page structure or
+the blank-reader discipline.
+
+---
+
+### B50. The note card's resize ceiling is one-fifth of the viewport — the 2.0 scale cap is superseded where it binds first (issue #142)
+
+The note card's resize gesture keeps B45's mechanism — TheBoards' scale-based
+frame-drag, a uniform scale on the card (the owner: cards resize 1:1, never
+per-axis) — but the ceiling of record is **one-fifth of the viewport**: a card
+grows until it reaches 1/5 of the viewport, at any viewport size, and stops
+there. The ceiling is a single uniform-scale bound: the gesture stops at the
+first axis that reaches its fifth. The minimum stands as-is ("the current
+minimum card size is fine as-is"): `MIN_SCALE` 0.5 and the `NOTE_MIN_W` 132
+unscaled floor are untouched.
+
+**This supersedes B45's scale-max clause** — TheBoards `state.js`
+`MAX_SCALE` 2.0 — wherever 2.0 would stop a card below the one-fifth ceiling:
+the gesture's maximum is the scale at which the card first reaches 1/5 of the
+viewport width or height, whichever binds first. Where a card's content size
+already puts 2.0 above that ceiling, the ceiling binds instead. B45's other
+clauses (the 17px/1.4 note font scaled only by the card's own scale,
+content-sized sizing, the sheet-edge width cap, the footprint re-clamp) stand
+unchanged, as does B21's one-fifth ceiling, which this entry implements for
+the scale-based gesture.
+
+The per-card ceiling scale is an agent-derived implementation value (the
+`B33`/`B43` provenance pattern): the owner ruled the ceiling (1/5 of the
+viewport, uniform), not the arithmetic that derives it.
+
+**Source:** the owner's issue
+[#142](https://github.com/AlastairZeved/The-Portfolio/issues/142) — "Note
+cards should be resizable to be as large as 1/5 of the entire viewport -
+scaled to any viewport size. The current minimum card size is fine as-is,
+but the maximum is not. Fix the maximum size a note card can be resized to."
+— and the owner's chat answers of 2026-10-06 confirming the reading:
+"cards can only be resized 1:1, not by length or width individually so this
+question makes no sense." (the ceiling is one uniform scale, not per-axis
+bounds) and "1/5 viewport is the only ceiling; 2.0 is superseded when it
+binds first."

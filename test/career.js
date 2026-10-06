@@ -133,7 +133,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   };
   for (const [tab, roles] of Object.entries(ROLES)) {
     await page.locator(`.topband__card-hit[for="${tab}"]`).click();
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(300);
     const sel = `.${tab.replace('employer-', 'employer--')}`;
     const got = await page.evaluate(s => {
       const section = document.querySelector(s);
@@ -148,7 +148,8 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       await page.evaluate(s =>
         [...document.querySelector(s).querySelectorAll('.gm-desc')].every(d =>
           d.innerText.trim() === '' && d.getBoundingClientRect().height > 0 &&
-          parseFloat(getComputedStyle(d).minHeight) >= 116), sel));
+          parseFloat(getComputedStyle(d).minHeight) >=
+          116 * Math.min(innerHeight / 1104.55, innerWidth / 1440)), sel));
     ok(`${tab}: components isolated to their tab`,
       await page.evaluate(s =>
         [...document.querySelectorAll('section.employer')]

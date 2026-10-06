@@ -617,6 +617,13 @@ The final hexes are the owner's sign-off (issue #133 blank slot 9); the
 **relationships** above — card above deep, note brightest on the deep, glow
 one rung below frame — are the law.
 
+*(B55, issue #154: the ported component's `.gm-title` carries the source's
+800-weight type. The page's font set gains the **800 face** —
+`MontserratAlternates-800.woff2` from the source repo, embedded as a data
+URI like the existing 400/600 faces — so the title weight is served, not
+browser-synthesized. The desc card's 300 weight has no face in the source
+either; it renders synthesized there and here, unchanged.)*
+
 ### §10.2 Regions
 
 *(Band, card and footer rendering law amended by B49, issue #139: the career

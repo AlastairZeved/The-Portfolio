@@ -2238,3 +2238,46 @@ but the maximum is not. Fix the maximum size a note card can be resized to."
 question makes no sense." (the ceiling is one uniform scale, not per-axis
 bounds) and "1/5 viewport is the only ceiling; 2.0 is superseded when it
 binds first."
+
+---
+
+### B51. The note cards size per the owner's issue #138 drawing — the six board cards at their drawing scales, the three sub cards at theirs (issue #138)
+
+The issue #126/#B45 rebuild left every note card content-sized at the
+minimum footprint (the `NOTE_MIN_W` 132 unscaled floor). That was only ever
+meant for the three sub cards — "it was only supposed to be the sub cards
+'LinkedIn', 'Apple Music', and 'Spotify'". The owner's attached visual is
+the size authority of record: each card sizes to its own drawing footprint.
+
+The mechanism of record does not change — **B45's TheBoards note mechanics
+stand**: content-sized boxes, the 17px/1.4 note font, and a per-card uniform
+`transform: scale()`. What the ruling adds is each card's **rest scale of
+record**: the six board cards (Community, Career, Writing, Software & AI,
+Plants & Rocks, Music) sit **above 1**; the three sub cards (LinkedIn,
+Apple Music, Spotify) sit **below 1**. The cards render at their drawing
+sizes; the drag and resize gestures still move the scale from there under
+B45's 0.5 floor and B50's one-fifth-of-viewport ceiling, unchanged.
+
+The scale values themselves are **agent-derived arithmetic transcribing the
+owner's visual** (the `B33`/`B43` provenance pattern): each value is the
+card's measured drawing footprint at 2560×1440 (render scale 1.3037, the
+`B43` calibration) divided by the card's measured unscaled content width —
+2.25 community, 2.21 career, 1.35 writing, 1.79 software-ai, 1.96
+plants-rocks, 1.70 music, 0.78 apple-music, 0.79 spotify, 0.81 linkedin.
+Under the uniform-scale mechanism a card's height follows from its width;
+the drawing's heights pin nothing independently. The card placements
+(`left/top %`, `B43`) are untouched — the visual's cards sit where the
+board already draws them.
+
+This ruling **supersedes issue #126's minimum-size footprint reading for
+the six board cards** (the sub cards' drawing footprints sit below it);
+issue #126's mechanism ruling (`B45`) stands everywhere else. It does not
+touch `B50`'s resize ceiling.
+
+**Source:** the owner's issue
+[#138](https://github.com/AlastairZeved/The-Portfolio/issues/138) — "All
+note cards were resized to the minimum size in the last update, but it was
+only supposed to be the sub cards \"LinkedIn\",\"Apple Music\", and
+\"Spotify\". Attached is a visual displaying how exactly each card should
+be sized." — with the attached visual (2560×1440 board rendering) as the
+size authority the quote names.

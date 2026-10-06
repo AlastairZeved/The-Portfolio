@@ -2200,3 +2200,41 @@ header/footer/title card issue" as the career page's and roll the work into
 the same PR (i.e. B49's three owner-ruled mechanics, unchanged). This entry
 transcribes the owner's rulings; it does not touch B48's page structure or
 the blank-reader discipline.
+
+---
+
+### B50. The note card's resize ceiling is one-fifth of the viewport — the 2.0 scale cap is superseded where it binds first (issue #142)
+
+The note card's resize gesture keeps B45's mechanism — TheBoards' scale-based
+frame-drag, a uniform scale on the card (the owner: cards resize 1:1, never
+per-axis) — but the ceiling of record is **one-fifth of the viewport**: a card
+grows until it reaches 1/5 of the viewport, at any viewport size, and stops
+there. The ceiling is a single uniform-scale bound: the gesture stops at the
+first axis that reaches its fifth. The minimum stands as-is ("the current
+minimum card size is fine as-is"): `MIN_SCALE` 0.5 and the `NOTE_MIN_W` 132
+unscaled floor are untouched.
+
+**This supersedes B45's scale-max clause** — TheBoards `state.js`
+`MAX_SCALE` 2.0 — wherever 2.0 would stop a card below the one-fifth ceiling:
+the gesture's maximum is the scale at which the card first reaches 1/5 of the
+viewport width or height, whichever binds first. Where a card's content size
+already puts 2.0 above that ceiling, the ceiling binds instead. B45's other
+clauses (the 17px/1.4 note font scaled only by the card's own scale,
+content-sized sizing, the sheet-edge width cap, the footprint re-clamp) stand
+unchanged, as does B21's one-fifth ceiling, which this entry implements for
+the scale-based gesture.
+
+The per-card ceiling scale is an agent-derived implementation value (the
+`B33`/`B43` provenance pattern): the owner ruled the ceiling (1/5 of the
+viewport, uniform), not the arithmetic that derives it.
+
+**Source:** the owner's issue
+[#142](https://github.com/AlastairZeved/The-Portfolio/issues/142) — "Note
+cards should be resizable to be as large as 1/5 of the entire viewport -
+scaled to any viewport size. The current minimum card size is fine as-is,
+but the maximum is not. Fix the maximum size a note card can be resized to."
+— and the owner's chat answers of 2026-10-06 confirming the reading:
+"cards can only be resized 1:1, not by length or width individually so this
+question makes no sense." (the ceiling is one uniform scale, not per-axis
+bounds) and "1/5 viewport is the only ceiling; 2.0 is superseded when it
+binds first."

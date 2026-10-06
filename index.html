@@ -158,7 +158,7 @@ body {
   width: auto;
   min-height: 44px;
   padding: 0;
-  font-size: 16.57px; font-weight: 600;   /* 15 × 1.10455 (#128/B46) — keeps the band anchor on the same rescaled rung as the band's own literals */
+  font-size: 16.57px; font-weight: 400;   /* 15 × 1.10455 (#128/B46) — keeps the band anchor on the same rescaled rung as the band's own literals; weight plain per issue #147/B53 */
 }
 
 /* ---- The title compartment (UIUX §3.2, B17; TheBoards #anchor-title) ---- */
@@ -249,6 +249,12 @@ body {
      transform-origin top left so the authored left/top stays truthful. */
   transform: scale(var(--card-scale, 1));
   transform-origin: top left;
+}
+/* B52 (issue #145): the three linked sub-cards render their text plain —
+   weight 400, the self-hosted regular rung — while every other door-card
+   keeps the 600. */
+.door-card.sub-card {
+  font-weight: 400;
 }
 /* While a scale resize is active the card applies its scale instantly
    (TheBoards fidelity, B45): the 80ms transform transition above is the
@@ -444,11 +450,11 @@ body {
 
   <div id="zone-components" class="band-zone">
     <span class="band-label on-light">Components</span>
-    <div class="anchor">All cards open their pages in a new tab.</div>
+    <div class="anchor">Each card links to a page housing my work in that domain.</div>
   </div>
   <div id="zone-requirements" class="band-zone">
     <span class="band-label on-light">Requirements</span>
-    <div class="anchor">Click around, explore!</div>
+    <div class="anchor">Click around to explore my works!</div>
   </div>
 
   <div id="anchor-title">
@@ -490,15 +496,15 @@ body {
     Music
     <span class="resize-handle" aria-hidden="true"></span>
   </div>
-  <a class="door-card" data-id="apple-music" style="--card-scale: 0.78; left:88.3%; top:61.3%" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
+  <a class="door-card sub-card" data-id="apple-music" style="--card-scale: 0.78; left:88.3%; top:61.3%" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
     Apple Music
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="spotify" style="--card-scale: 0.79; left:81.7%; top:68.6%" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
+  <a class="door-card sub-card" data-id="spotify" style="--card-scale: 0.79; left:81.7%; top:68.6%" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
     Spotify
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="linkedin" style="--card-scale: 0.81; left:37.3%; top:32.7%" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">
+  <a class="door-card sub-card" data-id="linkedin" style="--card-scale: 0.81; left:37.3%; top:32.7%" href="https://www.linkedin.com/in/robertagregory" target="_blank" rel="noopener noreferrer">
     LinkedIn
     <span class="resize-handle" aria-hidden="true"></span>
   </a>

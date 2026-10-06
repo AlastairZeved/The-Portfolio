@@ -266,8 +266,8 @@ exceeds the sheet minus the side gutters.
 | Region | Render |
 |---|---|
 | Title | the compartment above (§3.2) |
-| Components | TheBoards region, furniture present, contents **not yet ruled** — do not invent (PRD §2.6) |
-| Requirements | the line **"Click around, explore!"** (B37), **16.57px/600 `--ink`** (15px × 1.10455, `B46`), **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
+| Components | the line **"Each card links to a page housing my work in that domain."** (B38's line, copy per B53), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B53`), hanging from the region top at `--band-top` |
+| Requirements | the line **"Click around to explore my works!"** (B37's line, copy per B53), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B53`), **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
 | Parking Lot | water field closing the sheet; sized by its measured contents from the two-row floor (§3.2's own law mirrored at the foot, B46); holds the contact form (§6) |
 
 There is **no All Boards rail** — it is removed from the DOM and the layout
@@ -321,7 +321,9 @@ drawing authority, `B43`):
   that sizes the text: it rides a uniform `transform: scale()` on the card,
   `transform-origin: top left` (TheBoards `styles.css` §4 `.note`), so text
   grows and shrinks with the card, never independently of it. No
-  `--card-fs`; the height-driven updater is gone.
+  `--card-fs`; the height-driven updater is gone. **Weight:** the door-card's
+  text ships at **600**; the three linked sub cards (LinkedIn, Apple Music,
+  Spotify) render plain at **400** (`B52`, issue #145).
 - **Sizing:** cards are **content-sized** — `width: max-content`,
   `min-width: 132px` (= TheBoards' `NOTE_MIN_W`, `state.js` / `styles.css`
   `.note-text`, TheBoards `UIUX §4.5`, `B84`), `height` following the

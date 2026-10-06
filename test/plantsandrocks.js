@@ -40,10 +40,37 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   const hang = await page.evaluate(() => {
     const band = document.querySelector('.topband');
     const card = document.querySelector('.topband__card');
-    return card.getBoundingClientRect().bottom > band.getBoundingClientRect().bottom &&
-           getComputedStyle(card).marginBottom === '-14px';
+    return card.getBoundingClientRect().bottom > band.getBoundingClientRect().bottom;
   });
-  ok('title cards hang over the header line (career\'s -14px margin)', hang);
+  ok('title cards hang over the header line', hang);
+
+  // B50 (issue #140): the band, cards and lot render at B49's landing-page
+  // conventions — B46's height-anchored scale (rs = vh/1104.55), B31's card
+  // box, the lot's two-row-shelf floor — re-tokened to the idea-green block.
+  // (Deliberate rewrite: the old pin asserted the -14px margin mechanism.)
+  const b50 = await page.evaluate(() => {
+    const band = document.querySelector('.topband').getBoundingClientRect();
+    const card = document.querySelector('.topband__card');
+    const r = card.getBoundingClientRect();
+    const cs = getComputedStyle(card);
+    const lot = document.querySelector('.parking-lot').getBoundingClientRect();
+    const rs = innerHeight / 1104.55;
+    return { bandH: band.height, hang: r.bottom - band.bottom, font: cs.fontSize,
+             borderTop: cs.borderTopWidth, radius: cs.borderBottomLeftRadius,
+             cardW: r.width, lotH: lot.height, rs };
+  });
+  ok('band renders at the landing height-anchored scale: rule-y = 67.38 × vh/1104.55 (B46/B50)',
+    Math.abs(b50.bandH - 67.38 * b50.rs) < 1);
+  ok('card hangs 29 × rs over the rule (B31/B50)',
+    Math.abs(b50.hang - 29 * b50.rs) < 1);
+  ok('card type is the 20px logical rung: font-size = 20 × rs (B31/B50)',
+    Math.abs(parseFloat(b50.font) - 20 * b50.rs) < 0.5);
+  ok('card is the B31 box: border-top 0, radius only on the bottom corners, content-sized',
+    // content-sized hug: ~250px at 1440×900 (the B48 oneliner copy is long);
+    // <400 is a sanity bound against regression to the old full-width cell (~690px)
+    b50.borderTop === '0px' && parseFloat(b50.radius) > 0 && b50.cardW < 400);
+  ok('lot is floored at the rescaled two-row shelf: 134.76 × rs (B46/B73/B50)',
+    b50.lotH >= 134.76 * b50.rs - 1);
 
   // Default selection: Plants on Poles, wearing the glow (one token, soft bloom)
   await page.waitForTimeout(300);   // let the 200ms box-shadow transition settle

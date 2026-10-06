@@ -41,6 +41,23 @@
   --ink-dim:   rgb(244 245 241 / 0.55);   /* career.html's shipped dim value */
   --elevation: 0 2px 8px rgb(0 0 0 / 0.45);  /* career.html's value, verbatim */
   --ease:      cubic-bezier(0.22, 0.61, 0.36, 1);  /* career.html's value, verbatim */
+
+  /* The render scale, in pure CSS (B49, extended to this page by issue #140 /
+     B50): career.html's port of the landing page's B46 height-anchored scale
+     — landscape rs = vh/REF_H (1104.55), portrait the owner-ruled
+     min(vw/1440, vh/1104.55). Every band literal renders at L × --rs, with
+     zero script. The plain-vh line ahead of dvh keeps browsers without dvh
+     from dropping the scale entirely (agent-derived port mechanic). */
+  --rs: min(calc(100vh / 1104.55), calc(100vw / 1440));   /* vh fallback — dvh below wins where supported */
+  --rs: min(calc(100dvh / 1104.55), calc(100vw / 1440));
+  --band-top: calc(15.46 * var(--rs));   /* TheBoards' 14 × 1.10455 (B46) */
+  --rule-y:   calc(67.38 * var(--rs));   /* the rescaled two-line floor (B46): wordmark + oneliner */
+  --card-pad: calc(16 * var(--rs));      /* the B31 card's 16px logical padding */
+  --lot-floor: calc(134.76 * var(--rs)); /* the rescaled two-row shelf (B46/TheBoards B73) */
+}
+@media (min-aspect-ratio: 1) {
+  :root { --rs: calc(100vh / 1104.55);   /* vh fallback */
+          --rs: calc(100dvh / 1104.55); }  /* landscape: the pure height anchor (B46) */
 }
 
 html, body { min-height: 100dvh; }
@@ -66,39 +83,54 @@ body {
   outline-offset: 2px;
 }
 
-/* ---- Header — the two-page selector (issue #134 §1). career.html's
-   .topband grammar: water-gradient-over-card band closed by a 1px --frame
-   rule. Two title cards, one per page. ---- */
+/* ---- Header — the two-page selector (issue #134 §1; conventions fixed to
+   the landing page's render, issue #140/B50). The landing's band grammar —
+   the water (radial foot, three-stop ladder, 0.05 dither) over the deep,
+   closed by the 1px --frame rule at --rule-y — career.html's B49 port,
+   re-tokened to the idea-green block. Two title cards, one per page. ---- */
 .topband {
   box-sizing: border-box;
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  column-gap: 2rem;
-  align-items: stretch;
-  padding: 0.35rem clamp(1.5rem, 5vw, 4rem) 0.35rem;
+  justify-items: center;
+  align-items: start;
+  height: var(--rule-y);
   background:
-    linear-gradient(color-mix(in srgb, var(--water-top) 35%, transparent),
-                    color-mix(in srgb, var(--water-mid) 35%, transparent) 55%,
-                    color-mix(in srgb, var(--water-bot) 35%, transparent)),
-    var(--card);
+    radial-gradient(118% 76% at 50% 24%, rgb(0 0 0 / 0) 32%,
+                    rgb(var(--water-bot-a) / 0.72) 128%),
+    linear-gradient(180deg, var(--water-top) 0%, var(--water-mid) 46%,
+                    var(--water-bot) 100%);
   border-bottom: 1px solid var(--frame);
 }
+.topband::after {           /* the water's dither, at 0.05 (the landing's band-fill) */
+  content: "";
+  position: absolute; inset: 0; z-index: 0;
+  opacity: 0.05; pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='4' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+}
 
-/* Each card hangs over the header line, exactly as career.html's cards do
-   (B31's overhang grammar, same -14px). */
+/* Each card is the landing title card's B31 box grammar verbatim (B49/B50):
+   content-sized (hugs its text), top-anchored in the band, border-top 0 and
+   radius only on the corners that exist, (band-top + 8px) 16px 16px padding,
+   the 20px type, and the min-height rule-y + 29px that hangs it over the
+   header line. All literals render at B46's scale. */
 .topband__card {
   position: relative;
+  z-index: 2;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  width: max-content;
   min-width: 0;
-  margin-bottom: -14px;
-  padding: 0.25rem 1.1rem;
-  border: 2px solid var(--frame);
-  border-radius: 3px;
+  min-height: calc(var(--rule-y) + 29 * var(--rs));
+  padding: calc(var(--band-top) + calc(8 * var(--rs))) var(--card-pad) var(--card-pad);
+  border: calc(2 * var(--rs)) solid var(--frame);
+  border-top: 0;
+  border-radius: 0 0 calc(3 * var(--rs)) calc(3 * var(--rs));   /* only the corners that exist */
   background: var(--card);
-  box-shadow: var(--elevation);
+  text-align: center;
   transition:
     box-shadow 200ms var(--ease),
     filter 200ms var(--ease),
@@ -134,24 +166,26 @@ body {
 }
 .topband__card-hit {
   position: absolute;
-  inset: -2px;
+  inset: calc(-2 * var(--rs));
   cursor: pointer;
 }
 
+/* The B31 type: both lines at 20px logical, single size in the card — the
+   page name is the pinned line (600), the oneliner (the owner's B48 copy)
+   the eyebrow line (400), the landing title card's two-line grammar. */
 .topband__wordmark {
   margin: 0;
   font-weight: 600;
-  font-size: clamp(1.1rem, 2vw, 1.7rem);
+  font-size: calc(20 * var(--rs));
   letter-spacing: -0.02em;
-  line-height: 1;
+  line-height: 1.2;
 }
 /* The owner's oneliner copy (B48, verbatim) — these slots are NOT blank. */
 .topband__oneliner {
-  margin: 0.1rem 0 0;
-  max-width: 50rem;
-  font-weight: 600;
-  font-size: clamp(0.65rem, 0.9vw, 0.8rem);
-  color: var(--note);
+  margin: 0;
+  font-weight: 400;
+  font-size: calc(20 * var(--rs));
+  color: var(--ink-light);
   line-height: 1.2;
 }
 /* Unselected: career.html's dim-italic state. */
@@ -184,6 +218,10 @@ body:has(#page-rocks:checked) .reader--rocks {
   display: flex;
   align-items: center;
   gap: 2rem;
+  /* The landing lot's floor (B49/B50): the rescaled two-row shelf
+     (TheBoards' 122-shelf × k = 134.76 logical, B46/TheBoards B73), rendered
+     at B46's scale. Content grows past the floor; the padding stands. */
+  min-height: var(--lot-floor);
   padding: 0.75rem clamp(1.5rem, 5vw, 4rem);
   background:
     linear-gradient(color-mix(in srgb, var(--water-top) 30%, transparent),
@@ -267,8 +305,17 @@ body:has(#page-rocks:checked) .reader--rocks {
 }
 
 @media (max-width: 743px) {
-  .topband { grid-template-columns: 1fr; row-gap: 0.75rem; padding: 0.8rem 16px 0.9rem; }
-  .topband__card { margin-bottom: 0; }
+  /* Mobile keeps the shipped readable reflow (the scaled band literals are a
+     desktop-render law; a 390px portrait rs ≈ 0.27 would render 5.4px type):
+     the band grows to hold the stacked cards, no overhang; the scaled card
+     literals reset to the shipped readable values. */
+  .topband { grid-template-columns: 1fr; justify-items: stretch; row-gap: 0.75rem; height: auto; padding: 0.8rem 16px 0.9rem; }
+  .topband__card { min-height: 0;
+    padding: 0.25rem 1.1rem;
+    border: 2px solid var(--frame);
+    border-radius: 3px; }
+  .topband__card-hit { inset: -2px; }
+  .topband__wordmark { font-size: 1.1rem; }
   .topband__oneliner { font-size: 0.8rem; }
   .parking-lot { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .parking-lot__divider { width: auto; align-self: flex-start; }

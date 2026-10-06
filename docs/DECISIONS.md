@@ -2160,3 +2160,43 @@ verbatim:
 This entry transcribes the owner's rulings; it supersedes §10.2's shipped
 band/card/lot values as the rendering law and does not touch B47's
 selection mechanics or the B47/B48 page structure.
+
+### B50. The plantsandrocks page's header band, title cards and footer render at the same landing-page conventions (issue #140)
+
+The owner ruled that razgregory.com/plantsandrocks had "wildly incorrect"
+header pane, title cards and footer pane against the same established
+conventions whose source of truth is the landing page in this same repo,
+and directed the same resolution as the career page's (B49). The
+plantsandrocks page's header band, title cards and footer therefore render
+at B49's conventions verbatim, re-tokened to the B48 idea-green block:
+
+- **The header band** is B49's band — the landing's water grammar (radial
+  foot, three-stop ladder, 0.05 dither) over the deep, closed by the 1px
+  `--frame` rule at `--rule-y` (67.38 × --rs, the rescaled two-line floor)
+  — with B49's pure-CSS `--rs` scale and its plain-`vh` fallback line.
+- **The two selector cards** take B31's box grammar verbatim (content-sized,
+  top-anchored, border-top 0, bottom-only radius, (band-top + 8px) 16px 16px
+  padding, the 20px logical type — page name the pinned 600 line, the B48
+  oneliner copy the eyebrow 400 line — and the rule-y + 29px overhang), all
+  at `--rs`. B48's selection mechanics stand unchanged: the `--frame` glow
+  verbatim, unselected cards dim + italic, default Plants on Poles.
+- **The footer lot** takes the rescaled two-row-shelf floor (134.76 × --rs)
+  as a `min-height`; the padding, the two-section arrangement, the single
+  3/4-length divider bar and the disabled Download button stand as shipped.
+
+The ≤743px mobile reflow renders as shipped; the block gained the same
+resets as B49's (min-height/height, justify-items, the shipped card
+literals restored).
+
+**Source:** the owner's issue
+[#140](https://github.com/AlastairZeved/The-Portfolio/issues/140) — "There
+are already established conventions for what the header, the footer, and
+the title cards should look like, how they should be styled, and how they
+should be formatted and bordered, their vertical height, etc.. Source of
+truth is razgregory.com in this same repo and that design must be adhered
+to. Fix the header pane. Fix the title cards. Fix the footer pane." — and
+the owner's chat direction of 2026-10-06 to resolve it as "the exact same
+header/footer/title card issue" as the career page's and roll the work into
+the same PR (i.e. B49's three owner-ruled mechanics, unchanged). This entry
+transcribes the owner's rulings; it does not touch B48's page structure or
+the blank-reader discipline.

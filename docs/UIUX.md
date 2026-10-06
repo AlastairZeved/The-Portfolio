@@ -499,9 +499,9 @@ A Formspree form with fields and protections per the owner's ruling (B6):
 | Email | no |
 | Message | **yes** |
 
-### §6.1 Spatial layout (B18)
+### §6.1 Spatial layout (B20)
 
-The form's userspace, per the owner's ruling `B18`, renders left-anchored:
+The form's userspace, per the owner's ruling `B20`, renders left-anchored:
 
 - **Name** and **Email** sit **stacked vertically** at the **left wall**,
   directly under the "Parking Lot" header, each at **half their original
@@ -516,7 +516,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 - The **right side of the pane is deliberately empty** — free space lives
   free; it is never filled.
 - The **lot's height follows its measured contents** (B46, issue #128 —
-  superseding B18's fixed `180px` as a mechanism, which stands only as the
+  superseding B20's fixed `180px` as a mechanism, which stands only as the
   no-JS fallback): TheBoards' own law, `TheBoards' UIUX §3.2` / B73, ported
   as `lotH` in `index.html` — measure the rendered rows, floor at the
   **rescaled two-row shelf** (TheBoards' 122-shelf × 1.10455 = **134.76px**,
@@ -525,7 +525,7 @@ The form's userspace, per the owner's ruling `B18`, renders left-anchored:
 
   `lot-h = min(max(134.76, 34 + Σ rowHeight), ⌈0.5 × logical-h⌉)`, the section
   bottom-anchored so it grows **upward** past the shelf floor, with
-  `#lot-items` clipping past the half-sheet ceiling. (B18's stacked-pair
+  `#lot-items` clipping past the half-sheet ceiling. (B20's stacked-pair
   arrangement above is unchanged.)
 
 - **Captcha:** Formspree's reCAPTCHA — on by default, runs on Formspree's

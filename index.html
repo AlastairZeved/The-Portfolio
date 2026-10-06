@@ -213,7 +213,7 @@ body {
    (issue #138 / B51): each card ships its own inline --card-scale —
    2.25 community, 2.21 career, 1.35 writing, 1.79 software-ai, 1.96
    plants-rocks, 1.70 music, 0.78 apple-music, 0.79 spotify, 0.81
-   linkedin — so the six board cards render large and the three sub
+   linkedin — so the six board cards render large and the sub
    cards small, exactly as the owner's visual sizes them. B54 (issue
    #146) adds four more sub cards at 0.78 each — zeved-boards,
    agentic-plugins, plants-poles, plants-in-rocks — inside the sub-card
@@ -476,7 +476,7 @@ body {
        scale factor, TheBoards' note mechanics. B51 (issue #138): each
        card also carries its drawing scale of record inline (--card-scale),
        derived from the owner's attached visual; the six board cards sit
-       above 1, the three sub cards below it. -->
+       above 1, the sub cards below it. -->
   <a class="door-card" data-id="community" style="--card-scale: 2.25; left:13.6%; top:18.3%" href="https://earp-street-park.netlify.app" target="_blank" rel="noopener noreferrer">
     Community
     <span class="resize-handle" aria-hidden="true"></span>
@@ -826,7 +826,7 @@ body {
     drawLinks();
   }
 
-  /* ---- The link layer (UIUX §4.3, B28): nine straight 1px --frame lines
+  /* ---- The link layer (UIUX §4.3, B28): thirteen straight 1px --frame lines
      between card centres, one per pair authored in the markup. The pairing
      is authored; the geometry is computed, so a line stays true while a
      card is dragged or resized (TheBoards' link idiom, UIUX §4.6 / B91 —

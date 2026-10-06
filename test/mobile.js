@@ -1,6 +1,6 @@
 /* test/mobile.js — mobile render + eight new-tab door-cards + form + the one
    render scale (no clip, no overflow, link endpoints under the scale) and the
-   nine note links (B28) (black-box, Playwright).
+   thirteen note links (B28, B54) (black-box, Playwright).
    Run: node test/mobile.js   (BOARDS_URL default http://localhost:8000/index.html) */
 
 const { chromium } = require('playwright');
@@ -60,7 +60,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('no horizontal overflow (scrollWidth <= innerWidth)', fit.noHOverflow);
   ok('no vertical overflow (scrollHeight <= innerHeight)', fit.noVOverflow);
 
-  // the nine note links (B28) hold their endpoints under the same scale: the
+  // the thirteen note links (B28, B54) hold their endpoints under the same scale: the
   // layer's user units are the board's LOGICAL px, so every line must land on
   // the LOGICAL centre of the two cards it joins — measured rects are physical,
   // divided by rs here exactly as index.html's toLogical does (issue #87, B30)

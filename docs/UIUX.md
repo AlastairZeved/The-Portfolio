@@ -649,10 +649,23 @@ renders as `L × --rs`.)*
   At ≤743px the shown employer stacks (`flex-direction: column`), the rule
   running horizontal at 33.333% width. Transitions collapse under
   `prefers-reduced-motion: reduce`.
-  Left half: role heading box (2px `--frame` border) only — "Blurb about
-  role" and "Notes about role & responsibilities" render only once the owner
-  fills them. Right half: "Accomplishments" and "Learnings/Skills" (section
-  name pending, issue #133 slot 6) render only once filled.
+  Left half *(amended by B55, issue #154)*: the employer's roles as stacked
+  **plugin components** — the Agentic Plugins page's `.gregorian-mode` class
+  set ported verbatim in structure (water back card `.gm-back`, uppercase
+  title card `.gm-title`, the italic lowered year subscript in the `.gm-uc`
+  grammar, description card `.gm-desc`), re-hued to this page's own
+  sand/brown tokens (§10.1) with `--ink` on the sand cards reusing `--deep`
+  `#12100a`. One component per role, equally sized and evenly spaced with
+  comfortable padding between each to fit the space, contained within the
+  left half. The component's "Github" CTA is not ported. The description
+  cards **render empty** (B55's explicit override of the omit-empty rule for
+  these components), each with min-height for 2–3 sentences at the
+  component's own 20px/32px desc type. Plate geometry is agent-derived
+  under the B33 provenance pattern: plate width = the half's own width,
+  plates flex-equal in the stack, desc min-height `3 × 32px + 2 × 10px =
+  116px`, stack padding the page's existing 1.25rem gutter value.
+  Right half: "Accomplishments" and "Learnings/Skills" (section name
+  pending, issue #133 slot 6) render only once filled.
 - **Footer (three sections):** the landing page's `.parking-lot` grammar —
   water gradient over `--deep`, 1px `--frame`-mix top rule, same padding —
   floored at the rescaled two-row shelf (`134.76 × --rs`, B49: the landing
@@ -673,6 +686,13 @@ marker. The slot structure lives in the markup as non-rendering `SLOT`
 comments (and the footer's three-section frame, whose empty `<p>` slots
 measure zero height and carry no text) so a targeted fill makes each block
 appear; until then the page invents no copy.
+
+*(Amended by B55, issue #154: the left half's role-title and dates slots
+ship as the components' `.gm-title` and `.gm-uc` year subscript, with the
+exact strings the owner's issue #154 lists; the blurb/notes slot structure
+is carried by the components' empty `.gm-desc` cards, which render empty
+per B55's explicit override. The omit-empty rule stands unchanged for the
+right half and the footer.)*
 
 **Pinned by:** `test/career.js` — selector mechanics, the B132 glow, the
 split, the three-section lot, the ladder tokens, and the omit-empty-block

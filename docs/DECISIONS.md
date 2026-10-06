@@ -2390,3 +2390,77 @@ children should hang under Software & AI instead" (the placement of the
 Software & AI pair, superseding the issue's literal "underneath Plants &
 Rocks" for those two); "The existing sub-card scale band — ~0.78–0.81,
 matching Apple Music/Spotify/LinkedIn" (the size).
+
+
+### B55. The career body's left half carries the plugin components — one per role, per employer tab (issue #154)
+
+The owner directed that the component that displays the plugins on the
+**Agentic Plugins page** of repo AlastairZeved/AlastairZeved
+(`.gregorian-mode` class set: the water back card `.gm-back`, the uppercase
+title card `.gm-title`, the italic lowered subscript (the `.gm-uc` grammar),
+the description card `.gm-desc`) be brought over to the career body's left
+half, **re-hued to the career page's own sand/brown binding** — the
+component's purple token ladder does not ship. The component's structure,
+gradients, borders, glimmer and type grammar port **verbatim**; every
+re-hued value is an existing career token (`UIUX §10.1`), and the dark ink
+on the sand cards reuses `--deep` (`#12100a`) — no new hex is invented.
+
+**Per employer tab** the left half holds that employer's roles as stacked
+component plates — **PNC Bank**: Branch Sales & Service Representative
+(2017–2018), Branch Sales & Service Associate (2018–2019), Branch Banker
+(2019–2020); **PNC Private Bank**: Client Service Associate (2020–2021),
+Portfolio & Trust Administrator (2021–2022); **Brinker Capital**: Trader
+(2022–2023), Portfolio Specialist (2023), Sr. Portfolio Specialist
+(2023–2025). Each plate is the component verbatim: the uppercase title in
+`.gm-title`, the year as the **italicized subscript** in the `.gm-uc`
+grammar (the Docket's own subscript precedent, issue #92), the description
+card `.gm-desc`. The description cards **render empty — the owner's
+explicit override of the omit-empty ruling (B47, 2026-10-05) for these
+components only** ("leave description card with no text for now, not even
+stubbed"), sized so a later edit can write 2–3 sentences into each. The
+omitted-until-content rule itself is not amended: it stands for every
+other block on the page. The description slots (B47 blank slots #3/#4)
+are carried by the desc cards from this entry on.
+
+The plates are **visible and contained within the left half of the body**
+(left side of the divider bar), **equally sized and evenly spaced with
+comfortable padding between each to fit the space**. **No item selector
+tool ships** — the plugins page's selector row has no career counterpart,
+and the component's "Github" CTA (`.gm-cta`) is omitted (owner chat,
+2026-10-06: "No CTA on career role cards"). The header selector, the split
+and the right half (Accomplishments / Learnings slots) are **untouched**;
+the components are **isolated to their individual tabs** — never visible in
+the other tabs they don't belong to.
+
+The stacked plate geometry (each plate's width as the half's own width, the
+equal-height/equal-spacing arrangement, the desc card's 2–3-sentence
+min-height, and the ≤743px readable reflow of the same) is the
+**agent-derived implementation** of the owner's words — "equally sized and
+evenly spaced with comfortable padding between each to fit the space" and
+"enough vertical height to fit 2-3 sentences in each description card" —
+under the B33/B40 provenance pattern: the owner ruled the arrangement, the
+values implement it.
+
+**Source:** the owner's issue
+[#154](https://github.com/AlastairZeved/The-Portfolio/issues/154), 2026-10-06
+— quoted verbatim: "The component that displays the plugins on the \"agentic
+plugins\" page of repo AlastairZeved/AlastairZeved needs to be brought over
+to this page, razgregory.com/career and the color palette needs to be
+completely updated to match the sand and brown of this palette."; per-tab
+role lists as transcribed above; "All three components should be visible and
+contained within the left half of the body (left side of the divider bar).
+They should be equally sized and evenly spaced with comfortable padding
+between each to fit the space. Use enough vertical height to fit 2-3
+sentences in each description card to be written in a later edit. No item
+selector tool needed for this page."; "(leave description card with no text
+for now, not even stubbed)"; "Keep these components isolated to their
+individual tabs so they are not visible in the other tabs they don't belong
+to." — and the owner's four grill answers of 2026-10-06 (owner chat):
+
+1. "Keep split + right-half slots unchanged, only swap left-half content"
+   (the split's right half and its slots are untouched).
+2. "Yes, verbatim structure re-hued to the sand/brown tokens" (the back
+   card, glimmer sweep, uppercase title card and description card all port).
+3. "Empty desc cards render, sized per the issue" (the omit-empty override
+   for these components).
+4. "No CTA on career role cards".

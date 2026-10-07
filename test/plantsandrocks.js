@@ -113,6 +113,13 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     await page.evaluate(() =>
       document.querySelector('.reader--poles iframe').contentDocument &&
       document.querySelector('.reader--poles iframe').contentDocument.body.scrollHeight > 0));
+  ok('the storybook document wears Montserrat Alternates (issue #160, UIUX §2.9)',
+    await page.evaluate(() => {
+      const doc = document.querySelector('.reader--poles iframe').contentDocument;
+      const ff = getComputedStyle(doc.body).fontFamily;
+      return ff.includes('Montserrat Alternates') &&
+        doc.querySelector('style').textContent.includes('font-display: swap');
+    }));
   ok('the storybook iframe sits below the title-card overhang (no overlap)',
     await page.evaluate(() => {
       const ifr = document.querySelector('.reader--poles iframe').getBoundingClientRect();

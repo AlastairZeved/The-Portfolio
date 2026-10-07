@@ -123,8 +123,9 @@ door.
 
 ### §2.2 In scope
 
-A single static `index.html` (all CSS and JS inline, truly one file — owner
-ruling, `DECISIONS.md` B12) that renders TheBoards' four regions — **Title,
+A single static `index.html` (all CSS inline, JS as external .js files per
+the issue-#151 ruling — B59, superseding B12's inline-JS clause) that renders
+TheBoards' four regions — **Title,
 Components, Requirements, Parking Lot** — with door-cards in the free board
 space linking out to the owner's sites, and a Formspree contact form in the
 Parking Lot. The sheet fills the whole viewport; there is **no All Boards rail**

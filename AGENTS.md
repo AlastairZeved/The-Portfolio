@@ -8,8 +8,8 @@ governing records instead.
 
 The-Portfolio — Robert A. Gregory's portfolio site and the central hub for his
 scattered pseudonyms and websites. It is built **literally on TheBoards as the
-template** (owner ruling, 2026-09-29): one static single-file `index.html`
-with all CSS and JS inline — **no calendar rail**, no service worker, no
+template** (owner ruling, 2026-09-29): one static single-page `index.html`
+with all CSS inline and JS as external .js files (issue #151, B59) — **no calendar rail**, no service worker, no
 backend, no build step, no package manager, no dependencies.
 
 The site is a **functional advertisement for TheBoards**: it wears TheBoards'
@@ -78,9 +78,12 @@ none.
 
 ## Architecture: facts that explain most of `index.html`
 
-1. **One file.** All CSS and JS is inline in `index.html`. Do not split it
-   into `app.js`/`styles.css`/modules — a second shipped file is a FAIL
-   without an owner ruling. The typeface (Montserrat Alternates, self-hosted,
+1. **One page.** The CSS is inline in `index.html`; the JS ships as
+   external .js files (`app.js`, and `monstera-storybook.js` beside its
+   page) per the issue-#151 owner ruling (B59), which supersedes the old
+   "all JS inline, truly one file" clause of B12. Do not split it further
+   into a module tree — additional shipped JS files are a FAIL without an
+   owner ruling. The typeface (Montserrat Alternates, self-hosted,
    no CDN) may be embedded in the CSS as a data URI if the build requires it
    to stay single-file; that is the Earp-Street-Park precedent, not a new
    dependency.

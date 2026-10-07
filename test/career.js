@@ -22,7 +22,14 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
 
   // Single-file law: no scripts, no stylesheets, no deps
   ok('no <script> elements', await page.locator('script').count() === 0);
-  ok('no external stylesheets or links', await page.locator('link').count() === 0);
+  // issue #168/B63: favicons ship as same-origin <link rel="icon"> on every
+  // page — the single-file law forbids stylesheets and off-origin refs, not
+  // the site's own favicon links (the resource-origin guard below still
+  // holds that line; this assertion rewrite is deliberate).
+  ok('no stylesheets or off-origin links — only the B63 favicon links',
+    await page.locator('link').evaluateAll(ls => ls.every(l =>
+      ['icon', 'apple-touch-icon', 'shortcut icon'].includes(l.rel) &&
+      l.href.startsWith(location.origin))));
   ok('no external network requests beyond the page itself', await page.evaluate(() => performance.getEntriesByType('resource')
     .every(r => r.name.startsWith('data:') || r.name.startsWith(location.origin))));
 

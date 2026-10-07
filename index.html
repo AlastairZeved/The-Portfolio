@@ -378,10 +378,62 @@ body {
   display: flex; align-items: flex-start; gap: 12px;
   z-index: 1;
 }
+
+/* issue #169 / B62: the footer splits 50/50 — the owner's copy in the left
+   half, the contact form in the right half — closed by a vertical divider
+   bar: the divider grammar career.html ships (.parking-lot__divider — 1px
+   wide, 3/4 of the section's inner height, centred), re-tokened to this
+   page's own To-Do blue tokens (color-mix --frame 45%, the same mix the
+   #lot-rule and career's bars already render). Both halves are flex 1 1 0
+   over the same 50% share; the form's tracks are fr units so everything
+   scales with any viewport, per the issue. */
+.lot-split {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.lot-copy {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 13px; line-height: 1.5; font-weight: 400;
+  color: var(--ink);
+}
+.lot-copy p { margin: 0; }
+.lot-divider {
+  flex: 0 0 1px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  width: 1px;
+}
+.lot-divider::before {
+  content: "";
+  height: 75%;          /* 3/4 of the section's inner length, career's grammar */
+  width: 1px;
+  background: color-mix(in srgb, var(--frame) 45%, transparent);
+}
+.lot-form {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+}
+/* Mobile: the halves stack — copy above, form below (issue #169). The
+   ≤743px breakpoint is the repo's own (career.html's mobile block). */
+@media (max-width: 743px) {
+  .lot-split { flex-direction: column; align-items: stretch; gap: 12px; }
+  .lot-divider { width: auto; flex: 0 0 1px; align-self: stretch; }
+  .lot-divider::before { width: 75%; height: 1px; }
+}
 #contact-form {
-  display: grid;#contact-form {
   display: grid;
-  grid-template-columns: 15% 30%;   /* 1:2 — Name/Email half the Message width (half of their prior size) */
+  /* 1:2 — Name/Email half the Message width (B20's ratio), now in fr units
+     so the form fills the right half of the footer and scales with any
+     viewport (issue #169 / B62). B20's arrangement is unchanged. */
+  grid-template-columns: 1fr 2fr;
   gap: 12px;
   align-items: start;
   justify-content: start;           /* anchored left; right side of the pane stays free */
@@ -539,6 +591,15 @@ body {
     <div id="lot-rule"></div>
     <div id="lot-header">Parking Lot</div>
     <div id="lot-items">
+      <!-- issue #169 / B62: the footer splits 50/50 — the owner's copy in the
+           left half, the Formspree form in the right half, divided by the
+           vertical divider bar. -->
+      <div class="lot-split">
+        <div class="lot-copy">
+          <p>Hey, I'm Rob, and you have stumbled into my digital garden. This is the sort of central hub for accessing all of my works across the various domains that have sparked my curiosity throughout my life. I'm weary of calling them "hobbies" or "passions", because the passion is simply learning, solving tough problems, and satisfying my insatiable curiosity for how things are built - so that I can rebuild them, my way. None of these are stale, the work always continues as I find inspiration to ask a new question. Because all it takes to be a little curious is to ask a question, then keep asking questions and always be<em>Curiouser and curiouser.</em></p>
+        </div>
+        <div class="lot-divider" aria-hidden="true"></div>
+        <div class="lot-form">
       <form id="contact-form" action="https://formspree.io/f/xppwbrga" method="POST">
         <div class="left-column">
           <div class="field">
@@ -560,6 +621,8 @@ body {
           <button type="submit">Send</button>
         </div>
       </form>
+        </div><!-- /.lot-form -->
+      </div><!-- /.lot-split -->
     </div>
   </div>
 

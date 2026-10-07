@@ -567,7 +567,7 @@ The form's userspace, per the owner's ruling `B20`, renders left-anchored:
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 | the career page (B47): employer selector, B132 glow, split body, three-section lot, sand/brown ladder, empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
-| the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, disabled Download, literal idea-green ladder, the B50 landing-convention band/card/lot render | `test/plantsandrocks.js` |
+| the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, the B58 Download (PDF anchor), literal idea-green ladder, the B50 landing-convention band/card/lot render | `test/plantsandrocks.js` |
 
 ---
 
@@ -797,9 +797,12 @@ values, not new numbers.
   **Download** `.cta` — career's `.cta` grammar re-tokened to the green
   palette (`background: var(--card); color: var(--ink-light); box-shadow:
   var(--elevation), 0 0 6px 0 var(--frame)`; `--elevation` and `--ease` are
-  career's values verbatim) — rendered but **DISABLED**
-  (`aria-disabled="true"`, `disabled`, no handler, opacity 0.55, and the
-  hover/active bloom gated off by `:not([disabled])`).
+  career's values verbatim) — **live on the Plants on Poles tab as an
+  anchor serving the shipped `Flattened-Monstera-Division.pdf` via the
+  `download` attribute (B58, issue #157)**; on the Plants in Rocks tab it
+  renders inert and dimmed via CSS `:has` (`opacity: 0.55`,
+  `cursor: not-allowed`, `pointer-events: none` — B48's shipped dim value,
+  reused; the inert state is CSS-only, the page has no script).
 
 At ≤743px the band stacks to one column and the lot stacks (career.html's
 media pattern); transitions collapse under `prefers-reduced-motion: reduce`.
@@ -809,13 +812,16 @@ media pattern); transitions collapse under `prefers-reduced-motion: reduce`.
 The Plants on Poles reader body is **filled as of B57** (issue #156): it
 renders the shipped `monstera-storybook.html` document in an iframe. What
 still awaits the owner's fill passes — the Plants in Rocks reader
-implementation (B57 keeps B48's blank-reader discipline for that container),
-the Download target (which PDF the button serves, per selected page). The
+implementation (B57 keeps B48's blank-reader discipline for that
+container). The Download target is **filled as of B58** (issue #157): the
+control serves the shipped `Flattened-Monstera-Division.pdf` (repo root)
+via the `download` attribute, live on the Plants on Poles tab only. The
 footer's left section is **permanently empty** by spec (not a pending fill).
 The slot structure lives in the markup as non-rendering `SLOT` comments so a
 targeted fill lands in place; the page invents no copy.
 
 **Pinned by:** `test/plantsandrocks.js` — selector mechanics, the `--frame`
 glow, the poles reader's storybook iframe and the empty rocks reader (B57),
-the two-section lot, the disabled Download, the literal idea-green tokens,
+the two-section lot, the B58 Download (PDF anchor, live on the poles tab,
+inert on the rocks tab), the literal idea-green tokens,
 the single-file law, and the B50 landing-convention band/card/lot render.

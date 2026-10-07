@@ -164,26 +164,32 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       return f.innerText.trim() === '' && f.getBoundingClientRect().height === 0;
     }));
 
-  // The Download button: rendered but DISABLED (B48, owner ruling)
+  // The Download control: a PDF anchor, live on the poles tab, inert on
+  // the rocks tab (B58, issue #157 — supersedes B48's disabled state)
   const cta = page.locator('.parking-lot .cta');
-  ok('the Download button renders', (await cta.innerText()).trim() === 'Download' && await cta.count() === 1);
-  ok('the Download button is disabled: aria-disabled + disabled + dimmed, no handler',
-    (await cta.getAttribute('aria-disabled')) === 'true' &&
-    (await cta.getAttribute('disabled')) !== null &&
+  ok('the Download control renders as an anchor targeting the shipped PDF',
+    (await cta.innerText()).trim() === 'Download' && await cta.count() === 1 &&
+    (await cta.getAttribute('href')) === 'Flattened-Monstera-Division.pdf' &&
+    (await cta.getAttribute('download')) !== null);
+  ok('the Download control has no script handler (the page has no script)',
     (await cta.getAttribute('onclick')) === null);
-  ok('the Download button is dimmed at 0.55 and cannot hover-bloom', await page.evaluate(() => {
-    const b = document.querySelector('.parking-lot .cta');
-    const s = getComputedStyle(b);
-    const sheet = [...document.styleSheets].find(sh => sh.ownerNode && !sh.href);
-    let hover = null;
-    for (const r of sheet.cssRules) {
-      const inner = r.selectorText ? [r] : [...(r.cssRules || [])];
-      hover = inner.find(x => x.selectorText && x.selectorText.includes('.cta') && x.selectorText.includes(':hover'));
-      if (hover) break;
-    }
-    return s.opacity === '0.55' && s.cursor === 'not-allowed' &&
-      hover && hover.selectorText.includes(':not([disabled])');
-  }));
+  ok('on the poles tab the Download control is live (not dimmed, clickable)', await (async () => {
+    // re-select Plants on Poles: the §3 swap step above left Plants in Rocks checked
+    await page.locator('.topband__card-hit[for="page-poles"]').click();
+    return await page.evaluate(() => {
+      const b = document.querySelector('.parking-lot .cta');
+      const s = getComputedStyle(b);
+      return s.opacity === '1' && s.pointerEvents !== 'none';
+    });
+  })());
+  ok('on the rocks tab the Download control is inert and dimmed at 0.55', await (async () => {
+    await page.locator('#page-rocks').check({ force: true });
+    return await page.evaluate(() => {
+      const b = document.querySelector('.parking-lot .cta');
+      const s = getComputedStyle(b);
+      return s.opacity === '0.55' && s.cursor === 'not-allowed' && s.pointerEvents === 'none';
+    });
+  })());
 
   // §4: the palette is the LITERAL idea-board green block (byte-exact)
   const tokens = await page.evaluate(() => {

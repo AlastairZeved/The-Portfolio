@@ -7,7 +7,9 @@
      token block (`#board[data-cat="idea"]`), NOT a re-hue — byte-exact hexes.
      The Plants on Poles reader renders the shipped monstera-storybook.html
      document in an iframe (issue #156, B57); the Plants in Rocks reader stays
-     a bare empty container. No script, single file, zero <link>, per the
+     a bare empty container. The footer Download is an anchor serving the
+     shipped Flattened-Monstera-Division.pdf (issue #157, B58), live only on
+     the Plants on Poles tab. No script, single file, zero <link>, per the
      site's law. -->
 <html lang="en">
 <head>
@@ -292,17 +294,19 @@ body:has(#page-rocks:checked) .reader--rocks {
     filter 200ms var(--ease),
     transform 200ms var(--ease);
 }
-/* The disabled Download button (B48, owner ruling: rendered but disabled —
-   it visibly cannot yet work). Dimmed at career.html's shipped 0.55 alpha,
-   no pointer cursor, and NO hover/active bloom: the hover/active rules are
-   gated on :not([disabled]) so the disabled state stays inert. The 0.55
-   alpha is agent-derived (career.html's existing dim value, reused). */
-.cta[disabled] {
+/* The Download control (B58, issue #157): an anchor serving the shipped
+   Flattened-Monstera-Division.pdf via the download attribute. It is live
+   only while the Plants on Poles tab is selected; on the Plants in Rocks
+   tab it is inert and dimmed at career.html's shipped 0.55 alpha (B48's
+   dim value, reused), no pointer cursor, pointer-events none. The inert
+   state is CSS-driven because the page has no script (B48 law). */
+body:has(#page-rocks:checked) .cta {
   opacity: 0.55;
   cursor: not-allowed;
+  pointer-events: none;
 }
 @media (hover: hover) {
-  .cta:not([disabled]):hover {
+  .cta:hover {
     filter: brightness(1.1);
     box-shadow: var(--elevation), 0 0 12px 2px var(--frame), 0 0 24px 4px var(--frame);
   }
@@ -396,11 +400,12 @@ body:has(#page-rocks:checked) .reader--rocks {
   </div>
   <div class="parking-lot__divider" aria-hidden="true"></div>
   <div class="parking-lot__facts">
-    <!-- SLOT (blank #4): the Download target — owner fills in (which PDF the
-         button serves, per selected page). Until then the button is rendered
-         but DISABLED (B48, owner ruling): aria-disabled, no handler, it
-         visibly cannot yet work. -->
-    <button class="cta" type="button" disabled aria-disabled="true">Download</button>
+    <!-- SLOT (blank #4 → filled, issue #157/B58): the Download target — the
+       owner's Flattened-Monstera-Division.pdf, shipped in the repo root,
+       forced to download via the download attribute. Live on the Plants on
+       Poles tab (its PDF); inert and dimmed on Plants in Rocks, which has
+       no PDF (B57: that reader stays blank). -->
+    <a class="cta" href="Flattened-Monstera-Division.pdf" download>Download</a>
   </div>
 </footer>
 

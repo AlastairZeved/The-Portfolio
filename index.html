@@ -189,8 +189,7 @@ body {
   /* issue #59: single font size in the card — both lines at 20px (#91) */
   font-size: 20px; font-weight: 400; line-height: 1.2;
   color: var(--ink);
-}
-#anchor-title .title-pinned {
+}#anchor-title .title-pinned {
   font-size: 20px; font-weight: 600;
   color: var(--ink);
 }
@@ -238,8 +237,10 @@ body {
   border-radius: 3px;
   padding: 10px 12px;
   /* B45: 17px / 1.4 like TheBoards' .note-text, fixed — the card's own
-     scale factor (below) is the only text scaling; no --card-fs. */
-  font-size: 17px; font-weight: 600; line-height: 1.4;
+     scale factor (below) is the only text scaling; no --card-fs.
+     Weight: 400 per B60 (issue #167) — no note card renders bold;
+     supersedes B53's "six door-cards keep 600" clause. */
+  font-size: 17px; font-weight: 400; line-height: 1.4;
   text-align: center;
   overflow-wrap: break-word;
   text-decoration: none;
@@ -253,13 +254,6 @@ body {
      transform-origin top left so the authored left/top stays truthful. */
   transform: scale(var(--card-scale, 1));
   transform-origin: top left;
-}
-/* B53 (issue #145): the three linked sub-cards render their text plain —
-   weight 400, the self-hosted regular rung — while every other door-card
-   keeps the 600. B55 (issue #146): the four new note sub cards render
-   plain too; the selector covers all seven sub cards. */
-.door-card.sub-card {
-  font-weight: 400;
 }
 /* While a scale resize is active the card applies its scale instantly
    (TheBoards fidelity, B45): the 80ms transform transition above is the
@@ -385,6 +379,7 @@ body {
   z-index: 1;
 }
 #contact-form {
+  display: grid;#contact-form {
   display: grid;
   grid-template-columns: 15% 30%;   /* 1:2 — Name/Email half the Message width (half of their prior size) */
   gap: 12px;

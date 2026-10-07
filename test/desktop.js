@@ -97,7 +97,8 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('all door-cards sit inside the viewport (no clipping)', inside);
 
   // issue #145/B53 + #146/B55: the seven linked sub cards render plain (400)
-  // text, every other door-card keeps the 600 — UIUX §4's weight clause
+  // text — and issue #167/B60 supersedes B53's 600 clause: every note card
+  // (all thirteen) renders plain 400 — UIUX §4's weight clause
   const weights = await page.evaluate(() => {
     const w = id => { const el = document.querySelector(`.door-card[data-id="${id}"]`); return el ? getComputedStyle(el).fontWeight : null; };
     return {
@@ -107,8 +108,8 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   });
   ok('sub cards render plain 400 text (issue #145/B53, #146/B55)',
     weights.sub.length === 7 && weights.sub.every(x => x === '400'));
-  ok('the Music note and six board cards keep 600 (issue #145/B53)',
-    weights.rest.length === 6 && weights.rest.every(x => x === '600'));
+  ok('every note card renders plain 400 — no bold (issue #167/B60, superseding B53)',
+    weights.rest.length === 6 && weights.rest.every(x => x === '400'));
 
   // the thirteen note links (B28, UIUX §4.3): one <line> per owner-named pair
   // (issue #75, #72, #74 and #146), 1px --frame between the two cards' centres, on a hitless

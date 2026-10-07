@@ -5,9 +5,12 @@
      overhanging the band rule, a :has-driven radio selection, footer
      .parking-lot with a .cta. The palette is the LITERAL TheBoards idea-board
      token block (`#board[data-cat="idea"]`), NOT a re-hue — byte-exact hexes.
-     Body is intentionally blank pending the PDF pass: selection swaps between
-     two bare empty reader containers, nothing renders in them. No script,
-     single file, zero <link>, per the site's law. -->
+     The Plants on Poles reader renders the shipped monstera-storybook.html
+     document in an iframe (issue #156, B57); the Plants in Rocks reader stays
+     a bare empty container. The footer Download is an anchor serving the
+     shipped Flattened-Monstera-Division.pdf (issue #157, B58), live only on
+     the Plants on Poles tab. No script, single file, zero <link>, per the
+     site's law. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -197,17 +200,33 @@ body {
 
 main { flex: 1 1 auto; display: flex; }
 
-/* ---- Body — intentionally BLANK (issue #134 §2). Selection swaps between
-   two bare empty reader containers driven by :has — one per radio. Each is
-   an empty bare container: no styled content, no placeholder images, no
-   text, no chevrons, no split furniture (the spec asks for no split here;
-   the reader region is just reserved). The containers exist so the future
-   PDF pass fills them in place; until then they render nothing. ---- */
+/* ---- Body — the readers (issue #134 §2; the poles embed is issue #156,
+   B57). Selection swaps between two reader containers driven by :has — one
+   per radio. The Plants in Rocks reader is still a bare empty container.
+   The Plants on Poles reader renders the shipped monstera-storybook.html
+   document in an iframe filling the body region between header and footer,
+   edge-to-edge (no side gaps): width 100%, border 0, height filling the
+   main region. The container's clearance below the title-card overhang
+   (B31's 29 × --rs hang) plus the card's own 8 × --rs top offset keeps the
+   storybook's top clear of the cards; the storybook's internal pager
+   handles paging (it is overflow:hidden). ---- */
 .reader { display: none; min-width: 0; }
 body:has(#page-poles:checked) .reader--poles,
 body:has(#page-rocks:checked) .reader--rocks {
   display: flex;
   flex: 1 1 auto;
+}
+.reader--poles {
+  box-sizing: border-box;
+  flex-direction: column;
+  padding-top: calc(29 * var(--rs) + 8 * var(--rs));
+}
+.reader--poles iframe {
+  display: block;
+  flex: 1 1 auto;
+  width: 100%;
+  border: 0;
+  background: var(--deep);
 }
 
 /* ---- Footer — two sections (issue #134 §3). career.html's .parking-lot,
@@ -275,17 +294,19 @@ body:has(#page-rocks:checked) .reader--rocks {
     filter 200ms var(--ease),
     transform 200ms var(--ease);
 }
-/* The disabled Download button (B48, owner ruling: rendered but disabled —
-   it visibly cannot yet work). Dimmed at career.html's shipped 0.55 alpha,
-   no pointer cursor, and NO hover/active bloom: the hover/active rules are
-   gated on :not([disabled]) so the disabled state stays inert. The 0.55
-   alpha is agent-derived (career.html's existing dim value, reused). */
-.cta[disabled] {
+/* The Download control (B58, issue #157): an anchor serving the shipped
+   Flattened-Monstera-Division.pdf via the download attribute. It is live
+   only while the Plants on Poles tab is selected; on the Plants in Rocks
+   tab it is inert and dimmed at career.html's shipped 0.55 alpha (B48's
+   dim value, reused), no pointer cursor, pointer-events none. The inert
+   state is CSS-driven because the page has no script (B48 law). */
+body:has(#page-rocks:checked) .cta {
   opacity: 0.55;
   cursor: not-allowed;
+  pointer-events: none;
 }
 @media (hover: hover) {
-  .cta:not([disabled]):hover {
+  .cta:hover {
     filter: brightness(1.1);
     box-shadow: var(--elevation), 0 0 12px 2px var(--frame), 0 0 24px 4px var(--frame);
   }
@@ -320,6 +341,9 @@ body:has(#page-rocks:checked) .reader--rocks {
   .parking-lot { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .parking-lot__divider { width: auto; align-self: flex-start; }
   .parking-lot__divider::before { width: 75%; height: 1px; }
+  /* The cards no longer overhang the stacked band, so the poles reader's
+     clearance collapses to zero and the iframe fills the body edge-to-edge. */
+  .reader--poles { padding-top: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -353,16 +377,18 @@ body:has(#page-rocks:checked) .reader--rocks {
 </header>
 
 <main>
-  <!-- SLOT (blank #1): the Plants on Poles reader (Monstera Division and Moss
-       Pole Guide) — the future PDF pass fills this container. B48: the body
-       is intentionally blank; this container is a bare empty shell, no
-       styled content, no placeholder furniture. -->
+  <!-- SLOT (blank #1 → filled, issue #156/B57): the Plants on Poles reader
+       (Monstera Division and Moss Pole Guide) renders the shipped
+       monstera-storybook.html document in an iframe; the storybook's own
+       pager handles paging. -->
   <div class="reader reader--poles">
+    <iframe src="monstera-storybook.html" title="Monstera Division and Moss Pole Introduction"></iframe>
   </div>
 
   <!-- SLOT (blank #2): the Plants in Rocks reader (Planting in
-       Semi-Hydroponics With Pon) — the future PDF pass fills this container.
-       B48: same blank-shell discipline. -->
+       Semi-Hydroponics With Pon) — the future fill fills this container.
+       B57: it stays a bare empty shell, no styled content, no placeholder
+       furniture. -->
   <div class="reader reader--rocks">
   </div>
 </main>
@@ -374,11 +400,12 @@ body:has(#page-rocks:checked) .reader--rocks {
   </div>
   <div class="parking-lot__divider" aria-hidden="true"></div>
   <div class="parking-lot__facts">
-    <!-- SLOT (blank #4): the Download target — owner fills in (which PDF the
-         button serves, per selected page). Until then the button is rendered
-         but DISABLED (B48, owner ruling): aria-disabled, no handler, it
-         visibly cannot yet work. -->
-    <button class="cta" type="button" disabled aria-disabled="true">Download</button>
+    <!-- SLOT (blank #4 → filled, issue #157/B58): the Download target — the
+       owner's Flattened-Monstera-Division.pdf, shipped in the repo root,
+       forced to download via the download attribute. Live on the Plants on
+       Poles tab (its PDF); inert and dimmed on Plants in Rocks, which has
+       no PDF (B57: that reader stays blank). -->
+    <a class="cta" href="Flattened-Monstera-Division.pdf" download>Download</a>
   </div>
 </footer>
 

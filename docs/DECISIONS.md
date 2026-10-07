@@ -1523,3 +1523,131 @@ to." — and the owner's four grill answers of 2026-10-06 (owner chat):
 3. "Empty desc cards render, sized per the issue" (the omit-empty override
    for these components).
 4. "No CTA on career role cards".
+
+### B57. The Plants on Poles reader renders the monstera-storybook.html document in an iframe (issue #156)
+
+The owner logged the embed in issue #156: the built storybook guidebook is
+embedded in the body of the `/plantsandrocks` page. It ships as a **second
+file, `monstera-storybook.html`, committed verbatim** — a self-contained
+HTML document (base64 WebP pages in a JS array, its own prev/next pager,
+dual-page at ≥768px, single-page below, its own CSS carrying the exact
+idea-green token block of B48) — and the Plants on Poles reader container
+(`.reader--poles`) embeds it in the body via an `<iframe
+src="monstera-storybook.html" title="Monstera Division and Moss Pole
+Introduction">`. The storybook's internal pager handles paging; the page's
+own script law is unchanged (no script is added to `plantsandrocks.html`
+itself).
+
+The iframe fills the **body region between the header and the footer** and
+scales to fit the width of the viewport end-to-end so there are no gaps on
+the sides, with clearance below the title-card overhang (B31's `29 × --rs`
+hang plus the card's `8 × --rs` top offset) so the top of it does not
+overlap with the title cards. The mobile media block keeps the iframe
+working at ≤743px consistent with the existing mobile block's pattern. The
+Download button stays **disabled and untouched**.
+
+**This entry supersedes B48's blank-reader discipline for the
+`.reader--poles` container only.** The Plants in Rocks reader
+(`.reader--rocks`) stays an empty reserved container per B48; the
+Download button's disabled state and the B50 header-band/title-card/footer
+conventions stand unchanged.
+
+**Source:** the owner's issue
+[#156](https://github.com/AlastairZeved/The-Portfolio/issues/156),
+2026-10-06 — quoted verbatim: "for the /plantsandrocks page when the plants
+tab is selected and being viewed, the attached file needs to be embedded in
+the body. It is a dual page guidebook that has already been built in HTML.
+Embed it in the body area of the page (between the header and footer) and
+make sure the top of it does not overlap with the title cards on the page.
+It should scale to fit the width of the viewport end-to-end so there's no
+gaps on the side. It already includes mobile formatting with a single page
+viewer." — and the owner's four grill answers of 2026-10-06 (owner chat):
+
+1. "Option A — two files, iframe".
+2. "Yes, Plants in Rocks stays blank".
+3. "Untouched, still disabled".
+4. "Fill body region between header and footer".
+
+And the owner's chat direction of 2026-10-06 on the rendered result, quoted
+verbatim: "i need you to remove the green header bar from the storybook
+reader. it's too much with a header right under the title header so just
+remove it" — the storybook document ships **without its top header band**
+(the empty 56px `#band` gradient strip is removed from
+`monstera-storybook.html`); the storybook's bottom pager band and its pages
+stand unchanged.
+
+### B58. The Download button serves the shipped Flattened-Monstera-Division.pdf on the Plants on Poles tab (issue #157)
+
+The owner logged the fill in issue #157: the attached
+`Flattened-Monstera-Division.pdf` "needs to be downloadable and targeted by
+the 'download' button" on the Plants tab of `/plantsandrocks`. The PDF is
+therefore **shipped in the repo root** as `Flattened-Monstera-Division.pdf`
+(next to `monstera-storybook.html`, per the owner's grill answer that the
+file ships with the site) and the footer Download control becomes a real
+`<a class="cta" href="Flattened-Monstera-Division.pdf" download>Download</a>`
+— the `download` attribute forces the download; the page's no-script law
+(B48) is unchanged.
+
+The control is live **only while the Plants on Poles tab is selected** (the
+PDF belongs to that guide); on the Plants in Rocks tab it renders inert and
+dimmed, driven by the page's existing CSS `:has` selector — `opacity: 0.55`,
+`cursor: not-allowed`, `pointer-events: none` (the 0.55 alpha is B48's
+shipped dim value, reused; no new design value is introduced). The inert
+state is CSS-only because the page has no script. The Plants in Rocks
+reader stays an empty reserved container per B57; the B50
+header-band/title-card/footer conventions stand unchanged.
+
+**This entry supersedes B48's disabled-Download discipline** (the button's
+"rendered but disabled, no handler" state) — the button is now live on the
+Plants on Poles tab. It does not supersede B57.
+
+**Source:** the owner's issue
+[#157](https://github.com/AlastairZeved/The-Portfolio/issues/157),
+2026-10-06 — quoted verbatim: "On the plants tab, the attached doc needs to
+be downloadable and targeted by the 'download' button." (titled "the
+download button needs a target in /plantsandrocks on the plants tab") —
+and the owner's three grill answers of 2026-10-06 (owner chat):
+
+1. "Disabled on the Rocks tab, enabled only while Plants on Poles is
+   selected" (option chosen from the agent's measurement that Plants in
+   Rocks has no PDF).
+2. "Ship the PDF in the repo root next to monstera-storybook.html and link
+   it relatively".
+3. "Force download via the HTML download attribute".
+
+### B59. JavaScript ships as external .js files; a strict Content-Security-Policy ships via a Netlify `_headers` file (issue #151)
+
+The owner ruled, in pre-implementation alignment on issue #151 (2026-10-06),
+that **B12's "all CSS and JS inline" clause is superseded for scripts**: the
+page's JavaScript ships as **external .js files** — `app.js` beside
+`index.html`, `monstera-storybook.js` beside `monstera-storybook.html`,
+both in the repository root (the publish root), loaded by `<script src>`
+with no handler attributes. The inline-CSS clause of B12 stands unchanged.
+
+A **strict Content-Security-Policy** ships as a real HTTP header from a
+**`_headers` file at the repository root** (hosting configuration, not a
+page asset):
+
+`default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; frame-src 'self'; form-action https://formspree.io; base-uri 'none'; frame-ancestors 'none'; upgrade-insecure-requests`
+
+- `script-src 'self'` only — no `unsafe-inline`, no hashes: the scripts are
+  external per this ruling.
+- `style-src 'unsafe-inline'` is unavoidable: the CSS is inline by B12.
+- `img-src data:` and `font-src data:` carry the embedded base64 WebP pages
+  and the self-hosted data-URI faces (B23); `frame-src 'self'` carries the
+  B57 storybook iframe; `form-action https://formspree.io` carries the B6
+  form. **No Referrer-Policy directive is set** (SECURITY.md — a missing
+  referrer files every Formspree submission as spam).
+- The issue's "sanitize/encode any user-supplied content" clause was
+  measured and is a no-op: the form posts to Formspree and nothing is ever
+  rendered back; no dynamic `innerHTML` writes of user data exist anywhere.
+  SECURITY.md is left untouched on that point, per the owner's ruling.
+
+**Source:** the owner's four grill answers of 2026-10-06, given in
+pre-implementation alignment on issue #151 (owner chat, multiple choice) —
+"Add `_headers` at repo root, real HTTP headers"; "Strict policy with
+hash-pinned scripts, 'unsafe-inline' only for styles"; "Amend B12 —
+externalize JS into .js files"; "Leave SECURITY.md untouched on this
+point". (With the scripts external, the strict-policy ruling's
+hash-pinning mechanism is moot and `script-src 'self'` carries it; the
+strictness ruling itself stands.)

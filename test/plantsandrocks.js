@@ -1,9 +1,11 @@
 /* test/plantsandrocks.js — the Plants & Rocks page (issue #134, B48):
    two-page selector over the band rule, B132 glow mechanism on the selected
-   card, body intentionally BLANK (reader region renders nothing pending the
-   PDF pass), two-section parking lot with one divider, a rendered-but-
-   disabled Download button, and the literal TheBoards idea-board green
-   palette (byte-exact, NOT a re-hue). Single file, zero script, zero <link>.
+   card, the poles reader rendering the shipped monstera-storybook.html
+   iframe (issue #156, B57 — deliberate rewrite of the blank-body pin) while
+   the rocks reader stays empty, two-section parking lot with one divider, a
+   rendered-but-disabled Download button, and the literal TheBoards
+   idea-board green palette (byte-exact, NOT a re-hue). Single file, zero
+   script on plantsandrocks.html itself, zero <link>.
    Black-box Playwright, career.js's harness.
    Run: node test/plantsandrocks.js   (PORTFOLIO_URL default http://localhost:8000/plantsandrocks.html) */
 
@@ -90,19 +92,50 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     getComputedStyle(document.querySelectorAll('.topband__card')[1]).boxShadow);
   ok('unselected cards carry no bloom', !unselectedGlow.includes('rgb(82, 153, 127)'));
 
-  // §2: the body is intentionally blank — the reader region renders nothing
-  ok('the body is blank: no reader container renders any content',
+  // §2: the readers (B57, issue #156 — deliberate rewrite of B48's
+  // blank-body pin): the Plants on Poles reader renders the shipped
+  // monstera-storybook.html in an iframe filling the body edge-to-edge;
+  // the Plants in Rocks reader stays empty.
+  ok('the poles reader renders the storybook iframe: src, title, fills the width',
     await page.evaluate(() => {
-      const reader = [...document.querySelectorAll('.reader')]
-        .find(r => r.getBoundingClientRect().height > 0);
-      if (!reader) return false;
+      const reader = document.querySelector('.reader--poles');
+      const ifr = reader && reader.querySelector('iframe');
+      if (!ifr) return false;
+      const r = ifr.getBoundingClientRect();
+      const rr = reader.getBoundingClientRect();
+      return ifr.getAttribute('src') === 'monstera-storybook.html' &&
+        ifr.getAttribute('title') === 'Monstera Division and Moss Pole Introduction' &&
+        getComputedStyle(ifr).borderWidth === '0px' &&
+        Math.abs(r.width - innerWidth) < 1 &&
+        Math.abs(rr.width - innerWidth) < 1;
+    }));
+  ok('the storybook iframe actually loads its document (non-zero content height)',
+    await page.evaluate(() =>
+      document.querySelector('.reader--poles iframe').contentDocument &&
+      document.querySelector('.reader--poles iframe').contentDocument.body.scrollHeight > 0));
+  ok('the storybook document wears Montserrat Alternates (issue #160, UIUX §2.9)',
+    await page.evaluate(() => {
+      const doc = document.querySelector('.reader--poles iframe').contentDocument;
+      const ff = getComputedStyle(doc.body).fontFamily;
+      return ff.includes('Montserrat Alternates') &&
+        doc.querySelector('style').textContent.includes('font-display: swap');
+    }));
+  ok('the storybook iframe sits below the title-card overhang (no overlap)',
+    await page.evaluate(() => {
+      const ifr = document.querySelector('.reader--poles iframe').getBoundingClientRect();
+      const card = document.querySelector('.topband__card').getBoundingClientRect();
+      return ifr.top >= card.bottom - 1;
+    }));
+  ok('the rocks reader stays a bare empty container',
+    await page.evaluate(() => {
+      const reader = document.querySelector('.reader--rocks');
       return reader.innerText.trim() === '' &&
         reader.children.length === 0 &&
-        reader.querySelector('img, h2, h3, p, span') === null;
+        reader.querySelector('img, iframe, h2, h3, p, span') === null;
     }));
 
   await page.locator('.topband__card-hit[for="page-rocks"]').click();
-  ok('selecting Plants in Rocks swaps the selection (body swaps between bare empty containers)',
+  ok('selecting Plants in Rocks swaps the selection (body swaps between the two reader containers)',
     await page.locator('#page-rocks').isChecked() &&
     !(await page.locator('#page-poles').isChecked()));
   await page.waitForTimeout(300);
@@ -112,10 +145,14 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       .map(c => getComputedStyle(c).boxShadow);
     return shadows[1].includes('rgb(82, 153, 127)') && !shadows[0].includes('rgb(82, 153, 127)');
   }));
-  ok('body still renders nothing after the swap',
-    await page.evaluate(() =>
-      [...document.querySelectorAll('.reader')].every(
-        r => r.innerText.trim() === '' && r.children.length === 0)));
+  ok('after the swap the rocks reader renders and the poles reader is hidden',
+    await page.evaluate(() => {
+      const rocks = document.querySelector('.reader--rocks');
+      const poles = document.querySelector('.reader--poles');
+      return rocks.getBoundingClientRect().height > 0 &&
+        rocks.children.length === 0 && rocks.innerText.trim() === '' &&
+        getComputedStyle(poles).display === 'none';
+    }));
 
   // §3: the footer is the parking-lot grammar, two sections, one divider
   ok('footer has two sections and one divider bar',
@@ -134,26 +171,32 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       return f.innerText.trim() === '' && f.getBoundingClientRect().height === 0;
     }));
 
-  // The Download button: rendered but DISABLED (B48, owner ruling)
+  // The Download control: a PDF anchor, live on the poles tab, inert on
+  // the rocks tab (B58, issue #157 — supersedes B48's disabled state)
   const cta = page.locator('.parking-lot .cta');
-  ok('the Download button renders', (await cta.innerText()).trim() === 'Download' && await cta.count() === 1);
-  ok('the Download button is disabled: aria-disabled + disabled + dimmed, no handler',
-    (await cta.getAttribute('aria-disabled')) === 'true' &&
-    (await cta.getAttribute('disabled')) !== null &&
+  ok('the Download control renders as an anchor targeting the shipped PDF',
+    (await cta.innerText()).trim() === 'Download' && await cta.count() === 1 &&
+    (await cta.getAttribute('href')) === 'Flattened-Monstera-Division.pdf' &&
+    (await cta.getAttribute('download')) !== null);
+  ok('the Download control has no script handler (the page has no script)',
     (await cta.getAttribute('onclick')) === null);
-  ok('the Download button is dimmed at 0.55 and cannot hover-bloom', await page.evaluate(() => {
-    const b = document.querySelector('.parking-lot .cta');
-    const s = getComputedStyle(b);
-    const sheet = [...document.styleSheets].find(sh => sh.ownerNode && !sh.href);
-    let hover = null;
-    for (const r of sheet.cssRules) {
-      const inner = r.selectorText ? [r] : [...(r.cssRules || [])];
-      hover = inner.find(x => x.selectorText && x.selectorText.includes('.cta') && x.selectorText.includes(':hover'));
-      if (hover) break;
-    }
-    return s.opacity === '0.55' && s.cursor === 'not-allowed' &&
-      hover && hover.selectorText.includes(':not([disabled])');
-  }));
+  ok('on the poles tab the Download control is live (not dimmed, clickable)', await (async () => {
+    // re-select Plants on Poles: the §3 swap step above left Plants in Rocks checked
+    await page.locator('.topband__card-hit[for="page-poles"]').click();
+    return await page.evaluate(() => {
+      const b = document.querySelector('.parking-lot .cta');
+      const s = getComputedStyle(b);
+      return s.opacity === '1' && s.pointerEvents !== 'none';
+    });
+  })());
+  ok('on the rocks tab the Download control is inert and dimmed at 0.55', await (async () => {
+    await page.locator('#page-rocks').check({ force: true });
+    return await page.evaluate(() => {
+      const b = document.querySelector('.parking-lot .cta');
+      const s = getComputedStyle(b);
+      return s.opacity === '0.55' && s.cursor === 'not-allowed' && s.pointerEvents === 'none';
+    });
+  })());
 
   // §4: the palette is the LITERAL idea-board green block (byte-exact)
   const tokens = await page.evaluate(() => {
@@ -188,6 +231,19 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       const overflow = document.documentElement.scrollWidth > document.documentElement.clientWidth;
       return !band.includes(' ') && !overflow;
     }));
+  ok('at 390px the poles reader still renders the storybook iframe full-width, below the cards',
+    await (async () => {
+      // re-select Plants on Poles: the swap step above left Plants in Rocks checked
+      await page.locator('.topband__card-hit[for="page-poles"]').click();
+      await page.waitForTimeout(200);
+      return page.evaluate(() => {
+        const ifr = document.querySelector('.reader--poles iframe');
+        if (!ifr) return false;
+        const r = ifr.getBoundingClientRect();
+        const card = document.querySelector('.topband__card').getBoundingClientRect();
+        return Math.abs(r.width - innerWidth) < 1 && r.top >= card.bottom - 1;
+      });
+    })());
 
   // a11y: the selector is a named radio group; one off-canvas h1
   await page.setViewportSize({ width: 1440, height: 900 });

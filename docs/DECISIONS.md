@@ -1523,3 +1523,55 @@ to." — and the owner's four grill answers of 2026-10-06 (owner chat):
 3. "Empty desc cards render, sized per the issue" (the omit-empty override
    for these components).
 4. "No CTA on career role cards".
+
+### B57. The Plants on Poles reader renders the monstera-storybook.html document in an iframe (issue #156)
+
+The owner logged the embed in issue #156: the built storybook guidebook is
+embedded in the body of the `/plantsandrocks` page. It ships as a **second
+file, `monstera-storybook.html`, committed verbatim** — a self-contained
+HTML document (base64 WebP pages in a JS array, its own prev/next pager,
+dual-page at ≥768px, single-page below, its own CSS carrying the exact
+idea-green token block of B48) — and the Plants on Poles reader container
+(`.reader--poles`) embeds it in the body via an `<iframe
+src="monstera-storybook.html" title="Monstera Division and Moss Pole
+Introduction">`. The storybook's internal pager handles paging; the page's
+own script law is unchanged (no script is added to `plantsandrocks.html`
+itself).
+
+The iframe fills the **body region between the header and the footer** and
+scales to fit the width of the viewport end-to-end so there are no gaps on
+the sides, with clearance below the title-card overhang (B31's `29 × --rs`
+hang plus the card's `8 × --rs` top offset) so the top of it does not
+overlap with the title cards. The mobile media block keeps the iframe
+working at ≤743px consistent with the existing mobile block's pattern. The
+Download button stays **disabled and untouched**.
+
+**This entry supersedes B48's blank-reader discipline for the
+`.reader--poles` container only.** The Plants in Rocks reader
+(`.reader--rocks`) stays an empty reserved container per B48; the
+Download button's disabled state and the B50 header-band/title-card/footer
+conventions stand unchanged.
+
+**Source:** the owner's issue
+[#156](https://github.com/AlastairZeved/The-Portfolio/issues/156),
+2026-10-06 — quoted verbatim: "for the /plantsandrocks page when the plants
+tab is selected and being viewed, the attached file needs to be embedded in
+the body. It is a dual page guidebook that has already been built in HTML.
+Embed it in the body area of the page (between the header and footer) and
+make sure the top of it does not overlap with the title cards on the page.
+It should scale to fit the width of the viewport end-to-end so there's no
+gaps on the side. It already includes mobile formatting with a single page
+viewer." — and the owner's four grill answers of 2026-10-06 (owner chat):
+
+1. "Option A — two files, iframe".
+2. "Yes, Plants in Rocks stays blank".
+3. "Untouched, still disabled".
+4. "Fill body region between header and footer".
+
+And the owner's chat direction of 2026-10-06 on the rendered result, quoted
+verbatim: "i need you to remove the green header bar from the storybook
+reader. it's too much with a header right under the title header so just
+remove it" — the storybook document ships **without its top header band**
+(the empty 56px `#band` gradient strip is removed from
+`monstera-storybook.html`); the storybook's bottom pager band and its pages
+stand unchanged.

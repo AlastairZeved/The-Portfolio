@@ -713,7 +713,9 @@ discipline.
 page's header band, title cards and footer render at B49's landing-page
 conventions — B46's height-anchored scale as the pure-CSS `--rs` port, B31's
 title-card box, the lot's two-row-shelf floor — re-tokened to the idea-green
-binding.)*
+binding. The body reader law is amended by B57, issue #156: the Plants on
+Poles reader renders the shipped `monstera-storybook.html` document in an
+iframe.)*
 
 `plantsandrocks.html` is razgregory.com's dual-page-reader page. It is a
 static single file — all CSS inline, the typeface embedded as a data URI,
@@ -767,11 +769,23 @@ values, not new numbers.
   grammar); the selected card wears the B48 glow with `--frame` as the
   token. The header is `role="radiogroup"` (`aria-label="Choose a page"`);
   the page's one `h1` ("Plants & Rocks") is visually hidden.
-- **Body (dual-page reader, BLANK):** selection swaps between two bare empty
-  reader containers (one per radio) driven by `:has`. Each is an empty bare
-  container — no styled content, no placeholder images, no text, no
-  chevrons, no split furniture; the spec asks for no split here, the reader
-  region is just reserved pending the PDF pass. Nothing renders in the body.
+- **Body (dual-page reader; the poles reader renders the storybook
+  document per B57):** selection swaps between two reader containers (one
+  per radio) driven by `:has`. The **Plants on Poles** reader renders the
+  shipped second file `monstera-storybook.html` in an
+  `<iframe src="monstera-storybook.html" title="Monstera Division and Moss
+  Pole Introduction">` — the self-contained dual/single-page storybook whose
+  own pager handles paging (it is `overflow: hidden`; the storybook ships
+  **without its top header band** — the empty 56px `#band` strip was removed
+  at the owner's direction, 2026-10-06, per B57); the iframe fills the
+  body region between header and footer edge-to-edge (width 100%, no side
+  gaps, `border: 0`) and sits below the title-card overhang (B31's
+  `29 × --rs` hang plus the card's `8 × --rs` top offset as clearance, so
+  the storybook's top does not overlap the cards; the clearance collapses
+  to zero in the mobile block, where the cards no longer overhang). The
+  **Plants in Rocks** reader is still a bare empty container — no styled
+  content, no placeholder images, no text, no chevrons, no split furniture
+  (B57 keeps B48's blank-reader discipline for that container only).
 - **Footer (two sections):** the `.parking-lot` grammar — water gradient
   over `--deep`, 1px `--frame`-mix top rule, career.html's exact
   linear-gradient construction with the idea-green water tokens — floored at
@@ -792,15 +806,16 @@ media pattern); transitions collapse under `prefers-reduced-motion: reduce`.
 
 ### §11.3 Blank slots
 
-The PDF pass and everything it brings — the reader implementation inside
-each reader container, the Download target (which PDF the button serves, per
-selected page) — awaits the owner's fill passes; until then the body renders
-nothing and the button cannot work. The footer's left section is
-**permanently empty** by spec (not a pending fill). The slot structure lives
-in the markup as non-rendering `SLOT` comments so a targeted fill lands in
-place; the page invents no copy.
+The Plants on Poles reader body is **filled as of B57** (issue #156): it
+renders the shipped `monstera-storybook.html` document in an iframe. What
+still awaits the owner's fill passes — the Plants in Rocks reader
+implementation (B57 keeps B48's blank-reader discipline for that container),
+the Download target (which PDF the button serves, per selected page). The
+footer's left section is **permanently empty** by spec (not a pending fill).
+The slot structure lives in the markup as non-rendering `SLOT` comments so a
+targeted fill lands in place; the page invents no copy.
 
 **Pinned by:** `test/plantsandrocks.js` — selector mechanics, the `--frame`
-glow, the blank body, the two-section lot, the disabled Download, the
-literal idea-green tokens, the single-file law, and the B50
-landing-convention band/card/lot render.
+glow, the poles reader's storybook iframe and the empty rocks reader (B57),
+the two-section lot, the disabled Download, the literal idea-green tokens,
+the single-file law, and the B50 landing-convention band/card/lot render.

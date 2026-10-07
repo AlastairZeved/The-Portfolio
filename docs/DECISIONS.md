@@ -1651,3 +1651,134 @@ externalize JS into .js files"; "Leave SECURITY.md untouched on this
 point". (With the scripts external, the strict-policy ruling's
 hash-pinning mechanism is moot and `script-src 'self'` carries it; the
 strictness ruling itself stands.)
+
+---
+
+### B60. Every note card renders plain — no bold, anywhere (issue #167)
+
+Every note card on the board — **all thirteen**: the six board cards, the
+Music note, and the seven linked sub cards — renders its text at weight
+**400** (the self-hosted Montserrat Alternates regular rung). No note card
+renders bold. **This supersedes B53's scope clause** ("Only the three —
+keep the Music note and the six door-cards at 600"): the six board cards
+and the Music note join the sub cards at 400. The title card and the two
+band-zone anchor lines are untouched (the band anchors are already 400 per
+B54; the title card's lines are title-card text, not note text).
+
+**Source:** the owner's issue
+[#167](https://github.com/AlastairZeved/The-Portfolio/issues/167),
+2026-10-07 — "The bold weight is just too much on the screen when used for
+every note card. Remove the bold and adjust the font weight to a normal,
+standard size." — and the owner's pre-implementation answer of 2026-10-07
+(owner chat, multiple choice): "Yes — all note cards to 400; title card and
+band anchors untouched."
+
+### B61. The title card renders on two rungs — the eyebrow on the reduced secondary rung (issue #170)
+
+The title card's two lines render on **two rungs**, TheBoards' own
+title-card convention: the **eyebrow "The Portfolio of"** on the reduced
+secondary rung — **13.33px / 400**, `line-height: 1.2` — under the name
+**"Robert Alastair Zeved Gregory"** on the title rung (**20px / 600**,
+B31's rung, unchanged). The reduced rung is TheBoards' `#anchor-title
+.title-date` convention (10px/400 under a 15px/600 title — a 2/3 ratio)
+scaled to this page's 20px title rung: 20 × 2/3 = 13.33px. **No dates
+ship** — on TheBoards' "Today's To Do" cards the secondary line's text
+happens to be a date; what #170 takes is the **formatting** (reduced size
+and weight), not the date. **This supersedes the one-size clause of B19**
+for the eyebrow line only (B31's history: B19 made both lines one size at
+15px; B31 raised both to 20px; B61 restores the two-rung render); B31's
+title rung, the hug-the-text borders and the +29px overhang stand
+unchanged.
+
+**Scope note:** the "Zeved Boards" and "Agentic Plugins" cards of the
+board are **note cards and are untouched** — the title cards #170 names
+for that work belong to repo AlastairZeved/AlastairZeved's header, per the
+owner's pre-implementation correction of 2026-10-07, and were logged as
+[AlastairZeved/AlastairZeved
+#112](https://github.com/AlastairZeved/AlastairZeved/issues/112).
+
+**Source:** the owner's issue
+[#170](https://github.com/AlastairZeved/The-Portfolio/issues/170),
+2026-10-07 — "…the text size and formatting needs to be updated as well to
+match the title card conventions in repo AlastairZeved/TheBoards. The
+description text should match the formatting of the dates in the title
+cards of 'Today's To Do' Boards, reduced size and weight. For the title
+card on razgregory.com that reads 'The Portfolio of', use the date
+formatting of 'Today's To Do' Boards too." — and the owner's
+pre-implementation corrections of 2026-10-07 (owner chat), quoted verbatim:
+"Don't touch those cards for the reasons given above. Those cards are
+referencing a different repo, AlastairZeved/AlastairZeved for its 'Zeved
+Boards' and 'Agentic Plugins' cards in the header. Can you log this as an
+issue in that repo?"; and, on the Today's To Do card: "On a 'Today's To
+Do' board, the title card on the board has the title 'Today's To Do' and
+then underneath it is the date. Look for that card's styling. There is no
+last updated on that card at all. There is no date formatting. The text
+just happens to be the date on those cards and we're not shipping any
+dates. The font is a reduced size, geez just look at it. Don't ship
+dates."; and the order confirmation: "Order stays: 'The Portfolio of'
+(reduced size/weight) first line, 'Robert Alastair Zeved Gregory' (title
+rung, 600) second."
+
+### B62. The Parking Lot splits 50/50 — the owner's copy left, the form right, one vertical divider (issue #169)
+
+The footer (the Parking Lot) splits **50/50**, closed by a **vertical
+divider bar**, and the contact form **moves to the right half**:
+
+- The **divider bar** is the divider grammar career.html ships
+  (`.parking-lot__divider` — 1px wide, 3/4 of the section's inner height,
+  centred), **re-tokened to this page's To-Do blue tokens**
+  (`color-mix(in srgb, var(--frame) 45%, transparent)` — the mix the
+  `#lot-rule` already renders). No new colour, no new token.
+- The **contact form** (B6, B20's arrangement) occupies the **right 50%**
+  and **scales to fit across any viewport size** — its tracks are `1fr` /
+  `2fr` (B20's 1:2 ratio restated in fr units), so it scales up and down;
+  at **≤743px** (the repo's mobile breakpoint, career.html's block) the
+  halves **stack**, copy above the form.
+- The **left half** carries the owner's copy, **verbatim** (italic phrase
+  per the issue's markup), rendered 13px/1.5/400 `--ink` (agent-derived per
+  the `B33` pattern — between the lot's own 11px labels and 14px inputs).
+- **This supersedes B20's "the right side of the pane is deliberately left
+  empty" clause** — the right half is the form's. B20's field arrangement
+  (Name/Email stacked at half width, Message anchored to their right, its
+  size unchanged) stands, now within the right half.
+- The lot's measured-content height law (B46) is unchanged; the split rides
+  inside `#lot-items`.
+
+**Source:** the owner's issue
+[#169](https://github.com/AlastairZeved/The-Portfolio/issues/169),
+2026-10-07 — "In the footer of the main page of the site, there needs to be
+a divider bar splitting the footer 50/50. The formatting and design should
+match the footer used in pages for alastairzeved.com (github repo
+AlastairZeved/AlastairZeved), using the blue color palette from the 'Zeved
+Boards' tab. Then, move the contact form for Formspree to the right side of
+the divider (the right 50% of the footer), and make sure it scales to fit
+across any viewport sizes (stacked for mobile). Not just specific viewport
+sizes, scaled up and down to fit them all. In the left side of the footer,
+add this copy: …" (the copy is transcribed verbatim into `index.html`) —
+and the owner's pre-implementation answer of 2026-10-07 (owner chat,
+multiple choice): "Vertical divider bar between the halves, reusing the
+divider grammar re-tokened to To-Do blue."
+
+### B63. Favicons: the owner's portrait at TheBoards' file convention (issue #168)
+
+The site gains **favicons** — the **owner's portrait**: a blonde guy, hair
+short with a **fauxhawk**, wearing **glasses**, eyes **brown**. The drawing
+is flat, on the To-Do deep tile (`--deep` `#020812`) inside the `--frame`
+`#698ebf` rounded-square ring — existing §2 tokens, no new palette entry
+(the skin/blonde illustration values are agent-derived per the `B33`
+pattern: the owner ruled the subject, the drawing implements it). Shipped
+at **TheBoards' own file convention** — `favicon.ico` (16/32/48) plus an
+`icons/` set (`favicon-16/32/48.png`, `apple-touch-icon-192.png`,
+`icon-192.png`, `icon-512.png`) — and **linked on every page** in the repo
+(`index.html`, `career.html`, `plantsandrocks.html`,
+`monstera-storybook.html`). No PWA manifest (B13 stands); `img-src 'self'`
+(B59) already carries the set.
+
+**Source:** the owner's issue
+[#168](https://github.com/AlastairZeved/The-Portfolio/issues/168),
+2026-10-07 — "Design and implement favicons that render as a blonde guy
+with glasses. Hair should be short, but in a fauxhawk. Eyes should be
+brown." — and the owner's pre-implementation answer of 2026-10-07 (owner
+chat, multiple choice): "TheBoards' convention: favicon.ico + icons/ PNG
+set, linked on all repo pages."
+

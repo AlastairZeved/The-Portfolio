@@ -88,6 +88,22 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     bandCopy.components && bandCopy.requirements &&
     bandCopy.components.weight === '400' && bandCopy.requirements.weight === '400');
 
+  // issue #169/B62: the footer splits 50/50 — copy left, divider, form right
+  const footer = await page.evaluate(() => {
+    const copy = document.querySelector('.lot-copy').getBoundingClientRect();
+    const form = document.querySelector('.lot-form').getBoundingClientRect();
+    const dv = document.querySelector('.lot-divider').getBoundingClientRect();
+    const items = document.getElementById('lot-items').getBoundingClientRect();
+    return {
+      half: Math.abs(copy.width - form.width) < 2,
+      divider: dv.width < 2 && dv.height > 0,
+      sides: copy.left < form.left && form.right <= items.right + 0.5,
+    };
+  });
+  ok('footer halves are equal width (50/50, issue #169/B62)', footer.half);
+  ok('vertical divider bar present between the halves (issue #169/B62)', footer.divider);
+  ok('copy sits left of the form inside the lot (issue #169/B62)', footer.sides);
+
   // the six door-cards render inside the viewport (re-scaled to the wider sheet)
   ok('door-card links present (>=6)', await page.locator('a.door-card').count() >= 6);
   const inside = await page.locator('.door-card').evaluateAll((as, vp) => as.every(a => {

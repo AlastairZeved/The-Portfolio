@@ -186,10 +186,17 @@ body {
   z-index: 2;
 }
 #anchor-title .title-eyebrow {
-  /* issue #59: single font size in the card — both lines at 20px (#91) */
-  font-size: 20px; font-weight: 400; line-height: 1.2;
+  /* issue #170 / B61: the eyebrow renders on the reduced secondary rung of
+     TheBoards' title-card convention (#anchor-title .title-date: 10px/400
+     under a 15px/600 title — a 2/3 ratio), scaled to this page's 20px title
+     rung: 20 × 2/3 = 13.33px. The agent-derived arithmetic transcribes the
+     owner's convention per the B33 provenance pattern. Supersedes the
+     single-size clause of B19 for this line only (#59's history: B31 raised
+     both lines to 20px; B61 restores the two-rung render). */
+  font-size: 13.33px; font-weight: 400; line-height: 1.2;
   color: var(--ink);
-}#anchor-title .title-pinned {
+}
+#anchor-title .title-pinned {
   font-size: 20px; font-weight: 600;
   color: var(--ink);
 }

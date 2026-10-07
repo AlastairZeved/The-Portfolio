@@ -1575,3 +1575,42 @@ remove it" — the storybook document ships **without its top header band**
 (the empty 56px `#band` gradient strip is removed from
 `monstera-storybook.html`); the storybook's bottom pager band and its pages
 stand unchanged.
+
+### B58. The Download button serves the shipped Flattened-Monstera-Division.pdf on the Plants on Poles tab (issue #157)
+
+The owner logged the fill in issue #157: the attached
+`Flattened-Monstera-Division.pdf` "needs to be downloadable and targeted by
+the 'download' button" on the Plants tab of `/plantsandrocks`. The PDF is
+therefore **shipped in the repo root** as `Flattened-Monstera-Division.pdf`
+(next to `monstera-storybook.html`, per the owner's grill answer that the
+file ships with the site) and the footer Download control becomes a real
+`<a class="cta" href="Flattened-Monstera-Division.pdf" download>Download</a>`
+— the `download` attribute forces the download; the page's no-script law
+(B48) is unchanged.
+
+The control is live **only while the Plants on Poles tab is selected** (the
+PDF belongs to that guide); on the Plants in Rocks tab it renders inert and
+dimmed, driven by the page's existing CSS `:has` selector — `opacity: 0.55`,
+`cursor: not-allowed`, `pointer-events: none` (the 0.55 alpha is B48's
+shipped dim value, reused; no new design value is introduced). The inert
+state is CSS-only because the page has no script. The Plants in Rocks
+reader stays an empty reserved container per B57; the B50
+header-band/title-card/footer conventions stand unchanged.
+
+**This entry supersedes B48's disabled-Download discipline** (the button's
+"rendered but disabled, no handler" state) — the button is now live on the
+Plants on Poles tab. It does not supersede B57.
+
+**Source:** the owner's issue
+[#157](https://github.com/AlastairZeved/The-Portfolio/issues/157),
+2026-10-06 — quoted verbatim: "On the plants tab, the attached doc needs to
+be downloadable and targeted by the 'download' button." (titled "the
+download button needs a target in /plantsandrocks on the plants tab") —
+and the owner's three grill answers of 2026-10-06 (owner chat):
+
+1. "Disabled on the Rocks tab, enabled only while Plants on Poles is
+   selected" (option chosen from the agent's measurement that Plants in
+   Rocks has no PDF).
+2. "Ship the PDF in the repo root next to monstera-storybook.html and link
+   it relatively".
+3. "Force download via the HTML download attribute".

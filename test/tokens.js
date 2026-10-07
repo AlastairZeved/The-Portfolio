@@ -59,8 +59,17 @@ else console.log('PASS --glow-green = Idea --note #b9d2b2 (185 210 178)');
 // one file: no external CSS/JS service worker
 if (html.includes('serviceWorker') || html.includes('sw.js')) { failures++; console.log('FAIL: service worker present'); }
 else console.log('PASS: no service worker (B13)');
-if (/<link[^>]+rel=["']stylesheet/.test(html) || /<script[^>]+src=/.test(html)) { failures++; console.log('FAIL: external css/js file'); }
-else console.log('PASS: single file, inline css/js (B12)');
+if (/<link[^>]+rel=["']stylesheet/.test(html)) { failures++; console.log('FAIL: external css file'); }
+else console.log('PASS: css inline (B12)');
+// B59 (issue #151): JS ships as external .js files; only the ruled set is allowed.
+// An inline <script> block (no src attribute) with any content is forbidden — regression guard.
+if (/<script(?![^>]*\bsrc=)[^>]*>[^\S<]*\S/.test(html)) { failures++; console.log('FAIL: inline script block (B59 forbids)'); }
+else console.log('PASS: no inline script blocks (B59)');
+const scriptSrcs = [...html.matchAll(/<script[^>]+src=(?:"([^"]+)"|'([^']+)'|([^\s>"']+))/g)].map(m => m[1] || m[2] || m[3]);
+const ALLOWED_JS = new Set(['app.js', 'monstera-storybook.js']);
+const bad = scriptSrcs.filter(s => !ALLOWED_JS.has(s));
+if (bad.length) { failures++; console.log('FAIL: unruled external js file: ' + bad.join(', ')); }
+else console.log('PASS: external js files are the ruled set (B59)');
 
 console.log(failures === 0 ? '\nTOKENS PASS' : `\nTOKENS FAIL: ${failures}`);
 process.exit(failures === 0 ? 0 : 1);

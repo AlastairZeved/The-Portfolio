@@ -1614,3 +1614,40 @@ and the owner's three grill answers of 2026-10-06 (owner chat):
 2. "Ship the PDF in the repo root next to monstera-storybook.html and link
    it relatively".
 3. "Force download via the HTML download attribute".
+
+### B59. JavaScript ships as external .js files; a strict Content-Security-Policy ships via a Netlify `_headers` file (issue #151)
+
+The owner ruled, in pre-implementation alignment on issue #151 (2026-10-06),
+that **B12's "all CSS and JS inline" clause is superseded for scripts**: the
+page's JavaScript ships as **external .js files** — `app.js` beside
+`index.html`, `monstera-storybook.js` beside `monstera-storybook.html`,
+both in the repository root (the publish root), loaded by `<script src>`
+with no handler attributes. The inline-CSS clause of B12 stands unchanged.
+
+A **strict Content-Security-Policy** ships as a real HTTP header from a
+**`_headers` file at the repository root** (hosting configuration, not a
+page asset):
+
+`default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; frame-src 'self'; form-action https://formspree.io; base-uri 'none'; frame-ancestors 'none'; upgrade-insecure-requests`
+
+- `script-src 'self'` only — no `unsafe-inline`, no hashes: the scripts are
+  external per this ruling.
+- `style-src 'unsafe-inline'` is unavoidable: the CSS is inline by B12.
+- `img-src data:` and `font-src data:` carry the embedded base64 WebP pages
+  and the self-hosted data-URI faces (B23); `frame-src 'self'` carries the
+  B57 storybook iframe; `form-action https://formspree.io` carries the B6
+  form. **No Referrer-Policy directive is set** (SECURITY.md — a missing
+  referrer files every Formspree submission as spam).
+- The issue's "sanitize/encode any user-supplied content" clause was
+  measured and is a no-op: the form posts to Formspree and nothing is ever
+  rendered back; no dynamic `innerHTML` writes of user data exist anywhere.
+  SECURITY.md is left untouched on that point, per the owner's ruling.
+
+**Source:** the owner's four grill answers of 2026-10-06, given in
+pre-implementation alignment on issue #151 (owner chat, multiple choice) —
+"Add `_headers` at repo root, real HTTP headers"; "Strict policy with
+hash-pinned scripts, 'unsafe-inline' only for styles"; "Amend B12 —
+externalize JS into .js files"; "Leave SECURITY.md untouched on this
+point". (With the scripts external, the strict-policy ruling's
+hash-pinning mechanism is moot and `script-src 'self'` carries it; the
+strictness ruling itself stands.)

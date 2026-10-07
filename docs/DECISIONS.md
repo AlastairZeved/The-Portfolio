@@ -1567,3 +1567,11 @@ viewer." — and the owner's four grill answers of 2026-10-06 (owner chat):
 2. "Yes, Plants in Rocks stays blank".
 3. "Untouched, still disabled".
 4. "Fill body region between header and footer".
+
+And the owner's chat direction of 2026-10-06 on the rendered result, quoted
+verbatim: "i need you to remove the green header bar from the storybook
+reader. it's too much with a header right under the title header so just
+remove it" — the storybook document ships **without its top header band**
+(the empty 56px `#band` gradient strip is removed from
+`monstera-storybook.html`); the storybook's bottom pager band and its pages
+stand unchanged.

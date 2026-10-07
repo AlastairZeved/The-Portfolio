@@ -775,7 +775,9 @@ values, not new numbers.
   shipped second file `monstera-storybook.html` in an
   `<iframe src="monstera-storybook.html" title="Monstera Division and Moss
   Pole Introduction">` — the self-contained dual/single-page storybook whose
-  own pager handles paging (it is `overflow: hidden`); the iframe fills the
+  own pager handles paging (it is `overflow: hidden`; the storybook ships
+  **without its top header band** — the empty 56px `#band` strip was removed
+  at the owner's direction, 2026-10-06, per B57); the iframe fills the
   body region between header and footer edge-to-edge (width 100%, no side
   gaps, `border: 0`) and sits below the title-card overhang (B31's
   `29 × --rs` hang plus the card's `8 × --rs` top offset as clearance, so

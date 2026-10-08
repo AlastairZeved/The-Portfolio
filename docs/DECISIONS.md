@@ -1848,3 +1848,43 @@ copy, add divider bars. These divider bars need to be even shorter and the
 footer's divider bar so that they are visually distinct from the divider
 bar without changing the color palette."
 
+### B66. The career role plates read left to right, not top to bottom (issue #173)
+
+The owner logged in issue [#173](https://github.com/AlastairZeved/The-Portfolio/issues/173)
+that the per-role plugin components of B56 **read left to right, not top to
+bottom**: "These components will never fit in a top to bottom layout once
+description text is added. They need to read left to right" — followed by
+the per-employer role lists (PNC Bank: Branch Sales & Services
+Representative | Branch Sales & Services Associate | Branch Banker; PNC
+Private Bank: Client Services Associate | Portfolio & Trust Administrator;
+Brinker Capital Investments: Trader | Portfolio Specialist | Sr. Portfolio
+Specialist). The row keeps B56's other arrangement values: the plates stay
+**equally sized and evenly spaced with comfortable padding between each to
+fit the space**, still **visible and contained within the left half**.
+
+**This entry supersedes B56's stacked-plate geometry** (the vertical stack
+and the plate height = the half's row height) — that geometry was the
+agent-derived implementation of B56's arrangement words, and the owner now
+rules the direction. B56's structure, re-hue, empty-then-B64-filled desc
+cards, no-CTA, no-selector and tab-isolation laws all stand unchanged. The
+reading order is **chronological — oldest role leftmost, newest rightmost**
+(owner grill answer, 2026-10-08), which preserves the previous top-to-bottom
+reading order. The shipped **≤743px readable reflow stacks the plates again
+below the breakpoint** (owner grill answer, 2026-10-08). When the row needs
+more height than the left half provides, **the half scrolls vertically**;
+the plates size to their content (owner grill answer, 2026-10-08). When
+only two plates sit in the row (PNC Private Bank), **they split the row
+equally — each half the row's width** (owner grill answer, 2026-10-08).
+
+**Source:** the owner's issue
+[#173](https://github.com/AlastairZeved/The-Portfolio/issues/173),
+2026-10-08 — quoted verbatim: "These components will never fit in a top to
+bottom layout once description text is added. They need to read left to
+right:" — and the owner's four grill answers of 2026-10-08 (owner chat):
+
+1. "Keep the existing ≤743px stacked reflow below the breakpoint".
+2. "Two equal plates, each half the row width" (PNC Private Bank's
+   two-plate row).
+3. "Body half scrolls vertically when plates need more height".
+4. "Oldest role leftmost, newest rightmost".
+

@@ -2009,3 +2009,93 @@ formatting answers tied to the Components move (13px/1.5 at weight 300 in
 the band; B20's empty right half restored) lapse with the move they
 governed.
 
+
+
+### B69. The Components zone renders the pseudonyms line (issue #185)
+
+The **Components** band zone renders one text line — **"Pseudonyms and
+DBAs: aboveaveragerob, Alastair Zeved, Philly Plant Dads"** — in the
+identical anchor grammar the B38/B54 line used: hanging from the zone's
+top at `--band-top`, in `--ink` at 15px/600 (`UIUX`'s 16.57px/400 under
+B46's ×1.10455 rescale; weight plain per B54), static, no editing
+affordance. The zone's `pointer-events: none` stands. B68's removal of the
+prior Components line stands — this entry adds the zone's new line; it
+does not restore B38's copy. No new token is invented.
+
+**Source:** owner's issue
+[#185](https://github.com/AlastairZeved/The-Portfolio/issues/185),
+2026-10-08 — "Add this new copy to the \"Components\" section of the header
+bar: \"Pseudonyms and DBAs: aboveaveragerob, Alastair Zeved, Philly Plant
+Dads\"" — with the owner's pre-implementation answer of 2026-10-08 (owner
+chat, multiple choice): the line sits in the identical anchor grammar
+("Second line below the existing one, identical styling and mechanism"
+— given with the B68 state where the prior line is already removed, so the
+pseudonyms line is the zone's only line).
+
+### B70. The Parking Lot's left-half copy is replaced with the issue-#184 text (issue #184)
+
+The Parking Lot keeps **B62's layout** — the owner's copy in the **left
+half**, the Formspree form in the **right half**, the 50/50 split and the
+vertical divider bar unchanged — and the **left half's copy is replaced**
+with the issue-#184 text, verbatim (the copy of record below),
+**superseding B68's issue-#174 copy of record**. The issue's literal
+newline break renders as **two paragraphs with no gap between them**
+(the copy's rendering stands at 13px / 1.5 / 400 in `--ink` per B62, and
+the paragraphs carry no margin). The closing phrase **renders italic**
+(B68's italic-phrase ruling stands) and is spelled **"curiouser"** — the
+owner's pre-implementation correction of the issue's "curioser" typo.
+`UIUX §6.2` is amended accordingly.
+
+**Copy of record (verbatim, issue #184):** "Hey, I'm Rob. Welcome to my
+digital garden. This is a sort of central hub for all of the things I work
+on, across all of the sites and pseudonyms I've used. I'm weary of calling
+any of these "hobbies" or "passions"; they're actually more of an after
+effect of the real passion: simply following my curiosity - through any and
+all of the vagaries. All it takes to flex one's curiosity is to ask a
+question, then keep asking questions and always strive to be curioser and
+curiouser."
+
+**Source:** owner's issue
+[#184](https://github.com/AlastairZeved/The-Portfolio/issues/184),
+2026-10-08 — "Update the copy in the parking lot section to this: [the copy
+of record above]" — with the owner's pre-implementation answers of
+2026-10-08 (owner chat, multiple choice): the issue's newline renders as
+two paragraphs with no blank line between them ("Two paragraphs, no blank
+lines between them. It just starts on a new line."); and the closing phrase
+renders italic with the spelling corrected ("Keep it italic, correct
+spelling to \"curiouser\"").
+
+### B71. The Requirements line's copy is replaced with the issue-#183 text (issue #183)
+
+The **Requirements** line's **copy is replaced**: the line reads **"Click
+the note cards to launch my various pages and work across the web."**,
+**superseding B37's/B54's copy of record** ("Click around to explore my
+works!"). Everything else stands unchanged: B39's anchor (left-anchored at
+the title card's rendered right border + one `--gutter`, at `--band-top`),
+the 15px/600 rung (16.57px/400 under B46's rescale), weight plain per B54,
+`--ink`, static, no editing affordance, the zone's `pointer-events: none`.
+`UIUX §3.3` is amended accordingly.
+
+**Source:** owner's issue
+[#183](https://github.com/AlastairZeved/The-Portfolio/issues/183),
+2026-10-08 — "Replace the existing copy with this new copy to the
+\"Requirements\" section in the right side of the header bar: \"Click the
+note cards to launch my various pages and work across the web.\""
+
+### B72. The title card's eyebrow reads "The Digital Garden of" (issue #188)
+
+The title card's **line 1 (the eyebrow)** reads **"The Digital Garden of"**
+— **superseding B17's "The Portfolio of" on the eyebrow line only**. The
+title card's text otherwise stands byte-identical: line 2 remains
+**"Robert Alastair Zeved Gregory"**, all on the same two lines — the
+eyebrow above the name — with the eyebrow's format unchanged (B61's reduced
+secondary rung, 13.33px/400, `line-height: 1.2`; B31's 20px/600 title rung;
+B19's hug-the-text box). No size, weight, spacing or mechanism changes.
+`UIUX §3.2` is amended accordingly.
+
+**Source:** owner's issue
+[#188](https://github.com/AlastairZeved/The-Portfolio/issues/188),
+2026-10-08 — "The title card currently reads: \"The Portfolio of\" which
+needs to be removed and replaced with \"The Digital Garden of\". Same text
+formatting, all on one line with \"Robert Alastair Zeved Gregory\" below
+it."

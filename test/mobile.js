@@ -19,7 +19,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
 
   // title card, B17/B19 text
   const title = await page.locator('#anchor-title').innerText();
-  ok('title card line 1 "The Portfolio of"', title.includes('The Portfolio of'));
+  ok('title card line 1 "The Digital Garden of" (issue #188/B72)', title.includes('The Digital Garden of'));
   ok('title card line 2 name', title.includes('Robert Alastair Zeved Gregory'));
 
   // title card, B17 text; B19's hug-the-text borders; B61's two-rung type

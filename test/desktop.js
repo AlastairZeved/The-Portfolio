@@ -72,9 +72,9 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('Requirements zone label', (await page.locator('#zone-requirements .band-label').innerText()) === 'Requirements');
   ok('Parking Lot header', (await page.locator('#lot-header').innerText()) === 'Parking Lot');
 
-  // issue #174/B68: the Components line "Each card links to a page housing
-  // my work in that domain." is removed entirely — the zone keeps its label
-  // and renders no anchor. Requirements keeps the B54 line, plain.
+  // issue #174/B68 removed the prior Components line; issue #185/B69 adds the
+  // zone's line — the pseudonyms line, in the identical anchor grammar.
+  // Requirements keeps that grammar; issue #183/B71 replaces its copy.
   const bandCopy = await page.evaluate(() => {
     const g = sel => { const el = document.querySelector(sel); return el ? { text: el.textContent.trim(), weight: getComputedStyle(el).fontWeight } : null; };
     return {
@@ -82,40 +82,51 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       requirements: g('#zone-requirements .anchor'),
     };
   });
-  ok('Components zone renders no anchor line (issue #174/B68)',
-    bandCopy.componentsAnchor === null);
-  ok('Components zone renders its label and nothing else (issue #174/B68)',
-    (await page.locator('#zone-components').textContent()).trim() === 'Components');
-  ok('Requirements line is the owner\'s revised copy (issue #147/B54)',
-    bandCopy.requirements && bandCopy.requirements.text === 'Click around to explore my works!');
+  ok('Components zone renders the issue-#185 pseudonyms line (issue #185/B69)',
+    bandCopy.componentsAnchor !== null &&
+    bandCopy.componentsAnchor.text === 'Pseudonyms and DBAs: aboveaveragerob, Alastair Zeved, Philly Plant Dads');
+  ok('Components zone renders its label and the pseudonyms line only (issue #185/B69)',
+    (await page.locator('#zone-components').textContent()).replace(/\s+/g, ' ').trim() ===
+    'Components Pseudonyms and DBAs: aboveaveragerob, Alastair Zeved, Philly Plant Dads');
+  ok('Requirements line is the issue-#183 copy (issue #183/B71)',
+    bandCopy.requirements &&
+    bandCopy.requirements.text === 'Click the note cards to launch my various pages and work across the web.');
   ok('Requirements band anchor renders plain 400 text (issue #147/B54)',
     bandCopy.requirements && bandCopy.requirements.weight === '400');
 
-  // issue #174/B68: the footer keeps B62's layout (copy left, form right);
-  // the left half's copy is the issue-#174 EDITED version, verbatim — the
-  // full text is asserted equal to the copy of record, and the closing
-  // phrase renders italic.
-  const GARDEN_COPY = "Hey, I'm Rob. Welcome to my digital garden. This is a sort of central hub for all of the things I work on, across all of the sites and pseudonyms I've used. I'm weary of calling these \"hobbies\" or \"passions\"; they're more like symptoms, the after effect of the passion. I simply pursue my curiosity, without much of a thought of whether I can or cannot learn the subject at hand. That also has the side effect of my works sprawling across quite a few domains. The cards on this page link to those works (the digital works at least) to keep everything in one place. None are stale, but my curiosity is ever wandering and I may run out of questions in a subject for a time. But the great work always continues as my curiosity finds its flame again. All it takes to flex curiousity is to ask a question, then keep asking questions and always be curiouser and curiouser.";
+  // issue #184/B70: the footer keeps B62's layout (copy left, form right);
+  // the left half's copy is the issue-#184 text, verbatim, in two
+  // paragraphs (the issue's \n break) with no gap between them, and the
+  // closing phrase renders italic (spelled "curiouser" per the owner's
+  // correction of the issue's typo).
+  const LOT_COPY = "Hey, I'm Rob. Welcome to my digital garden. This is a sort of central hub for all of the things I work on, across all of the sites and pseudonyms I've used. I'm weary of calling any of these \"hobbies\" or \"passions\"; they're actually more of an after effect of the real passion: simply following my curiosity - through any and all of the vagaries. All it takes to flex one's curiosity is to ask a question, then keep asking questions and always strive to be curiouser and curiouser.";
   const footer = await page.evaluate(() => {
     const copy = document.querySelector('.lot-copy');
     const copyBox = copy.getBoundingClientRect();
     const form = document.querySelector('.lot-form').getBoundingClientRect();
     const dv = document.querySelector('.lot-divider').getBoundingClientRect();
     const items = document.getElementById('lot-items').getBoundingClientRect();
-    const p = copy.querySelector('p');
+    const ps = [...copy.querySelectorAll('p')];
+    const em = copy.querySelector('p em');
+    const margins = ps.map(el => getComputedStyle(el).marginTop + '/' + getComputedStyle(el).marginBottom);
     return {
-      text: p ? p.textContent.replace(/\s+/g, ' ').trim() : null,
-      em: p ? p.querySelector('em') : null,
-      italic: p && p.querySelector('em') ? getComputedStyle(p.querySelector('em')).fontStyle : null,
+      text: ps.length ? ps.map(p => p.textContent).join(' ').replace(/\s+/g, ' ').trim() : null,
+      paragraphs: ps.length,
+      em,
+      italic: em ? getComputedStyle(em).fontStyle : null,
+      margins,
       half: Math.abs(copyBox.width - form.width) < 2,
       divider: dv.width < 2 && dv.height > 0,
       sides: copyBox.left < form.left && form.right <= items.right + 0.5,
     };
   });
-  ok('footer copy matches the issue-#174 copy of record verbatim (issue #174/B68)',
-    footer.text !== null && footer.text === GARDEN_COPY);
-  ok('the italic phrase is present (issue #174/B68)', footer.em !== null);
-  ok('the closing phrase renders italic (issue #174/B68)', footer.italic === 'italic');
+  ok('footer copy matches the issue-#184 copy of record verbatim (issue #184/B70)',
+    footer.text !== null && footer.text === LOT_COPY);
+  ok('footer copy renders two paragraphs (issue #184/B70)', footer.paragraphs === 2);
+  ok('the paragraphs carry no gap between them (issue #184/B70)',
+    footer.margins.every(m => m === '0px/0px'));
+  ok('the italic phrase is present (issue #184/B70)', footer.em !== null);
+  ok('the closing phrase renders italic (issue #184/B70)', footer.italic === 'italic');
   ok('footer halves are equal width (50/50, issue #169/B62)', footer.half);
   ok('vertical divider bar present between the halves (issue #169/B62)', footer.divider);
   ok('copy sits left of the form inside the lot (issue #169/B62)', footer.sides);

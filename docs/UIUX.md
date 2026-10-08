@@ -699,15 +699,18 @@ renders as `L × --rs`.)*
   At ≤743px the shown employer stacks (`flex-direction: column`), the rule
   running horizontal at 33.333% width. Transitions collapse under
   `prefers-reduced-motion: reduce`.
-  Left half *(amended by B56, issue #154)*: the employer's roles as stacked
-  **plugin components** — the Agentic Plugins page's `.gregorian-mode` class
-  set ported verbatim in structure (water back card `.gm-back`, uppercase
-  title card `.gm-title`, the italic lowered year subscript in the `.gm-uc`
-  grammar, description card `.gm-desc`), re-hued to this page's own
-  sand/brown tokens (§10.1) with `--ink` on the sand cards reusing `--deep`
-  `#12100a`. One component per role, equally sized and evenly spaced with
-  comfortable padding between each to fit the space, contained within the
-  left half. The component's "Github" CTA is not ported. The description
+  Left half *(amended by B56, issue #154; re-arranged by B66, issue #173)*:
+  the employer's roles as **plugin components** — the Agentic Plugins page's
+  `.gregorian-mode` class set ported verbatim in structure (water back card
+  `.gm-back`, uppercase title card `.gm-title`, the italic lowered year
+  subscript in the `.gm-uc` grammar, description card `.gm-desc`), re-hued
+  to this page's own sand/brown tokens (§10.1) with `--ink` on the sand
+  cards reusing `--deep` `#12100a`. One component per role, in **one row
+  reading left to right** (B66: chronological, oldest leftmost; the half
+  scrolls vertically when the row needs more height; at ≤743px the shipped
+  readable reflow stacks the plates again), equally sized and evenly spaced
+  with comfortable padding between each to fit the space, contained within
+  the left half. The component's "Github" CTA is not ported. The description
   cards carried **B56's explicit override** of the omit-empty rule (empty
   until the owner's fill passes); *(amended by B64, issue #176)* three now
   render the **owner's copy verbatim, three paragraphs per card** — Sr.
@@ -716,15 +719,17 @@ renders as `L × --rs`.)*
   desc-card element with `<br><br>` paragraph breaks; every other desc
   card stays empty (B56), each with min-height for 2–3 sentences at the
   component's own 20px/32px desc type. Plate geometry is agent-derived
-  under the B33 provenance pattern: plate width = the half's own width,
-  desc min-height `3 × 32px + 2 × 10px =
-  116px`, stack padding the page's existing 1.25rem gutter value.
+  under the B33 provenance pattern, as re-ruled by B66: each plate is an
+  equal flex cell of the left-to-right row (two plates split it half/half),
+  desc min-height `3 × 32px + 2 × 10px = 116px`, row padding the page's
+  existing 1.25rem gutter value.
   *(Amended by B64: with the copy filled, the B56 equal flex cells
-  (`flex: 1 1 0`) clamp every plate to the empty state's height — the
+  (`flex: 1 1 0`) clamped every plate to the empty state's height — the
   699px filled card overflowed its cell onto the footer, which the
-  no-overlap law forbids. The plates now size to their content and share
-  the half's leftover space equally (`flex: 1 1 auto`); the 1.25rem
-  gutter keeps the stack evenly spaced. The empty-state equal-cell
+  no-overlap law forbids; the plates then sized to their content. That
+  content-sizing now renders in B66's left-to-right row: `flex: 1 1 0`
+  equalizes the plates' widths, the vertical size is the content, and the
+  half scrolls when the row needs more height. The empty-state equal-cell
   rendering was the placeholder geometry; the owner's equal-sizing words
   were ruled for the empty state and the filled state sizes to content.)*
   Right half: "Accomplishments" and "Learnings/Skills" (section name

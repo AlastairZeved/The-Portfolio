@@ -231,8 +231,15 @@ body:has(#employer-brinker:checked) .employer--brinker {
 }
 
 /* ---- B56 (issue #154): the career body's left half carries the Agentic
-   Plugins page's plugin component — one per role, stacked, equally sized,
-   evenly spaced, contained in the half. Ported VERBATIM in structure from
+   Plugins page's plugin component — one per role. B66 (issue #173) rules
+   the plates READ LEFT TO RIGHT in one row — the owner: "These components
+   will never fit in a top to bottom layout once description text is added.
+   They need to read left to right" — equally sized (equal flex cells),
+   evenly spaced (the page's gutter), contained in the half; the half
+   scrolls vertically when the row needs more height (owner grill answer,
+   2026-10-08). The shipped ≤743px readable reflow stacks them again below
+   the breakpoint (owner grill answer, 2026-10-08). Ported VERBATIM in
+   structure from
    the .gregorian-mode class set (.gm-back/.gm-title/.gm-uc/.gm-desc), with
    NO .gm-cta and NO item selector row (B56). The re-hue re-points the
    component's token ladder at this page's B47 sand/brown :root tokens —
@@ -252,8 +259,10 @@ body:has(#employer-brinker:checked) .employer--brinker {
   min-width: 0;
   min-height: 0;
   display: flex;
-  flex-direction: column;
-  gap: 1.25rem;                 /* the page's existing gutter value */
+  flex-direction: row;           /* B66: the plates read left to right */
+  align-items: flex-start;       /* plates size to their content; the half scrolls (B66) */
+  gap: 1.25rem;                  /* the page's existing gutter value */
+  overflow-y: auto;
 }
 .gregorian-mode {
   --ink: var(--deep);           /* desc ink on the sand note: the deep itself */
@@ -573,9 +582,12 @@ body:has(#employer-brinker:checked) .employer--brinker {
     display: flex; flex-direction: column; align-items: stretch; gap: 0.75rem;
   }
   .split__rule { width: 33.333%; height: 1px; }
+  /* B66: below 743px the shipped readable reflow stacks the plates again
+     (owner grill answer, 2026-10-08). */
   /* B56 component stack on mobile: plates flow (auto height, page may
      scroll), the composition drops its absolute layout for a static reflow
      at readable sizes — the same reset the band's scaled literals get. */
+  .split__gallery { flex-direction: column; align-items: stretch; }
   .gregorian-mode { flex: 0 0 auto; display: flex; flex-direction: column; padding: 0.75rem; }
   .gm-back { inset: 0; }
   .gm-title { position: relative; top: auto; left: auto; transform: none; width: auto; max-width: 100%; margin: 0 auto; font-size: 1.05rem; padding: 0.6rem 0.75rem 0.7rem; }

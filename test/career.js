@@ -189,16 +189,22 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
           .filter(sec => !sec.matches(s))
           .flatMap(sec => [...sec.querySelectorAll('.gregorian-mode')])
           .every(p => p.getBoundingClientRect().height === 0), sel));
-    ok(`${tab}: plates evenly spaced, contained in the half, content fits (B56 as amended by B64)`,
+    ok(`${tab}: plates evenly spaced in the B66 left-to-right row, contained in the half, content fits (B56/B66 as amended by B64)`,
       await page.evaluate(s => {
         const nrm = Math.min(innerHeight / 1104.55, innerWidth / 1440);
         const plates = [...document.querySelector(s).querySelectorAll('.gregorian-mode')];
         if (!plates.length) return false;
         const rects = plates.map(p => p.getBoundingClientRect());
         const gap = 20 * nrm; // 1.25rem at rs
-        const spaced = rects.slice(1).every((r, i) => Math.abs((r.top - rects[i].bottom) - gap) < 3);
+        // B66: the plates read left to right — chronological order leftmost,
+        // horizontal gutter between neighbours, one row (equal tops).
+        const spaced = rects.slice(1).every((r, i) =>
+          Math.abs((r.left - rects[i].right) - gap) < 3) &&
+          rects.slice(1).every((r, i) => r.left > rects[i].right) &&
+          rects.slice(1).every(r => Math.abs(r.top - rects[0].top) < 3);
+        const half = document.querySelector(s).querySelector('.split__gallery').getBoundingClientRect();
         const ruleLeft = document.querySelector(s).querySelector('.split__rule').getBoundingClientRect().left;
-        const contained = rects.every(r => r.right < ruleLeft);
+        const contained = rects.every(r => r.right < ruleLeft && r.left >= half.left - 1);
         const fits = plates.every(p =>
           p.querySelector('.gm-desc').getBoundingClientRect().bottom <=
           p.getBoundingClientRect().bottom + 1);

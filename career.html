@@ -238,8 +238,15 @@ body:has(#employer-brinker:checked) .employer--brinker {
    evenly spaced (the page's gutter), contained in the half; the half
    scrolls vertically when the row needs more height (owner grill answer,
    2026-10-08). The shipped ≤743px readable reflow stacks them again below
-   the breakpoint (owner grill answer, 2026-10-08). Ported VERBATIM in
-   structure from
+   the breakpoint (owner grill answer, 2026-10-08).
+   Row-width composition: the ruled row gives each plate a fraction of the
+   half's width — below what the wide-plate absolute composition (source
+   insets re-derived against the source's 830px plate) can hold without the
+   title clipping its own text and overlapping the year subscript. The
+   composition therefore renders in the page's own shipped readable reflow
+   grammar (the ≤743px static flow: back card full-bleed behind, title →
+   year → desc stacked and centred) at EVERY width, at the reflow's shipped
+   type values. Ported VERBATIM in structure from
    the .gregorian-mode class set (.gm-back/.gm-title/.gm-uc/.gm-desc), with
    NO .gm-cta and NO item selector row (B56). The re-hue re-points the
    component's token ladder at this page's B47 sand/brown :root tokens —
@@ -274,11 +281,16 @@ body:has(#employer-brinker:checked) .employer--brinker {
      cards) and share the half's leftover space equally — the B56 equal
      flex cells (1 1 0) clamped every plate to the empty state's height and
      the filled card overflowed the cell onto the footer. Spacing stands:
-     the 1.25rem gutter keeps the stack evenly spaced. */
-  flex: 1 1 auto;
+     the 1.25rem gutter keeps the row evenly spaced. In B66's row the equal
+     cells equalize the plates' WIDTHS (flex-basis 0); the vertical size is
+     the content, and the half scrolls when the row needs more height. */
+  flex: 1 1 0;
+  min-height: 0;
   min-width: 0;
   width: 100%;
-  padding: calc(140 * var(--rs)) 0 0;   /* clears the title card + subscript */
+  display: flex;
+  flex-direction: column;       /* title → year → desc, the reflow's flow */
+  padding: 0.75rem;             /* the shipped reflow value */
   background: var(--deep);
   font-family: "Montserrat Alternates", system-ui, sans-serif;
   text-rendering: optimizeLegibility;
@@ -301,10 +313,11 @@ body:has(#employer-brinker:checked) .employer--brinker {
   overflow-wrap: break-word;
 }
 
-/* Card 3 — the background card (the water ladder from :root) */
+/* Card 3 — the background card (the water ladder from :root); full-bleed
+   behind the flowing composition (the shipped reflow's own reset) */
 .gm-back {
   position: absolute;
-  inset: 6% 20% 2%;
+  inset: 0;
   z-index: 0;
   background: radial-gradient(
       118% 76% at 50% 24%,
@@ -345,23 +358,29 @@ body:has(#employer-brinker:checked) .employer--brinker {
 
 /* Card 1 — the title card */
 .gm-title {
-  position: absolute;
+  position: relative;
   z-index: 1;
-  top: calc(24 * var(--rs));
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(427px, 78%);
-  margin: 0;
-  padding: calc(26 * var(--rs)) 12px calc(30 * var(--rs));
+  top: auto;
+  left: auto;
+  transform: none;
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0.6rem 0.6rem 0.7rem;   /* shipped reflow rungs; the horizontal 0.6rem
+                                      keeps REPRESENTATIVE (144px at 1rem) inside
+                                      the ~167px plate cell where 0.75rem left it
+                                      1px over and orphaned the final glyph */
   border-color: var(--frame);
   background: var(--card);
   color: var(--ink-light);
-  font-size: calc(28 * var(--rs));   /* the source's 28px rung, at B46's scale */
-  font-weight: 800;                  /* served by the embedded 800 face (above), not synthesized */
+  font-size: 1rem;                 /* the shipped reflow rung, one below the desc's —
+                                      at B66's row width 1.05rem orphaned the last
+                                      glyph of REPRESENTATIVE onto its own line */
+  font-weight: 800;                /* served by the embedded 800 face (above), not synthesized */
   line-height: 1.2;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  white-space: normal;               /* wrap only if a title asks for it */
+  white-space: normal;             /* wrap only if a title asks for it */
   box-shadow: var(--elevation);
   overflow: hidden;
 }
@@ -397,14 +416,14 @@ body:has(#employer-brinker:checked) .employer--brinker {
    positioned under the title card, exactly like the Docket's "Under
    Construction" on the plugins page. */
 .gm-uc {
-  position: absolute;
+  position: relative;
   z-index: 1;
-  top: calc(120 * var(--rs));
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0;
+  top: auto;
+  left: auto;
+  transform: none;
+  margin: 0.4rem auto 0;
   color: var(--ink-light);
-  font-size: calc(14 * var(--rs));
+  font-size: 0.85rem;              /* the shipped reflow value */
   font-style: italic;
   font-weight: 400;
   line-height: 1;
@@ -417,17 +436,18 @@ body:has(#employer-brinker:checked) .employer--brinker {
 .gm-desc {
   position: relative;
   z-index: 1;
-  width: min(600px, 78%);
-  margin: 0 auto;
+  width: auto;
+  max-width: 100%;
+  margin: 0.6rem auto 0;
   padding: calc(10 * var(--rs)) 18px;
   border-color: var(--ink);
   background: var(--note);
   color: var(--ink);
-  font-size: calc(20 * var(--rs));
+  font-size: 1rem;                 /* the shipped reflow value */
   letter-spacing: 0.015em;
   font-weight: 300;
-  line-height: calc(32 * var(--rs));
-  min-height: calc(116 * var(--rs));
+  line-height: 1.6;
+  min-height: max(116px, calc(116 * var(--rs)));  /* 2-3 sentences at the reflow's type */
   box-shadow: var(--elevation);
 }
 
@@ -584,15 +604,10 @@ body:has(#employer-brinker:checked) .employer--brinker {
   .split__rule { width: 33.333%; height: 1px; }
   /* B66: below 743px the shipped readable reflow stacks the plates again
      (owner grill answer, 2026-10-08). */
-  /* B56 component stack on mobile: plates flow (auto height, page may
-     scroll), the composition drops its absolute layout for a static reflow
-     at readable sizes — the same reset the band's scaled literals get. */
   .split__gallery { flex-direction: column; align-items: stretch; }
-  .gregorian-mode { flex: 0 0 auto; display: flex; flex-direction: column; padding: 0.75rem; }
-  .gm-back { inset: 0; }
-  .gm-title { position: relative; top: auto; left: auto; transform: none; width: auto; max-width: 100%; margin: 0 auto; font-size: 1.05rem; padding: 0.6rem 0.75rem 0.7rem; }
-  .gm-uc { position: relative; top: auto; left: auto; transform: none; margin: 0.4rem auto 0; font-size: 0.85rem; }
-  .gm-desc { width: auto; max-width: 100%; margin: 0.6rem auto 0; min-height: 116px; font-size: 1rem; line-height: 1.6; }
+  .gregorian-mode { flex: 0 0 auto; }
+  /* B56 component stack on mobile: the row drops to a column — the plates
+     themselves already render in the reflow grammar at every width. */
   .parking-lot { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .parking-lot__divider { width: auto; align-self: flex-start; }
   .parking-lot__divider::before { width: 75%; height: 1px; }

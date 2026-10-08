@@ -268,7 +268,9 @@ rescaled band grows beneath the box; the box grows around it.
 
 Its two lines, in order (B17, superseding B5; sizes per B31, amended by B61):
 
-1. **"The Portfolio of"** — the reduced secondary rung: **13.33px / 400**,
+1. **"The Digital Garden of"** (B72, issue #188, superseding B17's
+   "The Portfolio of" on the eyebrow line only) — the reduced secondary
+   rung: **13.33px / 400**,
    `line-height: 1.2` (B61, issue #170: TheBoards' title-card convention
    `#anchor-title .title-date` — 10px/400 under a 15px/600 title, a 2/3
    ratio — scaled to this page's 20px title rung, 20 × 2/3; agent-derived

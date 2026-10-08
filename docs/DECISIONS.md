@@ -2081,3 +2081,21 @@ the 15px/600 rung (16.57px/400 under B46's rescale), weight plain per B54,
 2026-10-08 — "Replace the existing copy with this new copy to the
 \"Requirements\" section in the right side of the header bar: \"Click the
 note cards to launch my various pages and work across the web.\""
+
+### B72. The title card's eyebrow reads "The Digital Garden of" (issue #188)
+
+The title card's **line 1 (the eyebrow)** reads **"The Digital Garden of"**
+— **superseding B17's "The Portfolio of" on the eyebrow line only**. The
+title card's text otherwise stands byte-identical: line 2 remains
+**"Robert Alastair Zeved Gregory"**, all on the same two lines — the
+eyebrow above the name — with the eyebrow's format unchanged (B61's reduced
+secondary rung, 13.33px/400, `line-height: 1.2`; B31's 20px/600 title rung;
+B19's hug-the-text box). No size, weight, spacing or mechanism changes.
+`UIUX §3.2` is amended accordingly.
+
+**Source:** owner's issue
+[#188](https://github.com/AlastairZeved/The-Portfolio/issues/188),
+2026-10-08 — "The title card currently reads: \"The Portfolio of\" which
+needs to be removed and replaced with \"The Digital Garden of\". Same text
+formatting, all on one line with \"Robert Alastair Zeved Gregory\" below
+it."

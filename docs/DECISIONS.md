@@ -1888,3 +1888,57 @@ right:" — and the owner's four grill answers of 2026-10-08 (owner chat):
 3. "Body half scrolls vertically when plates need more height".
 4. "Oldest role leftmost, newest rightmost".
 
+### B67. Every note card's default size and placement follows the owner's issue #175 drawing (issue #175)
+
+The owner logged in issue [#175](https://github.com/AlastairZeved/The-Portfolio/issues/175)
+a 2560×1440 screenshot of the board displaying "the cards arranged and
+re-sized", directing: "These sizes should replace the default sizes of each
+note card displayed when a user loads the page. The placement of each note
+card must be arranged according to this spec as well." Per B33's provenance
+law, the owner's drawing rules the authored card sizes and placements. This
+entry **supersedes B52's rest-scale list and the B55 sub-card 0.78 band**,
+and **B43's placement values for the cards the drawing moves**; the
+Community, Career, Software & AI and Music cards keep their #112 seats and
+scales (their measured percentages and scales reproduce the shipped
+values to within measurement noise).
+
+The values below are **agent-derived measurements of that screenshot**
+(method: outer card footprint — pale fill plus the 2px `--ink-dark` border —
+at the drawing's 2560×1223 page viewport, render scale `rs = 1223/1104.55`
+under B46's height-anchored landscape law, calibrated against the unchanged
+cards' shipped percentages; rest scale = drawing footprint ÷ the card's
+measured unscaled content width). Authored `left`% / `top`% / `--card-scale`:
+
+- Community: 13.6% / 18.3% / 2.25 (unchanged)
+- Career: 42.3% / 18.5% / 2.21 (unchanged)
+- Writing: 66% / 24% / **1.77** (scale re-sized)
+- Software & AI: 12.3% / 51.7% / 1.79 (unchanged)
+- Plants & Rocks: **40% / 61.5% / 2.25**
+- Music: 73% / 54% / 1.70 (unchanged)
+- Apple Music: **82.9% / 45.8% / 1.02**
+- Spotify: 81.7% / **63.7% / 1.19**
+- LinkedIn: **36.6% / 11.5% / 1.06**
+- Zeved Boards: **3.2% / 55% / 1.14**
+- Agentic Plugins: **14.2% / 61.8% / 1.20**
+- Plants on Poles: **37.7% / 73.7% / 0.98**
+- Plants in Rocks: **50.2% / 73.8% / 1.03**
+
+**The B52 tier clause is superseded.** The drawing puts several sub cards
+above scale 1 (Apple Music 1.02, Spotify 1.19, LinkedIn 1.06, Zeved Boards
+1.14, Agentic Plugins 1.20, Plants in Rocks 1.03), so the "six board cards
+above 1, sub cards below 1" split no longer holds: the drawing rules the
+sizes, not the tier. The gesture bounds stand unchanged — B45's 0.5 floor
+and B51's one-fifth-of-viewport ceiling still move the scale from these rest
+values. Nothing else changes: the cards' destinations, states, links and the
+per-authored-pair link mechanism (B28) are untouched, and the link lines
+recompute from the moved cards' centres. `UIUX §3.4` and `§4` are amended to
+name this drawing as the placement and size authority.
+
+**Source:** owner's issue
+[#175](https://github.com/AlastairZeved/The-Portfolio/issues/175),
+2026-10-08 — "Attached is a 2560x1440 screenshot displaying the cards
+arranged and re-sized. These sizes should replace the default sizes of each
+note card displayed when a user loads the page. The placement of each note
+card must be arranged according to this spec as well." (screenshot:
+[issue #175](https://github.com/user-attachments/assets/7d0e99b7-e9b4-4d3b-8e7f-b9bb11b7da36)).
+

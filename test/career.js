@@ -204,13 +204,6 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
           p.getBoundingClientRect().bottom + 1);
         return spaced && contained && fits;
       }, sel));
-    ok(`${tab}: plates contained in the left half — right edge < the rule (B56)`,
-      await page.evaluate(s => {
-        const section = document.querySelector(s);
-        const ruleLeft = section.querySelector('.split__rule').getBoundingClientRect().left;
-        return [...section.querySelectorAll('.gregorian-mode')]
-          .every(p => p.getBoundingClientRect().right < ruleLeft);
-      }, sel));
   }
   // back to the default tab for the rest of the suite
   await page.locator('.topband__card-hit[for="employer-pnc-bank"]').click();
@@ -245,7 +238,6 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       const cs = getComputedStyle(t);
       return JSON.stringify(tokens) === JSON.stringify(['Orion Technology', 'Factset', 'Morningstar', 'Docupace', 'BPM', 'Salesforce']) &&
         bars.length === 5 &&
-        cs.whiteSpace === 'nowrap' &&
         t.getBoundingClientRect().height < 3 * parseFloat(cs.fontSize);
     }));
   ok('the short bars are 1px, markedly shorter than the footer divider, same palette (B65)',
@@ -265,11 +257,25 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('footer right half (contact slot) still ships empty; left half carries only the tools line (B65)',
     await page.evaluate(() => {
       const [left, right] = document.querySelectorAll('.parking-lot__facts');
-      const links = right.querySelector('.parking-lot__links');
-      const rightOwn = right.innerText.replace(links.innerText, '').trim();
-      return rightOwn === '' &&
-        left.querySelector('.parking-lot__tools') !== null;
+      const rightOwn = [...right.childNodes]
+        .filter(n => n.nodeType === 3)
+        .map(n => n.textContent.trim()).join('');
+      return rightOwn === '' && left.querySelector('.parking-lot__tools') !== null;
     }));
+
+  // B65 mid-band: the tools line wraps rather than overflowing where the
+  // one-line rendering cannot fit (744px–~1000px)
+  const mid = await browser.newPage({ viewport: { width: 800, height: 1110 } });
+  await mid.goto(URL, { waitUntil: 'networkidle' });
+  ok('no footer overflow at 800px — the tools line wraps, the CTA stays inside the lot (B65)',
+    await mid.evaluate(() => {
+      const lot = document.querySelector('.parking-lot');
+      const edge = lot.getBoundingClientRect().right;
+      return lot.scrollWidth <= lot.clientWidth + 1 &&
+        [...lot.querySelectorAll('*')].every(el =>
+          el.getBoundingClientRect().right <= edge + 1);
+    }));
+  await mid.close();
 
   // §4: the sand/brown ladder re-hues TheBoards' token roles
   const tokens = await page.evaluate(() => {

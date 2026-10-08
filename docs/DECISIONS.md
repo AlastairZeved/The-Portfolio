@@ -1830,10 +1830,12 @@ the relationship — shorter and visually distinct, same palette — the value
 implements it): `0.875em` at the facts type size, vertically centred. The
 professional-blurb (blank #7) and contact-info (blank #8) slot comments
 stand unchanged in their halves; per B47 the empty slots render nothing,
-so the owner's two halves are exactly what the bar shows. At ≤743px the
-tools line may wrap to a second row (the one-line rule is the footer bar's
-desktop rendering; a 320px viewport cannot hold it on one line at the
-facts type size).
+so the owner's two halves are exactly what the bar shows. The tools line
+renders on **one line wherever the bar's width allows and wraps to a
+second row rather than overflowing wherever it doesn't** (the
+744px–~1000px band: a nowrap line pushed the CTA past the lot's edge,
+which the no-overlap law forbids) — wrap-only-when-needed implements the
+owner's one-line rule, agent-derived under the B33/B40 pattern.
 
 **Source:** the owner's issue
 [#177](https://github.com/AlastairZeved/The-Portfolio/issues/177),

@@ -743,8 +743,9 @@ renders as `L × --rs`.)*
   Rob" → `https://razgregory.com/`. *(B65 supersedes §3's three-way
   split: the second divider bar is removed.)* The professional-blurb
   (blank #7) and contact-info (blank #8) slot comments keep their halves;
-  the empty slots render nothing (B47). At ≤743px the tools line may wrap
-  to a second row.
+  the empty slots render nothing (B47). The tools line renders on one line
+  wherever the bar's width allows and wraps rather than overflows where it
+  doesn't (B65, wrap-only-when-needed — no-overlap law).
 
 ### §10.3 Blank slots
 
@@ -774,7 +775,7 @@ one-line tools list; the blurb (#7) and contact (#8) slots remain
 unfilled and render nothing.)*
 
 **Pinned by:** `test/career.js` — selector mechanics, the B132 glow, the
-split, the three-section lot, the ladder tokens, and the omit-empty-block
+split, the two-way lot (B65), the ladder tokens, and the omit-empty-block
 discipline.
 
 ---

@@ -1948,3 +1948,64 @@ note card displayed when a user loads the page. The placement of each note
 card must be arranged according to this spec as well." (screenshot:
 [issue #175](https://github.com/user-attachments/assets/7d0e99b7-e9b4-4d3b-8e7f-b9bb11b7da36)).
 
+### B68. The Components line is removed entirely; the footer's copy is updated to the issue-#174 text and stays in the Parking Lot (issue #174)
+
+The **Components** band zone renders **no anchor line**: the B38/B54 line
+"Each card links to a page housing my work in that domain." is **removed
+entirely**, per the owner's issue #174. The zone keeps its band label and
+renders its furniture only. `UIUX §3.3` is amended accordingly.
+
+The **Parking Lot footer keeps B62's layout** — the owner's copy in the
+**left half**, the Formspree form in the **right half**, the 50/50 split and
+the vertical divider bar unchanged. B68's only footer change is the **copy's
+text**: the left half carries the issue-#174 edited version, verbatim (the
+copy of record below), superseding issue #169's original text. The phrase
+*curiouser and curiouser.* renders italic, and the copy keeps B62's
+rendering — 13px / 1.5 / 400 in `--ink`. **The copy does not move to the
+Components band**: the owner's mid-implementation ruling of 2026-10-08 —
+"I guess keep the text in the parking lot then. I didn't realize it would be
+so many lines. Make sure the copy gets updated with all edits though." —
+supersedes issue #174's move instruction (measured in implementation: the
+copy renders ~10–11 lines in the band, which grew the band's rule from the
+67.38 two-line floor to ~218–240 logical px and broke B46's parity suite).
+The owner's companion ruling of 2026-10-08 confirms the Components removal
+stands on its own: "Remove it entirely (as the issue says verbatim) —
+Components zone renders no anchor line." `UIUX §6.2` is amended
+accordingly.
+
+**Copy of record (verbatim, issue #174):** "Hey, I'm Rob. Welcome to my
+digital garden. This is a sort of central hub for all of the things I work
+on, across all of the sites and pseudonyms I've used. I'm weary of calling
+these "hobbies" or "passions"; they're more like symptoms, the after effect
+of the passion. I simply pursue my curiosity, without much of a thought of
+whether I can or cannot learn the subject at hand. That also has the side
+effect of my works sprawling across quite a few domains. The cards on this
+page link to those works (the digital works at least) to keep everything in
+one place. None are stale, but my curiosity is ever wandering and I may run
+out of questions in a subject for a time. But the great work always
+continues as my curiosity finds its flame again. All it takes to flex
+curiousity is to ask a question, then keep asking questions and always be
+curiouser and curiouser."
+
+**Source:** owner's issue
+[#174](https://github.com/AlastairZeved/The-Portfolio/issues/174),
+2026-10-08 — "In the "Components" section, remove this line: "Each page
+links to a page housing my work in that domain" entirely. Then, Move this
+copy (and it's edits) to the "Components" section: [the copy of record
+above] Once that is moved, the Formspree contact form info can move back
+over to the left side of the footer." (Transcription note: the issue quotes
+the removed line as "Each page links to a page housing my work in that
+domain"; the line as actually shipped — B54's copy of record — reads "Each
+card links to a page housing my work in that domain.", which is what this
+ruling removes.) — with the owner's mid-implementation
+rulings of 2026-10-08 (owner chat), quoted verbatim: "I guess keep the text
+in the parking lot then. I didn't realize it would be so many lines. Make
+sure the copy gets updated with all edits though."; and "Remove it entirely
+(as the issue says verbatim) — Components zone renders no anchor line; the
+B62 footer layout (copy left, form right) just gets the updated copy". The
+owner's pre-implementation answer of 2026-10-08 keeping the italic phrase
+("Yes, keep the italic phrase") stands; the earlier pre-implementation
+formatting answers tied to the Components move (13px/1.5 at weight 300 in
+the band; B20's empty right half restored) lapse with the move they
+governed.
+

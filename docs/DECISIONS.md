@@ -1782,3 +1782,67 @@ brown." — and the owner's pre-implementation answer of 2026-10-07 (owner
 chat, multiple choice): "TheBoards' convention: favicon.ico + icons/ PNG
 set, linked on all repo pages."
 
+---
+
+### B64. The career desc cards carry the owner's copy for three roles (issue #176)
+
+The owner's fill pass for the B56 description cards (issue #154): the desc
+cards of **Sr. Portfolio Specialist** (Brinker Capital tab, 2023-2025),
+**Portfolio & Trust Administrator** (PNC Private Bank tab, 2021-2022) and
+**Branch Banker** (PNC Bank tab, 2019-2020) now render the owner's copy
+**verbatim**, three paragraphs per card, transcribed from the issue body
+without edit. Every other `.gm-desc` card on the page **stays empty** under
+B56's explicit override; the omit-empty rule (B47) stands for every block
+the owner has not yet filled. The cards keep the component's single
+`<p class="gm-card gm-desc">` element — the sibling convention on the
+Agentic Plugins page — with the owner's paragraph breaks carried by
+`<br><br>`; no new card grammar, no new type value, the card grows past its
+B56 min-height as content. The B56 plate geometry is amended for the filled
+state under the same provenance pattern: the equal flex cells
+(`flex: 1 1 0`) clamp every plate to the empty state's height, so the
+filled card overflowed its cell onto the footer — the plates now size to
+their content and share the half's leftover space equally
+(`flex: 1 1 auto`), the 1.25rem gutter keeping the stack evenly spaced
+(the owner's equal-sizing words were ruled for the empty placeholder
+state).
+
+**Source:** the owner's issue
+[#176](https://github.com/AlastairZeved/The-Portfolio/issues/176),
+2026-10-08 — "For the component titled \"Sr. Portfolio Specialist\" in
+/career, add the below copy to the description card of the component" —
+and the same sentence for "Portfolio & Trust Administrator" and "Branch
+Banker", each followed by the exact three-paragraph copy now transcribed
+into `career.html`.
+
+### B65. The career footer splits two ways — the tools line left, one divider, the CTA right (issue #177)
+
+The career page's footer drops from **three sections to two**: the **second
+divider bar is removed**. The left side of the remaining divider carries a
+**one-line tools list** — "Orion Technology", "Factset", "Morningstar",
+"Docupace", "BPM", "Salesforce" — where the copy's straight slashes render
+as **short divider bars**: 1px wide, the same `--frame`-mix color as the
+footer's divider bar (no palette change), but **markedly shorter** than the
+footer's 3/4-length bar so the two are visually distinct. The footer bar
+renders: the tools line on the left, the full divider bar, then the "Learn
+More about Rob" `.cta` on the right. The bar's height is the only new value
+and is agent-derived under the B33/B40 provenance pattern (the owner ruled
+the relationship — shorter and visually distinct, same palette — the value
+implements it): `0.875em` at the facts type size, vertically centred. The
+professional-blurb (blank #7) and contact-info (blank #8) slot comments
+stand unchanged in their halves; per B47 the empty slots render nothing,
+so the owner's two halves are exactly what the bar shows. At ≤743px the
+tools line may wrap to a second row (the one-line rule is the footer bar's
+desktop rendering; a 320px viewport cannot hold it on one line at the
+facts type size).
+
+**Source:** the owner's issue
+[#177](https://github.com/AlastairZeved/The-Portfolio/issues/177),
+2026-10-08 — "There should only be one divider bar, not two. Remove the
+second divider bar, then on the left side of the bar add the below copy:
+\"Orion Technology | Factset | Morningstar | Docupace | BPM | Salesforce\".
+It should all fit in one line in the footer bar, then the divider bar, then
+the \"Learn More About Rob\" button. Where I have straight slashes in the
+copy, add divider bars. These divider bars need to be even shorter and the
+footer's divider bar so that they are visually distinct from the divider
+bar without changing the color palette."
+

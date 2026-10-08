@@ -1,8 +1,9 @@
 /* test/career.js — the career page (issue #133, B47): three-way employer
    selector, B132 glow on the selected title card, split body with ruled bar,
-   three-section parking lot with dividers, CTA back to razgregory.com, the
-   sand/brown token ladder, and the plugin components in the body's left
-   half (issue #154, B56 — desc cards render EMPTY on purpose). Single file,
+   two-section parking lot with one divider and the B65 tools line, CTA back
+   to razgregory.com, the sand/brown token ladder, and the plugin components
+   in the body's left half (issue #154, B56 — desc cards render EMPTY on
+   purpose except the three B64 fills of issue #176). Single file,
    zero script, zero <link>. Black-box Playwright.
    Run: node test/career.js   (PORTFOLIO_URL default http://localhost:8000/career.html)
    Viewport note: the desktop run is at the page's own design canvas
@@ -115,13 +116,32 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     return shadows[1].includes('rgb(125, 99, 64)') && !shadows[0].includes('rgb(125, 99, 64)');
   }));
 
-  // B56 (issue #154) rewrites the blank-slot assertions deliberately: the
-  // description cards now render EMPTY ON PURPOSE (B56 owner override of the
-  // omit-empty rule), so the subject is the plugin components themselves.
-  // (1) each shown tab renders exactly the right number of components with
-  // the exact titles + years from the issue body, verbatim; (2) every desc
-  // card is empty and min-height ≥ 116px; (3) tab isolation; (4) no CTA, no
+  // B64 (issue #176) rewrites the desc-card assertions deliberately: three
+  // desc cards now carry the owner's copy verbatim (B64), the rest stay
+  // EMPTY ON PURPOSE (B56 owner override of the omit-empty rule). The
+  // subject is the plugin components themselves: (1) each shown tab renders
+  // exactly the right number of components with the exact titles + years
+  // from the issue body, verbatim; (2) each filled desc card renders the
+  // issue's copy (whitespace-normalized) and the others render empty, all
+  // visible at the B56 min-height; (3) tab isolation; (4) no CTA, no
   // selector row; (5) plates contained in the left half.
+  const B64_COPY = {
+    'Branch Banker': [
+      'Completed the PNC Leadership Development Program, a high-performer program focused on preparing associates for advancement into specialized financial roles.',
+      'Deployed across the PDSJ region to onboard and coach Branch Relationship Managers on multi-channel client-book development.',
+      'Consistently outperformed branch sales goals while maintaining exceptional client service.',
+    ],
+    'Portfolio & Trust Administrator': [
+      'Managed end-to-end account setup, funding, and servicing for complex irrevocable trust portfolios within a highly regulated environment.',
+      'Served as a primary point of contact for trust officers, legal counsel, and beneficiaries, coordinating across stakeholders to resolve complex account and servicing requirements.',
+      'Translated client and operational requirements into practical solutions while balancing service quality, underlying data, and regulatory constraints.',
+    ],
+    'Sr. Portfolio Specialist': [
+      'Manage daily trade execution across client liquidity needs, portfolio re-allocations, and new business for the firm’s $12B UHNW Wealth Management UMA products.',
+      'Mapped, documented, and trained the end-to-end trading workflows for new UMA product offerings and SRM platform migrations while maintaining SLA performance without client or business disruption.',
+      'Architected the Brinker Trading PowerBI dashboard 0->1, partnering with a developer, to monitor daily trading volume and metrics previously siloed in vendor databases to develop actionable KPI metrics, automated alerts, and data visualizations using the 3-30-300 framework.',
+    ],
+  };
   const ROLES = {
     'employer-pnc-bank': [
       ['Branch Sales & Service Representative', '2017-2018'],
@@ -151,23 +171,38 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     }, sel);
     ok(`${tab}: ${roles.length} components with the issue's exact titles+years`,
       JSON.stringify(got) === JSON.stringify(roles));
-    ok(`${tab}: desc cards empty, visible, min-height ≥ 116px (B56)`,
-      await page.evaluate(s =>
-        [...document.querySelector(s).querySelectorAll('.gm-desc')].every(d =>
-          d.innerText.trim() === '' && d.getBoundingClientRect().height > 0 &&
-          parseFloat(getComputedStyle(d).minHeight) >=
-          116 * Math.min(innerHeight / 1104.55, innerWidth / 1440)), sel));
+    ok(`${tab}: desc cards — B64 copy verbatim where filled, empty where not, visible, min-height ≥ 116px (B56/B64)`,
+      await page.evaluate(({ s, b64 }) => {
+        const nrm = t => t.replace(/\s+/g, ' ').trim();
+        return [...document.querySelector(s).querySelectorAll('.gregorian-mode')].every(p => {
+          const d = p.querySelector('.gm-desc');
+          const filled = b64[p.querySelector('.gm-title').textContent.trim()];
+          const want = filled ? filled.join(' ') : '';
+          return nrm(d.innerText) === nrm(want) && d.getBoundingClientRect().height > 0 &&
+            parseFloat(getComputedStyle(d).minHeight) >=
+            116 * Math.min(innerHeight / 1104.55, innerWidth / 1440);
+        });
+      }, { s: sel, b64: B64_COPY }));
     ok(`${tab}: components isolated to their tab`,
       await page.evaluate(s =>
         [...document.querySelectorAll('section.employer')]
           .filter(sec => !sec.matches(s))
           .flatMap(sec => [...sec.querySelectorAll('.gregorian-mode')])
           .every(p => p.getBoundingClientRect().height === 0), sel));
-    ok(`${tab}: plates equally sized (equal flex cells)`,
+    ok(`${tab}: plates evenly spaced, contained in the half, content fits (B56 as amended by B64)`,
       await page.evaluate(s => {
-        const hs = [...document.querySelector(s).querySelectorAll('.gregorian-mode')]
-          .map(p => p.getBoundingClientRect().height);
-        return hs.length > 0 && Math.max(...hs) - Math.min(...hs) < 1;
+        const nrm = Math.min(innerHeight / 1104.55, innerWidth / 1440);
+        const plates = [...document.querySelector(s).querySelectorAll('.gregorian-mode')];
+        if (!plates.length) return false;
+        const rects = plates.map(p => p.getBoundingClientRect());
+        const gap = 20 * nrm; // 1.25rem at rs
+        const spaced = rects.slice(1).every((r, i) => Math.abs((r.top - rects[i].bottom) - gap) < 3);
+        const ruleLeft = document.querySelector(s).querySelector('.split__rule').getBoundingClientRect().left;
+        const contained = rects.every(r => r.right < ruleLeft);
+        const fits = plates.every(p =>
+          p.querySelector('.gm-desc').getBoundingClientRect().bottom <=
+          p.getBoundingClientRect().bottom + 1);
+        return spaced && contained && fits;
       }, sel));
     ok(`${tab}: plates contained in the left half — right edge < the rule (B56)`,
       await page.evaluate(s => {
@@ -188,24 +223,53 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       [...document.querySelectorAll('section.employer')].every(s =>
         !!s.querySelector('.gm-title') && s.innerHTML.includes('SLOT:'))));
 
-  // §3: the footer is the parking-lot grammar, three sections, two dividers
-  ok('footer has three content sections',
+  // §3 (B65, issue #177): the footer is the parking-lot grammar, two
+  // sections, one divider — the owner's tools line left, the CTA right
+  ok('footer has two content sections with one CTA',
     await page.locator('.parking-lot__facts').count() === 2 &&
     await page.locator('.parking-lot .cta').count() === 1);
-  ok('two divider bars separate the three sections',
-    await page.locator('.parking-lot__divider').count() === 2);
-  ok('dividers are 1px wide and 3/4 of the section length', await page.evaluate(() => {
+  ok('one divider bar remains (B65: the second is removed)',
+    await page.locator('.parking-lot__divider').count() === 1);
+  ok('the divider bar is 1px wide and 3/4 of the section length', await page.evaluate(() => {
     const d = document.querySelector('.parking-lot__divider');
     const bar = parseFloat(getComputedStyle(d, '::before').height);
     const lot = document.querySelector('.parking-lot').getBoundingClientRect();
     return getComputedStyle(d, '::before').width === '1px' &&
       Math.abs(bar - 0.75 * (lot.height - 24)) < 6;
   }));
+  ok('the tools line renders the owner\'s copy on one line, five short bars between tokens (B65)',
+    await page.evaluate(() => {
+      const t = document.querySelector('.parking-lot__tools');
+      const tokens = [...t.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).filter(Boolean);
+      const bars = [...t.querySelectorAll('.parking-lot__tools-bar')];
+      const cs = getComputedStyle(t);
+      return JSON.stringify(tokens) === JSON.stringify(['Orion Technology', 'Factset', 'Morningstar', 'Docupace', 'BPM', 'Salesforce']) &&
+        bars.length === 5 &&
+        cs.whiteSpace === 'nowrap' &&
+        t.getBoundingClientRect().height < 3 * parseFloat(cs.fontSize);
+    }));
+  ok('the short bars are 1px, markedly shorter than the footer divider, same palette (B65)',
+    await page.evaluate(() => {
+      const bar = getComputedStyle(document.querySelector('.parking-lot__tools-bar'));
+      const d = document.querySelector('.parking-lot__divider');
+      const full = getComputedStyle(d, '::before');
+      const barH = parseFloat(bar.height);
+      const fullH = parseFloat(full.height);
+      return bar.width === '1px' && full.width === '1px' &&
+        barH < fullH / 4 &&
+        bar.backgroundColor === full.backgroundColor;
+    }));
   ok('the CTA reads "Learn More about Rob" and links back to razgregory.com',
     (await page.locator('.parking-lot .cta').innerText()).trim() === 'Learn More about Rob' &&
     (await page.locator('.parking-lot .cta').getAttribute('href')) === 'https://razgregory.com/');
-  ok('footer blurb and contact slots ship empty', await page.evaluate(() =>
-    [...document.querySelectorAll('.parking-lot__facts')].every(f => f.innerText.trim() === '')));
+  ok('footer right half (contact slot) still ships empty; left half carries only the tools line (B65)',
+    await page.evaluate(() => {
+      const [left, right] = document.querySelectorAll('.parking-lot__facts');
+      const links = right.querySelector('.parking-lot__links');
+      const rightOwn = right.innerText.replace(links.innerText, '').trim();
+      return rightOwn === '' &&
+        left.querySelector('.parking-lot__tools') !== null;
+    }));
 
   // §4: the sand/brown ladder re-hues TheBoards' token roles
   const tokens = await page.evaluate(() => {

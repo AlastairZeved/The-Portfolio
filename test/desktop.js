@@ -72,34 +72,46 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('Requirements zone label', (await page.locator('#zone-requirements .band-label').innerText()) === 'Requirements');
   ok('Parking Lot header', (await page.locator('#lot-header').innerText()) === 'Parking Lot');
 
-  // issue #147/B54: the band anchors carry the owner's revised copy, plain (400)
+  // issue #174/B68: the Components line "Each card links to a page housing
+  // my work in that domain." is removed entirely — the zone keeps its label
+  // and renders no anchor. Requirements keeps the B54 line, plain.
   const bandCopy = await page.evaluate(() => {
     const g = sel => { const el = document.querySelector(sel); return el ? { text: el.textContent.trim(), weight: getComputedStyle(el).fontWeight } : null; };
     return {
-      components: g('#zone-components .anchor'),
+      componentsAnchor: g('#zone-components .anchor'),
       requirements: g('#zone-requirements .anchor'),
     };
   });
-  ok('Components line is the owner\'s revised copy (issue #147/B54)',
-    bandCopy.components && bandCopy.components.text === 'Each card links to a page housing my work in that domain.');
+  ok('Components zone renders no anchor line (issue #174/B68)',
+    bandCopy.componentsAnchor === null);
   ok('Requirements line is the owner\'s revised copy (issue #147/B54)',
     bandCopy.requirements && bandCopy.requirements.text === 'Click around to explore my works!');
-  ok('band anchors render plain 400 text (issue #147/B54)',
-    bandCopy.components && bandCopy.requirements &&
-    bandCopy.components.weight === '400' && bandCopy.requirements.weight === '400');
+  ok('Requirements band anchor renders plain 400 text (issue #147/B54)',
+    bandCopy.requirements && bandCopy.requirements.weight === '400');
 
-  // issue #169/B62: the footer splits 50/50 — copy left, divider, form right
+  // issue #174/B68: the footer keeps B62's layout (copy left, form right);
+  // the left half's copy is the issue-#174 EDITED version, verbatim, ending
+  // in the italic phrase curiouser and curiouser.
   const footer = await page.evaluate(() => {
-    const copy = document.querySelector('.lot-copy').getBoundingClientRect();
+    const copy = document.querySelector('.lot-copy');
+    const copyBox = copy.getBoundingClientRect();
     const form = document.querySelector('.lot-form').getBoundingClientRect();
     const dv = document.querySelector('.lot-divider').getBoundingClientRect();
     const items = document.getElementById('lot-items').getBoundingClientRect();
+    const p = copy.querySelector('p');
     return {
-      half: Math.abs(copy.width - form.width) < 2,
+      text: p ? p.textContent.trim() : '',
+      italic: p ? getComputedStyle(p.querySelector('em')).fontStyle : null,
+      half: Math.abs(copyBox.width - form.width) < 2,
       divider: dv.width < 2 && dv.height > 0,
-      sides: copy.left < form.left && form.right <= items.right + 0.5,
+      sides: copyBox.left < form.left && form.right <= items.right + 0.5,
     };
   });
+  ok('footer copy starts "Hey, I\'m Rob. Welcome to my digital garden." (issue #174/B68)',
+    footer.text.startsWith('Hey, I\'m Rob. Welcome to my digital garden.'));
+  ok('footer copy ends "always be curiouser and curiouser." (issue #174/B68)',
+    footer.text.endsWith('always be curiouser and curiouser.'));
+  ok('the closing phrase renders italic (issue #174/B68)', footer.italic === 'italic');
   ok('footer halves are equal width (50/50, issue #169/B62)', footer.half);
   ok('vertical divider bar present between the halves (issue #169/B62)', footer.divider);
   ok('copy sits left of the form inside the lot (issue #169/B62)', footer.sides);

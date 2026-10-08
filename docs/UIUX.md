@@ -287,7 +287,7 @@ exceeds the sheet minus the side gutters.
 | Region | Render |
 |---|---|
 | Title | the compartment above (§3.2) |
-| Components | the line **"Each card links to a page housing my work in that domain."** (B38's line, copy per B54), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), hanging from the region top at `--band-top` |
+| Components | **no anchor line** — the B38/B54 line "Each card links to a page housing my work in that domain." is **removed entirely** (B68, issue #174); the zone keeps its label and renders its furniture only |
 | Requirements | the line **"Click around to explore my works!"** (B37's line, copy per B54), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
 | Parking Lot | water field closing the sheet; sized by its measured contents from the two-row floor (§3.2's own law mirrored at the foot, B46); holds the contact form (§6) |
 
@@ -566,26 +566,29 @@ The form's userspace, per the owner's ruling `B20`, renders left-anchored:
   when the referrer is missing, which would silently brick the form.
 - The form is the page's **only** network call (§3.4, PRD).
 
-### §6.2 The footer's 50/50 split (B62, issue #169)
+### §6.2 The footer's 50/50 split (B62, issue #169; copy text amended by B68, issue #174)
 
 The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 
-- **Left half:** the owner's copy, verbatim from issue #169, ending in the
-  italic phrase *Curiouser and curiouser.* — rendered **13px / 1.5 / 400**
-  in `--ink` (agent-derived: the lot's own reading-text rung, between the
-  11px labels and the 14px inputs, per the `B33` pattern).
+- **Left half:** the owner's copy, verbatim from issue #174 (B68's copy of
+  record — the issue-#174 edited version, superseding issue #169's original
+  text), ending in the italic phrase *curiouser and curiouser.* — rendered
+  **13px / 1.5 / 400** in `--ink` (the lot's own reading-text rung, per
+  B62's rendering, unchanged by B68).
 - **Divider:** the divider grammar career.html ships (`.parking-lot__divider`
   — 1px wide, **3/4** of the section's inner height, centred), re-tokened to
   this page's To-Do blue: `color-mix(in srgb, var(--frame) 45%, transparent)`
   — the same mix the `#lot-rule` already renders.
-- **Right half:** the contact form (§6/§6.1 stand), now spanning the right
+- **Right half:** the contact form (§6/§6.1 stand), spanning the right
   half; its tracks are `1fr 2fr` so it **scales with any viewport** (the
   issue's "scaled up and down to fit them all").
 - **≤743px** (the repo's mobile breakpoint, career.html's block): the halves
   **stack** — copy above, divider horizontal (3/4 width), form below.
 - The lot's height still follows §6.1's measured-content law; B20's
-  "the right side of the pane stays empty" clause is **superseded** — the
-  right half is the form's.
+  "the right side of the pane stays empty" clause stays **superseded** — the
+  right half is the form's. B68 ruled the copy **stays in the left half**
+  (the owner's mid-implementation correction: "keep the text in the parking
+  lot") — it does not move to the Components band.
 
 ---
 

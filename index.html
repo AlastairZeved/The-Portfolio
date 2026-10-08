@@ -393,7 +393,9 @@ body {
    page's own To-Do blue tokens (color-mix --frame 45%, the same mix the
    #lot-rule and career's bars already render). Both halves are flex 1 1 0
    over the same 50% share; the form's tracks are fr units so everything
-   scales with any viewport, per the issue. */
+   scales with any viewport, per the issue. Issue #174/B68 amends the COPY'S
+   TEXT only: the left half carries the issue-#174 edited version, verbatim;
+   layout, split and divider stand unchanged. */
 .lot-split {
   display: flex;
   align-items: center;
@@ -509,7 +511,6 @@ body {
 
   <div id="zone-components" class="band-zone">
     <span class="band-label on-light">Components</span>
-    <div class="anchor">Each card links to a page housing my work in that domain.</div>
   </div>
   <div id="zone-requirements" class="band-zone">
     <span class="band-label on-light">Requirements</span>
@@ -596,12 +597,13 @@ body {
     <div id="lot-rule"></div>
     <div id="lot-header">Parking Lot</div>
     <div id="lot-items">
-      <!-- issue #169 / B62: the footer splits 50/50 — the owner's copy in the
-           left half, the Formspree form in the right half, divided by the
-           vertical divider bar. -->
+      <!-- issue #174/B68: the Components line is removed entirely (the zone
+           keeps its label); the garden copy stays in the LEFT half — its
+           text is the issue-#174 edited version, verbatim — the Formspree
+           form keeps the right half, split and divider per B62. -->
       <div class="lot-split">
         <div class="lot-copy">
-          <p>Hey, I'm Rob, and you have stumbled into my digital garden. This is the sort of central hub for accessing all of my works across the various domains that have sparked my curiosity throughout my life. I'm weary of calling them "hobbies" or "passions", because the passion is simply learning, solving tough problems, and satisfying my insatiable curiosity for how things are built - so that I can rebuild them, my way. None of these are stale, the work always continues as I find inspiration to ask a new question. Because all it takes to be a little curious is to ask a question, then keep asking questions and always be<em>Curiouser and curiouser.</em></p>
+          <p>Hey, I'm Rob. Welcome to my digital garden. This is a sort of central hub for all of the things I work on, across all of the sites and pseudonyms I've used. I'm weary of calling these "hobbies" or "passions"; they're more like symptoms, the after effect of the passion. I simply pursue my curiosity, without much of a thought of whether I can or cannot learn the subject at hand. That also has the side effect of my works sprawling across quite a few domains. The cards on this page link to those works (the digital works at least) to keep everything in one place. None are stale, but my curiosity is ever wandering and I may run out of questions in a subject for a time. But the great work always continues as my curiosity finds its flame again. All it takes to flex curiousity is to ask a question, then keep asking questions and always be <em>curiouser and curiouser.</em></p>
         </div>
         <div class="lot-divider" aria-hidden="true"></div>
         <div class="lot-form">

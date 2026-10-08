@@ -287,8 +287,8 @@ exceeds the sheet minus the side gutters.
 | Region | Render |
 |---|---|
 | Title | the compartment above (§3.2) |
-| Components | **no anchor line** — the B38/B54 line "Each card links to a page housing my work in that domain." is **removed entirely** (B68, issue #174); the zone keeps its label and renders its furniture only |
-| Requirements | the line **"Click around to explore my works!"** (B37's line, copy per B54), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
+| Components | the line **"Pseudonyms and DBAs: aboveaveragerob, Alastair Zeved, Philly Plant Dads"** (B69, issue #185), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), hanging from the region top at `--band-top` — the identical anchor grammar; B38/B54's prior line is removed (B68) |
+| Requirements | the line **"Click the note cards to launch my various pages and work across the web."** (B71, issue #183, superseding B37/B54's copy), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
 | Parking Lot | water field closing the sheet; sized by its measured contents from the two-row floor (§3.2's own law mirrored at the foot, B46); holds the contact form (§6) |
 
 There is **no All Boards rail** — it is removed from the DOM and the layout
@@ -566,15 +566,18 @@ The form's userspace, per the owner's ruling `B20`, renders left-anchored:
   when the referrer is missing, which would silently brick the form.
 - The form is the page's **only** network call (§3.4, PRD).
 
-### §6.2 The footer's 50/50 split (B62, issue #169; copy text amended by B68, issue #174)
+### §6.2 The footer's 50/50 split (B62, issue #169; copy text amended by B68, issue #174, and by B70, issue #184)
 
 The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 
-- **Left half:** the owner's copy, verbatim from issue #174 (B68's copy of
-  record — the issue-#174 edited version, superseding issue #169's original
-  text), ending in the italic phrase *curiouser and curiouser.* — rendered
+- **Left half:** the owner's copy, verbatim from issue #184 (B70's copy of
+  record — superseding B68's issue-#174 copy of record), rendered as **two
+  paragraphs with no gap between them** (the issue's newline break; the
+  paragraphs carry no margin), ending in the italic phrase *curiouser and
+  curiouser.* (spelled "curiouser" per the owner's correction of the
+  issue's "curioser" typo) — rendered
   **13px / 1.5 / 400** in `--ink` (the lot's own reading-text rung, per
-  B62's rendering, unchanged by B68).
+  B62's rendering, unchanged by B68/B70).
 - **Divider:** the divider grammar career.html ships (`.parking-lot__divider`
   — 1px wide, **3/4** of the section's inner height, centred), re-tokened to
   this page's To-Do blue: `color-mix(in srgb, var(--frame) 45%, transparent)`

@@ -170,6 +170,21 @@ TheBoards. Three weights shipped: 400, 600, 800, Latin-subset woff2,
 `font-display: swap`. May be embedded as a data URI to keep the single-file
 law (`PRD §3.3`).
 
+### §2.10 Favicons (B63, issue #168)
+
+The favicon is the **owner's portrait**: a blonde guy, hair short with a
+**fauxhawk**, wearing **glasses**, eyes **brown** — drawn flat on the To-Do
+deep tile (`--deep` `#020812`) inside the `--frame` `#698ebf` rounded-square
+ring, at §2's own tokens (no new hex: skin/blonde are the portrait's own
+illustration values, agent-derived per the `B33` pattern — the owner ruled
+the subject, the drawing implements it). Shipped at **TheBoards' own
+convention**: `favicon.ico` (16/32/48) + `icons/` — `favicon-16/32/48.png`,
+`apple-touch-icon-192.png`, `icon-192.png`, `icon-512.png` — linked on
+**every page** in the repo (`index.html`, `career.html`,
+`plantsandrocks.html`, `monstera-storybook.html`). No PWA manifest — the
+site refuses one (B13); the larger `icon-*` sizes ride the set for bookmark
+and OS use, unlinked to any manifest.
+
 ---
 
 ## §3 The page
@@ -251,12 +266,18 @@ It occludes the rule and overhangs it by **29px**:
 its box is B31's own, `padding: calc(var(--band-top) + 8px) 16px 16px`. The
 rescaled band grows beneath the box; the box grows around it.
 
-Its two lines, in order (B17, superseding B5; sizes per B31):
+Its two lines, in order (B17, superseding B5; sizes per B31, amended by B61):
 
-1. **"The Portfolio of"** — same size as the name: 20px, `line-height: 1.2`.
+1. **"The Portfolio of"** — the reduced secondary rung: **13.33px / 400**,
+   `line-height: 1.2` (B61, issue #170: TheBoards' title-card convention
+   `#anchor-title .title-date` — 10px/400 under a 15px/600 title, a 2/3
+   ratio — scaled to this page's 20px title rung, 20 × 2/3; agent-derived
+   arithmetic per the `B33` pattern).
 2. **"Robert Alastair Zeved Gregory"** — the title rung: 20px / **600**.
 
-The compartment's two lines render at **one font size** (20px). Its width hugs
+The compartment's two lines render at **two rungs** (B61, issue #170 —
+superseding the one-size clause of B19 for the eyebrow line only; B31's 20px
+title rung stands). Its width hugs
 the title text: the `--frame` left/right borders close in on the text with
 comfortable padding (`16px`), the card stays centred, and the interior never
 exceeds the sheet minus the side gutters.
@@ -321,10 +342,10 @@ drawing authority, `B43`):
   that sizes the text: it rides a uniform `transform: scale()` on the card,
   `transform-origin: top left` (TheBoards `styles.css` §4 `.note`), so text
   grows and shrinks with the card, never independently of it. No
-  `--card-fs`; the height-driven updater is gone. **Weight:** the door-card's
-  text ships at **600**; the linked sub cards (LinkedIn, Apple Music,
-  Spotify, Zeved Boards, Agentic Plugins, Plants on Poles, Plants in Rocks)
-  render plain at **400** (`B53`, issue #145; `B55`, issue #146).
+  `--card-fs`; the height-driven updater is gone. **Weight:** **400, every
+  note card** (`B60`, issue #167 — no note card renders bold; supersedes
+  `B53`'s "the six board cards keep 600" clause and subsumes `B53`/`B55`'s
+  sub-card 400).
 - **Sizing:** cards are **content-sized** — `width: max-content`,
   `min-width: 132px` (= TheBoards' `NOTE_MIN_W`, `state.js` / `styles.css`
   `.note-text`, TheBoards `UIUX §4.5`, `B84`), `height` following the
@@ -506,8 +527,9 @@ The form's userspace, per the owner's ruling `B20`, renders left-anchored:
 - **Name** and **Email** sit **stacked vertically** at the **left wall**,
   directly under the "Parking Lot" header, each at **half their original
   width** (the pre-fix three-equal-fields width halved). As a fluid grid the
-  left track is one half of the Message track (`15%` vs `30%` of the pane),
-  so the pair always reads as half-size beside it.
+  left track is one half of the Message track (`1fr` vs `2fr` of the form's
+  own width — B62's fr-unit restatement of B20's 1:2 ratio), so the pair
+  always reads as half-size beside it.
 - **Message** sits to their immediate right, anchored to the Name/Email right
   edges, its **size unchanged** from the pre-fix layout (the full Message
   track, `30%`).
@@ -537,6 +559,27 @@ The form's userspace, per the owner's ruling `B20`, renders left-anchored:
   no-referrer` or `same-origin` — Formspree files every submission as spam
   when the referrer is missing, which would silently brick the form.
 - The form is the page's **only** network call (§3.4, PRD).
+
+### §6.2 The footer's 50/50 split (B62, issue #169)
+
+The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
+
+- **Left half:** the owner's copy, verbatim from issue #169, ending in the
+  italic phrase *Curiouser and curiouser.* — rendered **13px / 1.5 / 400**
+  in `--ink` (agent-derived: the lot's own reading-text rung, between the
+  11px labels and the 14px inputs, per the `B33` pattern).
+- **Divider:** the divider grammar career.html ships (`.parking-lot__divider`
+  — 1px wide, **3/4** of the section's inner height, centred), re-tokened to
+  this page's To-Do blue: `color-mix(in srgb, var(--frame) 45%, transparent)`
+  — the same mix the `#lot-rule` already renders.
+- **Right half:** the contact form (§6/§6.1 stand), now spanning the right
+  half; its tracks are `1fr 2fr` so it **scales with any viewport** (the
+  issue's "scaled up and down to fit them all").
+- **≤743px** (the repo's mobile breakpoint, career.html's block): the halves
+  **stack** — copy above, divider horizontal (3/4 width), form below.
+- The lot's height still follows §6.1's measured-content law; B20's
+  "the right side of the pane stays empty" clause is **superseded** — the
+  right half is the form's.
 
 ---
 

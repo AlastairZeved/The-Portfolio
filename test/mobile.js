@@ -22,10 +22,16 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('title card line 1 "The Portfolio of"', title.includes('The Portfolio of'));
   ok('title card line 2 name', title.includes('Robert Alastair Zeved Gregory'));
 
-  // title card, B19: single font size and borders hug the text
+  // title card, B17 text; B19's hug-the-text borders; B61's two-rung type
+  // (issue #170: the eyebrow renders on TheBoards' reduced secondary rung —
+  // 13.33px/400 — under the 20px/600 title rung; supersedes the single-size
+  // clause of B19 for this line)
   const titleSizes = await page.locator('#anchor-title .title-eyebrow, #anchor-title .title-pinned')
-    .evaluateAll(els => els.map(el => getComputedStyle(el).fontSize));
-  ok('title card single font size (both lines equal)', titleSizes.length === 2 && titleSizes[0] === titleSizes[1] && !!titleSizes[0]);
+    .evaluateAll(els => els.map(el => getComputedStyle(el)));
+  ok('title card two rungs: eyebrow reduced 13.33px/400, name 20px/600 (issue #170/B61)',
+    titleSizes.length === 2 &&
+    titleSizes[0].fontSize === '13.33px' && titleSizes[0].fontWeight === '400' &&
+    titleSizes[1].fontSize === '20px' && titleSizes[1].fontWeight === '600');
   const titleBox = await page.locator('#anchor-title').boundingBox();
   // B19: borders close in on the text — card width = widest line + horizontal padding + borders.
   // The whole sheet renders through one scale (issue #87, B30): rect widths from

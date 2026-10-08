@@ -88,6 +88,22 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     bandCopy.components && bandCopy.requirements &&
     bandCopy.components.weight === '400' && bandCopy.requirements.weight === '400');
 
+  // issue #169/B62: the footer splits 50/50 — copy left, divider, form right
+  const footer = await page.evaluate(() => {
+    const copy = document.querySelector('.lot-copy').getBoundingClientRect();
+    const form = document.querySelector('.lot-form').getBoundingClientRect();
+    const dv = document.querySelector('.lot-divider').getBoundingClientRect();
+    const items = document.getElementById('lot-items').getBoundingClientRect();
+    return {
+      half: Math.abs(copy.width - form.width) < 2,
+      divider: dv.width < 2 && dv.height > 0,
+      sides: copy.left < form.left && form.right <= items.right + 0.5,
+    };
+  });
+  ok('footer halves are equal width (50/50, issue #169/B62)', footer.half);
+  ok('vertical divider bar present between the halves (issue #169/B62)', footer.divider);
+  ok('copy sits left of the form inside the lot (issue #169/B62)', footer.sides);
+
   // the six door-cards render inside the viewport (re-scaled to the wider sheet)
   ok('door-card links present (>=6)', await page.locator('a.door-card').count() >= 6);
   const inside = await page.locator('.door-card').evaluateAll((as, vp) => as.every(a => {
@@ -97,7 +113,8 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('all door-cards sit inside the viewport (no clipping)', inside);
 
   // issue #145/B53 + #146/B55: the seven linked sub cards render plain (400)
-  // text, every other door-card keeps the 600 — UIUX §4's weight clause
+  // text — and issue #167/B60 supersedes B53's 600 clause: every note card
+  // (all thirteen) renders plain 400 — UIUX §4's weight clause
   const weights = await page.evaluate(() => {
     const w = id => { const el = document.querySelector(`.door-card[data-id="${id}"]`); return el ? getComputedStyle(el).fontWeight : null; };
     return {
@@ -107,8 +124,8 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   });
   ok('sub cards render plain 400 text (issue #145/B53, #146/B55)',
     weights.sub.length === 7 && weights.sub.every(x => x === '400'));
-  ok('the Music note and six board cards keep 600 (issue #145/B53)',
-    weights.rest.length === 6 && weights.rest.every(x => x === '600'));
+  ok('every note card renders plain 400 — no bold (issue #167/B60, superseding B53)',
+    weights.rest.length === 6 && weights.rest.every(x => x === '400'));
 
   // the thirteen note links (B28, UIUX §4.3): one <line> per owner-named pair
   // (issue #75, #72, #74 and #146), 1px --frame between the two cards' centres, on a hitless

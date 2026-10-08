@@ -708,21 +708,44 @@ renders as `L × --rs`.)*
   `#12100a`. One component per role, equally sized and evenly spaced with
   comfortable padding between each to fit the space, contained within the
   left half. The component's "Github" CTA is not ported. The description
-  cards **render empty** (B56's explicit override of the omit-empty rule for
-  these components), each with min-height for 2–3 sentences at the
+  cards carried **B56's explicit override** of the omit-empty rule (empty
+  until the owner's fill passes); *(amended by B64, issue #176)* three now
+  render the **owner's copy verbatim, three paragraphs per card** — Sr.
+  Portfolio Specialist (Brinker), Portfolio & Trust Administrator (PNC
+  Private Bank) and Branch Banker (PNC Bank) — as the component's single
+  desc-card element with `<br><br>` paragraph breaks; every other desc
+  card stays empty (B56), each with min-height for 2–3 sentences at the
   component's own 20px/32px desc type. Plate geometry is agent-derived
   under the B33 provenance pattern: plate width = the half's own width,
-  plates flex-equal in the stack, desc min-height `3 × 32px + 2 × 10px =
+  desc min-height `3 × 32px + 2 × 10px =
   116px`, stack padding the page's existing 1.25rem gutter value.
+  *(Amended by B64: with the copy filled, the B56 equal flex cells
+  (`flex: 1 1 0`) clamp every plate to the empty state's height — the
+  699px filled card overflowed its cell onto the footer, which the
+  no-overlap law forbids. The plates now size to their content and share
+  the half's leftover space equally (`flex: 1 1 auto`); the 1.25rem
+  gutter keeps the stack evenly spaced. The empty-state equal-cell
+  rendering was the placeholder geometry; the owner's equal-sizing words
+  were ruled for the empty state and the filled state sizes to content.)*
   Right half: "Accomplishments" and "Learnings/Skills" (section name
   pending, issue #133 slot 6) render only once filled.
-- **Footer (three sections):** the landing page's `.parking-lot` grammar —
-  water gradient over `--deep`, 1px `--frame`-mix top rule, same padding —
-  floored at the rescaled two-row shelf (`134.76 × --rs`, B49: the landing
-  lot's floor, taken statically; content grows past it), split three ways
-  (professional blurb · contact info · the `.cta` "Learn More about Rob" →
-  `https://razgregory.com/`), separated by 1px divider bars of 3/4 of the
-  section's inner length, vertically centred.
+- **Footer *(amended by B65, issue #177)*** the landing page's
+  `.parking-lot` grammar — water gradient over `--deep`, 1px
+  `--frame`-mix top rule, same padding — floored at the rescaled two-row
+  shelf (`134.76 × --rs`, B49: the landing lot's floor, taken statically;
+  content grows past it), split **two ways**: the **tools line** left —
+  the owner's copy "Orion Technology | Factset | Morningstar | Docupace |
+  BPM | Salesforce" rendered on one line, its straight slashes as **short
+  divider bars** (1px wide, the divider's own `--frame`-mix color, `0.875em` tall —
+  agent-derived per B33/B40: the owner ruled shorter + visually distinct,
+  same palette) — then **one** full divider bar (1px, 3/4 of the section's
+  inner length, vertically centred), then the `.cta` "Learn More about
+  Rob" → `https://razgregory.com/`. *(B65 supersedes §3's three-way
+  split: the second divider bar is removed.)* The professional-blurb
+  (blank #7) and contact-info (blank #8) slot comments keep their halves;
+  the empty slots render nothing (B47). The tools line renders on one line
+  wherever the bar's width allows and wraps rather than overflows where it
+  doesn't (B65, wrap-only-when-needed — no-overlap law).
 
 ### §10.3 Blank slots
 
@@ -744,8 +767,15 @@ is carried by the components' empty `.gm-desc` cards, which render empty
 per B56's explicit override. The omit-empty rule stands unchanged for the
 right half and the footer.)*
 
+*(Amended by B64, issue #176: three desc cards — Sr. Portfolio
+Specialist, Portfolio & Trust Administrator, Branch Banker — now render
+the owner's copy verbatim; every other desc card stays empty under B56.
+Amended by B65, issue #177: the footer's left half carries the owner's
+one-line tools list; the blurb (#7) and contact (#8) slots remain
+unfilled and render nothing.)*
+
 **Pinned by:** `test/career.js` — selector mechanics, the B132 glow, the
-split, the three-section lot, the ladder tokens, and the omit-empty-block
+split, the two-way lot (B65), the ladder tokens, and the omit-empty-block
 discipline.
 
 ---

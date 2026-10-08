@@ -261,8 +261,12 @@ body:has(#employer-brinker:checked) .employer--brinker {
     inset 0 2px 4px rgb(0 0 0 / 0.1);   /* the inset press value, verbatim */
   position: relative;
   box-sizing: border-box;
-  flex: 1 1 0;
-  min-height: 0;
+  /* B64 (issue #176): the plates size to their content (the filled desc
+     cards) and share the half's leftover space equally — the B56 equal
+     flex cells (1 1 0) clamped every plate to the empty state's height and
+     the filled card overflowed the cell onto the footer. Spacing stands:
+     the 1.25rem gutter keeps the stack evenly spaced. */
+  flex: 1 1 auto;
   min-width: 0;
   width: 100%;
   padding: calc(140 * var(--rs)) 0 0;   /* clears the title card + subscript */
@@ -477,6 +481,30 @@ body:has(#employer-brinker:checked) .employer--brinker {
 .parking-lot__facts p:last-child { margin-bottom: 0; }
 .parking-lot__facts--contact { flex: 0 1 auto; }
 
+/* B65 (issue #177): the owner's one-line tools list, its straight slashes
+   rendered as short divider bars — 1px wide, the footer divider's own
+   --frame-mix color, but 0.875em tall (agent-derived under the B33/B40
+   pattern: the owner ruled "even shorter and the footer's divider bar ...
+   visually distinct ... without changing the color palette"; the value
+   implements the relationship). The line renders on one line wherever the
+   bar's width allows and wraps to a second row rather than overflowing
+   where it doesn't (the 744px–~1000px band) — wrap-only-when-needed
+   implements the owner's one-line rule without breaking the no-overlap
+   law (a nowrap line pushed the CTA past the lot's edge at 800px). */
+.parking-lot__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6em;
+  margin: 0;
+}
+.parking-lot__tools-bar {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 0.875em;
+  background: color-mix(in srgb, var(--frame) 45%, transparent);
+}
+
 /* The CTA, verbatim from the landing page's .cta grammar (issue #133 §3). */
 .cta {
   display: flex;
@@ -612,10 +640,10 @@ body:has(#employer-brinker:checked) .employer--brinker {
              verbatim in structure (.gregorian-mode → gm-back/gm-title/gm-uc/
              gm-desc), re-hued to the B47 sand/brown ladder. The year is the
              .gm-uc italicized subscript in the title card's grammar. -->
-        <!-- SLOT: description card text (2-3 sentences per role) — owner
-             fills in. Per B56 (owner ruling): the .gm-desc cards render EMPTY
-             on purpose until then — this overrides B47's omit-empty rule for
-             the desc cards only. -->
+        <!-- SLOT: description card text — owner fills in. Per B64 (issue
+             #176): three desc cards carry the owner's copy verbatim; every
+             other .gm-desc card stays EMPTY on purpose (B56's override of
+             B47 for these components). -->
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
           <h3 class="gm-card gm-title" id="role-pnc-bank">Branch Sales &amp; Service Representative</h3>
@@ -632,7 +660,8 @@ body:has(#employer-brinker:checked) .employer--brinker {
           <div class="gm-card gm-back" role="presentation"></div>
           <h3 class="gm-card gm-title">Branch Banker</h3>
           <p class="gm-uc">2019-2020</p>
-          <p class="gm-card gm-desc"></p>
+          <!-- Filled by the owner's issue #176 (B64): the copy verbatim. -->
+          <p class="gm-card gm-desc">Completed the PNC Leadership Development Program, a high-performer program focused on preparing associates for advancement into specialized financial roles.<br><br>Deployed across the PDSJ region to onboard and coach Branch Relationship Managers on multi-channel client-book development.<br><br>Consistently outperformed branch sales goals while maintaining exceptional client service.</p>
         </div>
       </div>
       <div class="split__rule" aria-hidden="true"></div>
@@ -651,10 +680,10 @@ body:has(#employer-brinker:checked) .employer--brinker {
       <div class="split__gallery">
         <!-- B56 (issue #154): same component grammar as the PNC Bank tab —
              one .gregorian-mode per role, stacked to fill the half. -->
-        <!-- SLOT: description card text (2-3 sentences per role) — owner
-             fills in. Per B56 (owner ruling): the .gm-desc cards render EMPTY
-             on purpose until then — this overrides B47's omit-empty rule for
-             the desc cards only. -->
+        <!-- SLOT: description card text — owner fills in. Per B64 (issue
+             #176): three desc cards carry the owner's copy verbatim; every
+             other .gm-desc card stays EMPTY on purpose (B56's override of
+             B47 for these components). -->
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
           <h3 class="gm-card gm-title" id="role-pnc-private">Client Service Associate</h3>
@@ -665,7 +694,8 @@ body:has(#employer-brinker:checked) .employer--brinker {
           <div class="gm-card gm-back" role="presentation"></div>
           <h3 class="gm-card gm-title">Portfolio &amp; Trust Administrator</h3>
           <p class="gm-uc">2021-2022</p>
-          <p class="gm-card gm-desc"></p>
+          <!-- Filled by the owner's issue #176 (B64): the copy verbatim. -->
+          <p class="gm-card gm-desc">Managed end-to-end account setup, funding, and servicing for complex irrevocable trust portfolios within a highly regulated environment.<br><br>Served as a primary point of contact for trust officers, legal counsel, and beneficiaries, coordinating across stakeholders to resolve complex account and servicing requirements.<br><br>Translated client and operational requirements into practical solutions while balancing service quality, underlying data, and regulatory constraints.</p>
         </div>
       </div>
       <div class="split__rule" aria-hidden="true"></div>
@@ -682,10 +712,10 @@ body:has(#employer-brinker:checked) .employer--brinker {
       <div class="split__gallery">
         <!-- B56 (issue #154): same component grammar as the PNC Bank tab —
              one .gregorian-mode per role, stacked to fill the half. -->
-        <!-- SLOT: description card text (2-3 sentences per role) — owner
-             fills in. Per B56 (owner ruling): the .gm-desc cards render EMPTY
-             on purpose until then — this overrides B47's omit-empty rule for
-             the desc cards only. -->
+        <!-- SLOT: description card text — owner fills in. Per B64 (issue
+             #176): three desc cards carry the owner's copy verbatim; every
+             other .gm-desc card stays EMPTY on purpose (B56's override of
+             B47 for these components). -->
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
           <h3 class="gm-card gm-title" id="role-brinker">Trader</h3>
@@ -702,7 +732,10 @@ body:has(#employer-brinker:checked) .employer--brinker {
           <div class="gm-card gm-back" role="presentation"></div>
           <h3 class="gm-card gm-title">Sr. Portfolio Specialist</h3>
           <p class="gm-uc">2023-2025</p>
-          <p class="gm-card gm-desc"></p>
+          <!-- Filled by the owner's issue #176 (B64): the copy verbatim,
+               three paragraphs, <br><br> breaks in the single desc-card
+               element (the sibling convention). -->
+          <p class="gm-card gm-desc">Manage daily trade execution across client liquidity needs, portfolio re-allocations, and new business for the firm’s $12B UHNW Wealth Management UMA products.<br><br>Mapped, documented, and trained the end-to-end trading workflows for new UMA product offerings and SRM platform migrations while maintaining SLA performance without client or business disruption.<br><br>Architected the Brinker Trading PowerBI dashboard 0->1, partnering with a developer, to monitor daily trading volume and metrics previously siloed in vendor databases to develop actionable KPI metrics, automated alerts, and data visualizations using the 3-30-300 framework.</p>
         </div>
       </div>
       <div class="split__rule" aria-hidden="true"></div>
@@ -721,15 +754,22 @@ body:has(#employer-brinker:checked) .employer--brinker {
   <div class="parking-lot__facts">
     <!-- SLOT (blank #7): professional blurb — owner fills in; per B47 the
          block ships as this comment only until content exists. -->
+    <!-- B65 (issue #177): the owner's one-line tools list. The copy's
+         straight slashes render as short divider bars (1px, the divider's
+         own --frame-mix color, 0.875em tall), visually distinct from the
+         footer's full divider bar, same palette. -->
+    <p class="parking-lot__tools">Orion Technology<span class="parking-lot__tools-bar" aria-hidden="true"></span>Factset<span class="parking-lot__tools-bar" aria-hidden="true"></span>Morningstar<span class="parking-lot__tools-bar" aria-hidden="true"></span>Docupace<span class="parking-lot__tools-bar" aria-hidden="true"></span>BPM<span class="parking-lot__tools-bar" aria-hidden="true"></span>Salesforce</p>
   </div>
   <div class="parking-lot__divider" aria-hidden="true"></div>
   <div class="parking-lot__facts parking-lot__facts--contact">
     <!-- SLOT (blank #8): contact info — owner fills in; per B47 the block
          ships as this comment only until content exists. -->
-  </div>
-  <div class="parking-lot__divider" aria-hidden="true"></div>
-  <div class="parking-lot__links">
-    <a class="cta" href="https://razgregory.com/">Learn More about Rob</a>
+    <!-- B65 (issue #177): the second divider bar is removed — the contact
+         half and the links half now share the right side of the one
+         remaining divider. -->
+    <div class="parking-lot__links">
+      <a class="cta" href="https://razgregory.com/">Learn More about Rob</a>
+    </div>
   </div>
 </footer>
 

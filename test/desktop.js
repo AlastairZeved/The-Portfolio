@@ -84,14 +84,18 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   });
   ok('Components zone renders no anchor line (issue #174/B68)',
     bandCopy.componentsAnchor === null);
+  ok('Components zone renders its label and nothing else (issue #174/B68)',
+    (await page.locator('#zone-components').textContent()).trim() === 'Components');
   ok('Requirements line is the owner\'s revised copy (issue #147/B54)',
     bandCopy.requirements && bandCopy.requirements.text === 'Click around to explore my works!');
   ok('Requirements band anchor renders plain 400 text (issue #147/B54)',
     bandCopy.requirements && bandCopy.requirements.weight === '400');
 
   // issue #174/B68: the footer keeps B62's layout (copy left, form right);
-  // the left half's copy is the issue-#174 EDITED version, verbatim, ending
-  // in the italic phrase curiouser and curiouser.
+  // the left half's copy is the issue-#174 EDITED version, verbatim — the
+  // full text is asserted equal to the copy of record, and the closing
+  // phrase renders italic.
+  const GARDEN_COPY = "Hey, I'm Rob. Welcome to my digital garden. This is a sort of central hub for all of the things I work on, across all of the sites and pseudonyms I've used. I'm weary of calling these \"hobbies\" or \"passions\"; they're more like symptoms, the after effect of the passion. I simply pursue my curiosity, without much of a thought of whether I can or cannot learn the subject at hand. That also has the side effect of my works sprawling across quite a few domains. The cards on this page link to those works (the digital works at least) to keep everything in one place. None are stale, but my curiosity is ever wandering and I may run out of questions in a subject for a time. But the great work always continues as my curiosity finds its flame again. All it takes to flex curiousity is to ask a question, then keep asking questions and always be curiouser and curiouser.";
   const footer = await page.evaluate(() => {
     const copy = document.querySelector('.lot-copy');
     const copyBox = copy.getBoundingClientRect();
@@ -100,17 +104,17 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     const items = document.getElementById('lot-items').getBoundingClientRect();
     const p = copy.querySelector('p');
     return {
-      text: p ? p.textContent.trim() : '',
-      italic: p ? getComputedStyle(p.querySelector('em')).fontStyle : null,
+      text: p ? p.textContent.replace(/\s+/g, ' ').trim() : null,
+      em: p ? p.querySelector('em') : null,
+      italic: p && p.querySelector('em') ? getComputedStyle(p.querySelector('em')).fontStyle : null,
       half: Math.abs(copyBox.width - form.width) < 2,
       divider: dv.width < 2 && dv.height > 0,
       sides: copyBox.left < form.left && form.right <= items.right + 0.5,
     };
   });
-  ok('footer copy starts "Hey, I\'m Rob. Welcome to my digital garden." (issue #174/B68)',
-    footer.text.startsWith('Hey, I\'m Rob. Welcome to my digital garden.'));
-  ok('footer copy ends "always be curiouser and curiouser." (issue #174/B68)',
-    footer.text.endsWith('always be curiouser and curiouser.'));
+  ok('footer copy matches the issue-#174 copy of record verbatim (issue #174/B68)',
+    footer.text !== null && footer.text === GARDEN_COPY);
+  ok('the italic phrase is present (issue #174/B68)', footer.em !== null);
   ok('the closing phrase renders italic (issue #174/B68)', footer.italic === 'italic');
   ok('footer halves are equal width (50/50, issue #169/B62)', footer.half);
   ok('vertical divider bar present between the halves (issue #169/B62)', footer.divider);

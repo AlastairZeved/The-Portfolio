@@ -1993,7 +1993,11 @@ curiouser and curiouser."
 links to a page housing my work in that domain" entirely. Then, Move this
 copy (and it's edits) to the "Components" section: [the copy of record
 above] Once that is moved, the Formspree contact form info can move back
-over to the left side of the footer." — with the owner's mid-implementation
+over to the left side of the footer." (Transcription note: the issue quotes
+the removed line as "Each page links to a page housing my work in that
+domain"; the line as actually shipped — B54's copy of record — reads "Each
+card links to a page housing my work in that domain.", which is what this
+ruling removes.) — with the owner's mid-implementation
 rulings of 2026-10-08 (owner chat), quoted verbatim: "I guess keep the text
 in the parking lot then. I didn't realize it would be so many lines. Make
 sure the copy gets updated with all edits though."; and "Remove it entirely

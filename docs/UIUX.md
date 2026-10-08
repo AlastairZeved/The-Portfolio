@@ -303,9 +303,11 @@ is committed as an **illustrative reference only**:
 [`docs/proofs/wireframe-illustration-2026-09-29.png`](proofs/wireframe-illustration-2026-09-29.png)
 — it is not law; where the wireframe and this document disagree, this
 document wins. The cards do **not** live inside Components, Requirements, or
-the Parking Lot. The current placement authority is the owner's issue #112
-drawing (`B43`): every card's authored `left/top %` is an agent-derived
-measurement of that screenshot, labelled as such in `B43`. Since `B45`
+the Parking Lot. The current placement authority is the owner's issue #175
+drawing (`B67`): every card's authored `left/top %` is an agent-derived
+measurement of that screenshot, labelled as such in `B67` (it re-sizes and
+re-places nine cards against `B43`'s #112 drawing; the six board cards and
+Music keep their #112 seats). Since `B45`
 (issue #126) the placements are the **only** authored card geometry — the
 cards are content-sized (§4), no px width/height is authored.
 
@@ -315,7 +317,7 @@ re-authored — the whole sheet scales, so every card
 stays fully inside the sheet edge to edge (no left/right clipping, no
 horizontal overflow) at 320–1023px. Since `B44` (issue #121) the scale is
 uncapped, so desktop viewports render the drawing geometry scaled too — at
-**every** viewport size the sheet shows the #112 drawing (`B43`), no note
+**every** viewport size the sheet shows the #175 drawing (`B67`), no note
 cards overlapping and no link line obscured.
 
 ---
@@ -354,21 +356,25 @@ drawing authority, `B43`):
   divided by the card's own scale, floored at `NOTE_MIN_W` — TheBoards
   `geometry.js` `noteMaxW` ported verbatim (`--card-max-w`, set per card in
   JS, re-derived when the card is dragged or its scale changes).
-- **Rest scale (B52, issue #138):** each card's rest scale is its **drawing
-  scale of record** — the owner's attached visual sizes every card —
-  shipped inline per card: **2.25** community, **2.21** career, **1.35**
-  writing, **1.79** software-ai, **1.96** plants-rocks, **1.70** music,
-  **0.78** apple-music, **0.79** spotify, **0.81** linkedin. The six board
-  cards render above 1 (large display type), the sub cards below 1
-  (small chips), exactly as the visual sizes them; the gesture still moves
+- **Rest scale (B67, issue #175; supersedes B52's list):** each card's rest
+  scale is its **drawing scale of record** — the owner's issue #175
+  screenshot sizes every card — shipped inline per card: **2.25** community,
+  **2.21** career, **1.77** writing, **1.79** software-ai, **2.25**
+  plants-rocks, **1.70** music, **1.02** apple-music, **1.19** spotify,
+  **1.06** linkedin, **1.14** zeved-boards, **1.20** agentic-plugins,
+  **0.98** plants-poles, **1.03** plants-in-rocks. The six board cards
+  render above 1; the sub cards render at their drawing scales — several
+  now sit above 1, so **B52's board/sub tier split at scale 1 is
+  superseded**: the drawing rules the sizes (B33's provenance), not the
+  tier. The gesture still moves
   the scale from there under the floor and ceiling above, unchanged. The
-  values are agent-derived from the visual (the `B33`/`B43` provenance
-  pattern) — drawing footprint at 2560×1440 ÷ 1.3037 ÷ the card's measured
-  unscaled content width. `B55` (issue #146) adds four more sub cards at **0.78** each —
-  **zeved-boards**, **agentic-plugins**, **plants-poles**,
-  **plants-in-rocks** — inside the sub-card band the owner set for them
-  (~0.78–0.81); no drawing sizes these four, so the band's smallest scale
-  of record stands.
+  values are agent-derived measurements of the #175 drawing (the
+  `B33`/`B43` provenance pattern) — outer card footprint at the drawing's
+  2560×1223 viewport (render scale rs = 1223/1104.55, the B46 height anchor;
+  calibrated against the unchanged cards' shipped percentages) ÷ the card's
+  measured unscaled content width. The four `B55` sub cards are sized and
+  placed by the #175 drawing like every other card (their B55 0.78 band is
+  superseded).
 - **Resize:** the corner gesture acts as **TheBoards' scale-based resize**
   (`interactions.js` frame-drag resize): the drag changes the card's own
   scale — the pointer's distance to the card's fixed top-left origin,
@@ -397,8 +403,8 @@ drawing authority, `B43`):
 > (`state.js`), not agent inventions; the one-fifth-of-viewport ceiling is
 > the owner's (`B51`, issue #142), and the per-card ceiling arithmetic is
 > agent-derived per the `B33`/`B43` pattern. The per-card **rest scales**
-> are likewise agent-derived, transcribing the owner's issue #138 visual
-> (`B52`).
+> are likewise agent-derived, transcribing the owner's issue #175 drawing
+> (`B67`, superseding `B52`'s list).
 
 **A gesture is never a click** (`B41`, issue #109): the corner resize handle is
 a `<span>` **inside** the card's `<a>`, so a pointer release over it fires the
@@ -606,7 +612,7 @@ The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 | the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L8]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
 | the band / title-card / lot laws (B46): height-anchored landscape scale, ×1.10455 rescale, 29px overhang, B31's (band-top+8) 16px 16px box, rescaled lot shelf, lot clip | `test/scaling.js` (every viewport) and `test/parity_boards.js` — rendered side-by-side against the local TheBoards checkout at identical viewports |
-| card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B52 drawing rest scales per card, link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
+| card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B67 drawing rest scales and placements per card, link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 | the career page (B47): employer selector, B132 glow, split body, three-section lot, sand/brown ladder, empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |

@@ -39,14 +39,26 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
 const DRAG_X = 180, DRAG_Y = 150;   // physical px the pointer travels (6 moves of +30/+25)
 const MIN_SCALE = 0.5;   // TheBoards' note-scale floor (B45); the ceiling is per-card (B51)
 
-/* B52 (issue #138): each card's REST scale of record — the owner's drawing
-   size at page load. The gesture bounds (0.5 floor, one-fifth ceiling) are
-   untouched; this pins the default rendered size per card only. */
+/* B67 (issue #175): each card's REST scale of record — the owner's #175
+   drawing re-sizes nine cards (writing, plants-rocks, apple-music, spotify,
+   linkedin, zeved-boards, agentic-plugins, plants-poles, plants-in-rocks)
+   and re-places them; the B52 board/sub tier split at scale 1 no longer
+   holds (several sub cards now sit above 1). The gesture bounds (0.5 floor,
+   one-fifth ceiling) are untouched; this pins the default rendered size and
+   placement per card only. */
 const REST_SCALES = {
-  'community': 2.25, 'career': 2.21, 'writing': 1.35, 'software-ai': 1.79,
-  'plants-rocks': 1.96, 'music': 1.70, 'apple-music': 0.78, 'spotify': 0.79,
-  'linkedin': 0.81, 'zeved-boards': 0.78, 'agentic-plugins': 0.78,
-  'plants-poles': 0.78, 'plants-in-rocks': 0.78
+  'community': 2.25, 'career': 2.21, 'writing': 1.77, 'software-ai': 1.79,
+  'plants-rocks': 2.25, 'music': 1.70, 'apple-music': 1.02, 'spotify': 1.19,
+  'linkedin': 1.06, 'zeved-boards': 1.14, 'agentic-plugins': 1.20,
+  'plants-poles': 0.98, 'plants-in-rocks': 1.03
+};
+/* B67 (issue #175): the drawing's placements, as authored left/top % */
+const REST_PLACEMENTS = {
+  'community': [13.6, 18.3], 'career': [42.3, 18.5], 'writing': [66, 24],
+  'software-ai': [12.3, 51.7], 'plants-rocks': [40, 61.5], 'music': [73, 54],
+  'apple-music': [82.9, 45.8], 'spotify': [81.7, 63.7], 'linkedin': [36.6, 11.5],
+  'zeved-boards': [3.2, 55], 'agentic-plugins': [14.2, 61.8],
+  'plants-poles': [37.7, 73.7], 'plants-in-rocks': [50.2, 73.8]
 };
 
 /* one scenario, run once per viewport; rs is the render scale the page reports */
@@ -60,37 +72,85 @@ async function runScenario(page, tag, width, height) {
      drawing at every viewport, down AND up. issue #128 (B46): the law is
      HEIGHT-ANCHORED on landscape (rs = vh/REF_H, TheBoards' desktop frame
      law) and min(vw/REF_W, vh/REF_H) in portrait; B44's single-min() clause
-     is superseded for landscape viewports only. */
-  const REF_W = 2560 / 1.3037, REF_H = 1440 / 1.3037;
-  const expectRs = (width >= height) ? height / REF_H : Math.min(width / REF_W, height / REF_H);
-  ok(`${tag}: render scale is height-anchored on landscape (vh/REF_H), min() in portrait (B46) = ${expectRs.toFixed(3)} (rs=${rs.toFixed(3)})`,
+     is superseded for landscape viewports only. B46's measured no-overlap
+     floor (lw_min, incl. the B52 pairwise gap term — re-derived here from
+     the authored geometry the same way `test/scaling.js` does) may bind
+     first; issue #175 (B67)'s drawing does exactly that at 1440×900, where
+     the moved Zeved Boards card overlaps Software & AI vertically with only
+     a 9.1% horizontal gap. The expectation is the shipped mechanism:
+     rs = min(vh/REF_H, vw/lw_min) on landscape. */
+  const expectRs = await page.evaluate((REF) => {
+    const lwMin0 = Math.max(...[...document.querySelectorAll('.door-card')].map(c => {
+      const left = parseFloat(c.style.left) || 0;
+      if (left >= 100) return 0;
+      const cr = c.getBoundingClientRect();
+      let rightLogical = cr.width / REF.rsPage;
+      for (const child of c.querySelectorAll('*')) {
+        const over = (child.getBoundingClientRect().right - cr.left) / REF.rsPage;
+        if (over > rightLogical) rightLogical = over;
+      }
+      return rightLogical / (1 - left / 100);
+    }));
+    let lwMin = lwMin0;
+    const geo = [...document.querySelectorAll('.door-card')].map(c => ({
+      lp: parseFloat(c.style.left) || 0, tp: parseFloat(c.style.top) || 0,
+      w: c.offsetWidth * (parseFloat(c.style.getPropertyValue('--card-scale')) || 1),
+      h: c.offsetHeight * (parseFloat(c.style.getPropertyValue('--card-scale')) || 1)
+    }));
+    for (let pass = 0; pass < 60; pass++) {
+      const rs = innerWidth >= innerHeight
+        ? Math.min(innerHeight / REF.REF_H, innerWidth / lwMin)
+        : Math.min(innerWidth / REF.REF_W, innerHeight / REF.REF_H);
+      const lh = innerHeight / rs;
+      let need = lwMin;
+      for (let i = 0; i < geo.length; i++)
+        for (let j = i + 1; j < geo.length; j++) {
+          let A = geo[i], B = geo[j];
+          if (A.lp > B.lp) { const T = A; A = B; B = T; }
+          const dLeft = (B.lp - A.lp) / 100;
+          if (dLeft <= 0) continue;
+          const aTop = (A.tp / 100) * lh, bTop = (B.tp / 100) * lh;
+          if (aTop + A.h <= bTop || bTop + B.h <= aTop) continue;
+          need = Math.max(need, (A.w + 4) / dLeft);
+        }
+      if (need <= lwMin + 0.5) break;
+      lwMin = need;
+    }
+    return innerWidth >= innerHeight
+      ? Math.min(innerHeight / REF.REF_H, innerWidth / lwMin)
+      : Math.min(innerWidth / REF.REF_W, innerHeight / REF.REF_H);
+  }, { REF_W: 2560 / 1.3037, REF_H: 1440 / 1.3037, rsPage: rs });
+  ok(`${tag}: render scale is height-anchored on landscape, floored by the measured no-overlap width (B46/B67) = ${expectRs.toFixed(3)} (rs=${rs.toFixed(3)})`,
      Math.abs(rs - expectRs) < 1e-6);
 
-  // --- issue #138 (B52) + #146 (B55): each card renders at its own rest scale ---
-  // Six board cards above 1, the sub cards below 1, exactly as the owner
-  // sizes them (B52's drawing; B55's four note sub cards in the owner's
-  // sub-card band at 0.78). The gesture bounds are untouched.
+  // --- issue #175 (B67): each card renders at its own rest scale and placement ---
+  // The #175 drawing re-sizes nine cards and re-places them; the old B52
+  // board/sub tier split at scale 1 no longer holds (several sub cards now
+  // sit above 1). The gesture bounds are untouched.
   const rest = await page.evaluate(() => {
     const out = {};
     document.querySelectorAll('.door-card').forEach(c => {
       const r = c.getBoundingClientRect();
       const rs2 = parseFloat(getComputedStyle(document.querySelector('#board')).getPropertyValue('--rs')) || 1;
       out[c.dataset.id] = { scale: parseFloat(c.style.getPropertyValue('--card-scale')) || 1,
+        left: parseFloat(c.style.left), top: parseFloat(c.style.top),
         logicalW: r.width / rs2, unscaledW: c.offsetWidth };
     });
     return out;
   });
   for (const [id, want] of Object.entries(REST_SCALES)) {
     const got = rest[id];
-    ok(`${tag}: ${id} rest scale is the drawing scale ${want} (B52, got ${got && got.scale})`,
+    ok(`${tag}: ${id} rest scale is the drawing scale ${want} (B67, got ${got && got.scale})`,
        got && Math.abs(got.scale - want) < 1e-9);
-    ok(`${tag}: ${id} renders at unscaled × rest × rs (B52)`,
+    ok(`${tag}: ${id} renders at unscaled × rest × rs (B67)`,
        got && Math.abs(got.logicalW - got.unscaledW * got.scale) < 0.5);
+    const [wl, wt] = REST_PLACEMENTS[id];
+    ok(`${tag}: ${id} sits at the drawing placement ${wl}%/${wt}% (B67, got ${got && got.left}/${got && got.top})`,
+       got && Math.abs(got.left - wl) < 1e-9 && Math.abs(got.top - wt) < 1e-9);
   }
   const boardTier = ['community', 'career', 'writing', 'software-ai', 'plants-rocks', 'music']
     .every(id => rest[id].scale > 1);
-  const subTier = ['apple-music', 'spotify', 'linkedin', 'zeved-boards', 'agentic-plugins', 'plants-poles', 'plants-in-rocks'].every(id => rest[id].scale < 1);
-  ok(`${tag}: six board cards above 1, seven sub cards below 1 (B52/B55 tiers)`, boardTier && subTier);
+  ok(`${tag}: the six board cards still render above 1 (B67)`, boardTier);
 
   // --- issue #94: the native HTML5 anchor drag is suppressed on door-cards ---
   // A real press-and-move on an <a href> would otherwise fire the browser's

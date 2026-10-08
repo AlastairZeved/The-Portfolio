@@ -1782,3 +1782,230 @@ brown." — and the owner's pre-implementation answer of 2026-10-07 (owner
 chat, multiple choice): "TheBoards' convention: favicon.ico + icons/ PNG
 set, linked on all repo pages."
 
+---
+
+### B64. The career desc cards carry the owner's copy for three roles (issue #176)
+
+The owner's fill pass for the B56 description cards (issue #154): the desc
+cards of **Sr. Portfolio Specialist** (Brinker Capital tab, 2023-2025),
+**Portfolio & Trust Administrator** (PNC Private Bank tab, 2021-2022) and
+**Branch Banker** (PNC Bank tab, 2019-2020) now render the owner's copy
+**verbatim**, three paragraphs per card, transcribed from the issue body
+without edit. Every other `.gm-desc` card on the page **stays empty** under
+B56's explicit override; the omit-empty rule (B47) stands for every block
+the owner has not yet filled. The cards keep the component's single
+`<p class="gm-card gm-desc">` element — the sibling convention on the
+Agentic Plugins page — with the owner's paragraph breaks carried by
+`<br><br>`; no new card grammar, no new type value, the card grows past its
+B56 min-height as content. The B56 plate geometry is amended for the filled
+state under the same provenance pattern: the equal flex cells
+(`flex: 1 1 0`) clamp every plate to the empty state's height, so the
+filled card overflowed its cell onto the footer — the plates now size to
+their content and share the half's leftover space equally
+(`flex: 1 1 auto`), the 1.25rem gutter keeping the stack evenly spaced
+(the owner's equal-sizing words were ruled for the empty placeholder
+state).
+
+**Source:** the owner's issue
+[#176](https://github.com/AlastairZeved/The-Portfolio/issues/176),
+2026-10-08 — "For the component titled \"Sr. Portfolio Specialist\" in
+/career, add the below copy to the description card of the component" —
+and the same sentence for "Portfolio & Trust Administrator" and "Branch
+Banker", each followed by the exact three-paragraph copy now transcribed
+into `career.html`.
+
+### B65. The career footer splits two ways — the tools line left, one divider, the CTA right (issue #177)
+
+The career page's footer drops from **three sections to two**: the **second
+divider bar is removed**. The left side of the remaining divider carries a
+**one-line tools list** — "Orion Technology", "Factset", "Morningstar",
+"Docupace", "BPM", "Salesforce" — where the copy's straight slashes render
+as **short divider bars**: 1px wide, the same `--frame`-mix color as the
+footer's divider bar (no palette change), but **markedly shorter** than the
+footer's 3/4-length bar so the two are visually distinct. The footer bar
+renders: the tools line on the left, the full divider bar, then the "Learn
+More about Rob" `.cta` on the right. The bar's height is the only new value
+and is agent-derived under the B33/B40 provenance pattern (the owner ruled
+the relationship — shorter and visually distinct, same palette — the value
+implements it): `0.875em` at the facts type size, vertically centred. The
+professional-blurb (blank #7) and contact-info (blank #8) slot comments
+stand unchanged in their halves; per B47 the empty slots render nothing,
+so the owner's two halves are exactly what the bar shows. The tools line
+renders on **one line wherever the bar's width allows and wraps to a
+second row rather than overflowing wherever it doesn't** (the
+744px–~1000px band: a nowrap line pushed the CTA past the lot's edge,
+which the no-overlap law forbids) — wrap-only-when-needed implements the
+owner's one-line rule, agent-derived under the B33/B40 pattern.
+
+**Source:** the owner's issue
+[#177](https://github.com/AlastairZeved/The-Portfolio/issues/177),
+2026-10-08 — "There should only be one divider bar, not two. Remove the
+second divider bar, then on the left side of the bar add the below copy:
+\"Orion Technology | Factset | Morningstar | Docupace | BPM | Salesforce\".
+It should all fit in one line in the footer bar, then the divider bar, then
+the \"Learn More About Rob\" button. Where I have straight slashes in the
+copy, add divider bars. These divider bars need to be even shorter and the
+footer's divider bar so that they are visually distinct from the divider
+bar without changing the color palette."
+
+### B66. The career role plates read left to right, not top to bottom (issue #173)
+
+The owner logged in issue [#173](https://github.com/AlastairZeved/The-Portfolio/issues/173)
+that the per-role plugin components of B56 **read left to right, not top to
+bottom**: "These components will never fit in a top to bottom layout once
+description text is added. They need to read left to right" — followed by
+the per-employer role lists (PNC Bank: Branch Sales & Services
+Representative | Branch Sales & Services Associate | Branch Banker; PNC
+Private Bank: Client Services Associate | Portfolio & Trust Administrator;
+Brinker Capital Investments: Trader | Portfolio Specialist | Sr. Portfolio
+Specialist). The row keeps B56's other arrangement values: the plates stay
+**equally sized and evenly spaced with comfortable padding between each to
+fit the space**, still **visible and contained within the left half**.
+
+**This entry supersedes B56's stacked-plate geometry** (the vertical stack
+and the plate height = the half's row height) — that geometry was the
+agent-derived implementation of B56's arrangement words, and the owner now
+rules the direction. B56's structure, re-hue, empty-then-B64-filled desc
+cards, no-CTA, no-selector and tab-isolation laws all stand unchanged. The
+reading order is **chronological — oldest role leftmost, newest rightmost**
+(owner grill answer, 2026-10-08), which preserves the previous top-to-bottom
+reading order. The shipped **≤743px readable reflow stacks the plates again
+below the breakpoint** (owner grill answer, 2026-10-08). When the row needs
+more height than the left half provides, **the half scrolls vertically**;
+the plates size to their content (owner grill answer, 2026-10-08). When
+only two plates sit in the row (PNC Private Bank), **they split the row
+equally — each half the row's width** (owner grill answer, 2026-10-08).
+
+**Source:** the owner's issue
+[#173](https://github.com/AlastairZeved/The-Portfolio/issues/173),
+2026-10-08 — quoted verbatim: "These components will never fit in a top to
+bottom layout once description text is added. They need to read left to
+right:" — and the owner's four grill answers of 2026-10-08 (owner chat):
+
+1. "Keep the existing ≤743px stacked reflow below the breakpoint".
+2. "Two equal plates, each half the row width" (PNC Private Bank's
+   two-plate row).
+3. "Body half scrolls vertically when plates need more height".
+4. "Oldest role leftmost, newest rightmost".
+
+### B67. Every note card's default size and placement follows the owner's issue #175 drawing (issue #175)
+
+The owner logged in issue [#175](https://github.com/AlastairZeved/The-Portfolio/issues/175)
+a 2560×1440 screenshot of the board displaying "the cards arranged and
+re-sized", directing: "These sizes should replace the default sizes of each
+note card displayed when a user loads the page. The placement of each note
+card must be arranged according to this spec as well." Per B33's provenance
+law, the owner's drawing rules the authored card sizes and placements. This
+entry **supersedes B52's rest-scale list and the B55 sub-card 0.78 band**,
+and **B43's placement values for the cards the drawing moves**; the
+Community, Career, Software & AI and Music cards keep their #112 seats and
+scales (their measured percentages and scales reproduce the shipped
+values to within measurement noise).
+
+The values below are **agent-derived measurements of that screenshot**
+(method: outer card footprint — pale fill plus the 2px `--ink-dark` border —
+at the drawing's 2560×1223 page viewport, render scale `rs = 1223/1104.55`
+under B46's height-anchored landscape law, calibrated against the unchanged
+cards' shipped percentages; rest scale = drawing footprint ÷ the card's
+measured unscaled content width). Authored `left`% / `top`% / `--card-scale`:
+
+- Community: 13.6% / 18.3% / 2.25 (unchanged)
+- Career: 42.3% / 18.5% / 2.21 (unchanged)
+- Writing: 66% / 24% / **1.77** (scale re-sized)
+- Software & AI: 12.3% / 51.7% / 1.79 (unchanged)
+- Plants & Rocks: **40% / 61.5% / 2.25**
+- Music: 73% / 54% / 1.70 (unchanged)
+- Apple Music: **82.9% / 45.8% / 1.02**
+- Spotify: 81.7% / **63.7% / 1.19**
+- LinkedIn: **36.6% / 11.5% / 1.06**
+- Zeved Boards: **3.2% / 55% / 1.14**
+- Agentic Plugins: **14.2% / 61.8% / 1.20**
+- Plants on Poles: **37.7% / 73.7% / 0.98**
+- Plants in Rocks: **50.2% / 73.8% / 1.03**
+
+**The B52 tier clause is superseded.** The drawing puts several sub cards
+above scale 1 (Apple Music 1.02, Spotify 1.19, LinkedIn 1.06, Zeved Boards
+1.14, Agentic Plugins 1.20, Plants in Rocks 1.03), so the "six board cards
+above 1, sub cards below 1" split no longer holds: the drawing rules the
+sizes, not the tier. The gesture bounds stand unchanged — B45's 0.5 floor
+and B51's one-fifth-of-viewport ceiling still move the scale from these rest
+values. Nothing else changes: the cards' destinations, states, links and the
+per-authored-pair link mechanism (B28) are untouched, and the link lines
+recompute from the moved cards' centres. One mechanism consequence, noted
+for the record: the moved Zeved Boards seat (top:55%, beside Software &
+AI's top:51.7% at a 9.1% horizontal gap) makes **B46's measured no-overlap
+width floor bind at some landscape aspects** (measured: 1440×900), where
+the sheet — band included — rescales as a whole to keep B44's no-overlap
+law; where the floor is inert, the height-anchored render is unchanged.
+`UIUX §3.4` and `§4` are amended to
+name this drawing as the placement and size authority.
+
+**Source:** owner's issue
+[#175](https://github.com/AlastairZeved/The-Portfolio/issues/175),
+2026-10-08 — "Attached is a 2560x1440 screenshot displaying the cards
+arranged and re-sized. These sizes should replace the default sizes of each
+note card displayed when a user loads the page. The placement of each note
+card must be arranged according to this spec as well." (screenshot:
+[issue #175](https://github.com/user-attachments/assets/7d0e99b7-e9b4-4d3b-8e7f-b9bb11b7da36)).
+
+### B68. The Components line is removed entirely; the footer's copy is updated to the issue-#174 text and stays in the Parking Lot (issue #174)
+
+The **Components** band zone renders **no anchor line**: the B38/B54 line
+"Each card links to a page housing my work in that domain." is **removed
+entirely**, per the owner's issue #174. The zone keeps its band label and
+renders its furniture only. `UIUX §3.3` is amended accordingly.
+
+The **Parking Lot footer keeps B62's layout** — the owner's copy in the
+**left half**, the Formspree form in the **right half**, the 50/50 split and
+the vertical divider bar unchanged. B68's only footer change is the **copy's
+text**: the left half carries the issue-#174 edited version, verbatim (the
+copy of record below), superseding issue #169's original text. The phrase
+*curiouser and curiouser.* renders italic, and the copy keeps B62's
+rendering — 13px / 1.5 / 400 in `--ink`. **The copy does not move to the
+Components band**: the owner's mid-implementation ruling of 2026-10-08 —
+"I guess keep the text in the parking lot then. I didn't realize it would be
+so many lines. Make sure the copy gets updated with all edits though." —
+supersedes issue #174's move instruction (measured in implementation: the
+copy renders ~10–11 lines in the band, which grew the band's rule from the
+67.38 two-line floor to ~218–240 logical px and broke B46's parity suite).
+The owner's companion ruling of 2026-10-08 confirms the Components removal
+stands on its own: "Remove it entirely (as the issue says verbatim) —
+Components zone renders no anchor line." `UIUX §6.2` is amended
+accordingly.
+
+**Copy of record (verbatim, issue #174):** "Hey, I'm Rob. Welcome to my
+digital garden. This is a sort of central hub for all of the things I work
+on, across all of the sites and pseudonyms I've used. I'm weary of calling
+these "hobbies" or "passions"; they're more like symptoms, the after effect
+of the passion. I simply pursue my curiosity, without much of a thought of
+whether I can or cannot learn the subject at hand. That also has the side
+effect of my works sprawling across quite a few domains. The cards on this
+page link to those works (the digital works at least) to keep everything in
+one place. None are stale, but my curiosity is ever wandering and I may run
+out of questions in a subject for a time. But the great work always
+continues as my curiosity finds its flame again. All it takes to flex
+curiousity is to ask a question, then keep asking questions and always be
+curiouser and curiouser."
+
+**Source:** owner's issue
+[#174](https://github.com/AlastairZeved/The-Portfolio/issues/174),
+2026-10-08 — "In the "Components" section, remove this line: "Each page
+links to a page housing my work in that domain" entirely. Then, Move this
+copy (and it's edits) to the "Components" section: [the copy of record
+above] Once that is moved, the Formspree contact form info can move back
+over to the left side of the footer." (Transcription note: the issue quotes
+the removed line as "Each page links to a page housing my work in that
+domain"; the line as actually shipped — B54's copy of record — reads "Each
+card links to a page housing my work in that domain.", which is what this
+ruling removes.) — with the owner's mid-implementation
+rulings of 2026-10-08 (owner chat), quoted verbatim: "I guess keep the text
+in the parking lot then. I didn't realize it would be so many lines. Make
+sure the copy gets updated with all edits though."; and "Remove it entirely
+(as the issue says verbatim) — Components zone renders no anchor line; the
+B62 footer layout (copy left, form right) just gets the updated copy". The
+owner's pre-implementation answer of 2026-10-08 keeping the italic phrase
+("Yes, keep the italic phrase") stands; the earlier pre-implementation
+formatting answers tied to the Components move (13px/1.5 at weight 300 in
+the band; B20's empty right half restored) lapse with the move they
+governed.
+

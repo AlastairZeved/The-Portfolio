@@ -287,7 +287,7 @@ exceeds the sheet minus the side gutters.
 | Region | Render |
 |---|---|
 | Title | the compartment above (§3.2) |
-| Components | the line **"Each card links to a page housing my work in that domain."** (B38's line, copy per B54), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), hanging from the region top at `--band-top` |
+| Components | **no anchor line** — the B38/B54 line "Each card links to a page housing my work in that domain." is **removed entirely** (B68, issue #174); the zone keeps its label and renders its furniture only |
 | Requirements | the line **"Click around to explore my works!"** (B37's line, copy per B54), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
 | Parking Lot | water field closing the sheet; sized by its measured contents from the two-row floor (§3.2's own law mirrored at the foot, B46); holds the contact form (§6) |
 
@@ -303,9 +303,11 @@ is committed as an **illustrative reference only**:
 [`docs/proofs/wireframe-illustration-2026-09-29.png`](proofs/wireframe-illustration-2026-09-29.png)
 — it is not law; where the wireframe and this document disagree, this
 document wins. The cards do **not** live inside Components, Requirements, or
-the Parking Lot. The current placement authority is the owner's issue #112
-drawing (`B43`): every card's authored `left/top %` is an agent-derived
-measurement of that screenshot, labelled as such in `B43`. Since `B45`
+the Parking Lot. The current placement authority is the owner's issue #175
+drawing (`B67`): every card's authored `left/top %` is an agent-derived
+measurement of that screenshot, labelled as such in `B67` (it re-sizes and
+re-places nine cards against `B43`'s #112 drawing; the six board cards and
+Music keep their #112 seats). Since `B45`
 (issue #126) the placements are the **only** authored card geometry — the
 cards are content-sized (§4), no px width/height is authored.
 
@@ -315,7 +317,7 @@ re-authored — the whole sheet scales, so every card
 stays fully inside the sheet edge to edge (no left/right clipping, no
 horizontal overflow) at 320–1023px. Since `B44` (issue #121) the scale is
 uncapped, so desktop viewports render the drawing geometry scaled too — at
-**every** viewport size the sheet shows the #112 drawing (`B43`), no note
+**every** viewport size the sheet shows the #175 drawing (`B67`), no note
 cards overlapping and no link line obscured.
 
 ---
@@ -354,21 +356,25 @@ drawing authority, `B43`):
   divided by the card's own scale, floored at `NOTE_MIN_W` — TheBoards
   `geometry.js` `noteMaxW` ported verbatim (`--card-max-w`, set per card in
   JS, re-derived when the card is dragged or its scale changes).
-- **Rest scale (B52, issue #138):** each card's rest scale is its **drawing
-  scale of record** — the owner's attached visual sizes every card —
-  shipped inline per card: **2.25** community, **2.21** career, **1.35**
-  writing, **1.79** software-ai, **1.96** plants-rocks, **1.70** music,
-  **0.78** apple-music, **0.79** spotify, **0.81** linkedin. The six board
-  cards render above 1 (large display type), the sub cards below 1
-  (small chips), exactly as the visual sizes them; the gesture still moves
+- **Rest scale (B67, issue #175; supersedes B52's list):** each card's rest
+  scale is its **drawing scale of record** — the owner's issue #175
+  screenshot sizes every card — shipped inline per card: **2.25** community,
+  **2.21** career, **1.77** writing, **1.79** software-ai, **2.25**
+  plants-rocks, **1.70** music, **1.02** apple-music, **1.19** spotify,
+  **1.06** linkedin, **1.14** zeved-boards, **1.20** agentic-plugins,
+  **0.98** plants-poles, **1.03** plants-in-rocks. The six board cards
+  render above 1; the sub cards render at their drawing scales — several
+  now sit above 1, so **B52's board/sub tier split at scale 1 is
+  superseded**: the drawing rules the sizes (B33's provenance), not the
+  tier. The gesture still moves
   the scale from there under the floor and ceiling above, unchanged. The
-  values are agent-derived from the visual (the `B33`/`B43` provenance
-  pattern) — drawing footprint at 2560×1440 ÷ 1.3037 ÷ the card's measured
-  unscaled content width. `B55` (issue #146) adds four more sub cards at **0.78** each —
-  **zeved-boards**, **agentic-plugins**, **plants-poles**,
-  **plants-in-rocks** — inside the sub-card band the owner set for them
-  (~0.78–0.81); no drawing sizes these four, so the band's smallest scale
-  of record stands.
+  values are agent-derived measurements of the #175 drawing (the
+  `B33`/`B43` provenance pattern) — outer card footprint at the drawing's
+  2560×1223 viewport (render scale rs = 1223/1104.55, the B46 height anchor;
+  calibrated against the unchanged cards' shipped percentages) ÷ the card's
+  measured unscaled content width. The four `B55` sub cards are sized and
+  placed by the #175 drawing like every other card (their B55 0.78 band is
+  superseded).
 - **Resize:** the corner gesture acts as **TheBoards' scale-based resize**
   (`interactions.js` frame-drag resize): the drag changes the card's own
   scale — the pointer's distance to the card's fixed top-left origin,
@@ -397,8 +403,8 @@ drawing authority, `B43`):
 > (`state.js`), not agent inventions; the one-fifth-of-viewport ceiling is
 > the owner's (`B51`, issue #142), and the per-card ceiling arithmetic is
 > agent-derived per the `B33`/`B43` pattern. The per-card **rest scales**
-> are likewise agent-derived, transcribing the owner's issue #138 visual
-> (`B52`).
+> are likewise agent-derived, transcribing the owner's issue #175 drawing
+> (`B67`, superseding `B52`'s list).
 
 **A gesture is never a click** (`B41`, issue #109): the corner resize handle is
 a `<span>` **inside** the card's `<a>`, so a pointer release over it fires the
@@ -560,26 +566,29 @@ The form's userspace, per the owner's ruling `B20`, renders left-anchored:
   when the referrer is missing, which would silently brick the form.
 - The form is the page's **only** network call (§3.4, PRD).
 
-### §6.2 The footer's 50/50 split (B62, issue #169)
+### §6.2 The footer's 50/50 split (B62, issue #169; copy text amended by B68, issue #174)
 
 The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 
-- **Left half:** the owner's copy, verbatim from issue #169, ending in the
-  italic phrase *Curiouser and curiouser.* — rendered **13px / 1.5 / 400**
-  in `--ink` (agent-derived: the lot's own reading-text rung, between the
-  11px labels and the 14px inputs, per the `B33` pattern).
+- **Left half:** the owner's copy, verbatim from issue #174 (B68's copy of
+  record — the issue-#174 edited version, superseding issue #169's original
+  text), ending in the italic phrase *curiouser and curiouser.* — rendered
+  **13px / 1.5 / 400** in `--ink` (the lot's own reading-text rung, per
+  B62's rendering, unchanged by B68).
 - **Divider:** the divider grammar career.html ships (`.parking-lot__divider`
   — 1px wide, **3/4** of the section's inner height, centred), re-tokened to
   this page's To-Do blue: `color-mix(in srgb, var(--frame) 45%, transparent)`
   — the same mix the `#lot-rule` already renders.
-- **Right half:** the contact form (§6/§6.1 stand), now spanning the right
+- **Right half:** the contact form (§6/§6.1 stand), spanning the right
   half; its tracks are `1fr 2fr` so it **scales with any viewport** (the
   issue's "scaled up and down to fit them all").
 - **≤743px** (the repo's mobile breakpoint, career.html's block): the halves
   **stack** — copy above, divider horizontal (3/4 width), form below.
 - The lot's height still follows §6.1's measured-content law; B20's
-  "the right side of the pane stays empty" clause is **superseded** — the
-  right half is the form's.
+  "the right side of the pane stays empty" clause stays **superseded** — the
+  right half is the form's. B68 ruled the copy **stays in the left half**
+  (the owner's mid-implementation correction: "keep the text in the parking
+  lot") — it does not move to the Components band.
 
 ---
 
@@ -606,7 +615,7 @@ The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 | the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L8]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
 | the band / title-card / lot laws (B46): height-anchored landscape scale, ×1.10455 rescale, 29px overhang, B31's (band-top+8) 16px 16px box, rescaled lot shelf, lot clip | `test/scaling.js` (every viewport) and `test/parity_boards.js` — rendered side-by-side against the local TheBoards checkout at identical viewports |
-| card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B52 drawing rest scales per card, link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
+| card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B67 drawing rest scales and placements per card, link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 | the career page (B47): employer selector, B132 glow, split body, three-section lot, sand/brown ladder, empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
@@ -699,30 +708,58 @@ renders as `L × --rs`.)*
   At ≤743px the shown employer stacks (`flex-direction: column`), the rule
   running horizontal at 33.333% width. Transitions collapse under
   `prefers-reduced-motion: reduce`.
-  Left half *(amended by B56, issue #154)*: the employer's roles as stacked
-  **plugin components** — the Agentic Plugins page's `.gregorian-mode` class
-  set ported verbatim in structure (water back card `.gm-back`, uppercase
-  title card `.gm-title`, the italic lowered year subscript in the `.gm-uc`
-  grammar, description card `.gm-desc`), re-hued to this page's own
-  sand/brown tokens (§10.1) with `--ink` on the sand cards reusing `--deep`
-  `#12100a`. One component per role, equally sized and evenly spaced with
-  comfortable padding between each to fit the space, contained within the
-  left half. The component's "Github" CTA is not ported. The description
-  cards **render empty** (B56's explicit override of the omit-empty rule for
-  these components), each with min-height for 2–3 sentences at the
+  Left half *(amended by B56, issue #154; re-arranged by B66, issue #173)*:
+  the employer's roles as **plugin components** — the Agentic Plugins page's
+  `.gregorian-mode` class set ported verbatim in structure (water back card
+  `.gm-back`, uppercase title card `.gm-title`, the italic lowered year
+  subscript in the `.gm-uc` grammar, description card `.gm-desc`), re-hued
+  to this page's own sand/brown tokens (§10.1) with `--ink` on the sand
+  cards reusing `--deep` `#12100a`. One component per role, in **one row
+  reading left to right** (B66: chronological, oldest leftmost; the half
+  scrolls vertically when the row needs more height; at ≤743px the shipped
+  readable reflow stacks the plates again), equally sized and evenly spaced
+  with comfortable padding between each to fit the space, contained within
+  the left half. The component's "Github" CTA is not ported. The description
+  cards carried **B56's explicit override** of the omit-empty rule (empty
+  until the owner's fill passes); *(amended by B64, issue #176)* three now
+  render the **owner's copy verbatim, three paragraphs per card** — Sr.
+  Portfolio Specialist (Brinker), Portfolio & Trust Administrator (PNC
+  Private Bank) and Branch Banker (PNC Bank) — as the component's single
+  desc-card element with `<br><br>` paragraph breaks; every other desc
+  card stays empty (B56), each with min-height for 2–3 sentences at the
   component's own 20px/32px desc type. Plate geometry is agent-derived
-  under the B33 provenance pattern: plate width = the half's own width,
-  plates flex-equal in the stack, desc min-height `3 × 32px + 2 × 10px =
-  116px`, stack padding the page's existing 1.25rem gutter value.
+  under the B33 provenance pattern, as re-ruled by B66: each plate is an
+  equal flex cell of the left-to-right row (two plates split it half/half),
+  desc min-height `3 × 32px + 2 × 10px = 116px`, row padding the page's
+  existing 1.25rem gutter value.
+  *(Amended by B64: with the copy filled, the B56 equal flex cells
+  (`flex: 1 1 0`) clamped every plate to the empty state's height — the
+  699px filled card overflowed its cell onto the footer, which the
+  no-overlap law forbids; the plates then sized to their content. That
+  content-sizing now renders in B66's left-to-right row: `flex: 1 1 0`
+  equalizes the plates' widths, the vertical size is the content, and the
+  half scrolls when the row needs more height. The empty-state equal-cell
+  rendering was the placeholder geometry; the owner's equal-sizing words
+  were ruled for the empty state and the filled state sizes to content.)*
   Right half: "Accomplishments" and "Learnings/Skills" (section name
   pending, issue #133 slot 6) render only once filled.
-- **Footer (three sections):** the landing page's `.parking-lot` grammar —
-  water gradient over `--deep`, 1px `--frame`-mix top rule, same padding —
-  floored at the rescaled two-row shelf (`134.76 × --rs`, B49: the landing
-  lot's floor, taken statically; content grows past it), split three ways
-  (professional blurb · contact info · the `.cta` "Learn More about Rob" →
-  `https://razgregory.com/`), separated by 1px divider bars of 3/4 of the
-  section's inner length, vertically centred.
+- **Footer *(amended by B65, issue #177)*** the landing page's
+  `.parking-lot` grammar — water gradient over `--deep`, 1px
+  `--frame`-mix top rule, same padding — floored at the rescaled two-row
+  shelf (`134.76 × --rs`, B49: the landing lot's floor, taken statically;
+  content grows past it), split **two ways**: the **tools line** left —
+  the owner's copy "Orion Technology | Factset | Morningstar | Docupace |
+  BPM | Salesforce" rendered on one line, its straight slashes as **short
+  divider bars** (1px wide, the divider's own `--frame`-mix color, `0.875em` tall —
+  agent-derived per B33/B40: the owner ruled shorter + visually distinct,
+  same palette) — then **one** full divider bar (1px, 3/4 of the section's
+  inner length, vertically centred), then the `.cta` "Learn More about
+  Rob" → `https://razgregory.com/`. *(B65 supersedes §3's three-way
+  split: the second divider bar is removed.)* The professional-blurb
+  (blank #7) and contact-info (blank #8) slot comments keep their halves;
+  the empty slots render nothing (B47). The tools line renders on one line
+  wherever the bar's width allows and wraps rather than overflows where it
+  doesn't (B65, wrap-only-when-needed — no-overlap law).
 
 ### §10.3 Blank slots
 
@@ -744,8 +781,15 @@ is carried by the components' empty `.gm-desc` cards, which render empty
 per B56's explicit override. The omit-empty rule stands unchanged for the
 right half and the footer.)*
 
+*(Amended by B64, issue #176: three desc cards — Sr. Portfolio
+Specialist, Portfolio & Trust Administrator, Branch Banker — now render
+the owner's copy verbatim; every other desc card stays empty under B56.
+Amended by B65, issue #177: the footer's left half carries the owner's
+one-line tools list; the blurb (#7) and contact (#8) slots remain
+unfilled and render nothing.)*
+
 **Pinned by:** `test/career.js` — selector mechanics, the B132 glow, the
-split, the three-section lot, the ladder tokens, and the omit-empty-block
+split, the two-way lot (B65), the ladder tokens, and the omit-empty-block
 discipline.
 
 ---

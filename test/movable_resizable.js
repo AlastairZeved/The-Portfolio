@@ -72,10 +72,55 @@ async function runScenario(page, tag, width, height) {
      drawing at every viewport, down AND up. issue #128 (B46): the law is
      HEIGHT-ANCHORED on landscape (rs = vh/REF_H, TheBoards' desktop frame
      law) and min(vw/REF_W, vh/REF_H) in portrait; B44's single-min() clause
-     is superseded for landscape viewports only. */
-  const REF_W = 2560 / 1.3037, REF_H = 1440 / 1.3037;
-  const expectRs = (width >= height) ? height / REF_H : Math.min(width / REF_W, height / REF_H);
-  ok(`${tag}: render scale is height-anchored on landscape (vh/REF_H), min() in portrait (B46) = ${expectRs.toFixed(3)} (rs=${rs.toFixed(3)})`,
+     is superseded for landscape viewports only. B46's measured no-overlap
+     floor (lw_min, incl. the B52 pairwise gap term — re-derived here from
+     the authored geometry the same way `test/scaling.js` does) may bind
+     first; issue #175 (B67)'s drawing does exactly that at 1440×900, where
+     the moved Zeved Boards card overlaps Software & AI vertically with only
+     a 9.1% horizontal gap. The expectation is the shipped mechanism:
+     rs = min(vh/REF_H, vw/lw_min) on landscape. */
+  const expectRs = await page.evaluate((REF) => {
+    const lwMin0 = Math.max(...[...document.querySelectorAll('.door-card')].map(c => {
+      const left = parseFloat(c.style.left) || 0;
+      if (left >= 100) return 0;
+      const cr = c.getBoundingClientRect();
+      let rightLogical = cr.width / REF.rsPage;
+      for (const child of c.querySelectorAll('*')) {
+        const over = (child.getBoundingClientRect().right - cr.left) / REF.rsPage;
+        if (over > rightLogical) rightLogical = over;
+      }
+      return rightLogical / (1 - left / 100);
+    }));
+    let lwMin = lwMin0;
+    const geo = [...document.querySelectorAll('.door-card')].map(c => ({
+      lp: parseFloat(c.style.left) || 0, tp: parseFloat(c.style.top) || 0,
+      w: c.offsetWidth * (parseFloat(c.style.getPropertyValue('--card-scale')) || 1),
+      h: c.offsetHeight * (parseFloat(c.style.getPropertyValue('--card-scale')) || 1)
+    }));
+    for (let pass = 0; pass < 60; pass++) {
+      const rs = innerWidth >= innerHeight
+        ? Math.min(innerHeight / REF.REF_H, innerWidth / lwMin)
+        : Math.min(innerWidth / REF.REF_W, innerHeight / REF.REF_H);
+      const lh = innerHeight / rs;
+      let need = lwMin;
+      for (let i = 0; i < geo.length; i++)
+        for (let j = i + 1; j < geo.length; j++) {
+          let A = geo[i], B = geo[j];
+          if (A.lp > B.lp) { const T = A; A = B; B = T; }
+          const dLeft = (B.lp - A.lp) / 100;
+          if (dLeft <= 0) continue;
+          const aTop = (A.tp / 100) * lh, bTop = (B.tp / 100) * lh;
+          if (aTop + A.h <= bTop || bTop + B.h <= aTop) continue;
+          need = Math.max(need, (A.w + 4) / dLeft);
+        }
+      if (need <= lwMin + 0.5) break;
+      lwMin = need;
+    }
+    return innerWidth >= innerHeight
+      ? Math.min(innerHeight / REF.REF_H, innerWidth / lwMin)
+      : Math.min(innerWidth / REF.REF_W, innerHeight / REF.REF_H);
+  }, { REF_W: 2560 / 1.3037, REF_H: 1440 / 1.3037, rsPage: rs });
+  ok(`${tag}: render scale is height-anchored on landscape, floored by the measured no-overlap width (B46/B67) = ${expectRs.toFixed(3)} (rs=${rs.toFixed(3)})`,
      Math.abs(rs - expectRs) < 1e-6);
 
   // --- issue #175 (B67): each card renders at its own rest scale and placement ---

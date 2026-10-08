@@ -1931,7 +1931,13 @@ sizes, not the tier. The gesture bounds stand unchanged — B45's 0.5 floor
 and B51's one-fifth-of-viewport ceiling still move the scale from these rest
 values. Nothing else changes: the cards' destinations, states, links and the
 per-authored-pair link mechanism (B28) are untouched, and the link lines
-recompute from the moved cards' centres. `UIUX §3.4` and `§4` are amended to
+recompute from the moved cards' centres. One mechanism consequence, noted
+for the record: the moved Zeved Boards seat (top:55%, beside Software &
+AI's top:51.7% at a 9.1% horizontal gap) makes **B46's measured no-overlap
+width floor bind at some landscape aspects** (measured: 1440×900), where
+the sheet — band included — rescales as a whole to keep B44's no-overlap
+law; where the floor is inert, the height-anchored render is unchanged.
+`UIUX §3.4` and `§4` are amended to
 name this drawing as the placement and size authority.
 
 **Source:** owner's issue

@@ -2133,3 +2133,116 @@ monochrome scale), "these colors are not monochrome. monochrome. not blue.
 monochrome."; and on the final neutral gray set, "confirmed and approved
 for use." The final hexes are the owner's sign-off, per the issue-#133
 blank-slot-9 precedent.
+
+### B74. The career components cap at half the header→footer region; the description card carries the scroll (issue #186)
+
+The career body's role components are **bounded above the mobile breakpoint**.
+Each component is capped at **half the left half's own height** — "half of that
+length", the header→footer region the split lays out — and is **never sized from
+the header to the footer's entire length**. Where the cap leaves a description
+card less room than its content needs, the card **scrolls its own text**: above
+the breakpoint the description card is the page's only scroll container. The
+page is **one viewport** — it does not scroll vertically and fits without a
+scroll — and the row of components is **vertically centred** in the left half.
+
+**This entry supersedes B66's half-scroll clause** ("Body half scrolls
+vertically when plates need more height", owner grill answer 2026-10-08): the
+left half is no longer a scroll container; the scroll lives inside the
+description card. B66's left-to-right row, its chronological oldest-leftmost
+order and its two-equal-plates rule stand unchanged, as do B56's ported
+structure and B64's filled copy.
+
+The shipped mechanism is agent-derived under the B33/B40 provenance pattern
+(the owner ruled the relationships — "half of that length", the component as
+the capped thing, the description card as the scroller — the values implement
+them; no literal is invented): above 744px the page holds the viewport's height
+(`html, body { height: 100dvh }`, with the page's `100vh` fallback line above
+it as `--rs` does) and `main` may shrink (`min-height: 0` — without it the flex
+chain is content-driven and the page scrolls, which is the #186 defect), so the
+split, the shown employer and its `1fr` row are all definite and the gallery's
+`height: 50%` resolves against the grid area; the plates cap at `100%` of that
+box, and the description card takes the plate's remainder and scrolls
+(`overflow-y: auto`). The fixed-height band and the lot hold their own content
+height (`flex: 0 0 auto`): without it a shrunken lot's 50px CTA overflowed the
+lot by 3–4px and scrolled the page in ≥744px-wide windows under ~470px tall
+(measured 844×390, 744×400). The B56 description-card floor (`116 × --rs`) renders as a
+**shrinkable flex basis** for the empty placeholder, and a filled card sizes to
+its content (B64), so the cap is met by the card's own scroll rather than by
+cutting it. The component's own `overflow: hidden` bounds it, so the page never
+carries the overflow. At ≤743px nothing changes: the shipped stacked reflow
+keeps scrolling the page (owner grill answer, 2026-10-09).
+
+Measured residue of the same render: in a window **≤900px wide and ≤750px tall**
+the three-plate row's role titles wrap until the title + year + the card's
+minimum box exceed half the half; the cap then holds and the component's bottom
+is bounded rather than scrolled (the page still does not scroll). **B75 (below)
+scales the component's type with the render scale and removes that residue** —
+re-measured: no clipped component at any size from 744×600 to 2560×1440.
+
+**Source:** the owner's issue
+[#186](https://github.com/AlastairZeved/The-Portfolio/issues/186),
+2026-10-08 — quoted verbatim: "The components displaying the roles in /career
+were supposed to carry a vertical scroll if the description card became too
+long. They are NOT to be sized from header to footer's entire length. Half of
+that length in height for the components is more than enough with a scroll bar
+inside of the description of the component for overflow. Under no circumstances
+was a vertical scroll to be introduced to the entire web page. That is standing
+law. The page does not scroll and it fits on one viewport without a scroll." —
+and the owner's four grill answers of 2026-10-09 (owner chat), selected from the
+agent's proposed options and quoted as the selected text:
+
+1. "Half the header→footer region (band bottom → footer top); the cap binds the
+   whole role component, and the description card scrolls inside it".
+2. "Yes — B74 supersedes B66's half-scroll clause; the only scroll is inside the
+   description card".
+3. "Desktop only — the cap + internal description scroll apply above 743px; the
+   ≤743px stacked reflow keeps scrolling the page as today".
+4. "Vertically centred in the left half".
+
+### B75. The career component's type scales with the render scale, and its scroll bar is visible inside the description card (issue #186)
+
+The career body's role components render their **type at the page's render
+scale**. The component's own 1rem is `--rs`-scaled as `--c1`, and every
+type-derived literal of the component is the shipped value × `--c1` — the title
+card's and description card's type, the title card's padding, the year
+subscript and its margin, the description card's margin and padding, the
+plate's own padding, and the description card's placeholder size. The scale
+carries **no floor**: it is the band's own convention (B46/B49), and any floor
+holds the title + year + the card above the cap in a short viewport, where the
+plate would then cut the title — measured at 744×500 and below. Legibility
+rests where the page already puts it: the ≤743px block's shipped readable
+values, the same guarantee the band's scaled literals depend on. Measured, the
+component's type renders 16.08px at 1440×1110 (`--rs` = 1.005 — the design
+canvas is unchanged), 13.04px at 1440×900, 11.12px at 1024×768, 8.69px at
+744×600 and 5.65px at 844×390.
+
+**This removes B74's residue**: measured, no component is clipped and the page
+does not scroll at any tested size from 744×400 through 2560×1440.
+
+The description card's scroll bar is a **real, visible, in-card scroll bar**.
+The platform overlay scrollbar the page inherited paints nothing at rest, so
+the card's overflow read as a clipped card. `::-webkit-scrollbar` forces the
+classic (non-overlay) bar in Chromium and Safari — **6px** wide, so it takes no
+room — its thumb the card's own ink (`--ink`, the token the card's border
+already uses) over a **transparent** track that leaves the card's surface
+showing; Firefox reads `scrollbar-width: thin` / `scrollbar-color`, scoped
+behind `@supports (-moz-appearance: none)` because in Chromium the standard
+property wins the cascade and widens the bar to 10px. The bar occupies layout
+inside the card's border box (measured 6px of the card's 170.4px width at
+1440×1110, thumb `#080808`), and a card that does not overflow shows none. The
+card is keyboard-focusable now that it scrolls, so it wears the page's own
+focus ring (`--ink-light`, offset 2px so the ring lands on the plate outside
+the card's own ink border).
+
+Values are agent-derived under the B33/B40 provenance pattern: the owner ruled
+the relationships — the type scales with the component, it stays readable, the
+bar sits inside the card and takes no room — and the values implement them. No
+new hex or design size is invented; `--c1` carries the scale and `--ink` the
+thumb.
+
+**Source:** the owner's follow-up of 2026-10-09 (owner chat) — quoted verbatim,
+with one expletive removed at the owner's direction: "why is the scroll bar
+outside of the description box? Put it inside [expletive removed]. It takes up
+no room. And in these smaller viewports, why are you not scaling the font down?
+It still needs to be readable but come on man, you're scaling the component down
+but not the font size?"

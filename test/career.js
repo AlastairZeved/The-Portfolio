@@ -3,7 +3,12 @@
    two-section parking lot with one divider and the B65 tools line, CTA back
    to razgregory.com, the monochrome token ladder (B73), and the plugin components
    in the body's left half (issue #154, B56 — desc cards render EMPTY on
-   purpose except the three B64 fills of issue #176). Single file,
+   purpose except the three B64 fills of issue #176); above the breakpoint
+   B74 (issue #186) bounds them — one viewport, the component capped at half
+   the left half's own height, the description card the only scroll container —
+   and B75 scales the component's type with the render scale (--c1 = 16 × --rs,
+   no floor) and gives that card a visible 6px in-card scroll bar.
+   Single file,
    zero script, zero <link>. Black-box Playwright.
    Run: node test/career.js   (PORTFOLIO_URL default http://localhost:8000/career.html)
    Viewport note: the desktop run is at the page's own design canvas
@@ -171,16 +176,20 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     }, sel);
     ok(`${tab}: ${roles.length} components with the issue's exact titles+years`,
       JSON.stringify(got) === JSON.stringify(roles));
-    ok(`${tab}: desc cards — B64 copy verbatim where filled, empty where not, visible, min-height ≥ 116px (B56/B64)`,
+    ok(`${tab}: desc cards — B64 copy verbatim where filled, the empty placeholder at ≥ 116 × --rs (B56/B64/B74)`,
       await page.evaluate(({ s, b64 }) => {
         const nrm = t => t.replace(/\s+/g, ' ').trim();
+        const rs = Math.min(innerHeight / 1104.55, innerWidth / 1440);
         return [...document.querySelector(s).querySelectorAll('.gregorian-mode')].every(p => {
           const d = p.querySelector('.gm-desc');
           const filled = b64[p.querySelector('.gm-title').textContent.trim()];
           const want = filled ? filled.join(' ') : '';
+          // B74 deliberate rewrite: the B56 floor now renders as the empty
+          // placeholder's flex basis, not a min-height — so the floor is
+          // asserted on the empty card's rendered box. A filled card sizes to
+          // its content and is capped with its own scroll (asserted below).
           return nrm(d.innerText) === nrm(want) && d.getBoundingClientRect().height > 0 &&
-            parseFloat(getComputedStyle(d).minHeight) >=
-            116 * Math.min(innerHeight / 1104.55, innerWidth / 1440);
+            (filled || d.getBoundingClientRect().height >= 116 * rs - 1);
         });
       }, { s: sel, b64: B64_COPY }));
     ok(`${tab}: components isolated to their tab`,
@@ -211,6 +220,127 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         return spaced && contained && fits;
       }, sel));
   }
+  // B74 (issue #186): above the breakpoint the page is ONE viewport — it does
+  // not scroll — and every component caps at half the left half's own height;
+  // the row is centred in the half and the description card is the page's only
+  // scroll container. Deliberate new assertions for the ruling.
+  for (const tab of ['employer-pnc-bank', 'employer-pnc-private', 'employer-brinker']) {
+    await page.locator(`.topband__card-hit[for="${tab}"]`).click();
+    await page.waitForTimeout(300);
+    const sel = `.${tab.replace('employer-', 'employer--')}`;
+    ok(`${tab}: B74 — the page fits one viewport, no page scroll at the design canvas`,
+      await page.evaluate(() => {
+        const de = document.documentElement;
+        return de.scrollHeight <= de.clientHeight + 1 && de.scrollWidth <= de.clientWidth + 1;
+      }));
+    ok(`${tab}: B74 — every component caps at half the left half's own height; the half is not a scroll container`,
+      await page.evaluate(s => {
+        const shown = document.querySelector(s);
+        const half = shown.querySelector('.split__gallery');
+        const cap = shown.getBoundingClientRect().height / 2;
+        return [...shown.querySelectorAll('.gregorian-mode')]
+          .every(p => p.getBoundingClientRect().height <= cap + 1) &&
+          half.scrollHeight <= half.clientHeight + 1;
+      }, sel));
+    ok(`${tab}: B74 — the row is vertically centred in the left half`,
+      await page.evaluate(s => {
+        const shown = document.querySelector(s);
+        const gal = shown.querySelector('.split__gallery').getBoundingClientRect();
+        const emp = shown.getBoundingClientRect();
+        return Math.abs((gal.top - emp.top) - (emp.bottom - gal.bottom)) < 2;
+      }, sel));
+    ok(`${tab}: B74 — every description card stays inside its component (the cap never cuts the card)`,
+      await page.evaluate(s => {
+        const shown = document.querySelector(s);
+        return [...shown.querySelectorAll('.gregorian-mode')].every(p => {
+          const d = p.querySelector('.gm-desc').getBoundingClientRect();
+          const plate = p.getBoundingClientRect();
+          return d.bottom <= plate.bottom + 1 && d.top >= plate.top - 1;
+        });
+      }, sel));
+  }
+  await page.locator('.topband__card-hit[for="employer-brinker"]').click();
+  await page.waitForTimeout(300);
+  ok('B74 — the overflowing description scrolls inside its own card, never the page (Brinker, Sr. Portfolio Specialist)',
+    await page.evaluate(() => {
+      const plate = [...document.querySelectorAll('.employer--brinker .gregorian-mode')]
+        .find(p => /Sr\. Portfolio Specialist/.test(p.querySelector('.gm-title').textContent));
+      const d = plate.querySelector('.gm-desc');
+      const de = document.documentElement;
+      return d.scrollHeight > d.clientHeight + 1 &&
+        getComputedStyle(d).overflowY === 'auto' &&
+        d.getBoundingClientRect().bottom <= plate.getBoundingClientRect().bottom + 1 &&
+        de.scrollHeight <= de.clientHeight + 1;
+    }));
+
+  // B75 (issue #186 follow-up): the component's type renders at the page's
+  // render scale (--c1 = 16 × --rs, no floor), and the description card's
+  // scroll bar is a real, visible, in-card classic bar, not the platform
+  // overlay bar that painted nothing.
+  // (Headless Chromium force-enables overlay scrollbars, so the bar's painted
+  // width is verified in a real browser — see the PR; the styling contract and
+  // the scroll behaviour are asserted here.)
+  const b75 = async (vp) => {
+    const pg = await browser.newPage({ viewport: vp });
+    await pg.goto(URL, { waitUntil: 'networkidle' });
+    await pg.locator('.topband__card-hit[for="employer-brinker"]').click();
+    await pg.waitForTimeout(300);
+    const out = await pg.evaluate(() => {
+      const plates = [...document.querySelectorAll('.employer--brinker .gregorian-mode')];
+      const plate = plates.pop();
+      const d = plate.querySelector('.gm-desc');
+      const empty = plates[0].querySelector('.gm-desc');
+      return {
+        rs: Math.min(innerHeight / 1104.55, innerWidth / 1440),
+        title: parseFloat(getComputedStyle(plate.querySelector('.gm-title')).fontSize),
+        desc: parseFloat(getComputedStyle(d).fontSize),
+        year: parseFloat(getComputedStyle(plate.querySelector('.gm-uc')).fontSize),
+        overflowY: getComputedStyle(d).overflowY,
+        sbWidth: getComputedStyle(d, '::-webkit-scrollbar').width,
+        sbThumb: getComputedStyle(d, '::-webkit-scrollbar-thumb').backgroundColor,
+        sbTrack: getComputedStyle(d, '::-webkit-scrollbar-track').backgroundColor,
+        scrolls: d.scrollHeight > d.clientHeight + 1,
+        emptyScrolls: empty.scrollHeight > empty.clientHeight + 1,
+        nothingClipped: plates.concat([plate]).every(pl => {
+          const pr = pl.getBoundingClientRect();
+          return ['.gm-title', '.gm-uc', '.gm-desc'].every(k => {
+            const kk = pl.querySelector(k);
+            return !kk || kk.getBoundingClientRect().bottom <= pr.bottom + 1;
+          });
+        }),
+        pageScrolls: document.documentElement.scrollHeight > document.documentElement.clientHeight + 1,
+      };
+    });
+    await pg.close();
+    return out;
+  };
+  const canvasB75 = await b75({ width: 1440, height: 1110 });
+  ok('B75 — the component\'s type renders at the page\'s render scale (16 × --rs at the design canvas)',
+    Math.abs(canvasB75.desc - 16 * canvasB75.rs) < 0.6 &&
+    Math.abs(canvasB75.title - 16 * canvasB75.rs) < 0.6 &&
+    Math.abs(canvasB75.year - 0.85 * 16 * canvasB75.rs) < 0.6);
+  const smallB75 = await b75({ width: 1440, height: 900 });
+  ok('B75 — the type scales down with the component (and is smaller than at the design canvas)',
+    smallB75.desc < canvasB75.desc && Math.abs(smallB75.desc - 16 * smallB75.rs) < 0.6);
+  const lowerB75 = await b75({ width: 1024, height: 768 });
+  ok('B75 — the type keeps tracking --rs below the design canvas: no floor pins it',
+    lowerB75.desc < smallB75.desc && Math.abs(lowerB75.desc - 16 * lowerB75.rs) < 0.6);
+  // Short/landscape viewports: the law is absolute (one viewport, nothing cut),
+  // so the type keeps scaling instead of a floor pushing the component past its
+  // cap — the two cases the quality review flagged (page scroll + title clip).
+  const shortB75 = await b75({ width: 744, height: 400 });
+  ok('B75 — 744×400: the page still fits one viewport and no component is clipped',
+    !shortB75.pageScrolls && shortB75.nothingClipped &&
+    Math.abs(shortB75.desc - 16 * shortB75.rs) < 0.6);
+  const landB75 = await b75({ width: 844, height: 390 });
+  ok('B75 — 844×390 (landscape phone): the page still fits one viewport and no component is clipped',
+    !landB75.pageScrolls && landB75.nothingClipped);
+  ok('B75 — the description card is the scroll container and wears a visible in-card scroll bar (6px, the card\'s own ink, transparent track)',
+    canvasB75.overflowY === 'auto' && canvasB75.scrolls && canvasB75.sbWidth === '6px' &&
+    canvasB75.sbThumb === 'rgb(8, 8, 8)' && canvasB75.sbTrack === 'rgba(0, 0, 0, 0)');
+  ok('B75 — a card that does not overflow shows no bar, and the page still never scrolls',
+    !canvasB75.emptyScrolls && !canvasB75.pageScrolls);
+
   // back to the default tab for the rest of the suite
   await page.locator('.topband__card-hit[for="employer-pnc-bank"]').click();
   ok('no .gm-cta and no item selector row anywhere (B56)',

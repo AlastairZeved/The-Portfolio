@@ -28,22 +28,24 @@
 @font-face { font-family: "Montserrat Alternates"; font-style: normal; font-weight: 800;
   src: url(data:font/woff2;base64,d09GMl5AXkFeQF5AXkBeQFZEXkBeUV5AXkBeQF5A3qxeQF5AVQ==) format("woff2"); font-display: swap; }
 :root {
-  /* B47 sand/brown re-hue of TheBoards' ladder (issue #133 §4). The ladder's
-     luminance relationships are preserved: --deep near-black canvas, --card
-     one step above it, --frame the deep's own hue lifted for rules and
-     borders, --note the brightest ink on the deep, the water ladder the same
-     three-stop mix, and the glow one rung down its base (B132's rung rule). */
-  --deep:      #12100a;            /* deep brown canvas (TheBoards --deep role) */
-  --card:      #241c0f;            /* dark brown card fill, one step above deep */
-  --frame:     #9a7c52;            /* mid sand/brown — borders + all full-width rules */
-  --note:      #e8d9b0;            /* light sand — brightest text on the deep */
-  --water-top: #7a5c38;
-  --water-mid: #5c4429;
-  --water-bot: #3a2c1a;
-  --water-bot-a: 58 44 26;      /* --water-bot's channels, the band's radial foot */
+  /* B73 monochrome re-derivation of TheBoards' ladder (issue #190). A pure
+     neutral gray scale — zero hue — at the landing palette's exact relative
+     luminance rungs: --deep 0.0023, --card 0.0077, the water ladder
+     0.1237/0.0737/0.0325, --frame 0.2611, --note 0.5962. The ladder's
+     relationships are preserved: --deep near-black canvas, --card one step
+     above it, --frame the border/rule rung, --note the brightest ink on the
+     deep, and the glow one rung down its base (B132's rung rule). */
+  --deep:      #080808;            /* neutral near-black canvas (TheBoards --deep role) */
+  --card:      #151515;            /* dark gray card fill, one step above deep */
+  --frame:     #8c8c8c;            /* mid gray — borders + all full-width rules */
+  --note:      #cbcbcb;            /* light gray — brightest text on the deep */
+  --water-top: #636363;
+  --water-mid: #4d4d4d;
+  --water-bot: #333333;
+  --water-bot-a: 51 51 51;      /* --water-bot's channels, the band's radial foot */
   --ink-light: #f4f5f1;
   --ink-dim:   rgb(244 245 241 / 0.55);
-  --glow-sand: #7d6340;            /* selected-card bloom: --frame one rung down (B132) */
+  --glow-gray: #676767;            /* selected-card bloom: --frame one rung down (B132) */
   --elevation: 0 2px 8px rgb(0 0 0 / 0.45);
   --ease:      cubic-bezier(0.22, 0.61, 0.36, 1);
 
@@ -147,8 +149,8 @@ body {
    the B132 glow verbatim — border-color + a single soft 0 0 8px 0 bloom, one
    token, no other states (issue #133 §1). */
 .topband__card:has(.topband__tab:checked) {
-  border-color: var(--glow-sand);
-  box-shadow: 0 0 8px 0 var(--glow-sand);
+  border-color: var(--glow-gray);
+  box-shadow: 0 0 8px 0 var(--glow-gray);
 }
 .topband__card:active {
   filter: brightness(0.92);

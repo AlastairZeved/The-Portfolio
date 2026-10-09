@@ -305,11 +305,12 @@ is committed as an **illustrative reference only**:
 [`docs/proofs/wireframe-illustration-2026-09-29.png`](proofs/wireframe-illustration-2026-09-29.png)
 — it is not law; where the wireframe and this document disagree, this
 document wins. The cards do **not** live inside Components, Requirements, or
-the Parking Lot. The current placement authority is the owner's issue #175
-drawing (`B67`): every card's authored `left/top %` is an agent-derived
-measurement of that screenshot, labelled as such in `B67` (it re-sizes and
-re-places nine cards against `B43`'s #112 drawing; the six board cards and
-Music keep their #112 seats). Since `B45`
+the Parking Lot. The current placement authority is the owner's issue #189
+drawing (`B78`): every card's authored `left/top %` is an agent-derived
+measurement of that screenshot, labelled as such in `B78` (it re-places
+nine cards against `B67`'s #175 drawing and re-sizes four — community,
+career, writing and zeved-boards; LinkedIn, Plants on Poles and Plants in
+Rocks keep their #175 seats and scales). Since `B45`
 (issue #126) the placements are the **only** authored card geometry — the
 cards are content-sized (§4), no px width/height is authored.
 
@@ -319,7 +320,7 @@ re-authored — the whole sheet scales, so every card
 stays fully inside the sheet edge to edge (no left/right clipping, no
 horizontal overflow) at 320–1023px. Since `B44` (issue #121) the scale is
 uncapped, so desktop viewports render the drawing geometry scaled too — at
-**every** viewport size the sheet shows the #175 drawing (`B67`), no note
+**every** viewport size the sheet shows the #189 drawing (`B78`), no note
 cards overlapping and no link line obscured.
 
 ---
@@ -358,25 +359,26 @@ drawing authority, `B43`):
   divided by the card's own scale, floored at `NOTE_MIN_W` — TheBoards
   `geometry.js` `noteMaxW` ported verbatim (`--card-max-w`, set per card in
   JS, re-derived when the card is dragged or its scale changes).
-- **Rest scale (B67, issue #175; supersedes B52's list):** each card's rest
-  scale is its **drawing scale of record** — the owner's issue #175
-  screenshot sizes every card — shipped inline per card: **2.25** community,
-  **2.21** career, **1.77** writing, **1.79** software-ai, **2.25**
+- **Rest scale (B78, issue #189; supersedes B67's list):** each card's rest
+  scale is its **drawing scale of record** — the owner's issue #189
+  screenshot sizes every card — shipped inline per card: **2.34** community,
+  **2.17** career, **1.87** writing, **1.79** software-ai, **2.25**
   plants-rocks, **1.70** music, **1.02** apple-music, **1.19** spotify,
-  **1.06** linkedin, **1.14** zeved-boards, **1.20** agentic-plugins,
+  **1.06** linkedin, **1.24** zeved-boards, **1.20** agentic-plugins,
   **0.98** plants-poles, **1.03** plants-in-rocks. The six board cards
   render above 1; the sub cards render at their drawing scales — several
-  now sit above 1, so **B52's board/sub tier split at scale 1 is
+  sit above 1, so **B52's board/sub tier split at scale 1 is
   superseded**: the drawing rules the sizes (B33's provenance), not the
   tier. The gesture still moves
   the scale from there under the floor and ceiling above, unchanged. The
-  values are agent-derived measurements of the #175 drawing (the
+  values are agent-derived measurements of the #189 drawing (the
   `B33`/`B43` provenance pattern) — outer card footprint at the drawing's
-  2560×1223 viewport (render scale rs = 1223/1104.55, the B46 height anchor;
-  calibrated against the unchanged cards' shipped percentages) ÷ the card's
-  measured unscaled content width. The four `B55` sub cards are sized and
-  placed by the #175 drawing like every other card (their B55 0.78 band is
-  superseded).
+  2880×1800 capture (2× DPR of a 1440×900 window; page viewport 1440×825,
+  render scale rs = 825/1104.55, the B46 height anchor; calibrated against
+  the unchanged cards' shipped values via a same-viewport render of the
+  shipped page) ÷ the card's measured unscaled content width. The four
+  `B55` sub cards are sized and placed by the #189 drawing like every
+  other card.
 - **Resize:** the corner gesture acts as **TheBoards' scale-based resize**
   (`interactions.js` frame-drag resize): the drag changes the card's own
   scale — the pointer's distance to the card's fixed top-left origin,
@@ -405,8 +407,8 @@ drawing authority, `B43`):
 > (`state.js`), not agent inventions; the one-fifth-of-viewport ceiling is
 > the owner's (`B51`, issue #142), and the per-card ceiling arithmetic is
 > agent-derived per the `B33`/`B43` pattern. The per-card **rest scales**
-> are likewise agent-derived, transcribing the owner's issue #175 drawing
-> (`B67`, superseding `B52`'s list).
+> are likewise agent-derived, transcribing the owner's issue #189 drawing
+> (`B78`, superseding `B67`'s list).
 
 **A gesture is never a click** (`B41`, issue #109): the corner resize handle is
 a `<span>` **inside** the card's `<a>`, so a pointer release over it fires the

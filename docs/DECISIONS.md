@@ -2393,3 +2393,68 @@ Use the same dividers in between sections as the top line"
 **Source:** the owner in chat, 2026-10-09 — quoted verbatim: "Mobile
 viewports are an entirely separate issue that will be resolved with their
 own work at a future date."
+
+### B78. Every note card's default size and placement follows the owner's issue #189 drawing (issue #189)
+
+The owner logged in issue [#189](https://github.com/AlastairZeved/The-Portfolio/issues/189)
+a screenshot of the board displaying "the new placements of the note cards
+and how each is to be sized", directing: "Please execute this exact
+placement and exact sizing." Per B33's provenance law, the owner's drawing
+rules the authored card sizes and placements. This entry **supersedes
+B67's placement and size values** (the #175 drawing's seats and scales);
+nothing else changes — the cards' destinations, states, links and the
+per-authored-pair link mechanism (B28) are untouched, and the link lines
+recompute from the moved cards' centres.
+
+The values below are **agent-derived measurements of that screenshot**
+(method: outer card footprint — pale fill plus the 2px `--ink-dark` border —
+at the drawing's 2880×1800 capture, a 2× DPR render of a 1440×900 window
+whose page viewport is 1440×825, render scale `rs = 825/1104.55` under
+B46's height-anchored landscape law, calibrated against the unchanged
+cards' shipped values via a same-viewport render of the shipped page; rest
+scale = drawing footprint ÷ the card's measured unscaled content width).
+Authored `left`% / `top`% / `--card-scale`:
+
+- Community: **13.8% / 18.5% / 2.34** (scale re-sized)
+- Career: **42.5% / 18.6% / 2.17** (scale re-sized)
+- Writing: **70.9% / 54.1% / 1.87** (scale re-sized)
+- Software & AI: **66.1% / 26.1%** / 1.79 (scale unchanged)
+- Zeved Boards: **81.1% / 26.8% / 1.24** (scale re-sized)
+- Agentic Plugins: **79.1% / 36.1%** / 1.20 (scale unchanged)
+- Music: **7.8% / 51.5%** / 1.70 (scale unchanged)
+- Plants & Rocks: **40.1% / 61.8%** / 2.25 (scale unchanged)
+- Spotify: **5.2% / 61.8%** / 1.19 (scale unchanged)
+- Apple Music: **17.9% / 62.8%** / 1.02 (scale unchanged)
+- Plants on Poles: 37.7% / 73.7% / 0.98 (unchanged)
+- Plants in Rocks: 50.2% / 73.8% / 1.03 (unchanged)
+- LinkedIn: 36.6% / 11.5% / 1.06 (unchanged)
+
+The drawing keeps the board/sub tier split of record open exactly as B67
+left it: several sub cards sit above 1 (Zeved Boards 1.24, Agentic Plugins
+1.20, Apple Music 1.02, Plants in Rocks 1.03), so the drawing rules the
+sizes, not the tier. The gesture bounds stand unchanged — B45's 0.5 floor
+and B51's one-fifth-of-viewport ceiling still move the scale from these
+rest values. `UIUX §3.4` and `§4` are amended to name this drawing as
+the placement and size authority, superseding the #175 drawing in both.
+
+**The no-obscured-line law yields for this one line (owner ruling).**
+Measured in implementation: the drawing's community ↔ Software & AI link
+line runs straight behind the Career card — visible leaving Community,
+vanishing under Career, re-emerging at its bottom-right corner — so
+B44's "no link line obscured by a card" law fails at ten landscape
+viewports (`test/scaling.js`). The owner ruled the drawing's exact
+placement stands and the overlap is allowed for this line only: the
+placement is **not** nudged and no other line or card is affected. B44
+stands everywhere else; this entry carves out exactly this one
+line/card pair.
+
+**Source (the carve-out):** the owner in chat, 2026-10-09 — quoted
+verbatim: "Keep the exact placement. The overlap is allowed this one
+time."
+
+**Source:** owner's issue
+[#189](https://github.com/AlastairZeved/The-Portfolio/issues/189),
+2026-10-09 — "Attached is a screenshot containing the new placements of
+the note cards and how each is to be sized. Please execute this exact
+placement and exact sizing." (screenshot:
+[issue #189](https://github.com/user-attachments/assets/cbc80ef9-2768-4a8e-8695-7d9da29f44fa)).

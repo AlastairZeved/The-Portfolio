@@ -6,14 +6,19 @@
    purpose except the three B64 fills of issue #176); above the breakpoint
    B74 (issue #186) bounds them — one viewport, the component capped at half
    the left half's own height, the description card the only scroll container —
-   and B75 scales the component's type with the render scale (--c1 = 16 × --rs,
-   no floor) and gives that card a visible 6px in-card scroll bar.
+   and B76 (issue #194) renders the agentic-plugins source geometry scaled
+   uniformly by the plate's own width (title card straddling the back card's
+   top edge, desc card wider than the back card and ending within its span,
+   type at the source ratios with an 11px readable floor, long titles wrap,
+   a filled card's styled bar always visible).
    Single file,
    zero script, zero <link>. Black-box Playwright.
    Run: node test/career.js   (PORTFOLIO_URL default http://localhost:8000/career.html)
    Viewport note: the desktop run is at the page's own design canvas
-   (REF_H ≈ 1104.55 → rs = 1), because the B56 component's geometry — like
-   the band's literals above it — renders at the B46 scale (--rs). */
+   (REF_H ≈ 1104.55 → rs = 1), because the band's literals render at the
+   B46 scale (--rs); the B76 component literals scale by the plate's own
+   width instead (container queries), so their assertions are computed from
+   the measured plate width. */
 
 const { chromium } = require('playwright');
 
@@ -176,20 +181,20 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     }, sel);
     ok(`${tab}: ${roles.length} components with the issue's exact titles+years`,
       JSON.stringify(got) === JSON.stringify(roles));
-    ok(`${tab}: desc cards — B64 copy verbatim where filled, the empty placeholder at ≥ 116 × --rs (B56/B64/B74)`,
+    ok(`${tab}: desc cards — B64 copy verbatim where filled, the empty placeholder at ≥ 116 × plate-width/830 (B56/B64/B74, scaled per B76)`,
       await page.evaluate(({ s, b64 }) => {
         const nrm = t => t.replace(/\s+/g, ' ').trim();
-        const rs = Math.min(innerHeight / 1104.55, innerWidth / 1440);
         return [...document.querySelector(s).querySelectorAll('.gregorian-mode')].every(p => {
           const d = p.querySelector('.gm-desc');
           const filled = b64[p.querySelector('.gm-title').textContent.trim()];
           const want = filled ? filled.join(' ') : '';
           // B74 deliberate rewrite: the B56 floor now renders as the empty
           // placeholder's flex basis, not a min-height — so the floor is
-          // asserted on the empty card's rendered box. A filled card sizes to
-          // its content and is capped with its own scroll (asserted below).
+          // asserted on the empty card's rendered box, in the B76 scale unit
+          // (116 source px of the 830px design × the plate's own width).
+          const u = p.getBoundingClientRect().width / 830;
           return nrm(d.innerText) === nrm(want) && d.getBoundingClientRect().height > 0 &&
-            (filled || d.getBoundingClientRect().height >= 116 * rs - 1);
+            (filled || d.getBoundingClientRect().height >= 116 * u - 1);
         });
       }, { s: sel, b64: B64_COPY }));
     ok(`${tab}: components isolated to their tab`,
@@ -268,78 +273,96 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       const d = plate.querySelector('.gm-desc');
       const de = document.documentElement;
       return d.scrollHeight > d.clientHeight + 1 &&
-        getComputedStyle(d).overflowY === 'auto' &&
+        getComputedStyle(d).overflowY === 'scroll' &&
         d.getBoundingClientRect().bottom <= plate.getBoundingClientRect().bottom + 1 &&
         de.scrollHeight <= de.clientHeight + 1;
     }));
 
-  // B75 (issue #186 follow-up): the component's type renders at the page's
-  // render scale (--c1 = 16 × --rs, no floor), and the description card's
-  // scroll bar is a real, visible, in-card classic bar, not the platform
-  // overlay bar that painted nothing.
+  // B76 (issue #194): the components render the agentic-plugins SOURCE
+  // geometry, scaled uniformly by each plate's own width (container
+  // queries): the title card straddles the back card\x27s top edge with a gap
+  // to the desc card, the desc card is wider than the back card and ends
+  // within its vertical span, the type renders at the source ratios (title
+  // 28, year 14, desc 20 per 830px plate) with the owner's 11px readable
+  // floor, long titles wrap, and a FILLED desc card always shows the styled
+  // in-card bar while the empty placeholder stays bare.
   // (Headless Chromium force-enables overlay scrollbars, so the bar's painted
   // width is verified in a real browser — see the PR; the styling contract and
   // the scroll behaviour are asserted here.)
-  const b75 = async (vp) => {
+  const b76 = async (vp, tab = 'employer-brinker') => {
     const pg = await browser.newPage({ viewport: vp });
     await pg.goto(URL, { waitUntil: 'networkidle' });
-    await pg.locator('.topband__card-hit[for="employer-brinker"]').click();
+    await pg.locator(`.topband__card-hit[for="${tab}"]`).click();
     await pg.waitForTimeout(300);
-    const out = await pg.evaluate(() => {
-      const plates = [...document.querySelectorAll('.employer--brinker .gregorian-mode')];
-      const plate = plates.pop();
+    const out = await pg.evaluate(t => {
+      const r = e => e.getBoundingClientRect();
+      const plates = [...document.querySelectorAll(`.employer--${t.slice(9)} .gregorian-mode`)];
+      const plate = plates[plates.length - 1];   // the filled desc card (B64)
+      const emptyPlate = plates[0];
       const d = plate.querySelector('.gm-desc');
-      const empty = plates[0].querySelector('.gm-desc');
+      const t2 = plate.querySelector('.gm-title'), k = plate.querySelector('.gm-back');
+      const de = document.documentElement;
       return {
-        rs: Math.min(innerHeight / 1104.55, innerWidth / 1440),
-        title: parseFloat(getComputedStyle(plate.querySelector('.gm-title')).fontSize),
-        desc: parseFloat(getComputedStyle(d).fontSize),
-        year: parseFloat(getComputedStyle(plate.querySelector('.gm-uc')).fontSize),
+        plateW: r(plate).width,
+        titleFS: parseFloat(getComputedStyle(t2).fontSize),
+        descFS: parseFloat(getComputedStyle(d).fontSize),
+        yearFS: parseFloat(getComputedStyle(plate.querySelector('.gm-uc')).fontSize),
+        straddle: r(t2).top < r(k).top && r(k).top < r(t2).bottom,
+        descWider: r(d).width > r(k).width,
+        descWithin: r(d).bottom <= r(k).bottom + 1,
+        gap: r(d).top > r(t2).bottom,
         overflowY: getComputedStyle(d).overflowY,
+        emptyOverflowY: getComputedStyle(emptyPlate.querySelector('.gm-desc')).overflowY,
         sbWidth: getComputedStyle(d, '::-webkit-scrollbar').width,
         sbThumb: getComputedStyle(d, '::-webkit-scrollbar-thumb').backgroundColor,
         sbTrack: getComputedStyle(d, '::-webkit-scrollbar-track').backgroundColor,
         scrolls: d.scrollHeight > d.clientHeight + 1,
-        emptyScrolls: empty.scrollHeight > empty.clientHeight + 1,
-        nothingClipped: plates.concat([plate]).every(pl => {
-          const pr = pl.getBoundingClientRect();
-          return ['.gm-title', '.gm-uc', '.gm-desc'].every(k => {
-            const kk = pl.querySelector(k);
-            return !kk || kk.getBoundingClientRect().bottom <= pr.bottom + 1;
-          });
-        }),
-        pageScrolls: document.documentElement.scrollHeight > document.documentElement.clientHeight + 1,
+        nothingClipped: plates.every(pl =>
+          ['.gm-title', '.gm-uc', '.gm-desc'].every(s => {
+            const e = pl.querySelector(s);
+            return !e || e.getBoundingClientRect().bottom <= r(pl).bottom + 1;
+          })),
+        pageScrolls: de.scrollHeight > de.clientHeight + 1,
       };
-    });
+    }, tab);
     await pg.close();
     return out;
   };
-  const canvasB75 = await b75({ width: 1440, height: 1110 });
-  ok('B75 — the component\'s type renders at the page\'s render scale (16 × --rs at the design canvas)',
-    Math.abs(canvasB75.desc - 16 * canvasB75.rs) < 0.6 &&
-    Math.abs(canvasB75.title - 16 * canvasB75.rs) < 0.6 &&
-    Math.abs(canvasB75.year - 0.85 * 16 * canvasB75.rs) < 0.6);
-  const smallB75 = await b75({ width: 1440, height: 900 });
-  ok('B75 — the type scales down with the component (and is smaller than at the design canvas)',
-    smallB75.desc < canvasB75.desc && Math.abs(smallB75.desc - 16 * smallB75.rs) < 0.6);
-  const lowerB75 = await b75({ width: 1024, height: 768 });
-  ok('B75 — the type keeps tracking --rs below the design canvas: no floor pins it',
-    lowerB75.desc < smallB75.desc && Math.abs(lowerB75.desc - 16 * lowerB75.rs) < 0.6);
-  // Short/landscape viewports: the law is absolute (one viewport, nothing cut),
-  // so the type keeps scaling instead of a floor pushing the component past its
-  // cap — the two cases the quality review flagged (page scroll + title clip).
-  const shortB75 = await b75({ width: 744, height: 400 });
-  ok('B75 — 744×400: the page still fits one viewport and no component is clipped',
-    !shortB75.pageScrolls && shortB75.nothingClipped &&
-    Math.abs(shortB75.desc - 16 * shortB75.rs) < 0.6);
-  const landB75 = await b75({ width: 844, height: 390 });
-  ok('B75 — 844×390 (landscape phone): the page still fits one viewport and no component is clipped',
-    !landB75.pageScrolls && landB75.nothingClipped);
-  ok('B75 — the description card is the scroll container and wears a visible in-card scroll bar (6px, the card\'s own ink, transparent track)',
-    canvasB75.overflowY === 'auto' && canvasB75.scrolls && canvasB75.sbWidth === '6px' &&
-    canvasB75.sbThumb === 'rgb(8, 8, 8)' && canvasB75.sbTrack === 'rgba(0, 0, 0, 0)');
-  ok('B75 — a card that does not overflow shows no bar, and the page still never scrolls',
-    !canvasB75.emptyScrolls && !canvasB75.pageScrolls);
+  const canvasB76 = await b76({ width: 1440, height: 1110 });
+  ok('B76 — the type renders at the source ratios with the 11px readable floor (design canvas)',
+    Math.abs(canvasB76.titleFS - Math.max(28 * canvasB76.plateW / 830, 11)) < 0.6 &&
+    Math.abs(canvasB76.descFS - Math.max(20 * canvasB76.plateW / 830, 11)) < 0.6 &&
+    Math.abs(canvasB76.yearFS - Math.max(14 * canvasB76.plateW / 830, 11)) < 0.6);
+  ok('B76 — the title card straddles the back card\x27s top edge, with a gap to the desc card below it',
+    canvasB76.straddle && canvasB76.gap);
+  ok('B76 — the desc card is wider than the back card and ends within its vertical span',
+    canvasB76.descWider && canvasB76.descWithin);
+  ok('B76 — a filled desc card ALWAYS shows the styled in-card bar (6px, the card\x27s own ink, transparent track)',
+    canvasB76.overflowY === 'scroll' && canvasB76.sbWidth === '6px' &&
+    canvasB76.sbThumb === 'rgb(8, 8, 8)' && canvasB76.sbTrack === 'rgba(0, 0, 0, 0)');
+  ok('B76 — the empty desc card stays bare (no scroll region, as the owner ruled)',
+    canvasB76.emptyOverflowY !== 'scroll');
+  ok('B76 — the page fits one viewport and no component is clipped (design canvas)',
+    !canvasB76.pageScrolls && canvasB76.nothingClipped);
+  // Plate-relative scaling: the two-across employer (PNC Private Bank) renders
+  // larger plates — and therefore larger type — than the three-across rows at
+  // the same viewport, wherever the 11px floor does not bind (2560×1440).
+  const wide3B76 = await b76({ width: 2560, height: 1440 }, 'employer-brinker');
+  const wide2B76 = await b76({ width: 2560, height: 1440 }, 'employer-pnc-private');
+  ok('B76 — plate-relative: the two-across row renders bigger components and type than the three-across row (2560×1440)',
+    wide2B76.plateW > wide3B76.plateW && wide2B76.descFS > wide3B76.descFS &&
+    Math.abs(wide2B76.descFS - Math.max(20 * wide2B76.plateW / 830, 11)) < 0.6 &&
+    Math.abs(wide3B76.descFS - Math.max(20 * wide3B76.plateW / 830, 11)) < 0.6);
+  // Short/landscape viewports: the law is absolute (one viewport, nothing
+  // cut), and the 11px floor keeps the type readable where the ratios would
+  // shrink it away.
+  const shortB76 = await b76({ width: 744, height: 400 });
+  ok('B76 — 744×400: the page still fits one viewport, nothing is clipped, and the type holds its 11px floor',
+    !shortB76.pageScrolls && shortB76.nothingClipped &&
+    shortB76.titleFS >= 11 && shortB76.descFS >= 11 && shortB76.yearFS >= 11);
+  const landB76 = await b76({ width: 844, height: 390 });
+  ok('B76 — 844×390 (landscape phone): the page still fits one viewport and no component is clipped',
+    !landB76.pageScrolls && landB76.nothingClipped);
 
   // back to the default tab for the rest of the suite
   await page.locator('.topband__card-hit[for="employer-pnc-bank"]').click();

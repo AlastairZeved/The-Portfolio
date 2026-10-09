@@ -738,26 +738,38 @@ renders as `L × --rs`.)*
   rendering as a shrinkable flex basis for the empty placeholder, a filled
   card sizing to its content per B64); the page is one viewport and does not
   scroll. **B74 supersedes B66's half-scroll clause** — the left half is no
-  longer a scroll container. *(Amended by B75, issue #186)* The component's
-  **type renders at the page's render scale**: its own 1rem is `--c1` =
-  `16 × --rs` — the title's and description's type, the title card's padding,
-  the year subscript's size and margin, the description card's margin and
-  padding, the plate's padding and the description card's placeholder size are
-  all the shipped value × `--c1` — so the copy scales with the component and is
-  never pinned while the rest shrinks. The scale carries **no floor** (the
-  band's own convention, B46/B49: a floor holds the component above its cap in
-  a short viewport and the plate then cuts the title); legibility is the
-  ≤743px block's shipped readable values. The design canvas is unchanged
-  (16.08px at 1440×1110; 13.04px at 1440×900, 11.12px at 1024×768, 8.69px at
-  744×600, 5.65px at 844×390 — one viewport and nothing clipped at every tested
-  size from 744×400 up).
-  Its **scroll bar is visible and inside the description card**:
-  `::-webkit-scrollbar` forces the classic (non-overlay) bar Chromium and
-  Safari otherwise auto-hide — 6px wide, thumb `--ink` (the card's own border
-  token), transparent track — Firefox reads the `thin` standard properties
-  behind `@supports (-moz-appearance: none)`, and a card that does not overflow
-  shows none; the card is keyboard-focusable now that it scrolls and wears the
-  page's own focus ring (`--ink-light`, offset 2px).
+  longer a scroll container. *(Amended by B76, issue #194 — supersedes B75's render-scale type)* The
+ component renders the **agentic-plugins source geometry at the source's
+ exact proportions, scaled uniformly by the plate's own width** — the
+ source's fixed 830px plate re-rendered as one scale unit, 1 source px =
+ plate-width/830 (container queries; no viewport-scale rule remains). The
+ back card is inset `90/165/90` source px; the title card is `427` source
+ px wide at top `55` — **straddling the back card's `90` top edge**, with a
+ gap to the description card below it; the description card is `600` source
+ px wide — **wider than the `500` back card, which it overhangs on both
+ sides** — and **ends within the back card's vertical span** (its bottom
+ margin is the back card's `90` bottom inset; long copy scrolls inside
+ instead). The component's **type renders at the source's ratios** (title
+ `28`, year `14`, desc `20` per `830px` plate) with the **owner's readable
+ floor: no component type below `11px`** — the floor may break the
+ proportions on small plates, per the owner's ruling; **long titles wrap to
+ two lines** rather than shrinking, the year subscript in flow under the
+ title card. Two-across rows render proportionally larger components than
+ three-across rows at the same viewport. The design canvas is unchanged
+ (measured: at 1440×1110's ~195px three-across plates the floored type
+ renders 11px; 12.86px title at 2560×1440's ~381px plates; one viewport and
+ nothing clipped at every tested size from 744×400 up).
+ Its **scroll bar is visible and inside the description card — always, on a
+ FILLED card**: `overflow-y: scroll` keeps the styled in-card bar present
+ even where the copy fits (the thumb renders when the content overflows;
+ B76 amends B75's "a card that does not overflow shows none").
+ `::-webkit-scrollbar` forces the classic (non-overlay) bar Chromium and
+ Safari otherwise auto-hide — 6px wide, thumb `--ink` (the card's own border
+ token), transparent track — Firefox reads the `thin` standard properties
+ behind `@supports (-moz-appearance: none)`; the **empty** placeholder
+ stays bare (no scroll region), per the owner's ruling; the card is
+ keyboard-focusable now that it scrolls and wears the
+ page's own focus ring (`--ink-light`, offset 2px).
   The component's "Github" CTA is not ported.
   The description
   cards carried **B56's explicit override** of the omit-empty rule (empty
@@ -830,10 +842,14 @@ unfilled and render nothing.)*
 
 **Pinned by:** `test/career.js` — selector mechanics, the B132 glow, the
 split, the two-way lot (B65), the ladder tokens, the omit-empty-block
-discipline, and B74/B75's one-viewport render (the component cap at half the
-left half's own height, the row centred in the half, the type scaled to `--c1`
-with no floor, and the description card as the page's only scroll container
-with its visible 6px in-card scroll bar).
+discipline, B74's one-viewport render (the component cap at half the
+left half's own height, the row centred in the half, the description card as
+the page's only scroll container), and B76's source-geometry render (the
+plate-relative uniform scale, the title card straddling the back card's top
+edge with a gap to the desc card, the wider desc card ending within the back
+card's span, the source-ratio type with its 11px floor, long titles wrapping,
+and the always-visible styled bar on filled desc cards with the empty
+placeholder bare).
 
 ---
 

@@ -2246,3 +2246,109 @@ outside of the description box? Put it inside [expletive removed]. It takes up
 no room. And in these smaller viewports, why are you not scaling the font down?
 It still needs to be readable but come on man, you're scaling the component down
 but not the font size?"
+
+### B76. The career role components render the agentic-plugins source geometry, scaled uniformly by the plate's own width (issue #194)
+
+The career body's role components had drifted from their source design — the
+owner: the components' title cards "were edited at some point and it needs to
+be fixed in /career". B76 re-renders the `.gregorian-mode` component at the
+**agentic-plugins source geometry exactly** (repo AlastairZeved/AlastairZeved,
+`agentic-plugins` page's components), **scaled uniformly by the plate's own
+width** — the source's fixed 830px design re-rendered as one scale unit:
+**1 source px = plate-width/830** (container queries; the component's own
+proportions are identical to the source's at every size):
+
+- the **back card** is inset `90 / 165 / 90` source px (the source's
+  `.gm-back`), so the plate's canvas shows around it;
+- the **title card** is `427` source px wide at top `55` — **straddling the
+  back card's `90` top edge** (the owner: "It overhangs the background cards
+  top edge straddling the top of the background card. Gap between it and the
+  description card below it.");
+- the **description card** is `600` source px wide — **wider than the `500`
+  back card, which it overhangs on both sides** — and the **back card
+  extends vertically past it**: the card's bottom margin is the source's
+  full desc→plate distance (`202` source px — the `122` bottom padding plus
+  the `30 + 50` CTA block the career page does not port), so the back
+  card's own `90` bottom inset leaves **`112` source px of back card
+  visibly showing below the description card** — long copy scrolls inside
+  the card instead (the owner: "The background card is supposed to extend
+  vertically past the description card");
+- the component's **type renders at the source's ratios** — title `28`, year
+  `14`, desc `20` per `830px` plate — with the **owner's readable floor: no
+  component type renders below `11px`**. The floor may break the proportions
+  on small plates; the owner accepted exactly that trade ("Exact ratios with
+  a readable floor (e.g. desc never below ~11px) — floors slightly break
+  proportionality on small plates").
+- **long titles wrap** to two lines rather than shrinking ("Let long titles
+  wrap to two lines instead of scaling type") — the year subscript stays in
+  flow under the title card so a wrapped title pushes it down instead of
+  colliding with it;
+- **the row count scales the component**: "Yes — plate-relative: two-across
+  rows render bigger components than three-across at the same viewport; type
+  keeps the exact agentic-plugins ratios" — PNC Private Bank's two-across row
+  renders proportionally larger components than the three-across rows.
+
+**This entry supersedes B75's viewport type scaling** (the `--c1 = 16 × --rs`
+law and its measured design-canvas values) and **amends B75's "a card that
+does not overflow shows none" clause**: a **filled** description card always
+shows the styled in-card bar (`overflow-y: scroll` — the bar's gutter is
+present even where the copy fits; the thumb renders when the content
+overflows), while the **empty** placeholder stays bare exactly as today
+("Filled cards always show the bar; empty cards stay bare as today"). B75's
+scroll-bar styling (6px classic in-card bar, thumb `--ink`, transparent
+track, Firefox `@supports`) is carried into B76 unchanged.
+
+**B74 stands untouched**: the page is one viewport, each component caps at
+half the left half's own height, the row is vertically centred in the half,
+and the description card remains the page's only scroll container; the
+≤743px block's shipped page reflow (stacked plates, page may scroll) also
+stands. The component's geometry — unlike the type — is one design at every
+width; the 11px floor keeps the ≤743px render readable where the ratios
+would shrink the type away.
+
+Values are agent-derived under the B33/B40 provenance pattern: the owner
+ruled the relationships (the source design, the plate-relative uniform
+scale, the straddle, the wrap, the floor, the always-visible filled-card
+bar); the literals implement them — every value is a source px of the
+830px design, and the `11px` floor is the owner's own example value.
+
+**Source:** the owner's issue
+[#194](https://github.com/AlastairZeved/The-Portfolio/issues/194),
+2026-10-09 — quoted verbatim: "In /career, the components displaying the
+various roles should have a title card that overhangs the top of the
+description card. The description card is supposed to be wider than the
+background card but shorter than it. These are supposed to be designed
+exactly like the components from GitHub repo AlastairZeved/AlastairZeved on
+the /agentic-plugins page's component selector, but in this color family.
+This component should be standardized. For long titles, scale the text size
+down so it fits. For long descriptions, add a vertical scrollbar (always
+visible and in this color palette) to the description card. The text size of
+the description card should match the text size of the components in
+agentic-plugins. The /career page's components should also look like this,
+but scaled down as a component to fit three across, then scaled up in size
+where there's only two across." — the issue body also embeds three
+screenshots of the agentic-plugins components (github.com/user-attachments/
+assets/46cc0bf7-9a89-4197-9012-735bc0f09a91, /5f3d0b31-7d5b-4d1b-bc19-
+c78b35f9ddf0, /d65cafcd-1ad6-4018-94f0-af2fb11a299e), referenced here, not
+re-rendered — and the owner's seven grill answers of 2026-10-09 (owner chat,
+issue #194 grill), quoted verbatim as answered:
+
+1. "It overhangs the background cards top edge straddling the top of the
+   background card. Gap between it and the description card below it."
+2. "Yes — plate-relative: two-across rows render bigger components than
+   three-across at the same viewport; type keeps the exact agentic-plugins
+   ratios"
+3. "Let long titles wrap to two lines instead of scaling type"
+4. "Filled cards always show the bar; empty cards stay bare as today"
+5. "Yes — desc ends within the back card's vertical span; scroll takes over"
+6. "Uniform by plate width — component keeps the source's exact proportions
+   everywhere"
+7. "Exact ratios with a readable floor (e.g. desc never below ~11px) — floors
+   slightly break proportionality on small plates"
+
+and the owner's correction of 2026-10-09 (owner chat, on the first PR
+render) — quoted verbatim, with one expletive removed at the owner's
+direction: "nope, wrong. The background card is supposed to extend
+vertically past the description card. You have a source of truth, you have
+the components existing already in /agentic-plugins. why is this so
+[expletive removed] difficult?"

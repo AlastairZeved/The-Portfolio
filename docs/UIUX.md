@@ -623,7 +623,7 @@ The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 | card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B67 drawing rest scales and placements per card, link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
-| the career page (B47): employer selector, B132 glow, split body, three-section lot, sand/brown ladder, empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
+| the career page (B47): employer selector, B132 glow, split body, two-way lot (B65), monochrome ladder (B73), empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
 | the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, the B58 Download (PDF anchor), literal idea-green ladder, the B50 landing-convention band/card/lot render | `test/plantsandrocks.js` |
 
 ---
@@ -693,8 +693,8 @@ either; it renders synthesized there and here, unchanged.)*
 *(Band, card and footer rendering law amended by B49, issue #139: the career
 page's header band, title cards and footer render at the landing page's
 conventions — B46's height-anchored scale, B31's title-card box, the lot's
-two-row-shelf floor — re-tokened to the sand/brown binding. The scale is a
-pure-CSS custom property `--rs` (`vh/1104.55` landscape, `min(vw/1440,
+two-row-shelf floor — re-tokened to this page's own binding (§10.1). The
+scale is a pure-CSS custom property `--rs` (`vh/1104.55` landscape, `min(vw/1440,
 vh/1104.55)` portrait) since the page ships no script; every band literal
 renders as `L × --rs`.)*
 
@@ -709,7 +709,7 @@ renders as `L × --rs`.)*
   600, oneliner slot 400), `min-height: rule-y + 29px` hanging over the
   rule. Unselected cards are dim + italic (§4's unselected grammar); the
   selected card wears the B132 glow verbatim:
-  `border-color: var(--glow-sand); box-shadow: 0 0 8px 0 var(--glow-sand);`
+  `border-color: var(--glow-gray); box-shadow: 0 0 8px 0 var(--glow-gray);`
   and no other state. Default selection: PNC Bank. The header is the
   selector's `role="radiogroup"` (`aria-label="Choose an employer"`); the
   page's one `h1` ("Career") is visually hidden so no wordmark encodes
@@ -724,9 +724,9 @@ renders as `L × --rs`.)*
   the employer's roles as **plugin components** — the Agentic Plugins page's
   `.gregorian-mode` class set ported verbatim in structure (water back card
   `.gm-back`, uppercase title card `.gm-title`, the italic lowered year
-  subscript in the `.gm-uc` grammar, description card `.gm-desc`), re-hued
-  to this page's own sand/brown tokens (§10.1) with `--ink` on the sand
-  cards reusing `--deep` `#12100a`. One component per role, in **one row
+  subscript in the `.gm-uc` grammar, description card `.gm-desc`), re-tokened
+  to this page's own monochrome ladder (§10.1), with `--ink` on the light
+  cards reusing `--deep` `#080808`. One component per role, in **one row
   reading left to right** (B66: chronological, oldest leftmost; at ≤743px the
   shipped readable reflow stacks the plates again), equally sized and evenly
   spaced with comfortable padding between each to fit the space, contained
@@ -810,7 +810,7 @@ the final palette hexes. **Owner ruling (2026-10-05): empty blocks are
 omitted from the rendered page entirely until content exists** — no empty
 styled container, no section heading, no filler text, no "coming soon"
 marker. The slot structure lives in the markup as non-rendering `SLOT`
-comments (and the footer's three-section frame, whose empty `<p>` slots
+comments (and the footer's two-way frame, whose empty `<p>` slots
 measure zero height and carry no text) so a targeted fill makes each block
 appear; until then the page invents no copy.
 

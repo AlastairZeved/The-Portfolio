@@ -2352,3 +2352,44 @@ direction: "nope, wrong. The background card is supposed to extend
 vertically past the description card. You have a source of truth, you have
 the components existing already in /agentic-plugins. why is this so
 [expletive removed] difficult?"
+
+### B77. The career footer's left half carries a second line of copy beneath the tools line (issue #193)
+
+The career footer's left half renders **a second line of copy directly
+beneath B65's tools line**: "Maryville University of St. Louis | B.S.
+Accounting | 2021 | Magna cum laude". Where the copy carries straight
+bars, they render as **the same short divider bars as the top line** — the
+same 1px width, the same `--frame`-mix color, the same `0.875em` height,
+the same `0.6em` gap — so the two lines are one grammar stacked, separated
+by the lot's existing `0.35em` paragraph gap. **No new design values are
+introduced**: the line reuses the B65 rule set unchanged.
+
+The line renders on one line wherever the bar's width allows and wraps
+rather than overflows where it doesn't — B65's wrap-only-when-needed
+carries over to the second line unchanged, as does the no-overlap law it
+serves. The footer's structure is untouched: the two-way split, the one
+full divider bar, the `.cta` right, the empty #7/#8 slots (B47), and the
+lot's `134.76 × --rs` floor with content growing past it. B65 stands in
+full; this entry adds the second line beneath it.
+
+**Short viewports are deferred to their own work.** In the ~400px-tall
+windows the suite checks (744×400, 844×390) the bar's floor is tiny
+(~48px) and the copy wraps to two rows per line, so the bar's height is
+set by the copy instead of the CTA: it grows 79px → 133px and the role
+components sit 3–11px past their B74 cap (the page still fits one viewport
+and does not scroll; at every other tested size the bar's height is
+unchanged — 135px / 98px / 79px with and without the line). The owner
+deferred that geometry.
+
+**Source:** the owner's issue
+[#193](https://github.com/AlastairZeved/The-Portfolio/issues/193),
+2026-10-09 — quoted verbatim: "Underneath: "Orion Technology | Factset |
+Morningstar | Docupace | BPM | Salesforce" add another line of copy that
+reads: "Maryville University of St. Louis  | B.S. Accounting | 2021 |
+Magna cum laude"
+
+Use the same dividers in between sections as the top line"
+
+**Source:** the owner in chat, 2026-10-09 — quoted verbatim: "Mobile
+viewports are an entirely separate issue that will be resolved with their
+own work at a future date."

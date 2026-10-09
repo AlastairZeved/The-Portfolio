@@ -759,8 +759,11 @@ renders as `L × --rs`.)*
  title card. Two-across rows render proportionally larger components than
  three-across rows at the same viewport. The design canvas is unchanged
  (measured: at 1440×1110's ~195px three-across plates the floored type
- renders 11px; 12.86px title at 2560×1440's ~381px plates; one viewport and
- nothing clipped at every tested size from 744×400 up).
+ renders 11px; 12.86px title at 2560×1440's ~381px plates; one viewport at
+ every tested size from 744×400 up, and nothing clipped there except the
+ short windows B77 defers — 744×400 and 844×390 clip the component's bottom
+ by 3–11px with the footer's second line, the owner deferring that to
+ separate future work (chat, 2026-10-09)).
  Its **scroll bar is visible and inside the description card — always, on a
  FILLED card**: `overflow-y: scroll` keeps the styled in-card bar present
  even where the copy fits (the thumb renders when the content overflows;
@@ -797,7 +800,8 @@ renders as `L × --rs`.)*
   were ruled for the empty state and the filled state sizes to content.)*
   Right half: "Accomplishments" and "Learnings/Skills" (section name
   pending, issue #133 slot 6) render only once filled.
-- **Footer *(amended by B65, issue #177)*** the landing page's
+- **Footer *(amended by B65, issue #177; second line added by B77, issue
+  #193)*** the landing page's
   `.parking-lot` grammar — water gradient over `--deep`, 1px
   `--frame`-mix top rule, same padding — floored at the rescaled two-row
   shelf (`134.76 × --rs`, B49: the landing lot's floor, taken statically;
@@ -806,14 +810,20 @@ renders as `L × --rs`.)*
   BPM | Salesforce" rendered on one line, its straight slashes as **short
   divider bars** (1px wide, the divider's own `--frame`-mix color, `0.875em` tall —
   agent-derived per B33/B40: the owner ruled shorter + visually distinct,
-  same palette) — then **one** full divider bar (1px, 3/4 of the section's
+  same palette) — with the **education line** stacked directly beneath it
+  (B77, issue #193): the owner's copy "Maryville University of St. Louis |
+  B.S. Accounting | 2021 | Magna cum laude", its straight bars rendered as
+  **the same short divider bars** (same width, color, height, gap — no new
+  values), the two lines separated by the lot's `0.35em` paragraph gap —
+  then **one** full divider bar (1px, 3/4 of the section's
   inner length, vertically centred), then the `.cta` "Learn More about
   Rob" → `https://razgregory.com/`. *(B65 supersedes §3's three-way
   split: the second divider bar is removed.)* The professional-blurb
   (blank #7) and contact-info (blank #8) slot comments keep their halves;
-  the empty slots render nothing (B47). The tools line renders on one line
+  the empty slots render nothing (B47). Each line renders on one line
   wherever the bar's width allows and wraps rather than overflows where it
-  doesn't (B65, wrap-only-when-needed — no-overlap law).
+  doesn't (B65, wrap-only-when-needed — no-overlap law; B77 carries it to
+  the education line).
 
 ### §10.3 Blank slots
 
@@ -840,10 +850,13 @@ Specialist, Portfolio & Trust Administrator, Branch Banker — now render
 the owner's copy verbatim; every other desc card stays empty under B56.
 Amended by B65, issue #177: the footer's left half carries the owner's
 one-line tools list; the blurb (#7) and contact (#8) slots remain
-unfilled and render nothing.)*
+unfilled and render nothing. Amended by B77, issue #193: the left half
+also carries the owner's second line — the education copy — beneath the
+tools line; the #7/#8 slots are unchanged.)*
 
 **Pinned by:** `test/career.js` — selector mechanics, the B132 glow, the
-split, the two-way lot (B65), the ladder tokens, the omit-empty-block
+split, the two-way lot (B65, with B77's second line and its bars matched
+to the top line's), the ladder tokens, the omit-empty-block
 discipline, B74's one-viewport render (the component cap at half the
 left half's own height, the row centred in the half, the description card as
 the page's only scroll container), and B76's source-geometry render (the

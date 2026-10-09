@@ -1,6 +1,7 @@
 /* test/career.js — the career page (issue #133, B47): three-way employer
    selector, B132 glow on the selected title card, split body with ruled bar,
-   two-section parking lot with one divider and the B65 tools line, CTA back
+   two-section parking lot with one divider, the B65 tools line and the B77
+   education line beneath it (issue #193), CTA back
    to razgregory.com, the monochrome token ladder (B73), and the plugin components
    in the body's left half (issue #154, B56 — desc cards render EMPTY on
    purpose except the three B64 fills of issue #176); above the breakpoint
@@ -355,16 +356,21 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     wide2B76.plateW > wide3B76.plateW && wide2B76.descFS > wide3B76.descFS &&
     Math.abs(wide2B76.descFS - Math.max(20 * wide2B76.plateW / 830, 11)) < 0.6 &&
     Math.abs(wide3B76.descFS - Math.max(20 * wide3B76.plateW / 830, 11)) < 0.6);
-  // Short/landscape viewports: the law is absolute (one viewport, nothing
-  // cut), and the 11px floor keeps the type readable where the ratios would
-  // shrink it away.
+  // Short/landscape viewports: the page still fits one viewport (no scroll),
+  // and the 11px floor keeps the type readable where the ratios would shrink
+  // it away. The "nothing is clipped" half of these two checks is DEFERRED:
+  // with the footer's second line (B77, issue #193) the bar grows in windows
+  // this short (79 → 133px), which pushes the components 3–11px past their
+  // cap. Owner ruling (chat, 2026-10-09): "Mobile viewports are an entirely
+  // separate issue that will be resolved with their own work at a future
+  // date."
   const shortB76 = await b76({ width: 744, height: 400 });
-  ok('B76 — 744×400: the page still fits one viewport, nothing is clipped, and the type holds its 11px floor',
-    !shortB76.pageScrolls && shortB76.nothingClipped &&
+  ok('B76 — 744×400: the page still fits one viewport and the type holds its 11px floor (clip check deferred, owner 2026-10-09)',
+    !shortB76.pageScrolls &&
     shortB76.titleFS >= 11 && shortB76.descFS >= 11 && shortB76.yearFS >= 11);
   const landB76 = await b76({ width: 844, height: 390 });
-  ok('B76 — 844×390 (landscape phone): the page still fits one viewport and no component is clipped',
-    !landB76.pageScrolls && landB76.nothingClipped);
+  ok('B76 — 844×390 (landscape phone): the page still fits one viewport (clip check deferred, owner 2026-10-09)',
+    !landB76.pageScrolls);
 
   // back to the default tab for the rest of the suite
   await page.locator('.topband__card-hit[for="employer-pnc-bank"]').click();
@@ -412,16 +418,42 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         barH < fullH / 4 &&
         bar.backgroundColor === full.backgroundColor;
     }));
+  // B77 (issue #193): the owner's second line sits beneath the tools line,
+  // its straight bars rendered as the SAME short bars as the top line
+  ok('the education line renders the owner\'s copy beneath the tools line, three short bars between tokens (B77)',
+    await page.evaluate(() => {
+      const lines = [...document.querySelectorAll('.parking-lot__facts .parking-lot__tools')];
+      if (lines.length !== 2) return false;
+      const t = lines[1];
+      const tokens = [...t.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).filter(Boolean);
+      const bars = [...t.querySelectorAll('.parking-lot__tools-bar')];
+      const above = lines[0].getBoundingClientRect();
+      const self = t.getBoundingClientRect();
+      return JSON.stringify(tokens) === JSON.stringify(['Maryville University of St. Louis', 'B.S. Accounting', '2021', 'Magna cum laude']) &&
+        bars.length === 3 &&
+        self.top >= above.bottom - 1 &&
+        self.top - above.bottom < 3 * parseFloat(getComputedStyle(t).fontSize);
+    }));
+  ok('the education line\'s bars are identical to the top line\'s short bars — same width, height, palette (B77)',
+    await page.evaluate(() => {
+      const lines = [...document.querySelectorAll('.parking-lot__facts .parking-lot__tools')];
+      if (lines.length !== 2) return false;
+      const a = getComputedStyle(lines[0].querySelector('.parking-lot__tools-bar'));
+      const b = getComputedStyle(lines[1].querySelector('.parking-lot__tools-bar'));
+      return a.width === b.width && a.height === b.height &&
+        a.backgroundColor === b.backgroundColor;
+    }));
   ok('the CTA reads "Learn More about Rob" and links back to razgregory.com',
     (await page.locator('.parking-lot .cta').innerText()).trim() === 'Learn More about Rob' &&
     (await page.locator('.parking-lot .cta').getAttribute('href')) === 'https://razgregory.com/');
-  ok('footer right half (contact slot) still ships empty; left half carries only the tools line (B65)',
+  ok('the footer right half (contact slot) still ships empty; left half carries the two owner lines (B65, B77)',
     await page.evaluate(() => {
       const [left, right] = document.querySelectorAll('.parking-lot__facts');
       const rightOwn = [...right.childNodes]
         .filter(n => n.nodeType === 3)
         .map(n => n.textContent.trim()).join('');
-      return rightOwn === '' && left.querySelector('.parking-lot__tools') !== null;
+      return rightOwn === '' &&
+        left.querySelectorAll('.parking-lot__tools').length === 2;
     }));
 
   // B65 mid-band: the tools line wraps rather than overflowing where the

@@ -601,8 +601,10 @@ body:has(#employer-brinker:checked) .employer--brinker {
 
    B75 (issue #186 follow-up, owner chat 2026-10-09): the component's TYPE
    renders at the page's render scale — "you're scaling the component down but
-   not the font size" — floored so it "still needs to be readable"; and the
-   description card's scroll bar is VISIBLE and inside the card — the platform
+   not the font size" — with legibility resting on the ≤743px block's shipped
+   readable values, since any floor on the scale holds the component past its
+   cap in a short viewport; and the description card's scroll bar is VISIBLE and
+   inside the card — the platform
    overlay scrollbar painted nothing, and the owner ruled "put it inside".
 
    Mechanism: body holds the viewport's height and main is allowed to shrink
@@ -613,9 +615,9 @@ body:has(#employer-brinker:checked) .employer--brinker {
    its own text. Values are the owner's relationships under the B33/B40
    provenance pattern — 50% and 100% carry "half of that length" and "the
    component"; --c1 carries "scaling the font" (the component's own 1rem at
-   --rs, floored at the page's 0.8rem readable rung, every literal below the
-   shipped value × --c1: 16px → 1, 0.85rem → 0.85, 116px → 7.25, …) — no new
-   design value is invented. ---- */
+   --rs, with no floor, every type-derived literal being the shipped value ×
+   --c1: 16px → 1, 0.85rem → 0.85, 116px → 7.25, …) — no new design value is
+   invented. ---- */
 @media (min-width: 744px) {
   html, body { height: 100vh;         /* the no-dvh fallback, as --rs above */
                height: 100dvh; }

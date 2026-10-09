@@ -274,9 +274,9 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     }));
 
   // B75 (issue #186 follow-up): the component's type renders at the page's
-  // render scale (--c1 = max(0.8rem, 16 × --rs)) with the 0.8rem readable
-  // floor, and the description card's scroll bar is a real, visible, in-card
-  // classic bar, not the platform overlay bar that painted nothing.
+  // render scale (--c1 = 16 × --rs, no floor), and the description card's
+  // scroll bar is a real, visible, in-card classic bar, not the platform
+  // overlay bar that painted nothing.
   // (Headless Chromium force-enables overlay scrollbars, so the bar's painted
   // width is verified in a real browser — see the PR; the styling contract and
   // the scroll behaviour are asserted here.)

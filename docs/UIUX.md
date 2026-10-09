@@ -747,9 +747,11 @@ renders as `L × --rs`.)*
  px wide at top `55` — **straddling the back card's `90` top edge**, with a
  gap to the description card below it; the description card is `600` source
  px wide — **wider than the `500` back card, which it overhangs on both
- sides** — and **ends within the back card's vertical span** (its bottom
- margin is the back card's `90` bottom inset; long copy scrolls inside
- instead). The component's **type renders at the source's ratios** (title
+ sides** — and the **back card extends vertically past it** (the desc
+ card's bottom margin is the source's full desc→plate distance, `202`
+ source px, leaving `112` source px of back card visibly showing below the
+ card; long copy scrolls inside instead). The component's **type renders at
+ the source's ratios** (title
  `28`, year `14`, desc `20` per `830px` plate) with the **owner's readable
  floor: no component type below `11px`** — the floor may break the
  proportions on small plates, per the owner's ruling; **long titles wrap to
@@ -846,8 +848,9 @@ discipline, B74's one-viewport render (the component cap at half the
 left half's own height, the row centred in the half, the description card as
 the page's only scroll container), and B76's source-geometry render (the
 plate-relative uniform scale, the title card straddling the back card's top
-edge with a gap to the desc card, the wider desc card ending within the back
-card's span, the source-ratio type with its 11px floor, long titles wrapping,
+edge with a gap to the desc card, the wider desc card with the back card
+extending vertically past it, the source-ratio type with its 11px floor,
+long titles wrapping,
 and the always-visible styled bar on filled desc cards with the empty
 placeholder bare).
 

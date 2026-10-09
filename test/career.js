@@ -310,6 +310,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         straddle: r(t2).top < r(k).top && r(k).top < r(t2).bottom,
         descWider: r(d).width > r(k).width,
         descWithin: r(d).bottom <= r(k).bottom + 1,
+        backPast: r(k).bottom - r(d).bottom,   // the back card extends past the desc card (B76 correction)
         gap: r(d).top > r(t2).bottom,
         overflowY: getComputedStyle(d).overflowY,
         emptyOverflowY: getComputedStyle(emptyPlate.querySelector('.gm-desc')).overflowY,
@@ -335,8 +336,9 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     Math.abs(canvasB76.yearFS - Math.max(14 * canvasB76.plateW / 830, 11)) < 0.6);
   ok('B76 — the title card straddles the back card\x27s top edge, with a gap to the desc card below it',
     canvasB76.straddle && canvasB76.gap);
-  ok('B76 — the desc card is wider than the back card and ends within its vertical span',
-    canvasB76.descWider && canvasB76.descWithin);
+  ok('B76 — the desc card is wider than the back card, which extends vertically past it (the source\u2019s 112px strip below the card)',
+    canvasB76.descWider && canvasB76.descWithin &&
+    Math.abs(canvasB76.backPast - 112 * canvasB76.plateW / 830) < 2);
   ok('B76 — a filled desc card ALWAYS shows the styled in-card bar (6px, the card\x27s own ink, transparent track)',
     canvasB76.overflowY === 'scroll' && canvasB76.sbWidth === '6px' &&
     canvasB76.sbThumb === 'rgb(8, 8, 8)' && canvasB76.sbTrack === 'rgba(0, 0, 0, 0)');

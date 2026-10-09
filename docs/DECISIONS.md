@@ -2265,11 +2265,14 @@ proportions are identical to the source's at every size):
   top edge straddling the top of the background card. Gap between it and the
   description card below it.");
 - the **description card** is `600` source px wide — **wider than the `500`
-  back card, which it overhangs on both sides** — and **ends within the back
-  card's vertical span**: its bottom margin is the back card's own `90` bottom
-  inset, so the card never crosses the back card's bottom edge — long copy
-  scrolls inside the card instead (the owner: "Yes — desc ends within the
-  back card's vertical span; scroll takes over");
+  back card, which it overhangs on both sides** — and the **back card
+  extends vertically past it**: the card's bottom margin is the source's
+  full desc→plate distance (`202` source px — the `122` bottom padding plus
+  the `30 + 50` CTA block the career page does not port), so the back
+  card's own `90` bottom inset leaves **`112` source px of back card
+  visibly showing below the description card** — long copy scrolls inside
+  the card instead (the owner: "The background card is supposed to extend
+  vertically past the description card");
 - the component's **type renders at the source's ratios** — title `28`, year
   `14`, desc `20` per `830px` plate — with the **owner's readable floor: no
   component type renders below `11px`**. The floor may break the proportions
@@ -2342,3 +2345,10 @@ issue #194 grill), quoted verbatim as answered:
    everywhere"
 7. "Exact ratios with a readable floor (e.g. desc never below ~11px) — floors
    slightly break proportionality on small plates"
+
+and the owner's correction of 2026-10-09 (owner chat, on the first PR
+render) — quoted verbatim, with one expletive removed at the owner's
+direction: "nope, wrong. The background card is supposed to extend
+vertically past the description card. You have a source of truth, you have
+the components existing already in /agentic-plugins. why is this so
+[expletive removed] difficult?"

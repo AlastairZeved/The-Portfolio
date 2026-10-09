@@ -252,9 +252,10 @@ body:has(#employer-brinker:checked) .employer--brinker {
    unit, --u below, carries every literal: 1 source px = plate-width/830.
    The title card STRADDLES the back card's top edge (title top 55 < back
    top 90) with a gap to the description card below it (owner ruling); the
-   desc card is WIDER than the back card (600 vs 500 source px) and ends
-   within its vertical span (the plate's bottom padding is the back card's
-   own 90px bottom inset); long titles WRAP to two lines rather than
+   desc card is WIDER than the back card (600 vs 500 source px) and the
+   BACK CARD EXTENDS VERTICALLY PAST it (the source's desc→plate distance,
+   202px, leaves 112px of back card visible below the desc card); long
+   titles WRAP to two lines rather than
    shrinking (owner ruling); the component's type renders at the source's
    ratios (title 28, year 14, desc 20 per 830px plate) with the owner's
    readable floor — nothing below 11px.
@@ -447,9 +448,11 @@ body:has(#employer-brinker:checked) .employer--brinker {
 
 /* Card 2 — the description card. WIDER than the back card (600 vs 500
    source px — the card overhangs the back card on both sides) and, per the
-   owner's ruling, ending WITHIN the back card's vertical span: its bottom
-   margin is the back card's own 90u bottom inset, so the card can never
-   cross the back card's bottom edge — long copy scrolls inside instead.
+   owner's ruling, the BACK CARD EXTENDS VERTICALLY PAST it: the desc
+   card's bottom margin is the source's full desc→plate distance (202px:
+   the 122 bottom padding + the 30+50 CTA block the career page does not
+   port), so the back card's own 90px bottom inset leaves 112px of back
+   card visibly showing below the card — long copy scrolls inside instead.
    EMPTY on purpose (B56 owner override of the omit-empty rule) except the
    three B64 fills; the 116px empty placeholder is already in source design
    coordinates (3 × 32px line + 2 × 10px padding at the source's own type). */
@@ -458,7 +461,7 @@ body:has(#employer-brinker:checked) .employer--brinker {
   z-index: 1;
   width: calc(600 * var(--u));
   max-width: 100%;
-  margin: calc(13 * var(--u)) auto calc(90 * var(--u));  /* top 180u (source); bottom = back inset */
+  margin: calc(13 * var(--u)) auto calc(202 * var(--u));  /* top 180u (source); bottom = the source's desc→plate distance */
   padding: calc(10 * var(--u)) calc(18 * var(--u));
   border-color: var(--ink);
   background: var(--note);

@@ -652,27 +652,34 @@ static single file — all CSS inline, the typeface embedded as a data URI,
 **no script**: the employer selector is a three-way radio group driven by CSS
 `:has`, the landing reference's own mechanism.
 
-### §10.1 Tokens — the sand/brown binding
+### §10.1 Tokens — the monochrome binding *(B73, issue #190)*
 
-TheBoards' token ladder re-hued to sand + deep brown (B47); the ladder's
-luminance relationships are preserved role for role:
+TheBoards' token ladder re-derived as a **pure neutral gray scale — zero
+hue** — at the **landing palette's exact relative luminance rungs** (issue
+#190; supersedes B47's sand/brown binding); the ladder's luminance
+relationships are preserved role for role, and because every rung sits at
+the landing palette's luminance, §2.3's ink-pole contrast table carries over
+unchanged:
 
-| Token | Hex | Role |
-|---|---|---|
-| `--deep` | `#12100a` | page canvas, darkest surface — deep brown, TheBoards `--deep` role |
-| `--card` | `#241c0f` | band/card fill, one step above the deep |
-| `--frame` | `#9a7c52` | card borders + all full-width rules — the deep's hue lifted |
-| `--note` | `#e8d9b0` | brightest ink on the deep — light sand |
-| `--water-top` | `#7a5c38` | gradient ladder, header band |
-| `--water-mid` | `#5c4429` | gradient ladder mid stop |
-| `--water-bot` | `#3a2c1a` | gradient ladder foot |
-| `--ink-light` | `#f4f5f1` | light ink pole |
-| `--ink-dim` | `rgb(244 245 241 / 0.55)` | unselected-card ink |
-| `--glow-sand` | `#7d6340` | selected-card bloom — `--frame` one rung down (B132's rung rule) |
+| Token | Hex | Role | Rel. luminance (landing rung) |
+|---|---|---|---|
+| `--deep` | `#080808` | page canvas, darkest surface — neutral near-black, TheBoards `--deep` role | 0.0023 |
+| `--card` | `#151515` | band/card fill, one step above the deep | 0.0077 |
+| `--frame` | `#8c8c8c` | card borders + all full-width rules — the border/rule rung | 0.2611 |
+| `--note` | `#cbcbcb` | brightest ink on the deep — light gray | 0.5962 |
+| `--water-top` | `#636363` | gradient ladder, header band | 0.1237 |
+| `--water-mid` | `#4d4d4d` | gradient ladder mid stop | 0.0737 |
+| `--water-bot` | `#333333` | gradient ladder foot | 0.0325 |
+| `--ink-light` | `#f4f5f1` | light ink pole | — |
+| `--ink-dim` | `rgb(244 245 241 / 0.55)` | unselected-card ink | — |
+| `--glow-gray` | `#676767` | selected-card bloom — `--frame` one rung down (B132's rung rule) | 0.1364 |
 
-The final hexes are the owner's sign-off (issue #133 blank slot 9); the
-**relationships** above — card above deep, note brightest on the deep, glow
-one rung below frame — are the law.
+The final hexes are the owner's sign-off (issue #190, owner chat 2026-10-09:
+"confirmed and approved for use"); the **relationships** above — card above
+deep, note brightest on the deep, glow one rung below frame — are the law.
+`--water-bot-a` is `51 51 51` (`--water-bot`'s channels, the band's radial
+foot). The glow token renames `--glow-sand` → `--glow-gray`; no value ships
+under the old name.
 
 *(B56, issue #154: the ported component's `.gm-title` carries the source's
 800-weight type. The page's font set gains the **800 face** —

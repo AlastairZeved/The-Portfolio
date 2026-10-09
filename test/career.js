@@ -1,7 +1,7 @@
 /* test/career.js — the career page (issue #133, B47): three-way employer
    selector, B132 glow on the selected title card, split body with ruled bar,
    two-section parking lot with one divider and the B65 tools line, CTA back
-   to razgregory.com, the sand/brown token ladder, and the plugin components
+   to razgregory.com, the monochrome token ladder (B73), and the plugin components
    in the body's left half (issue #154, B56 — desc cards render EMPTY on
    purpose except the three B64 fills of issue #176). Single file,
    zero script, zero <link>. Black-box Playwright.
@@ -86,13 +86,13 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('default selection is PNC Bank',
     await page.locator('#employer-pnc-bank').isChecked());
   ok('selected card glows: border-color + 0 0 8px 0 bloom, one token',
-    glow.borderColor === 'rgb(125, 99, 64)' &&
-    glow.shadow === 'rgb(125, 99, 64) 0px 0px 8px 0px');
+    glow.borderColor === 'rgb(103, 103, 103)' &&
+    glow.shadow === 'rgb(103, 103, 103) 0px 0px 8px 0px');
 
   // Unselected cards carry no glow
   const unselectedGlow = await page.evaluate(() =>
     getComputedStyle(document.querySelectorAll('.topband__card')[1]).boxShadow);
-  ok('unselected cards carry no bloom', !unselectedGlow.includes('rgb(125, 99, 64)'));
+  ok('unselected cards carry no bloom', !unselectedGlow.includes('rgb(103, 103, 103)'));
 
   // §2: the body is split by a ruled bar; content swaps with the selection
   ok('a .split__rule bar divides the body',
@@ -113,7 +113,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   await page.evaluate(() => {
     const shadows = [...document.querySelectorAll('.topband__card')]
       .map(c => getComputedStyle(c).boxShadow);
-    return shadows[1].includes('rgb(125, 99, 64)') && !shadows[0].includes('rgb(125, 99, 64)');
+    return shadows[1].includes('rgb(103, 103, 103)') && !shadows[0].includes('rgb(103, 103, 103)');
   }));
 
   // B64 (issue #176) rewrites the desc-card assertions deliberately: three
@@ -283,7 +283,9 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     }));
   await mid.close();
 
-  // §4: the sand/brown ladder re-hues TheBoards' token roles
+  // §4: the B73 monochrome ladder re-derives TheBoards' token roles as a
+  // pure neutral gray scale at the landing palette's luminance rungs
+  // (issue #190; deliberate rewrite of the B47 sand/brown pins)
   const tokens = await page.evaluate(() => {
     const cs = getComputedStyle(document.documentElement);
     return {
@@ -291,11 +293,11 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       card: cs.getPropertyValue('--card').trim(),
       frame: cs.getPropertyValue('--frame').trim(),
       note: cs.getPropertyValue('--note').trim(),
-      glow: cs.getPropertyValue('--glow-sand').trim(),
+      glow: cs.getPropertyValue('--glow-gray').trim(),
     };
   });
-  ok('the ladder is sand/brown, not the To-Do blue', tokens.deep === '#12100a' &&
-    tokens.card === '#241c0f' && tokens.frame === '#9a7c52' && tokens.note === '#e8d9b0');
+  ok('the ladder is monochrome gray, at the landing palette luminance rungs', tokens.deep === '#080808' &&
+    tokens.card === '#151515' && tokens.frame === '#8c8c8c' && tokens.note === '#cbcbcb');
   const lum = hex => {
     const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
       .map(c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));

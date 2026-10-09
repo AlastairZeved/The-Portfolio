@@ -2099,3 +2099,37 @@ B19's hug-the-text box). No size, weight, spacing or mechanism changes.
 needs to be removed and replaced with \"The Digital Garden of\". Same text
 formatting, all on one line with \"Robert Alastair Zeved Gregory\" below
 it."
+
+### B73. The career page's palette is re-derived as a monochrome gray scale at the landing palette's luminance rungs (issue #190)
+
+`career.html`'s binding is re-derived a second time: the B47 sand/brown
+re-hue is **superseded by a pure neutral gray scale — zero hue** — at the
+**landing page's exact relative luminance rungs**, role for role with
+TheBoards' ladder:
+
+`--deep` `#080808` (0.0023) · `--card` `#151515` (0.0077) ·
+`--water-top` `#636363` (0.1237) · `--water-mid` `#4d4d4d` (0.0737) ·
+`--water-bot` `#333333` (0.0325) · `--frame` `#8c8c8c` (0.2611) ·
+`--note` `#cbcbcb` (0.5962) · `--glow-gray` `#676767` (0.1364 — one rung
+below `--frame`, B132's rung rule) · `--water-bot-a` `51 51 51`.
+
+The ladder's relationships stand unchanged (card above deep, note brightest
+on the deep, glow one rung below frame), and because every rung sits at the
+landing palette's luminance, the ink poles (`--ink-light` `#f4f5f1`,
+`--ink-dim`) and `UIUX §2.3`'s contrast table carry over unchanged. The glow
+token renames `--glow-sand` → `--glow-gray`; no value ships under the old
+name. `UIUX §10.1` is amended accordingly, and `test/career.js`'s ladder
+pins are rewritten deliberately (they pinned the B47 hexes).
+
+**Source:** the owner's issue
+[#190](https://github.com/AlastairZeved/The-Portfolio/issues/190),
+2026-10-09 — "Rederive the color palette of the page /career into a
+monochrome color scale using the same luminescence and hue wheel as the
+landing page's color palette." — with the owner's pre-implementation
+answers of 2026-10-09 (owner chat): on the derivation, "No, monochrome.
+Choose the monochrome colors in the same families as the others with the
+same luminescence and everything."; on the first candidate set (a blue-hued
+monochrome scale), "these colors are not monochrome. monochrome. not blue.
+monochrome."; and on the final neutral gray set, "confirmed and approved
+for use." The final hexes are the owner's sign-off, per the issue-#133
+blank-slot-9 precedent.

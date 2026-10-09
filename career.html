@@ -555,8 +555,9 @@ body:has(#employer-brinker:checked) .employer--brinker {
 .parking-lot__facts p:last-child { margin-bottom: 0; }
 .parking-lot__facts--contact { flex: 0 1 auto; }
 
-/* B65 (issue #177): the owner's one-line tools list, its straight slashes
-   rendered as short divider bars — 1px wide, the footer divider's own
+/* B65 (issue #177), carried by B77 (issue #193): the owner's footer copy
+   lines — the tools line and the education line beneath it — their straight
+   slashes rendered as short divider bars — 1px wide, the footer divider's own
    --frame-mix color, but 0.875em tall (agent-derived under the B33/B40
    pattern: the owner ruled "even shorter and the footer's divider bar ...
    visually distinct ... without changing the color palette"; the value
@@ -873,6 +874,11 @@ body:has(#employer-brinker:checked) .employer--brinker {
          own --frame-mix color, 0.875em tall), visually distinct from the
          footer's full divider bar, same palette. -->
     <p class="parking-lot__tools">Orion Technology<span class="parking-lot__tools-bar" aria-hidden="true"></span>Factset<span class="parking-lot__tools-bar" aria-hidden="true"></span>Morningstar<span class="parking-lot__tools-bar" aria-hidden="true"></span>Docupace<span class="parking-lot__tools-bar" aria-hidden="true"></span>BPM<span class="parking-lot__tools-bar" aria-hidden="true"></span>Salesforce</p>
+    <!-- B77 (issue #193): the owner's second line, directly beneath the
+         tools line, its straight bars rendered as the SAME short divider
+         bars as the top line (same width, color, height, gap — no new
+         values). -->
+    <p class="parking-lot__tools">Maryville University of St. Louis<span class="parking-lot__tools-bar" aria-hidden="true"></span>B.S. Accounting<span class="parking-lot__tools-bar" aria-hidden="true"></span>2021<span class="parking-lot__tools-bar" aria-hidden="true"></span>Magna cum laude</p>
   </div>
   <div class="parking-lot__divider" aria-hidden="true"></div>
   <div class="parking-lot__facts parking-lot__facts--contact">

@@ -727,11 +727,39 @@ renders as `L × --rs`.)*
   subscript in the `.gm-uc` grammar, description card `.gm-desc`), re-hued
   to this page's own sand/brown tokens (§10.1) with `--ink` on the sand
   cards reusing `--deep` `#12100a`. One component per role, in **one row
-  reading left to right** (B66: chronological, oldest leftmost; the half
-  scrolls vertically when the row needs more height; at ≤743px the shipped
-  readable reflow stacks the plates again), equally sized and evenly spaced
-  with comfortable padding between each to fit the space, contained within
-  the left half. The component's "Github" CTA is not ported. The description
+  reading left to right** (B66: chronological, oldest leftmost; at ≤743px the
+  shipped readable reflow stacks the plates again), equally sized and evenly
+  spaced with comfortable padding between each to fit the space, contained
+  within the left half. *(Amended by B74, issue #186)* Above the breakpoint
+  each component is **capped at half the left half's own height** — never the
+  header→footer's entire length — and the row is **vertically centred** in the
+  half; the **description card is the page's only scroll container** (its text
+  scrolls inside the card on overflow — the B56 card floor, `116 × --rs`,
+  rendering as a shrinkable flex basis for the empty placeholder, a filled
+  card sizing to its content per B64); the page is one viewport and does not
+  scroll. **B74 supersedes B66's half-scroll clause** — the left half is no
+  longer a scroll container. *(Amended by B75, issue #186)* The component's
+  **type renders at the page's render scale**: its own 1rem is `--c1` =
+  `16 × --rs` — the title's and description's type, the title card's padding,
+  the year subscript's size and margin, the description card's margin and
+  padding, the plate's padding and the description card's placeholder size are
+  all the shipped value × `--c1` — so the copy scales with the component and is
+  never pinned while the rest shrinks. The scale carries **no floor** (the
+  band's own convention, B46/B49: a floor holds the component above its cap in
+  a short viewport and the plate then cuts the title); legibility is the
+  ≤743px block's shipped readable values. The design canvas is unchanged
+  (16.08px at 1440×1110; 13.04px at 1440×900, 11.12px at 1024×768, 8.69px at
+  744×600, 5.65px at 844×390 — one viewport and nothing clipped at every tested
+  size from 744×400 up).
+  Its **scroll bar is visible and inside the description card**:
+  `::-webkit-scrollbar` forces the classic (non-overlay) bar Chromium and
+  Safari otherwise auto-hide — 6px wide, thumb `--ink` (the card's own border
+  token), transparent track — Firefox reads the `thin` standard properties
+  behind `@supports (-moz-appearance: none)`, and a card that does not overflow
+  shows none; the card is keyboard-focusable now that it scrolls and wears the
+  page's own focus ring (`--ink-light`, offset 2px).
+  The component's "Github" CTA is not ported.
+  The description
   cards carried **B56's explicit override** of the omit-empty rule (empty
   until the owner's fill passes); *(amended by B64, issue #176)* three now
   render the **owner's copy verbatim, three paragraphs per card** — Sr.
@@ -749,8 +777,8 @@ renders as `L × --rs`.)*
   699px filled card overflowed its cell onto the footer, which the
   no-overlap law forbids; the plates then sized to their content. That
   content-sizing now renders in B66's left-to-right row: `flex: 1 1 0`
-  equalizes the plates' widths, the vertical size is the content, and the
-  half scrolls when the row needs more height. The empty-state equal-cell
+  equalizes the plates' widths and the vertical size is the content, **capped
+  by B74 at half the left half's own height**. The empty-state equal-cell
   rendering was the placeholder geometry; the owner's equal-sizing words
   were ruled for the empty state and the filled state sizes to content.)*
   Right half: "Accomplishments" and "Learnings/Skills" (section name
@@ -801,8 +829,11 @@ one-line tools list; the blurb (#7) and contact (#8) slots remain
 unfilled and render nothing.)*
 
 **Pinned by:** `test/career.js` — selector mechanics, the B132 glow, the
-split, the two-way lot (B65), the ladder tokens, and the omit-empty-block
-discipline.
+split, the two-way lot (B65), the ladder tokens, the omit-empty-block
+discipline, and B74/B75's one-viewport render (the component cap at half the
+left half's own height, the row centred in the half, the type scaled to `--c1`
+with no floor, and the description card as the page's only scroll container
+with its visible 6px in-card scroll bar).
 
 ---
 

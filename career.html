@@ -239,7 +239,10 @@ body:has(#employer-brinker:checked) .employer--brinker {
    They need to read left to right" — equally sized (equal flex cells),
    evenly spaced (the page's gutter), contained in the half; the half
    scrolls vertically when the row needs more height (owner grill answer,
-   2026-10-08). The shipped ≤743px readable reflow stacks them again below
+   2026-10-08); B74 (issue #186) supersedes that half-scroll clause above the
+   breakpoint — there the left half is no longer a scroll container and the
+   description card scrolls instead (see the >743px block). The shipped
+   ≤743px readable reflow stacks them again below
    the breakpoint (owner grill answer, 2026-10-08).
    Row-width composition: the ruled row gives each plate a fraction of the
    half's width — below what the wide-plate absolute composition (source
@@ -269,9 +272,8 @@ body:has(#employer-brinker:checked) .employer--brinker {
   min-height: 0;
   display: flex;
   flex-direction: row;           /* B66: the plates read left to right */
-  align-items: flex-start;       /* plates size to their content; the half scrolls (B66) */
+  align-items: flex-start;       /* plates size to their content (B66/B74) */
   gap: 1.25rem;                  /* the page's existing gutter value */
-  overflow-y: auto;
 }
 .gregorian-mode {
   --ink: var(--deep);           /* desc ink on the sand note: the deep itself */
@@ -285,7 +287,9 @@ body:has(#employer-brinker:checked) .employer--brinker {
      the filled card overflowed the cell onto the footer. Spacing stands:
      the 1.25rem gutter keeps the row evenly spaced. In B66's row the equal
      cells equalize the plates' WIDTHS (flex-basis 0); the vertical size is
-     the content, and the half scrolls when the row needs more height. */
+     the content. B74 (issue #186) supersedes B66's half-scroll clause above
+     the breakpoint: the plate caps at half the left half's own height and
+     the description card carries the scroll (see the >743px block). */
   flex: 1 1 0;
   min-height: 0;
   min-width: 0;
@@ -434,7 +438,10 @@ body:has(#employer-brinker:checked) .employer--brinker {
 
 /* Card 2 — the description card. EMPTY on purpose (B56 owner override of
    the omit-empty rule), sized for 2-3 sentences: min-height = 3 × 32px
-   line + 2 × 10px padding. */
+   line + 2 × 10px padding. Above the breakpoint this is the page's only
+   scroll container: the owner's B74 (issue #186) "scroll bar inside of the
+   description of the component for overflow" — the card takes the plate's
+   remainder and scrolls its own text (see the >743px block). */
 .gm-desc {
   position: relative;
   z-index: 1;
@@ -578,6 +585,92 @@ body:has(#employer-brinker:checked) .employer--brinker {
   outline: 2px solid var(--ink-light);
   outline-offset: 2px;
   box-shadow: var(--elevation), 0 0 12px 2px var(--frame), 0 0 0 4px var(--deep);
+}
+
+/* ---- B74 (issue #186): above the breakpoint the page is one viewport and the
+   components are bounded. The owner's issue #186: the role components "are NOT
+   to be sized from header to footer's entire length. Half of that length in
+   height for the components is more than enough with a scroll bar inside of
+   the description of the component for overflow" — and "the page does not
+   scroll and it fits on one viewport without a scroll". The cap binds the
+   whole component at half the left half's own height, the row is vertically
+   centred in the half, and the description card is the page's only scroll
+   container (the owner's four grill answers, 2026-10-09). B74 supersedes B66's
+   half-scroll clause; the ≤743px block below stands unchanged (mobile keeps
+   scrolling, owner grill answer).
+
+   B75 (issue #186 follow-up, owner chat 2026-10-09): the component's TYPE
+   renders at the page's render scale — "you're scaling the component down but
+   not the font size" — floored so it "still needs to be readable"; and the
+   description card's scroll bar is VISIBLE and inside the card — the platform
+   overlay scrollbar painted nothing, and the owner ruled "put it inside".
+
+   Mechanism: body holds the viewport's height and main is allowed to shrink
+   (min-height 0 — without it the flex chain is content-driven and the page
+   scrolls, the #186 defect), so .split, .employer and its 1fr row are all
+   definite and the gallery's 50% resolves against the grid area; the plates
+   cap at 100% of that box, and the desc card takes the remainder and scrolls
+   its own text. Values are the owner's relationships under the B33/B40
+   provenance pattern — 50% and 100% carry "half of that length" and "the
+   component"; --c1 carries "scaling the font" (the component's own 1rem at
+   --rs, floored at the page's 0.8rem readable rung, every literal below the
+   shipped value × --c1: 16px → 1, 0.85rem → 0.85, 116px → 7.25, …) — no new
+   design value is invented. ---- */
+@media (min-width: 744px) {
+  html, body { height: 100vh;         /* the no-dvh fallback, as --rs above */
+               height: 100dvh; }
+  main { min-height: 0; }             /* the bounded chain: main may shrink */
+  /* The fixed-height band and the lot keep their own content height: the lot's
+     CTA (50px min-height) overflowed a shrunken lot by 3–4px and scrolled the
+     page in ≥744px-wide windows under ~470px tall (measured 844×390, 745×400). */
+  .topband, .parking-lot { flex: 0 0 auto; }
+  .split__gallery { height: 50%;      /* half the left half's own height */
+                    align-self: center; }   /* centred in the half */
+  .gregorian-mode { max-height: 100%;               /* the component's own cap */
+                    overflow: hidden;               /* clip past the cap, never the page */
+                    padding: calc(0.75 * var(--c1)); }
+  .gm-title, .gm-uc { flex: 0 0 auto; }      /* the title/year never shrink */
+  /* B75: the component's 1rem at the page's render scale — exactly the band's
+     own convention (B46/B49) — so the type scales with the component and is
+     never pinned while the rest shrinks. No floor is imposed: any floor holds
+     the title + year + card above the cap in a short viewport, and the plate
+     then cuts the title (measured at 744×500 and below). Legibility is the
+     ≤743px block's shipped readable values, the same guarantee the band's
+     scaled literals rest on. */
+  .gregorian-mode { --c1: calc(16 * var(--rs)); }
+  .gm-title { font-size: var(--c1);
+              padding: calc(0.6 * var(--c1)) calc(0.6 * var(--c1)) calc(0.7 * var(--c1)); }
+  .gm-uc { font-size: calc(0.85 * var(--c1));
+           margin: calc(0.4 * var(--c1)) auto 0; }
+  /* The desc card is the only scroll container, and its B56 floor yields to the
+     cap: a floor as a hard min-height would be clipped by the plate at narrow
+     widths (where a role title wraps and half the half is under title + floor).
+     The empty placeholder keeps its 116 × --rs size as a shrinkable flex basis;
+     a filled card sizes to its content (B64) and shrinks only under the cap.
+     B75: the bar is a real, VISIBLE, in-card scroll bar — ::-webkit-scrollbar
+     forces the classic (non-overlay) bar Chromium/Safari otherwise auto-hide,
+     6px wide so it takes no room; its thumb is the card's own ink (the card's
+     border token, 12.4:1 on --note — no hex invented), over a transparent track
+     that leaves the card's surface showing. Firefox reads the standard
+     scrollbar properties, scoped behind -moz-appearance because in Chromium
+     scrollbar-width would win the cascade and widen the bar to 10px. */
+  .gm-desc { font-size: var(--c1);
+             margin: calc(0.6 * var(--c1)) auto 0;
+             padding: calc(0.625 * var(--c1)) calc(1.125 * var(--c1));
+             overflow-y: auto;
+             min-height: 0; }
+  .gm-desc:empty { flex: 0 1 calc(7.25 * var(--c1)); }
+  .gm-desc:not(:empty) { flex: 1 1 auto; }
+  .gm-desc::-webkit-scrollbar { width: 6px; }
+  .gm-desc::-webkit-scrollbar-track { background: transparent; }
+  .gm-desc::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 3px; }
+  @supports (-moz-appearance: none) {
+    .gm-desc { scrollbar-width: thin; scrollbar-color: var(--ink) transparent; }
+  }
+  /* The card is keyboard-focusable now that it scrolls; the page's own focus
+     ring token, offset 2px so it lands on the plate outside the card's ink
+     border (a light ring on the light card would not read). */
+  .gm-desc:focus-visible { outline: 2px solid var(--ink-light); outline-offset: 2px; }
 }
 
 @media (max-width: 743px) {

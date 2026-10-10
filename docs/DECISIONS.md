@@ -2466,3 +2466,48 @@ passes behind Career as your screenshot shows it; B78 records that this
 arrangement supersedes the no-obscured-line expectation where the two
 collide, and scaling.js's assertion is amended for this owner-authored
 pair.".
+
+---
+
+### B79. The career page's three title cards render at one shared size, equally spaced (issue #195)
+
+The owner ruled that the career page's three selector title cards —
+**PNC Bank**, **PNC Private Bank**, **Brinker Capital** — must render
+**all the same size** and **still equally spaced apart**. What the law
+now renders: every card's box is identical (one shared width and one
+shared height) and the two gaps between the three cards are exactly
+equal, at every viewport and in every selection state.
+
+The shared width is **the widest label's own content hug** ("PNC Private
+Bank"). Each card keeps B31's hug-the-text box grammar verbatim —
+`width: max-content`, the `(band-top + 8px) 16px 16px` padding, the
+border/radius/min-height/20px type — and the hug resolves to the widest
+of the three labels instead of each card's own text. Equal boxes centred
+in the band's three equal columns keep B49's "spread across the band",
+and the gaps are equal by construction. **B49's per-card "content-sized"
+clause is amended for these three selector cards only — the later
+ruling wins.** The landing page's single title card (B31) is untouched
+(one card, nothing to equalize), and the body's plugin components are
+explicitly out of scope: "this is not in reference to any of the
+components in the body of the page." The ≤743px stacked reflow inherits
+the same shared width, so the mobile cards are equal-sized too.
+
+Mechanism (agent-derived per B33 — the owner ruled the behaviour, not
+the CSS mechanics): a hidden widest-label sizer in each card's wordmark
+(`::before`, zero height, `visibility: hidden`) inherits the wordmark's
+exact typography — 600 weight, the 20 × `--rs` type (1.1rem mobile),
+-0.02em, the italic unselected state — so every card's `max-content`
+hug resolves to the widest label at every render scale and in every
+selection state, with no invented width value anywhere.
+`test/career.js` pins the law (shared size, equal gaps — at the desktop
+canvas, after a selection change, and at 390px) and its old per-card
+"content-sized" assertion is rewritten deliberately to say so (noted in
+the test's own comment). `UIUX §10.2` is amended accordingly.
+
+**Source:** owner's issue
+[#195](https://github.com/AlastairZeved/The-Portfolio/issues/195),
+2026-10-09 — quoted verbatim: "Equalize the size of the title cards so
+they're all the same size and still equally spaced apart. This is in
+reference to title cards: \"PNC Bank\", \"PNC Private Bank\", and
+\"Brinker Capital\". this is not in reference to any of the components in
+the body of the page."

@@ -80,12 +80,35 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     Math.abs(b49.hang - 29 * b49.rs) < 1);
   ok('card type is the 20px logical rung: wordmark font-size = 20 × rs (B31/B49)',
     Math.abs(parseFloat(b49.font) - 20 * b49.rs) < 0.5);
-  ok('card is the B31 box: border-top 0, radius only on the bottom corners, content-sized',
-    // content-sized hug: ~111px at 1440×900; <300 is a sanity bound against
-    // regression to the old full-width grid cell (~440px)
+  // issue #195 (B79) deliberately rewrites the old "content-sized" wording:
+  // the law is now ONE SHARED SIZE across the three cards (asserted below
+  // from the measured rects), not a per-card content hug. The < 300 sanity
+  // bound stays — it guards regression to the old full-width grid cell
+  // (~440px).
+  ok('card is the B31 box: border-top 0, radius only on the bottom corners, hug width bounded under the grid cell (issue #195, B79 rewrite)',
     b49.borderTop === '0px' && parseFloat(b49.radius) > 0 && b49.cardW < 300);
   ok('lot is floored at the rescaled two-row shelf: 134.76 × rs (B46/B73/B49)',
     b49.lotH >= 134.76 * b49.rs - 1);
+
+  // issue #195 (B79): the three title cards render at one shared size —
+  // each hugs the widest of the three labels ("PNC Private Bank") — and the
+  // two gaps between them are equal. Numbers computed from the measured
+  // rects (the B49 measurement block's spirit); the shared width is the
+  // widest label's own content hug, so the B31 hug-the-text box grammar
+  // stands and no width is invented.
+  const m195 = () => page.evaluate(() => {
+    const rs = [...document.querySelectorAll('.topband__card')].map(c => c.getBoundingClientRect());
+    return { w: rs.map(r => r.width), h: rs.map(r => r.height),
+             gaps: [rs[1].left - rs[0].right, rs[2].left - rs[1].right] };
+  });
+  const shared195 = m => m.w.every(w => Math.abs(w - m.w[0]) < 0.5) &&
+    m.h.every(h => Math.abs(h - m.h[0]) < 0.5);
+  const equalGaps195 = m => Math.abs(m.gaps[0] - m.gaps[1]) < 0.5;
+  const base195 = await m195();
+  ok('all three title cards render at one shared size (issue #195, B79)',
+    shared195(base195));
+  ok('the three title cards are equally spaced apart (issue #195, B79)',
+    equalGaps195(base195));
 
   // Default selection: PNC Bank, wearing the B132 glow (one token, soft bloom)
   await page.waitForTimeout(300);   // let the 200ms box-shadow transition settle
@@ -126,6 +149,14 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       .map(c => getComputedStyle(c).boxShadow);
     return shadows[1].includes('rgb(103, 103, 103)') && !shadows[0].includes('rgb(103, 103, 103)');
   }));
+  // issue #195 (B79): the shared size and equal gaps hold across a selection
+  // change — the two unselected wordmarks render italic (the dim-italic
+  // state) and the boxes stay identical.
+  const pick195 = await m195();
+  ok('the shared card size holds after a selection change (issue #195, B79)',
+    shared195(pick195));
+  ok('the gaps stay equal after a selection change (issue #195, B79)',
+    equalGaps195(pick195));
 
   // B64 (issue #176) rewrites the desc-card assertions deliberately: three
   // desc cards now carry the owner's copy verbatim (B64), the rest stay
@@ -267,6 +298,13 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   }
   await page.locator('.topband__card-hit[for="employer-brinker"]').click();
   await page.waitForTimeout(300);
+  // issue #195 (B79): the shared size and equal gaps hold with Brinker
+  // selected too (the other two wordmarks italic).
+  const brk195 = await m195();
+  ok('the shared card size holds with Brinker selected (issue #195, B79)',
+    shared195(brk195));
+  ok('the gaps stay equal with Brinker selected (issue #195, B79)',
+    equalGaps195(brk195));
   ok('B74 — the overflowing description scrolls inside its own card, never the page (Brinker, Sr. Portfolio Specialist)',
     await page.evaluate(() => {
       const plate = [...document.querySelectorAll('.employer--brinker .gregorian-mode')]
@@ -506,6 +544,19 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       const rule = shown.querySelector('.split__rule').getBoundingClientRect();
       const overflow = document.documentElement.scrollWidth > document.documentElement.clientWidth;
       return half.width > 300 && rule.height <= 2 && rule.width < half.width && !overflow;
+    }));
+  // issue #195 (B79): the stacked cards share one width at the mobile type
+  // rung too (the sizer inherits the 1.1rem wordmark).
+  ok('the stacked title cards share one width at 390px (issue #195, B79)',
+    await page.evaluate(() => {
+      const ws = [...document.querySelectorAll('.topband__card')].map(c => c.getBoundingClientRect().width);
+      return ws.every(w => Math.abs(w - ws[0]) < 0.5);
+    }));
+  ok('the stacked title cards are equally spaced at 390px (issue #195, B79)',
+    await page.evaluate(() => {
+      const rs = [...document.querySelectorAll('.topband__card')].map(c => c.getBoundingClientRect());
+      const gaps = [rs[1].top - rs[0].bottom, rs[2].top - rs[1].bottom];
+      return Math.abs(gaps[0] - gaps[1]) < 0.5;
     }));
   // a11y: the selector is a named radio group; one off-canvas h1, equal wordmarks
   await page.setViewportSize({ width: 1440, height: 1110 });

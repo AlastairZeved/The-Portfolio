@@ -119,7 +119,9 @@ body {
 }
 
 /* Each card is the landing title card's B31 box grammar verbatim (issue #139):
-   content-sized (hugs its text), top-anchored in the band, border-top 0 and
+   content-sized (hugs its text — the three selector cards hug the widest
+   label instead, so all three boxes are identical: issue #195/B79),
+   top-anchored in the band, border-top 0 and
    radius only on the corners that exist, (band-top + 8px) 16px 16px padding,
    the 20px type, and the min-height rule-y + 29px that hangs it over the
    header line. All literals render at B46's scale. */
@@ -193,6 +195,22 @@ body {
   font-size: calc(20 * var(--rs));
   color: var(--ink-light);
   line-height: 1.2;
+}
+/* issue #195 (B79): all three selector cards render at one shared size —
+   each hugs the widest of the three labels ("PNC Private Bank"), so the
+   boxes are identical and the gaps between them equal. The hidden sizer
+   inherits the wordmark's own typography (600, the 20 × --rs type, the
+   mobile 1.1rem, -0.02em, the italic unselected state), so the shared
+   width tracks the type at every breakpoint (the unselected italic is
+   synthetic — the embedded faces ship no true italic — so its advances
+   match the roman). Update the string if a label or a filled oneliner
+   slot ever outgrows it. */
+.topband__wordmark::before {
+  content: "PNC Private Bank";
+  display: block;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
 }
 /* Unselected: the landing page's dim-italic state (faded, italicized). */
 .topband__card:not(:has(.topband__tab:checked)) .topband__wordmark,

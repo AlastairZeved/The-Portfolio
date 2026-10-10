@@ -113,8 +113,8 @@ async function measure(page) {
     const p = await measure(pf);
     const b = await measure(tb);
 
-    /* B67 (issue #175): the owner's #175 drawing moves Zeved Boards to
-       top:55% beside Software & AI (top:51.7%) with only a 9.1% horizontal
+    /* B78 (issue #189): the owner's #189 drawing puts Zeved Boards at
+       top:26.7% beside Software & AI (top:25.9%) with only a 15% horizontal
        gap, so B46's measured no-overlap floor (lw_min) binds at 1440×900 —
        the sheet must be wider than the pure height anchor allows and the
        whole scene, band included, renders at the floored scale. B46's own
@@ -126,7 +126,7 @@ async function measure(page) {
     const REF_H = 1440 / 1.3037;
     const floored = Math.abs(p.rs - h / REF_H) > 1e-6;   // B46's floor bound first
     if (floored) {
-      ok(`${tag}: band rule renders at the portfolio's own law at its floored scale — 67.38 × rs (${p.rs.toFixed(4)}; B46's measured no-overlap floor bound by the #175 drawing, B67)`,
+      ok(`${tag}: band rule renders at the portfolio's own law at its floored scale — 67.38 × rs (${p.rs.toFixed(4)}; B46's measured no-overlap floor bound by the #189 drawing, B78)`,
         Math.abs(p.rulePx - p.ruleY * p.rs) < 1 &&
         Math.abs(p.ruleY - 67.38) < 0.5,
         `portfolio ${p.rulePx.toFixed(1)} vs ${(p.ruleY * p.rs).toFixed(1)}`);
@@ -138,10 +138,10 @@ async function measure(page) {
       await pfRef.waitForTimeout(300);
       const pref = await measure(pfRef);
       await pfRef.close();
-      ok(`${tag}: the floor-inert reference viewport actually is floor-inert (rs = vh/REF_H at 2560×1440; B67's premise, asserted)`,
+      ok(`${tag}: the floor-inert reference viewport actually is floor-inert (rs = vh/REF_H at 2560×1440; B67/B78's premise, asserted)`,
         Math.abs(pref.rs - 1440 / REF_H) < 1e-6,
         `reference rs ${pref.rs.toFixed(4)} vs ${(1440 / REF_H).toFixed(4)}`);
-      ok(`${tag}: the floored sheet rescales as a whole — band label logical height unchanged (${pref.rs.toFixed(4)} floor-inert reference vs ${p.rs.toFixed(4)} floored; B67)`,
+      ok(`${tag}: the floored sheet rescales as a whole — band label logical height unchanged (${pref.rs.toFixed(4)} floor-inert reference vs ${p.rs.toFixed(4)} floored; B67/B78)`,
         Math.abs(p.labelH / p.rs - pref.labelH / pref.rs) < 0.5,
         `floored ${(p.labelH / p.rs).toFixed(2)} vs ${(pref.labelH / pref.rs).toFixed(2)}`);
     } else {
@@ -161,7 +161,7 @@ async function measure(page) {
       ok(`${tag}: band labels render at the same PHYSICAL px`,
         Math.abs(p.labelH - b.labelH) < 1.2,
         `portfolio ${p.labelH.toFixed(1)} vs TheBoards ${b.labelH.toFixed(1)}`);
-    }   // end floored/else — B67's note above
+    }   // end floored/else — B78's note above
     ok(`${tag}: portfolio lot-h = min(max(134.76 shelf, 34 + Σ rows), ⌈half sheet⌉) — its own rescaled law`,
       Math.abs(p.lotH - Math.min(Math.max(122 * K, 34 + Math.round(p.lotSum)), Math.ceil(p.logicalH * 0.5))) < 0.5,
       `lot ${p.lotH} Σ ${p.lotSum}`);

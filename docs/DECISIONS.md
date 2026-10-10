@@ -2393,3 +2393,76 @@ Use the same dividers in between sections as the top line"
 **Source:** the owner in chat, 2026-10-09 — quoted verbatim: "Mobile
 viewports are an entirely separate issue that will be resolved with their
 own work at a future date."
+
+### B78. Every note card's default size and placement follows the owner's issue #189 drawing (issue #189)
+
+The owner logged in issue
+[#189](https://github.com/AlastairZeved/The-Portfolio/issues/189)
+a 2880×1800 screenshot of the board displaying the note cards at their
+new placements and sizes, directing: "Please execute this exact placement
+and exact sizing." Per B33's provenance law, the owner's drawing rules the
+authored card sizes and placements. This entry **supersedes B67's #175
+placement and scale list**.
+
+The values below are **agent-derived measurements of that screenshot**
+(method: outer card footprint — pale fill plus the 2px `--ink-dark` border
+— at the drawing's 2880×1650 page viewport, render scale
+`rs = 1650/1104.55` under B46's height-anchored landscape law, the width
+floor inert at that aspect; calibrated against the unchanged cards' B67
+values; rest scale = drawing footprint ÷ the card's measured unscaled
+content width). Authored `left`% / `top`% / `--card-scale`:
+
+- Community: 13.6% / 18.3% / **2.33** (seat unchanged, scale re-sized)
+- Career: 42.3% / 18.5% / **2.18** (seat unchanged, scale re-sized)
+- Writing: **70.9% / 53.9% / 1.86**
+- Software & AI: **66% / 25.9% / 1.78**
+- Plants & Rocks: 40% / 61.5% / **2.26** (seat unchanged, scale re-sized)
+- Music: **7.7% / 51.4%** / 1.70 (scale unchanged)
+- Apple Music: **17.8% / 62.7% / 1.01**
+- Spotify: **5.2% / 61.8%** / 1.19 (scale unchanged)
+- LinkedIn: 36.6% / 11.5% / 1.06 (unchanged)
+- Zeved Boards: **81% / 26.7% / 1.24**
+- Agentic Plugins: **79% / 36% / 1.19**
+- Plants on Poles: 37.7% / 73.7% / 0.98 (unchanged)
+- Plants in Rocks: 50.2% / 73.8% / **1.02** (seat unchanged, scale re-sized)
+
+Seven cards are re-placed and nine re-sized; LinkedIn and Plants on Poles
+are untouched. The gesture bounds stand unchanged — B45's 0.5 floor and
+B51's one-fifth-of-viewport ceiling still move the scale from these rest
+values. Nothing else changes: the cards' destinations, states, links and
+the per-authored-pair link mechanism (B28) are untouched, and the link
+lines recompute from the moved cards' centres. One mechanism consequence,
+noted for the record: **B46's measured no-overlap width floor binds at
+some landscape aspects** (measured: 1440×900, 1280×800, 1024×768, 800×800;
+inert at 2560×1440 and 1920×1080). The binding pair is now Software & AI
+↔ Zeved Boards at a 15% horizontal gap, and the floor settles at a
+1794.8-logical sheet width — binding below aspect ≈ 1.62 — where the
+sheet, band included, rescales as a whole to keep B44's no-overlap law;
+where the floor is inert, the height-anchored render is unchanged.
+`UIUX §3.4` and `§4` are amended to name this drawing as the placement
+and size authority.
+
+**The drawing collides with B44's no-obscured-line law, and the owner ruled
+the drawing stands.** The exact #189 placement runs the **Software & AI ↔
+Community** link line behind the Career card — visible in the owner's own
+screenshot, where the line dies at Career's left border and re-emerges from
+its bottom edge — reintroducing the "link lines obscured" defect class the
+owner ruled out in issue #121 (`B44`). The conflict was put to the owner,
+who ruled the drawing is executed exactly as-is: this arrangement supersedes
+the no-obscured-line expectation where the two collide, and
+`test/scaling.js`'s assertion is amended to except this owner-authored pair
+(`UIUX §3.4` records the exception).
+
+**Source:** owner's issue
+[#189](https://github.com/AlastairZeved/The-Portfolio/issues/189),
+2026-10-09 — quoted verbatim: "Attached is a screenshot containing the
+new placements of the note cards and how each is to be sized. Please
+execute this exact placement and exact sizing." (screenshot:
+[issue #189](https://github.com/user-attachments/assets/cbc80ef9-2768-4a8e-8695-7d9da29f44fa)).
+
+**Source:** the owner in chat, 2026-10-10 — selecting the offered
+resolution, quoted verbatim: "Execute the drawing exactly as-is — the line
+passes behind Career as your screenshot shows it; B78 records that this
+arrangement supersedes the no-obscured-line expectation where the two
+collide, and scaling.js's assertion is amended for this owner-authored
+pair.".

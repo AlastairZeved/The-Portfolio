@@ -706,7 +706,12 @@ renders as `L × --rs`.)*
   closed by the 1px `--frame` rule at `--rule-y` (`67.38 × --rs`, the
   rescaled two-line floor) — with three title cards, PNC Bank, PNC Private
   Bank, Brinker Capital, left→right chronological. Each card is the landing
-  title card's B31 box grammar verbatim: content-sized, top-anchored,
+  title card's B31 box grammar verbatim — except the hug: **all three
+  render at one shared size**, each card hugging the widest label's own
+  content width ("PNC Private Bank") rather than its own text, so the
+  three boxes are identical and the two gaps between them exactly equal
+  (B79, issue #195), in every selection state and at every viewport
+  (the ≤743px stacked reflow shares the one width too) — top-anchored,
   `border-top: 0`, radius only on the bottom corners, `(band-top + 8px)
   16px 16px` padding, both lines at the 20px logical type (employer name
   600, oneliner slot 400), `min-height: rule-y + 29px` hanging over the
@@ -857,7 +862,8 @@ unfilled and render nothing. Amended by B77, issue #193: the left half
 also carries the owner's second line — the education copy — beneath the
 tools line; the #7/#8 slots are unchanged.)*
 
-**Pinned by:** `test/career.js` — selector mechanics, the B132 glow, the
+**Pinned by:** `test/career.js` — the B79 selector-card shared size and
+equal gaps, selector mechanics, the B132 glow, the
 split, the two-way lot (B65, with B77's second line and its bars matched
 to the top line's), the ladder tokens, the omit-empty-block
 discipline, B74's one-viewport render (the component cap at half the

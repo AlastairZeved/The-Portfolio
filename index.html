@@ -223,7 +223,8 @@ body {
    plants-rocks, 1.70 music, 1.01 apple-music, 1.19 spotify, 1.06
    linkedin, 1.24 zeved-boards, 1.19 agentic-plugins, 0.98
    plants-poles, 1.02 plants-in-rocks — the owner's #189 drawing
-   sizes every card. The gesture
+   sizes every card — plus 1.19 philly-plant-dads, the Spotify scale by
+   the owner's grill words (B80, issue #196). The gesture
    still moves the scale from there (B45/B51 bounds unchanged). */
 .door-card {
   position: absolute;
@@ -323,6 +324,19 @@ body {
   transform: scale(var(--card-scale, 1));   /* B45: the note's own scale stands under hover */
   outline: none;
 }
+
+/* B80 (issue #196): the "Philly Plant Dads" note is the Spotify card's own
+   box — the same 132px min-width, one 17px × 1.4 line (48px outer) at the
+   Spotify rest scale 1.19 — with the label font scaled down to fit inside it
+   (owner, grill 2026-10-10: "same physical size as the Spotify card, with
+   font scaled down to fit"). The label hugs 152px at the note's 17px, so the
+   linear fit is 17 × 104 / 152 = 11.63px into the box's 104px content width —
+   shipped at 11.4px, the largest tenth that keeps the box at 132 × 48px
+   exactly (glyph-advance rounding widens the hug at 11.5px and above;
+   agent-derived, B33). line-height stays the note's 23.8px line box
+   (17 × 1.4, B45) so the box height is exactly Spotify's. B45's fixed-17px
+   font clause is amended for this one card (B80). */
+.door-card.fit-to-spotify { font-size: 11.4px; line-height: 23.8px; }
 
 /* ---- The link layer (UIUX §4.3): the lines that join the note cards ----
    TheBoards' link idiom ported verbatim (TheBoards' UIUX §4.6 / B91): a thin
@@ -597,6 +611,19 @@ body {
     <span class="resize-handle" aria-hidden="true"></span>
   </div>
 
+  <!-- B80 (issue #196): "Philly Plant Dads" — a linked sub note of Plants &
+       Rocks (link pair 14) and a door to its Instagram in a new tab, with the
+       full clickable-card states (B14/B25). The owner ruled its seat in
+       words (issue #196 + the grill answers of 2026-10-10): to the right of
+       Plants & Rocks, the gap "a little longer than" the Software & AI ↔
+       Zeved Boards gap, its centre "just a touch lower" than the parent's —
+       transcribed as left 59.5% / top 64.3% at the #189 drawing's own
+       2880×1650 reference (agent-derived, B33). -->
+  <a class="door-card sub-card fit-to-spotify" data-id="philly-plant-dads" style="--card-scale: 1.19; left:59.5%; top:64.3%" href="https://www.instagram.com/philly_plant_dads" target="_blank" rel="noopener noreferrer">
+    Philly Plant Dads
+    <span class="resize-handle" aria-hidden="true"></span>
+  </a>
+
   <!-- Parking Lot: water field closing the sheet (B6) -->
   <div id="lot">
     <div id="lot-rule"></div>
@@ -644,9 +671,9 @@ body {
     </div>
   </div>
 
-  <!-- The link layer (UIUX §4.3, B28): the thirteen straight 1px --frame
+  <!-- The link layer (UIUX §4.3, B28): the fourteen straight 1px --frame
        lines that join the note cards, one `<line>` per pair the owner names
-       in issue #75, #72, #74 and #146. TheBoards' link idiom ported verbatim
+       in issue #75, #72, #74, #146 and #196. TheBoards' link idiom ported verbatim
        (TheBoards' UIUX §4.6 / B91) — a line between two cards' centres,
        below the notes,
        never a hit target. Endpoints are computed from live card geometry
@@ -666,6 +693,7 @@ body {
     <line data-link="11" data-from="software-ai" data-to="agentic-plugins"></line>
     <line data-link="12" data-from="plants-rocks" data-to="plants-poles"></line>
     <line data-link="13" data-from="plants-rocks" data-to="plants-in-rocks"></line>
+    <line data-link="14" data-from="plants-rocks" data-to="philly-plant-dads"></line>
   </svg>
 
 </div>

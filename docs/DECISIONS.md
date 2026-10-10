@@ -2511,3 +2511,69 @@ they're all the same size and still equally spaced apart. This is in
 reference to title cards: \"PNC Bank\", \"PNC Private Bank\", and
 \"Brinker Capital\". this is not in reference to any of the components in
 the body of the page."
+
+---
+
+### B80. "Philly Plant Dads" — a linked sub note of Plants & Rocks and a door to its Instagram, at the Spotify card's own size (issue #196)
+
+A new note card joins the board: **Philly Plant Dads**, a child of
+**Plants & Rocks** — linked to it by line pair 14 — and a real link to
+`https://www.instagram.com/philly_plant_dads`, opening in a new tab with the
+full clickable-card states (B14/B25), like every other door.
+
+**Size — the Spotify card's own physical size, the label font scaled down to
+fit.** The card renders in the Spotify box exactly: the same `min-width:
+132px` one-line note box (132 × 48px outer — a 23.8px line + `10px 12px`
+padding + 2px border = 47.8px, reported 48) at the Spotify rest scale
+**1.19**, with the label's font scaled down to fit the box — **11.4px**
+(agent-derived fit under B33/B43: the label hugs 152px at the note's 17px,
+and the 132px box's content width is 104px, so the linear fit is
+17 × 104 / 152 = 11.63; 11.4 is the largest tenth that keeps the box at
+132 × 48px exactly — glyph-advance rounding widens the hug at 11.5px and
+above, measured at 133/134px boxes). The
+line box stays the note's 17 × 1.4 = 23.8px (B45), so the box height is
+Spotify's. **B45's fixed-17px font clause is amended for this one card — the
+later ruling wins.**
+
+**Placement — left 59.5% / top 64.3%** (agent-derived transcription of the
+owner's words at the issue-#189 drawing's own 2880×1650 reference, the B78
+method): the card sits to the right of Plants & Rocks' right edge at a gap of
+~28 logical px — the Software & AI ↔ Zeved Boards gap at that reference
+(23.97 logical px) "a little longer" (×1.2) — and its centre sits ~5.4
+logical px (≈5% of the parent's height) below Plants & Rocks' centre. The
+link line is visible in the gap: B44's no-overlap and no-obscured-line laws
+and their suites stand with **no exception**.
+
+Mechanism consequence, noted for the record: **B46's measured no-overlap
+width floor now binds on the Plants & Rocks ↔ Philly Plant Dads pair at ~1805
+logical sheet width** (agent-derived like B78's floor figures — it was
+Software & AI ↔ Zeved Boards at 1794.8; +0.6%) at the square-ish landscape
+aspects where the floor binds. The suites re-derive the floor from live
+geometry — no constant changes. The link mechanism (B28) draws the new pair
+unchanged.
+
+Counts for the record (B60's "all thirteen" and "the seven linked sub cards"
+are superseded on count only — its 400-weight law stands): the board now
+renders **fourteen note cards**, eight of them linked sub cards, **nine**
+real links (doors) opening in a new tab, and **fourteen** link lines.
+
+`UIUX §3.4`, `§4`, `§4.2`/`§4.3` and `§8` are amended.
+
+**Source:** owner's issue
+[#196](https://github.com/AlastairZeved/The-Portfolio/issues/196),
+2026-10-10 — quoted verbatim: "Add a new note card to the landing page called
+\"Philly Plant Dads\" and link it to the \"Plants & Rocks\" note card. Make
+the \"Philly Plant Dads\" card the same size as the \"Spotify\" card. Place
+the \"Philly Plant Dads\" card to the right of the \"Plants & Rocks\" card
+it's linked to, just a little bit over so the link line is visible, but not
+far away. The \"Philly Plant Dads\" card is clickable and links to
+'https://www.instagram.com/philly_plant_dads' so it will need the same hover
+state and click state as the other clickable cards. Open this linked page in
+a new tab as well."
+
+**Source:** the owner in chat, 2026-10-10 (the pre-implementation grill) —
+quoted verbatim: "same physical size as the Spotify card, with font scaled
+down to fit." (the size); "A little longer than the horizontal gap that
+exists between \"Software & AI\" and \"Zeved Boards\" note cards." (the gap
+at the parent's right edge); "Not vertically centred, just a touch lower
+than that." (the vertical seat).

@@ -1,6 +1,6 @@
-/* test/mobile.js — mobile render + eight new-tab door-cards + form + the one
+/* test/mobile.js — mobile render + nine new-tab door-cards + form + the one
    render scale (no clip, no overflow, link endpoints under the scale) and the
-   thirteen note links (B28, B55) (black-box, Playwright).
+   fourteen note links (B28, B55, B80) (black-box, Playwright).
    Run: node test/mobile.js   (BOARDS_URL default http://localhost:8000/index.html) */
 
 const { chromium } = require('playwright');
@@ -66,7 +66,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('no horizontal overflow (scrollWidth <= innerWidth)', fit.noHOverflow);
   ok('no vertical overflow (scrollHeight <= innerHeight)', fit.noVOverflow);
 
-  // the thirteen note links (B28, B55) hold their endpoints under the same scale: the
+  // the fourteen note links (B28, B55, B80) hold their endpoints under the same scale: the
   // layer's user units are the board's LOGICAL px, so every line must land on
   // the LOGICAL centre of the two cards it joins — measured rects are physical,
   // divided by rs here exactly as index.html's toLogical does (issue #87, B30)
@@ -87,12 +87,12 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
                       Math.abs(+l.getAttribute('x2') - cb[0]), Math.abs(+l.getAttribute('y2') - cb[1]));
     });
   });
-  ok('all thirteen links land on their card centres at scale < 1', linkFit.length === 13 && linkFit.every(d => d < 1));
+  ok('all fourteen links land on their card centres at scale < 1', linkFit.length === 14 && linkFit.every(d => d < 1));
 
-  // eight door-cards, each a real new-tab anchor (B26); the Music card and
+  // nine door-cards, each a real new-tab anchor (B26, B80); the Music card and
   // the four B55 sub cards (issue #146) are plain notes
   const cards = await page.locator('a.door-card').count();
-  ok('eight door-cards', cards === 8);
+  ok('nine door-cards', cards === 9);
   const hrefs = await page.locator('a.door-card').evaluateAll(as => as.map(a => [a.textContent.trim(), a.href, a.target, a.rel]));
   const expected = [
     ['Community', 'https://earp-street-park.netlify.app/'],
@@ -103,6 +103,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     ['LinkedIn', 'https://www.linkedin.com/in/robertagregory'],
     ['Apple Music', 'https://music.apple.com/us/artist/aboveaveragerob/1815357064'],
     ['Spotify', 'https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ'],
+    ['Philly Plant Dads', 'https://www.instagram.com/philly_plant_dads'],
   ];
   for (const [name, url] of expected) {
     const hit = hrefs.find(([n]) => n === name);

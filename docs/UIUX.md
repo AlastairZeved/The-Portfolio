@@ -309,7 +309,11 @@ the Parking Lot. The current placement authority is the owner's issue #189
 drawing (`B78`): every card's authored `left/top %` is an agent-derived
 measurement of that screenshot, labelled as such in `B78` (it re-sizes and
 re-places the board against `B67`'s #175 list — seven cards re-placed,
-nine re-sized; LinkedIn and Plants on Poles are untouched). Since `B45`
+nine re-sized; LinkedIn and Plants on Poles are untouched). The **Philly
+Plant Dads** note (issue #196, `B80`) seats by the owner's words rather than
+a drawing — **left 59.5% / top 64.3%**, an agent-derived transcription of
+the grill answers of 2026-10-10 at the #189 drawing's own 2880×1650
+reference (the derivation is recorded in `B80`). Since `B45`
 (issue #126) the placements are the **only** authored card geometry — the
 cards are content-sized (§4), no px width/height is authored.
 
@@ -351,7 +355,11 @@ drawing authority, `B43`):
   `--card-fs`; the height-driven updater is gone. **Weight:** **400, every
   note card** (`B60`, issue #167 — no note card renders bold; supersedes
   `B53`'s "the six board cards keep 600" clause and subsumes `B53`/`B55`'s
-  sub-card 400).
+  sub-card 400). **One owner-ruled exception (`B80`, issue #196):** the
+  **Philly Plant Dads** note's label renders at **11.4px** — scaled down to
+  fit the Spotify card's box ("font scaled down to fit", the owner's grill
+  answer) — amending `B45`'s fixed-17px clause for that one card; its line
+  box stays the note's 17 × 1.4 = 23.8px.
 - **Sizing:** cards are **content-sized** — `width: max-content`,
   `min-width: 132px` (= TheBoards' `NOTE_MIN_W`, `state.js` / `styles.css`
   `.note-text`, TheBoards `UIUX §4.5`, `B84`), `height` following the
@@ -359,14 +367,20 @@ drawing authority, `B43`):
   is the distance from the card's left edge to the sheet's right edge,
   divided by the card's own scale, floored at `NOTE_MIN_W` — TheBoards
   `geometry.js` `noteMaxW` ported verbatim (`--card-max-w`, set per card in
-  JS, re-derived when the card is dragged or its scale changes).
+  JS, re-derived when the card is dragged or its scale changes). The
+  **Philly Plant Dads** note (`B80`, issue #196) is content-sized by these
+  same mechanics and lands in the **Spotify card's own box** — the same
+  `min-width: 132px` one-line box at the Spotify rest scale — by the Font
+  bullet's fitted label.
 - **Rest scale (B78, issue #189; supersedes B67's list):** each card's rest
   scale is its **drawing scale of record** — the owner's issue #189
   screenshot sizes every card — shipped inline per card: **2.33** community,
   **2.18** career, **1.86** writing, **1.78** software-ai, **2.26**
   plants-rocks, **1.70** music, **1.01** apple-music, **1.19** spotify,
   **1.06** linkedin, **1.24** zeved-boards, **1.19** agentic-plugins,
-  **0.98** plants-poles, **1.02** plants-in-rocks. The six board cards
+  **0.98** plants-poles, **1.02** plants-in-rocks, **1.19**
+  philly-plant-dads (`B80` — the Spotify card's own rest scale, its box
+  being the Spotify box). The six board cards
   render above 1; the sub cards render at their drawing scales — several
   now sit above 1, so **B52's board/sub tier split at scale 1 is
   superseded**: the drawing rules the sizes (B33's provenance), not the
@@ -465,11 +479,15 @@ no bounce; nothing moves on its own after the interaction ends.
 | Plants & Rocks | `https://razgregory.com/plantsandrocks` | live — the dual-page-reader Plants & Rocks page (B48, `UIUX §11`) |
 | Apple Music | `https://music.apple.com/us/artist/aboveaveragerob/1815357064` | live (B26) |
 | Spotify | `https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ` | live (B26 — the link the Music card carried) |
+| Philly Plant Dads | `https://www.instagram.com/philly_plant_dads` | live (B80) |
 
 The **Music** card is not a door (§4.1, B26): it is the plain parent note the
 **Apple Music** and **Spotify** doors hang under. The two music doors sit
 **below the Music card as a mirrored pair** — Apple Music lower-left, Spotify
 lower-right — at the placement the owner's screenshot gives (issue #72).
+The **Philly Plant Dads** door hangs under **Plants & Rocks** the same way
+(`B80`, issue #196): link pair 14 to its parent, seated at the Spotify
+card's own size to the parent's right.
 
 ### §4.3 Note links (B28)
 
@@ -482,6 +500,7 @@ Plants & Rocks ↔ Community · Plants & Rocks ↔ Writing · Software & AI ↔ 
 Music ↔ Apple Music · Music ↔ Spotify. `B55` (issue #146) adds four more —
 Software & AI ↔ Zeved Boards · Software & AI ↔ Agentic Plugins ·
 Plants & Rocks ↔ Plants on Poles · Plants & Rocks ↔ Plants in Rocks.
+`B80` (issue #196) adds one more — Plants & Rocks ↔ Philly Plant Dads.
 
 A link is the card-to-card relationship drawn as the board's own linework:
 a thin straight line between two cards' **centres**, no label, no arrowhead.
@@ -620,10 +639,10 @@ The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 |---|---|
 | §2's tokens, ratios, crossover | `test/tokens.js` — recomputed from shipped hexes |
 | card states, region layout, the full-viewport sheet, no rail in the DOM | `test/mobile.js`, `test/desktop.js` |
-| the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L8]; `test/mobile.js` pins the endpoints at scale < 1 |
+| the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L14]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
 | the band / title-card / lot laws (B46): height-anchored landscape scale, ×1.10455 rescale, 29px overhang, B31's (band-top+8) 16px 16px box, rescaled lot shelf, lot clip | `test/scaling.js` (every viewport) and `test/parity_boards.js` — rendered side-by-side against the local TheBoards checkout at identical viewports |
-| card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B78 drawing rest scales and placements per card, link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
+| card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B78 drawing rest scales and placements per card (B80 for philly-plant-dads, seated by the owner's words), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 | the career page (B47): employer selector, B132 glow, split body, two-way lot (B65), monochrome ladder (B73), empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |

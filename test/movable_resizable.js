@@ -46,20 +46,24 @@ const MIN_SCALE = 0.5;   // TheBoards' note-scale floor (B45); the ceiling is pe
    untouched. B67's #175 list is superseded; the B52 board/sub tier split
    at scale 1 was superseded at B67. The gesture bounds (0.5 floor,
    one-fifth ceiling) are untouched; this pins the default rendered size and
-   placement per card only. */
+   placement per card only. B80 (issue #196) adds the Philly Plant Dads note
+   — the Spotify card's own box at the Spotify rest scale 1.19 (B80). */
 const REST_SCALES = {
   'community': 2.33, 'career': 2.18, 'writing': 1.86, 'software-ai': 1.78,
   'plants-rocks': 2.26, 'music': 1.70, 'apple-music': 1.01, 'spotify': 1.19,
   'linkedin': 1.06, 'zeved-boards': 1.24, 'agentic-plugins': 1.19,
-  'plants-poles': 0.98, 'plants-in-rocks': 1.02
+  'plants-poles': 0.98, 'plants-in-rocks': 1.02, 'philly-plant-dads': 1.19
 };
-/* B78 (issue #189): the drawing's placements, as authored left/top % */
+/* B78 (issue #189): the drawing's placements, as authored left/top %.
+   'philly-plant-dads' is B80's (issue #196) seat — the owner's grill words
+   transcribed at the #189 drawing's reference (agent-derived, B33). */
 const REST_PLACEMENTS = {
   'community': [13.6, 18.3], 'career': [42.3, 18.5], 'writing': [70.9, 53.9],
   'software-ai': [66, 25.9], 'plants-rocks': [40, 61.5], 'music': [7.7, 51.4],
   'apple-music': [17.8, 62.7], 'spotify': [5.2, 61.8], 'linkedin': [36.6, 11.5],
   'zeved-boards': [81, 26.7], 'agentic-plugins': [79, 36],
-  'plants-poles': [37.7, 73.7], 'plants-in-rocks': [50.2, 73.8]
+  'plants-poles': [37.7, 73.7], 'plants-in-rocks': [50.2, 73.8],
+  'philly-plant-dads': [59.5, 64.3]
 };
 
 /* one scenario, run once per viewport; rs is the render scale the page reports */
@@ -140,12 +144,14 @@ async function runScenario(page, tag, width, height) {
   });
   for (const [id, want] of Object.entries(REST_SCALES)) {
     const got = rest[id];
-    ok(`${tag}: ${id} rest scale is the drawing scale ${want} (B78, got ${got && got.scale})`,
+    // B80 seats philly-plant-dads by the owner's words, not a drawing
+    const cite = id === 'philly-plant-dads' ? 'B80' : 'B78';
+    ok(`${tag}: ${id} rest scale is the ${cite} scale of record ${want} (got ${got && got.scale})`,
        got && Math.abs(got.scale - want) < 1e-9);
     ok(`${tag}: ${id} renders at unscaled × rest × rs (B78)`,
        got && Math.abs(got.logicalW - got.unscaledW * got.scale) < 0.5);
     const [wl, wt] = REST_PLACEMENTS[id];
-    ok(`${tag}: ${id} sits at the drawing placement ${wl}%/${wt}% (B78, got ${got && got.left}/${got && got.top})`,
+    ok(`${tag}: ${id} sits at the ${cite} placement ${wl}%/${wt}% (got ${got && got.left}/${got && got.top})`,
        got && Math.abs(got.left - wl) < 1e-9 && Math.abs(got.top - wt) < 1e-9);
   }
   const boardTier = ['community', 'career', 'writing', 'software-ai', 'plants-rocks', 'music']

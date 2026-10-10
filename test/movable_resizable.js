@@ -39,25 +39,26 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
 const DRAG_X = 180, DRAG_Y = 150;   // physical px the pointer travels (6 moves of +30/+25)
 const MIN_SCALE = 0.5;   // TheBoards' note-scale floor (B45); the ceiling is per-card (B51)
 
-/* B67 (issue #175): each card's REST scale of record — the owner's #175
-   drawing re-sizes nine cards (writing, plants-rocks, apple-music, spotify,
-   linkedin, zeved-boards, agentic-plugins, plants-poles, plants-in-rocks)
-   and re-places them; the B52 board/sub tier split at scale 1 no longer
-   holds (several sub cards now sit above 1). The gesture bounds (0.5 floor,
+/* B78 (issue #189): each card's REST scale of record — the owner's #189
+   drawing re-sizes nine cards (community, career, writing, software-ai,
+   plants-rocks, apple-music, zeved-boards, agentic-plugins,
+   plants-in-rocks) and re-places seven; LinkedIn and Plants on Poles are
+   untouched. B67's #175 list is superseded; the B52 board/sub tier split
+   at scale 1 was superseded at B67. The gesture bounds (0.5 floor,
    one-fifth ceiling) are untouched; this pins the default rendered size and
    placement per card only. */
 const REST_SCALES = {
-  'community': 2.25, 'career': 2.21, 'writing': 1.77, 'software-ai': 1.79,
-  'plants-rocks': 2.25, 'music': 1.70, 'apple-music': 1.02, 'spotify': 1.19,
-  'linkedin': 1.06, 'zeved-boards': 1.14, 'agentic-plugins': 1.20,
-  'plants-poles': 0.98, 'plants-in-rocks': 1.03
+  'community': 2.33, 'career': 2.18, 'writing': 1.86, 'software-ai': 1.78,
+  'plants-rocks': 2.26, 'music': 1.70, 'apple-music': 1.01, 'spotify': 1.19,
+  'linkedin': 1.06, 'zeved-boards': 1.24, 'agentic-plugins': 1.19,
+  'plants-poles': 0.98, 'plants-in-rocks': 1.02
 };
-/* B67 (issue #175): the drawing's placements, as authored left/top % */
+/* B78 (issue #189): the drawing's placements, as authored left/top % */
 const REST_PLACEMENTS = {
-  'community': [13.6, 18.3], 'career': [42.3, 18.5], 'writing': [66, 24],
-  'software-ai': [12.3, 51.7], 'plants-rocks': [40, 61.5], 'music': [73, 54],
-  'apple-music': [82.9, 45.8], 'spotify': [81.7, 63.7], 'linkedin': [36.6, 11.5],
-  'zeved-boards': [3.2, 55], 'agentic-plugins': [14.2, 61.8],
+  'community': [13.6, 18.3], 'career': [42.3, 18.5], 'writing': [70.9, 53.9],
+  'software-ai': [66, 25.9], 'plants-rocks': [40, 61.5], 'music': [7.7, 51.4],
+  'apple-music': [17.8, 62.7], 'spotify': [5.2, 61.8], 'linkedin': [36.6, 11.5],
+  'zeved-boards': [81, 26.7], 'agentic-plugins': [79, 36],
   'plants-poles': [37.7, 73.7], 'plants-in-rocks': [50.2, 73.8]
 };
 
@@ -75,9 +76,9 @@ async function runScenario(page, tag, width, height) {
      is superseded for landscape viewports only. B46's measured no-overlap
      floor (lw_min, incl. the B52 pairwise gap term — re-derived here from
      the authored geometry the same way `test/scaling.js` does) may bind
-     first; issue #175 (B67)'s drawing does exactly that at 1440×900, where
-     the moved Zeved Boards card overlaps Software & AI vertically with only
-     a 9.1% horizontal gap. The expectation is the shipped mechanism:
+     first; issue #189 (B78)'s drawing does exactly that at 1440×900, where
+     Software & AI and the moved Zeved Boards card overlap vertically with
+     only a 15% horizontal gap. The expectation is the shipped mechanism:
      rs = min(vh/REF_H, vw/lw_min) on landscape. */
   const expectRs = await page.evaluate((REF) => {
     const lwMin0 = Math.max(...[...document.querySelectorAll('.door-card')].map(c => {
@@ -120,13 +121,12 @@ async function runScenario(page, tag, width, height) {
       ? Math.min(innerHeight / REF.REF_H, innerWidth / lwMin)
       : Math.min(innerWidth / REF.REF_W, innerHeight / REF.REF_H);
   }, { REF_W: 2560 / 1.3037, REF_H: 1440 / 1.3037, rsPage: rs });
-  ok(`${tag}: render scale is height-anchored on landscape, floored by the measured no-overlap width (B46/B67) = ${expectRs.toFixed(3)} (rs=${rs.toFixed(3)})`,
+  ok(`${tag}: render scale is height-anchored on landscape, floored by the measured no-overlap width (B46/B78) = ${expectRs.toFixed(3)} (rs=${rs.toFixed(3)})`,
      Math.abs(rs - expectRs) < 1e-6);
 
-  // --- issue #175 (B67): each card renders at its own rest scale and placement ---
-  // The #175 drawing re-sizes nine cards and re-places them; the old B52
-  // board/sub tier split at scale 1 no longer holds (several sub cards now
-  // sit above 1). The gesture bounds are untouched.
+  // --- issue #189 (B78): each card renders at its own rest scale and placement ---
+  // The #189 drawing re-sizes nine cards and re-places seven; the gesture
+  // bounds are untouched.
   const rest = await page.evaluate(() => {
     const out = {};
     document.querySelectorAll('.door-card').forEach(c => {
@@ -140,17 +140,17 @@ async function runScenario(page, tag, width, height) {
   });
   for (const [id, want] of Object.entries(REST_SCALES)) {
     const got = rest[id];
-    ok(`${tag}: ${id} rest scale is the drawing scale ${want} (B67, got ${got && got.scale})`,
+    ok(`${tag}: ${id} rest scale is the drawing scale ${want} (B78, got ${got && got.scale})`,
        got && Math.abs(got.scale - want) < 1e-9);
-    ok(`${tag}: ${id} renders at unscaled × rest × rs (B67)`,
+    ok(`${tag}: ${id} renders at unscaled × rest × rs (B78)`,
        got && Math.abs(got.logicalW - got.unscaledW * got.scale) < 0.5);
     const [wl, wt] = REST_PLACEMENTS[id];
-    ok(`${tag}: ${id} sits at the drawing placement ${wl}%/${wt}% (B67, got ${got && got.left}/${got && got.top})`,
+    ok(`${tag}: ${id} sits at the drawing placement ${wl}%/${wt}% (B78, got ${got && got.left}/${got && got.top})`,
        got && Math.abs(got.left - wl) < 1e-9 && Math.abs(got.top - wt) < 1e-9);
   }
   const boardTier = ['community', 'career', 'writing', 'software-ai', 'plants-rocks', 'music']
     .every(id => rest[id].scale > 1);
-  ok(`${tag}: the six board cards still render above 1 (B67)`, boardTier);
+  ok(`${tag}: the six board cards still render above 1 (B78)`, boardTier);
 
   // --- issue #94: the native HTML5 anchor drag is suppressed on door-cards ---
   // A real press-and-move on an <a href> would otherwise fire the browser's

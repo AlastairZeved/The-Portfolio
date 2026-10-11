@@ -2721,3 +2721,49 @@ multiple choice), quoted verbatim as selected:
 1. "Live on both tabs (scope the inert CSS rule to the Download button
    only)."
 2. "Same tab (match the footer's 'Learn More about Rob' precedent)."
+
+### B83. The contact-form Send button moves inline to the Message textarea's right (issue #210)
+
+The Parking Lot contact form's **Send** button moves from below the Message
+field to **inline, to the right of the Message textarea** on the same row:
+its bottom edge is flush with the textarea's bottom and its right edge sits
+at the form's right — the **bottom-right corner**. The Message textarea
+narrows to make room (it flexes to fill the rest of its `2fr` track). The
+"protected by reCAPTCHA" note stays under the Message field, left-anchored.
+`UIUX §6.1`.
+
+Rendering: the button keeps its existing `#contact-form
+button[type="submit"]` grammar (fill, label, radius, 34px height — `UIUX §6`);
+a new `.message-row` wrapper (a plain flex row: `flex-direction: row`,
+`align-items: flex-end` so the button bottom-aligns with the textarea, and
+`gap: 12px` — the form's existing gap) holds the textarea and button side by
+side. **No new design value is introduced** — no new token, hex, px, ms or
+state.
+
+**Source:** the owner's issue
+[#210](https://github.com/AlastairZeved/The-Portfolio/issues/210), 2026-10-11
+— quoted verbatim: "Move the \"Submit\" button for the formspree form to the
+RIGHT side of the form. It should be anchored to the bottom right of the
+form, in-line with the text box." — and the owner's two pre-implementation
+answers of 2026-10-11 (owner chat, multiple choice), quoted verbatim as
+selected:
+
+1. "Beside the message box, bottom-right corner (message box narrows to make
+   room)"
+2. "Keep it as \"Send\""
+
+### B84. The Message textarea regains the Send button's vertical space (issue #210 follow-up)
+
+When the Send button moved inline to the right of the Message textarea (B83),
+it left behind the vertical space it had occupied below the field. That space
+**returns to the Message textarea**: its `min-height` grows from `64px` to
+**`98px`** — the prior floor plus the Send button's `34px` height. The `98px`
+value is agent-derived (the sum of two existing values — the textarea's 64px
+floor and the button's 34px height), carrying out the owner's words rather
+than inventing a new size. The button stays inline at the bottom-right of the
+now-taller textarea; the "protected by reCAPTCHA" note stays under the field.
+`UIUX §6.1`.
+
+**Source:** the owner's mid-implementation directive, 2026-10-11 (owner chat),
+quoted verbatim: "Give that vertical space back to the 'Say hello' text box of
+the form."

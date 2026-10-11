@@ -563,8 +563,17 @@ The form's userspace, per the owner's ruling `B20`, renders left-anchored:
 - **Message** sits to their immediate right, anchored to the Name/Email right
   edges, its **size unchanged** from the pre-fix layout (the full Message
   track, `30%`).
-- The **Send** button and the "✱ required — protected by reCAPTCHA" note sit
-  under the Message field, also left-anchored.
+- The **Send** button (`UIUX §6`'s `button[type="submit"]` grammar, unchanged)
+  sits **inline, to the right of the Message textarea** on the same row (B83,
+  issue #210): its bottom edge is flush with the textarea's bottom and its
+  right edge at the form's right — the bottom-right corner — and the Message
+  textarea narrows to make room (it flexes to fill the rest of its `2fr`
+  track). The "✱ required — protected by reCAPTCHA" note stays under the
+  Message field, left-anchored.
+- The Message textarea's **height regains the button's former vertical
+  space** (B84, issue #210 follow-up): its `min-height` is **98px** — the
+  prior 64px floor plus the Send button's 34px height (`resize: vertical`
+  stands).
 - The **right side of the pane is deliberately empty** — free space lives
   free; it is never filled.
 - The **lot's height follows its measured contents** (B46, issue #128 —

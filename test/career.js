@@ -2,24 +2,24 @@
    selector, B132 glow on the selected title card, split body with ruled bar,
    two-section parking lot with one divider, the B65 tools line and the B77
    education line beneath it (issue #193), CTA back
-   to razgregory.com, the monochrome token ladder (B73), and the plugin components
-   in the body's left half (issue #154, B56 — desc cards render EMPTY on
-   purpose except the three B64 fills of issue #176); above the breakpoint
-   B74 (issue #186) bounds them — one viewport, the component capped at half
-   the left half's own height, the description card the only scroll container —
-   and B76 (issue #194) renders the agentic-plugins source geometry scaled
-   uniformly by the plate's own width (title card straddling the back card's
-   top edge, desc card wider than the back card and ending within its span,
-   type at the source ratios with an 11px readable floor, long titles wrap,
-   a filled card's styled bar always visible).
-   Single file,
-   zero script, zero <link>. Black-box Playwright.
+   to razgregory.com, the monochrome token ladder (B73), and — since B81
+   (issue #212) — the left half's agentic-plugins item selector design: a
+   STAGE presenting the one band-selected role's plugin component (B56/B76
+   internals: source geometry, 11px floor, long-title wrap, the always-
+   visible styled in-card bar on filled desc cards, empty cards bare) with
+   the title-card selector BAND beneath it (one card per role, role name +
+   year subscript, most-recent default, per-employer radio group, hover glow
+   + glimmer in --frame, the presented component's cards unglimmered).
+   B74's one-viewport render stands: the stage + band block caps at half
+   the left half's own height, centred in the half, the page never scrolls,
+   the description card the only scroll container.
+   Single file, zero script, zero <link>. Black-box Playwright.
    Run: node test/career.js   (PORTFOLIO_URL default http://localhost:8000/career.html)
    Viewport note: the desktop run is at the page's own design canvas
    (REF_H ≈ 1104.55 → rs = 1), because the band's literals render at the
-   B46 scale (--rs); the B76 component literals scale by the plate's own
-   width instead (container queries), so their assertions are computed from
-   the measured plate width. */
+   B46 scale (--rs); the component literals scale by the plate's own
+   width (container queries), so their assertions are computed from the
+   measured plate width. */
 
 const { chromium } = require('playwright');
 
@@ -44,7 +44,6 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       l.href.startsWith(location.origin))));
   ok('no external network requests beyond the page itself', await page.evaluate(() => performance.getEntriesByType('resource')
     .every(r => r.name.startsWith('data:') || r.name.startsWith(location.origin))));
-
   // §1: three title cards, one per employer, in chronological order
   const names = await page.locator('.topband__card .topband__wordmark').allInnerTexts();
   ok('three employer cards', names.length === 3);
@@ -157,16 +156,18 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     shared195(pick195));
   ok('the gaps stay equal after a selection change (issue #195, B79)',
     equalGaps195(pick195));
-
-  // B64 (issue #176) rewrites the desc-card assertions deliberately: three
-  // desc cards now carry the owner's copy verbatim (B64), the rest stay
-  // EMPTY ON PURPOSE (B56 owner override of the omit-empty rule). The
-  // subject is the plugin components themselves: (1) each shown tab renders
-  // exactly the right number of components with the exact titles + years
-  // from the issue body, verbatim; (2) each filled desc card renders the
-  // issue's copy (whitespace-normalized) and the others render empty, all
-  // visible at the B56 min-height; (3) tab isolation; (4) no CTA, no
-  // selector row; (5) plates contained in the left half.
+  // ---- B81 (issue #212): the left half's item selector band + stage.
+  // Deliberate rewrite of the B56/B64/B66/B76 body pins: the plates no
+  // longer read left-to-right across the half — one is PRESENTED on the
+  // stage, the rest launch from the band beneath it. Pinned: per-employer
+  // radio band (one group per employer under the unchanged header
+  // selector), band cards reading role name + year subscript in
+  // chronological order, default = the MOST RECENT role's card, the
+  // selected/unselected card states, the stage presenting exactly one
+  // component whose title/year match the checked card, band card clicks
+  // swapping the presented component, B64 copy verbatim on the filled
+  // cards (read while presented), tab isolation, and the desc-card
+  // empty/filled discipline carried from B56/B64.
   const B64_COPY = {
     'Branch Banker': [
       'Completed the PNC Leadership Development Program, a high-performer program focused on preparing associates for advancement into specialized financial roles.',
@@ -184,83 +185,153 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       'Architected the Brinker Trading PowerBI dashboard 0->1, partnering with a developer, to monitor daily trading volume and metrics previously siloed in vendor databases to develop actionable KPI metrics, automated alerts, and data visualizations using the 3-30-300 framework.',
     ],
   };
-  const ROLES = {
-    'employer-pnc-bank': [
-      ['Branch Sales & Service Representative', '2017-2018'],
-      ['Branch Sales & Service Associate', '2018-2019'],
-      ['Branch Banker', '2019-2020'],
-    ],
-    'employer-pnc-private': [
-      ['Client Service Associate', '2020-2021'],
-      ['Portfolio & Trust Administrator', '2021-2022'],
-    ],
-    'employer-brinker': [
-      ['Trader', '2022-2023'],
-      ['Portfolio Specialist', '2023'],
-      ['Sr. Portfolio Specialist', '2023-2025'],
-    ],
+  const EMPLOYERS = {
+    'employer-pnc-bank': {
+      group: 'pnc-bank-role', aria: 'Choose a PNC Bank role', mostRecent: 'pnc-banker',
+      roles: [
+        ['pnc-rep', 'Branch Sales & Service Representative', '2017-2018'],
+        ['pnc-associate', 'Branch Sales & Service Associate', '2018-2019'],
+        ['pnc-banker', 'Branch Banker', '2019-2020'],
+      ],
+    },
+    'employer-pnc-private': {
+      group: 'pnc-private-role', aria: 'Choose a PNC Private Bank role', mostRecent: 'ppb-pta',
+      roles: [
+        ['ppb-csa', 'Client Service Associate', '2020-2021'],
+        ['ppb-pta', 'Portfolio & Trust Administrator', '2021-2022'],
+      ],
+    },
+    'employer-brinker': {
+      group: 'brinker-role', aria: 'Choose a Brinker Capital role', mostRecent: 'brinker-sr-specialist',
+      roles: [
+        ['brinker-trader', 'Trader', '2022-2023'],
+        ['brinker-specialist', 'Portfolio Specialist', '2023'],
+        ['brinker-sr-specialist', 'Sr. Portfolio Specialist', '2023-2025'],
+      ],
+    },
   };
-  for (const [tab, roles] of Object.entries(ROLES)) {
+  const stageOf = sel => `${sel} .career__stage`;
+  const bandOf = sel => `${sel} .career__band`;
+  for (const [tab, E] of Object.entries(EMPLOYERS)) {
     await page.locator(`.topband__card-hit[for="${tab}"]`).click();
     await page.waitForTimeout(300);
     const sel = `.${tab.replace('employer-', 'employer--')}`;
-    const got = await page.evaluate(s => {
-      const section = document.querySelector(s);
-      return [...section.querySelectorAll('.gregorian-mode')].map(p => [
-        p.querySelector('.gm-title').textContent.trim(),
-        p.querySelector('.gm-uc').textContent.trim(),
-      ]);
-    }, sel);
-    ok(`${tab}: ${roles.length} components with the issue's exact titles+years`,
-      JSON.stringify(got) === JSON.stringify(roles));
-    ok(`${tab}: desc cards — B64 copy verbatim where filled, the empty placeholder at ≥ 116 × plate-width/830 (B56/B64/B74, scaled per B76)`,
-      await page.evaluate(({ s, b64 }) => {
-        const nrm = t => t.replace(/\s+/g, ' ').trim();
-        return [...document.querySelector(s).querySelectorAll('.gregorian-mode')].every(p => {
-          const d = p.querySelector('.gm-desc');
-          const filled = b64[p.querySelector('.gm-title').textContent.trim()];
-          const want = filled ? filled.join(' ') : '';
-          // B74 deliberate rewrite: the B56 floor now renders as the empty
-          // placeholder's flex basis, not a min-height — so the floor is
-          // asserted on the empty card's rendered box, in the B76 scale unit
-          // (116 source px of the 830px design × the plate's own width).
-          const u = p.getBoundingClientRect().width / 830;
-          return nrm(d.innerText) === nrm(want) && d.getBoundingClientRect().height > 0 &&
-            (filled || d.getBoundingClientRect().height >= 116 * u - 1);
-        });
-      }, { s: sel, b64: B64_COPY }));
-    ok(`${tab}: components isolated to their tab`,
+    // the band: a named per-employer radio group with one card per role
+    const band = await page.evaluate(({ sel, E }) => {
+      const b = document.querySelector(sel + ' .career__band');
+      const radios = [...b.querySelectorAll('.career__radio')];
+      const cards = [...b.querySelectorAll('.career__tab')].map(l => ({
+        name: l.childNodes.length ? l.childNodes[0].textContent.trim() : '',
+        year: l.querySelector('.career__tab-year').textContent.trim(),
+        color: getComputedStyle(l).color,
+        italic: getComputedStyle(l).fontStyle,
+        bg: getComputedStyle(l).backgroundColor,
+        rect: l.getBoundingClientRect().toJSON(),
+      }));
+      return {
+        role: b.getAttribute('role'), aria: b.getAttribute('aria-label'),
+        group: radios[0].name, radioCount: radios.length, cardCount: cards.length,
+        checkedId: b.querySelector('.career__radio:checked')?.id, cards,
+      };
+    }, { sel, E });
+    ok(`${tab}: the band is a named per-employer radio group (one group per employer, B81)`,
+      band.role === 'radiogroup' && band.aria === E.aria && band.group === E.group &&
+      band.radioCount === E.roles.length && band.cardCount === E.roles.length);
+    ok(`${tab}: band cards read the role name + the year subscript, chronological (B81)`,
+      JSON.stringify(band.cards.map(c => [c.name, c.year])) ===
+        JSON.stringify(E.roles.map(r => [r[1], r[2]])));
+    ok(`${tab}: default presented role is the MOST RECENT one's card (B81)`,
+      band.checkedId === E.mostRecent);
+    // the stage presents exactly one component — the checked card's role
+    const stage = await page.evaluate(({ sel, E }) => {
+      const st = document.querySelector(sel + ' .career__stage');
+      const roles = [...document.querySelector(sel).querySelectorAll('.role')];
+      const visible = roles.filter(w => getComputedStyle(w).display === 'block');
+      const plate = visible[0].querySelector('.gregorian-mode');
+      const r = e => e.getBoundingClientRect();
+      return {
+        visibleCount: visible.length,
+        title: plate.querySelector('.gm-title').textContent.trim(),
+        year: plate.querySelector('.gm-uc').textContent.trim(),
+        plateW: r(plate).width, stageW: r(st).width, stageH: r(st).height,
+        plateTop: r(plate).top, stageTop: r(st).top,
+        plateLeft: r(plate).left, stageLeft: r(st).left,
+        plateRight: r(plate).right, stageRight: r(st).right,
+        plateBottom: r(plate).bottom, stageBottom: r(st).bottom,
+        insideStage: r(plate).right <= r(st).right + 1 && r(plate).bottom <= r(st).bottom + 1 &&
+          r(plate).top >= r(st).top - 1 && r(plate).left >= r(st).left - 1,
+        pluginH: parseFloat(getComputedStyle(visible[0]).getPropertyValue('--plugin-h')),
+      };
+    }, { sel, E });
+    ok(`${tab}: the stage presents EXACTLY ONE component — the checked card's role (B81)`,
+      stage.visibleCount === 1 &&
+      stage.title === E.roles.find(r => r[0] === band.checkedId)[1] &&
+      stage.year === E.roles.find(r => r[0] === band.checkedId)[2]);
+    ok(`${tab}: the presented plate stays inside the stage, top-anchored (B81)`,
+      stage.insideStage && Math.abs(stage.plateTop - stage.stageTop) < 1);
+    // the plate's width follows the source's min-ratio law: min(the stage's
+    // width, 830px × the stage's height over the role's measured --plugin-h)
+    ok(`${tab}: the plate scales by the stage's min-ratio law over the 830px source design (B81)`,
+      Math.abs(stage.plateW - Math.min(stage.stageW, 830 * stage.stageH / stage.pluginH)) < 2);
+    // selected/unselected card states (the source's .plugins__tab grammar)
+    ok(`${tab}: unselected cards are dim + italic, the checked card is ink-light (B81)`,
+      band.cards.filter((_, i) => E.roles[i][0] !== band.checkedId)
+        .every(c => c.color === 'rgba(244, 245, 241, 0.55)' && c.italic === 'italic' && c.bg === 'rgb(21, 21, 21)') &&
+      band.cards[E.roles.findIndex(r => r[0] === band.checkedId)].color === 'rgb(244, 245, 241)' &&
+      band.cards[E.roles.findIndex(r => r[0] === band.checkedId)].italic === 'normal');
+    // band cards equal width, evenly spaced (the source's equal flex cells)
+    const ws = band.cards.map(c => c.rect.width);
+    ok(`${tab}: the band's cards are equal flex cells across the row (B81)`,
+      ws.every(w => Math.abs(w - ws[0]) < 0.5) &&
+      band.cards.slice(1).every((c, i) => Math.abs(c.rect.left - band.cards[i].rect.right - 8) < 2));
+    // clicking a band card swaps the presented component
+    const other = E.roles.find(r => r[0] !== band.checkedId);
+    await page.locator(`label[for="${other[0]}"]`).click();
+    await page.waitForTimeout(300);
+    const swapped = await page.evaluate(({ sel }) => {
+      const shown = [...document.querySelector(sel).querySelectorAll('.role')]
+        .filter(w => getComputedStyle(w).display === 'block');
+      const plate = shown[0].querySelector('.gregorian-mode');
+      return {
+        count: shown.length,
+        title: plate.querySelector('.gm-title').textContent.trim(),
+        year: plate.querySelector('.gm-uc').textContent.trim(),
+        checked: document.querySelector(sel + ' .career__band .career__radio:checked').id,
+      };
+    }, { sel });
+    ok(`${tab}: clicking a band card launches its role — the stage presents it (B81)`,
+      swapped.count === 1 && swapped.checked === other[0] &&
+      swapped.title === other[1] && swapped.year === other[2]);
+    // B64 copy verbatim, read while the role is presented; the empty
+    // cards stay empty (B56's override), each at the B56 116u floor.
+    for (const [rid, name, year] of E.roles) {
+      const filled = B64_COPY[name];
+      if (!filled) continue;
+      await page.locator(`label[for="${rid}"]`).click();
+      await page.waitForTimeout(200);
+      ok(`${tab}/${name}: the B64 copy renders verbatim in the presented desc card (B64)`,
+        await page.evaluate(({ sel, filled }) => {
+          const nrm = t => t.replace(/\s+/g, ' ').trim();
+          const shown = [...document.querySelector(sel).querySelectorAll('.role')]
+            .filter(w => getComputedStyle(w).display === 'block');
+          const d = shown[0].querySelector('.gm-desc');
+          return nrm(d.innerText) === nrm(filled.join(' ')) && d.getBoundingClientRect().height > 0;
+        }, { sel, filled }));
+    }
+    // tab isolation: the other employers' sections render nothing
+    ok(`${tab}: components isolated to their tab (B56)`,
       await page.evaluate(s =>
         [...document.querySelectorAll('section.employer')]
           .filter(sec => !sec.matches(s))
-          .flatMap(sec => [...sec.querySelectorAll('.gregorian-mode')])
-          .every(p => p.getBoundingClientRect().height === 0), sel));
-    ok(`${tab}: plates evenly spaced in the B66 left-to-right row, contained in the half, content fits (B56/B66 as amended by B64)`,
-      await page.evaluate(s => {
-        const nrm = Math.min(innerHeight / 1104.55, innerWidth / 1440);
-        const plates = [...document.querySelector(s).querySelectorAll('.gregorian-mode')];
-        if (!plates.length) return false;
-        const rects = plates.map(p => p.getBoundingClientRect());
-        const gap = 20 * nrm; // 1.25rem at rs
-        // B66: the plates read left to right — chronological order leftmost,
-        // horizontal gutter between neighbours, one row (equal tops).
-        const spaced = rects.slice(1).every((r, i) =>
-          Math.abs((r.left - rects[i].right) - gap) < 3) &&
-          rects.slice(1).every((r, i) => r.left > rects[i].right) &&
-          rects.slice(1).every(r => Math.abs(r.top - rects[0].top) < 3);
-        const half = document.querySelector(s).querySelector('.split__gallery').getBoundingClientRect();
-        const ruleLeft = document.querySelector(s).querySelector('.split__rule').getBoundingClientRect().left;
-        const contained = rects.every(r => r.right < ruleLeft && r.left >= half.left - 1);
-        const fits = plates.every(p =>
-          p.querySelector('.gm-desc').getBoundingClientRect().bottom <=
-          p.getBoundingClientRect().bottom + 1);
-        return spaced && contained && fits;
-      }, sel));
+          .every(sec => sec.getBoundingClientRect().height === 0), sel));
   }
-  // B74 (issue #186): above the breakpoint the page is ONE viewport — it does
-  // not scroll — and every component caps at half the left half's own height;
-  // the row is centred in the half and the description card is the page's only
-  // scroll container. Deliberate new assertions for the ruling.
+
+  // ---- B74 (issue #186), as it stands under B81: above the breakpoint
+  // the page is ONE viewport — it does not scroll — and the stage + band
+  // block caps at half the left half's own height, centred in the half;
+  // the description card remains the page's only scroll container.
+  // Deliberate rewrite: the B66 row pins are superseded (one presented
+  // component, not a row of plates). ----
   for (const tab of ['employer-pnc-bank', 'employer-pnc-private', 'employer-brinker']) {
     await page.locator(`.topband__card-hit[for="${tab}"]`).click();
     await page.waitForTimeout(300);
@@ -270,21 +341,26 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         const de = document.documentElement;
         return de.scrollHeight <= de.clientHeight + 1 && de.scrollWidth <= de.clientWidth + 1;
       }));
-    ok(`${tab}: B74 — every component caps at half the left half's own height; the half is not a scroll container`,
+    ok(`${tab}: B74 — the stage + band block caps at half the left half's own height, centred in the half; the half is not a scroll container`,
       await page.evaluate(s => {
         const shown = document.querySelector(s);
-        const half = shown.querySelector('.split__gallery');
-        const cap = shown.getBoundingClientRect().height / 2;
-        return [...shown.querySelectorAll('.gregorian-mode')]
-          .every(p => p.getBoundingClientRect().height <= cap + 1) &&
-          half.scrollHeight <= half.clientHeight + 1;
-      }, sel));
-    ok(`${tab}: B74 — the row is vertically centred in the left half`,
-      await page.evaluate(s => {
-        const shown = document.querySelector(s);
-        const gal = shown.querySelector('.split__gallery').getBoundingClientRect();
+        const gal = shown.querySelector('.split__gallery');
         const emp = shown.getBoundingClientRect();
-        return Math.abs((gal.top - emp.top) - (emp.bottom - gal.bottom)) < 2;
+        const g = gal.getBoundingClientRect();
+        return g.height <= emp.height / 2 + 1 &&
+          Math.abs((g.top - emp.top) - (emp.bottom - g.bottom)) < 2 &&
+          gal.scrollHeight <= gal.clientHeight + 1;
+      }, sel));
+    ok(`${tab}: B81 — the band sits beneath the stage; the stage presents one plate inside it`,
+      await page.evaluate(s => {
+        const shown = document.querySelector(s);
+        const st = shown.querySelector('.career__stage').getBoundingClientRect();
+        const b = shown.querySelector('.career__band').getBoundingClientRect();
+        const plates = [...shown.querySelectorAll('.role')]
+          .filter(w => w.getBoundingClientRect().height > 0);
+        const p = plates[0].querySelector('.gregorian-mode').getBoundingClientRect();
+        return b.top >= st.bottom - 1 && plates.length === 1 &&
+          p.right <= st.right + 1 && p.bottom <= st.bottom + 1 && p.top >= st.top - 1;
       }, sel));
     ok(`${tab}: B74 — every description card stays inside its component (the cap never cuts the card)`,
       await page.evaluate(s => {
@@ -307,8 +383,9 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     equalGaps195(brk195));
   ok('B74 — the overflowing description scrolls inside its own card, never the page (Brinker, Sr. Portfolio Specialist)',
     await page.evaluate(() => {
-      const plate = [...document.querySelectorAll('.employer--brinker .gregorian-mode')]
-        .find(p => /Sr\. Portfolio Specialist/.test(p.querySelector('.gm-title').textContent));
+      const shown = [...document.querySelectorAll('section.employer--brinker .role')]
+        .filter(w => getComputedStyle(w).display === 'block');
+      const plate = shown[0];
       const d = plate.querySelector('.gm-desc');
       const de = document.documentElement;
       return d.scrollHeight > d.clientHeight + 1 &&
@@ -317,106 +394,174 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         de.scrollHeight <= de.clientHeight + 1;
     }));
 
-  // B76 (issue #194): the components render the agentic-plugins SOURCE
-  // geometry, scaled uniformly by each plate's own width (container
-  // queries): the title card straddles the back card\x27s top edge with a gap
-  // to the desc card, the desc card is wider than the back card and ends
-  // within its vertical span, the type renders at the source ratios (title
-  // 28, year 14, desc 20 per 830px plate) with the owner's 11px readable
-  // floor, long titles wrap, and a FILLED desc card always shows the styled
-  // in-card bar while the empty placeholder stays bare.
-  // (Headless Chromium force-enables overlay scrollbars, so the bar's painted
-  // width is verified in a real browser — see the PR; the styling contract and
-  // the scroll behaviour are asserted here.)
-  const b76 = async (vp, tab = 'employer-brinker') => {
+  // ---- B76's surviving geometry + B81's stage mechanics, at several
+  // viewports: the presented component renders the agentic-plugins SOURCE
+  // geometry (title card straddling the back card's top edge with a gap to
+  // the desc card, desc card wider than the back card with the back card
+  // extending vertically past it by 112u — an invariant of the flow layout
+  // that holds under the stage's cap too), the type at the source ratios
+  // with the 11px floor, the styled in-card bar always visible on filled
+  // cards and bare on empty ones, and the plate scaled by the stage's
+  // min-ratio law (B81 — the deliberate rewrite of B76's plate-row pins).
+  // (Headless Chromium force-enables overlay scrollbars, so the bar's
+  // painted width is verified in a real browser — see the PR; the styling
+  // contract and the scroll behaviour are asserted here.) ----
+  const b81 = async (vp, tab = 'employer-brinker', clickLabel = null) => {
     const pg = await browser.newPage({ viewport: vp });
     await pg.goto(URL, { waitUntil: 'networkidle' });
     await pg.locator(`.topband__card-hit[for="${tab}"]`).click();
     await pg.waitForTimeout(300);
+    if (clickLabel) { await pg.locator(`label[for="${clickLabel}"]`).click(); await pg.waitForTimeout(300); }
     const out = await pg.evaluate(t => {
       const r = e => e.getBoundingClientRect();
-      const plates = [...document.querySelectorAll(`.employer--${t.slice(9)} .gregorian-mode`)];
-      const plate = plates[plates.length - 1];   // the filled desc card (B64)
-      const emptyPlate = plates[0];
+      const shown = [...document.querySelectorAll(`.employer--${t.slice(9)} .role`)];
+      // the presented role is the one whose radio drives :has — read by
+      // display, not by rect: at the deferred short viewports the stage
+      // collapses and every rect reads 0 (see the short-window pins below).
+      const roleEl = shown.find(w => getComputedStyle(w).display === 'block');
+      const plate = roleEl.querySelector('.gregorian-mode');
+      const stage = document.querySelector(`.employer--${t.slice(9)} .career__stage`);
+      const emptyRole = [...shown].find(w => !w.querySelector('.gm-desc').textContent.trim());
       const d = plate.querySelector('.gm-desc');
       const t2 = plate.querySelector('.gm-title'), k = plate.querySelector('.gm-back');
       const de = document.documentElement;
       return {
-        plateW: r(plate).width,
+        plateW: r(plate).width, stageW: r(stage).width, stageH: r(stage).height,
+        pluginH: parseFloat(getComputedStyle(roleEl).getPropertyValue('--plugin-h')),
         titleFS: parseFloat(getComputedStyle(t2).fontSize),
         descFS: parseFloat(getComputedStyle(d).fontSize),
         yearFS: parseFloat(getComputedStyle(plate.querySelector('.gm-uc')).fontSize),
         straddle: r(t2).top < r(k).top && r(k).top < r(t2).bottom,
         descWider: r(d).width > r(k).width,
-        descWithin: r(d).bottom <= r(k).bottom + 1,
-        backPast: r(k).bottom - r(d).bottom,   // the back card extends past the desc card (B76 correction)
+        backPast: r(k).bottom - r(d).bottom,
         gap: r(d).top > r(t2).bottom,
         overflowY: getComputedStyle(d).overflowY,
-        emptyOverflowY: getComputedStyle(emptyPlate.querySelector('.gm-desc')).overflowY,
+        emptyOverflowY: emptyRole ? getComputedStyle(emptyRole.querySelector('.gm-desc')).overflowY : 'n/a',
         sbWidth: getComputedStyle(d, '::-webkit-scrollbar').width,
         sbThumb: getComputedStyle(d, '::-webkit-scrollbar-thumb').backgroundColor,
         sbTrack: getComputedStyle(d, '::-webkit-scrollbar-track').backgroundColor,
         scrolls: d.scrollHeight > d.clientHeight + 1,
-        nothingClipped: plates.every(pl =>
-          ['.gm-title', '.gm-uc', '.gm-desc'].every(s => {
-            const e = pl.querySelector(s);
-            return !e || e.getBoundingClientRect().bottom <= r(pl).bottom + 1;
-          })),
+        centred: Math.abs((r(plate).left - r(stage).left) - (r(stage).right - r(plate).right)) < 1,
+        topAnchored: Math.abs(r(plate).top - r(stage).top) < 1,
+        nothingClipped: ['.gm-title', '.gm-uc', '.gm-desc'].every(s2 => {
+          const e = plate.querySelector(s2);
+          return !e || r(e).bottom <= r(plate).bottom + 1;
+        }),
         pageScrolls: de.scrollHeight > de.clientHeight + 1,
       };
     }, tab);
     await pg.close();
     return out;
   };
-  const canvasB76 = await b76({ width: 1440, height: 1110 });
+  const canvasB81 = await b81({ width: 1440, height: 1110 });
   ok('B76 — the type renders at the source ratios with the 11px readable floor (design canvas)',
-    Math.abs(canvasB76.titleFS - Math.max(28 * canvasB76.plateW / 830, 11)) < 0.6 &&
-    Math.abs(canvasB76.descFS - Math.max(20 * canvasB76.plateW / 830, 11)) < 0.6 &&
-    Math.abs(canvasB76.yearFS - Math.max(14 * canvasB76.plateW / 830, 11)) < 0.6);
+    Math.abs(canvasB81.titleFS - Math.max(28 * canvasB81.plateW / 830, 11)) < 0.6 &&
+    Math.abs(canvasB81.descFS - Math.max(20 * canvasB81.plateW / 830, 11)) < 0.6 &&
+    Math.abs(canvasB81.yearFS - Math.max(14 * canvasB81.plateW / 830, 11)) < 0.6);
   ok('B76 — the title card straddles the back card\x27s top edge, with a gap to the desc card below it',
-    canvasB76.straddle && canvasB76.gap);
+    canvasB81.straddle && canvasB81.gap);
   ok('B76 — the desc card is wider than the back card, which extends vertically past it (the source\u2019s 112px strip below the card)',
-    canvasB76.descWider && canvasB76.descWithin &&
-    Math.abs(canvasB76.backPast - 112 * canvasB76.plateW / 830) < 2);
+    canvasB81.descWider &&
+    Math.abs(canvasB81.backPast - 112 * canvasB81.plateW / 830) < 2);
+  ok('B81 — the plate follows the stage\x27s min-ratio law: width = min(stage width, 830 × stage height / --plugin-h), top-anchored, centred (design canvas)',
+    Math.abs(canvasB81.plateW - Math.min(canvasB81.stageW, 830 * canvasB81.stageH / canvasB81.pluginH)) < 2 &&
+    canvasB81.topAnchored && (canvasB81.plateW >= canvasB81.stageW - 2 || canvasB81.centred));
   ok('B76 — a filled desc card ALWAYS shows the styled in-card bar (6px, the card\x27s own ink, transparent track)',
-    canvasB76.overflowY === 'scroll' && canvasB76.sbWidth === '6px' &&
-    canvasB76.sbThumb === 'rgb(8, 8, 8)' && canvasB76.sbTrack === 'rgba(0, 0, 0, 0)');
-  ok('B76 — the empty desc card stays bare (no scroll region, as the owner ruled)',
-    canvasB76.emptyOverflowY !== 'scroll');
-  ok('B76 — the page fits one viewport and no component is clipped (design canvas)',
-    !canvasB76.pageScrolls && canvasB76.nothingClipped);
-  // Plate-relative scaling: the two-across employer (PNC Private Bank) renders
-  // larger plates — and therefore larger type — than the three-across rows at
-  // the same viewport, wherever the 11px floor does not bind (2560×1440).
-  const wide3B76 = await b76({ width: 2560, height: 1440 }, 'employer-brinker');
-  const wide2B76 = await b76({ width: 2560, height: 1440 }, 'employer-pnc-private');
-  ok('B76 — plate-relative: the two-across row renders bigger components and type than the three-across row (2560×1440)',
-    wide2B76.plateW > wide3B76.plateW && wide2B76.descFS > wide3B76.descFS &&
-    Math.abs(wide2B76.descFS - Math.max(20 * wide2B76.plateW / 830, 11)) < 0.6 &&
-    Math.abs(wide3B76.descFS - Math.max(20 * wide3B76.plateW / 830, 11)) < 0.6);
-  // Short/landscape viewports: the page still fits one viewport (no scroll),
-  // and the 11px floor keeps the type readable where the ratios would shrink
-  // it away. The "nothing is clipped" half of these two checks is DEFERRED:
-  // with the footer's second line (B77, issue #193) the bar grows in windows
-  // this short (79 → 133px), which pushes the components 3–11px past their
-  // cap. Owner ruling (chat, 2026-10-09): "Mobile viewports are an entirely
-  // separate issue that will be resolved with their own work at a future
-  // date."
-  const shortB76 = await b76({ width: 744, height: 400 });
+    canvasB81.overflowY === 'scroll' && canvasB81.sbWidth === '6px' &&
+    canvasB81.sbThumb === 'rgb(8, 8, 8)' && canvasB81.sbTrack === 'rgba(0, 0, 0, 0)');
+  ok('B76 — an empty desc card stays bare (no scroll region, as the owner ruled)',
+    canvasB81.emptyOverflowY !== 'scroll');
+  ok('B76/B74 — the page fits one viewport and nothing is clipped (design canvas)',
+    !canvasB81.pageScrolls && canvasB81.nothingClipped);
+  // B81 supersedes B76's plate-row pins: the deliberate rewrite is the
+  // stage's own law — the same viewport renders a bigger plate for the
+  // employer whose band leaves the stage more room (PNC Private Bank's
+  // two-card band vs PNC Bank's three-card band at 2560×1440).
+  const wide3B81 = await b81({ width: 2560, height: 1440 }, 'employer-pnc-bank');
+  const wide2B81 = await b81({ width: 2560, height: 1440 }, 'employer-pnc-private');
+  ok('B81 — the employer whose band leaves the stage more room renders the bigger plate (2560×1440; supersedes B76\x27s plate-row pin)',
+    wide2B81.plateW > wide3B81.plateW &&
+    Math.abs(wide2B81.plateW - Math.min(wide2B81.stageW, 830 * wide2B81.stageH / wide2B81.pluginH)) < 2 &&
+    Math.abs(wide3B81.plateW - Math.min(wide3B81.stageW, 830 * wide3B81.stageH / wide3B81.pluginH)) < 2);
+  const midB81 = await b81({ width: 1024, height: 768 });
+  ok('B81 — the min-ratio law holds at 1024×768 too',
+    Math.abs(midB81.plateW - Math.min(midB81.stageW, 830 * midB81.stageH / midB81.pluginH)) < 2 &&
+    !midB81.pageScrolls);
+  // Short/landscape viewports: the page still fits one viewport (no
+  // scroll) and the type holds its 11px floor. The "nothing is clipped"
+  // half of these checks stays DEFERRED exactly as B76's suite had it:
+  // with the footer's second line (B77) these windows are the owner's
+  // deferred short-viewport class (chat, 2026-10-09: "Mobile viewports
+  // are an entirely separate issue that will be resolved with their own
+  // work at a future date."), and under B81 the band takes its height
+  // before the stage does — the same deferred class, not a new ruling.
+  const shortB81 = await b81({ width: 744, height: 400 });
   ok('B76 — 744×400: the page still fits one viewport and the type holds its 11px floor (clip check deferred, owner 2026-10-09)',
-    !shortB76.pageScrolls &&
-    shortB76.titleFS >= 11 && shortB76.descFS >= 11 && shortB76.yearFS >= 11);
-  const landB76 = await b76({ width: 844, height: 390 });
+    !shortB81.pageScrolls &&
+    shortB81.titleFS >= 11 && shortB81.descFS >= 11 && shortB81.yearFS >= 11);
+  const landB81 = await b81({ width: 844, height: 390 });
   ok('B76 — 844×390 (landscape phone): the page still fits one viewport (clip check deferred, owner 2026-10-09)',
-    !landB76.pageScrolls);
+    !landB81.pageScrolls);
+
+  // ---- B81 band-card glow + glimmer + pane tokens ----
+  // The hover glow lives behind the (hover: hover) guard — asserted from
+  // the stylesheet (as the reduced-motion pin is), not by synthesizing a
+  // hover. The glimmer is the band cards' ALONE: the presented
+  // component's title/back cards carry none (the source repo's B26).
+  ok('B81 — the band-card hover glow is the source\x27s two-layer --frame bloom under the hover guard',
+    await page.evaluate(() => {
+      const sheet = [...document.styleSheets].find(s => s.ownerNode && !s.href);
+      const walk = rules => rules.flatMap(r =>
+        r.cssRules && r.cssRules.length ? [r, ...walk([...r.cssRules])] : [r]);
+      const rules = walk([...sheet.cssRules]);
+      const hoverMedia = rules.filter(r => r.media && r.media.mediaText.includes('(hover: hover)'));
+      const glowRule = rules.find(r => !r.media && r.selectorText === '.career__tab:hover');
+      const bs = glowRule ? glowRule.style.boxShadow : '';
+      return !!glowRule && /12px 2px var\(--frame\)/.test(bs) &&
+        /24px 4px var\(--frame\)/.test(bs) && hoverMedia.length > 0;
+    }));
+  ok('B81 — the band cards glimmer on the 6s gm-marquee clock; the presented component\x27s title/back cards do not (B26)',
+    await page.evaluate(() => {
+      const band = document.querySelector('.career__band .career__tab');
+      const glow = getComputedStyle(band, '::after');
+      const shown = [...document.querySelectorAll('.role')]
+        .find(w => getComputedStyle(w).display === 'block');
+      const plate = shown.querySelector('.gregorian-mode');
+      const titleAfter = getComputedStyle(plate.querySelector('.gm-title'), '::after');
+      const backAfter = getComputedStyle(plate.querySelector('.gm-back'), '::after');
+      return glow.animationName === 'gm-marquee' && glow.animationDuration === '6s' &&
+        titleAfter.animationName === 'none' && backAfter.animationName === 'none';
+    }));
+  ok('B81 — the presented back card breathes on the 10s gm-breathe clock (the presentation glow)',
+    await page.evaluate(() => {
+      const shown = [...document.querySelectorAll('.role')]
+        .find(w => getComputedStyle(w).display === 'block');
+      const cs = getComputedStyle(shown.querySelector('.gregorian-mode .gm-back'));
+      return cs.animationName === 'gm-breathe' && cs.animationDuration === '10s' &&
+        cs.boxShadow.includes('240px');
+    }));
+  ok('B81 — the band pane is the source\x27s note card: 2.1px --frame border, the water fill, the elevation',
+    await page.evaluate(() => {
+      const sec = [...document.querySelectorAll('section.employer')]
+        .find(x => getComputedStyle(x).display !== 'none');
+      const b = sec.querySelector('.career__band');
+      const cs = getComputedStyle(b);
+      const gal = sec.querySelector('.split__gallery');
+      return parseFloat(cs.borderTopWidth) > 1.9 && parseFloat(cs.borderTopWidth) < 2.2 &&
+        cs.borderTopColor === 'rgb(140, 140, 140)' &&
+        cs.borderRadius === '3px' &&
+        cs.backgroundImage.includes('radial-gradient') && cs.backgroundImage.includes('linear-gradient') &&
+        cs.boxShadow.includes('rgba(0, 0, 0, 0.45)') &&
+        Math.abs(parseFloat(cs.minHeight) - 0.10 * gal.getBoundingClientRect().width) < 1;
+    }));
 
   // back to the default tab for the rest of the suite
   await page.locator('.topband__card-hit[for="employer-pnc-bank"]').click();
-  ok('no .gm-cta and no item selector row anywhere (B56)',
+  ok('no .gm-cta anywhere, and no plugins-page selector — the career band is the page\x27s own (B56/B81 rewrite)',
     await page.locator('.gm-cta').count() === 0 &&
     await page.evaluate(() =>
-      !document.querySelector('[name="plugin-select"], .plugins__radio, .plugins__tab')));
-  ok('each employer body still carries its gm-title cards and slot comments for the owner\'s fill passes',
+      !document.querySelector('[name="plugin-select"], .plugins__radio, .plugins__tab, .plugins__pane, .plugins__stage')));
+  ok('each employer body still carries its gm-title cards and slot comments for the owner\x27s fill passes',
     await page.evaluate(() =>
       [...document.querySelectorAll('section.employer')].every(s =>
         !!s.querySelector('.gm-title') && s.innerHTML.includes('SLOT:'))));
@@ -507,7 +652,6 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
           el.getBoundingClientRect().right <= edge + 1);
     }));
   await mid.close();
-
   // §4: the B73 monochrome ladder re-derives TheBoards' token roles as a
   // pure neutral gray scale at the landing palette's luminance rungs
   // (issue #190; deliberate rewrite of the B47 sand/brown pins)
@@ -531,7 +675,6 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('luminance ladder holds: card one step above deep, glow one rung below frame (B132 rule)',
     lum(tokens.card) > lum(tokens.deep) && lum(tokens.card) / lum(tokens.deep) < 4 &&
     lum(tokens.glow) < lum(tokens.frame));
-
   // ≤743px: the shown employer stacks — halves full-width, the rule
   // horizontal (the mobile split law; the wrapper-less grid is the trap)
   await page.setViewportSize({ width: 390, height: 844 });
@@ -557,6 +700,22 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       const rs = [...document.querySelectorAll('.topband__card')].map(c => c.getBoundingClientRect());
       const gaps = [rs[1].top - rs[0].bottom, rs[2].top - rs[1].bottom];
       return Math.abs(gaps[0] - gaps[1]) < 0.5;
+    }));  // B81 at mobile: the stage + band column stays (one presented
+  // component, the band beneath it) in the shipped readable literals; the
+  // page keeps scrolling below the breakpoint (B74's mobile answer).
+  ok('at 390px the stage still presents one component with the band beneath it (B81)',
+    await page.evaluate(() => {
+      const shown = [...document.querySelectorAll('section.employer')]
+        .find(s => s.getBoundingClientRect().height > 0);
+      const st = shown.querySelector('.career__stage').getBoundingClientRect();
+      const b = shown.querySelector('.career__band').getBoundingClientRect();
+      const plates = [...shown.querySelectorAll('.role')]
+        .filter(w => w.getBoundingClientRect().height > 0);
+      const tab = shown.querySelector('.career__tab');
+      const year = tab.querySelector('.career__tab-year');
+      return b.top >= st.bottom - 1 && plates.length === 1 &&
+        getComputedStyle(tab).fontSize === '17.6px' &&
+        getComputedStyle(year).fontSize === '12.8px';
     }));
   // a11y: the selector is a named radio group; one off-canvas h1, equal wordmarks
   await page.setViewportSize({ width: 1440, height: 1110 });
@@ -566,6 +725,11 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       document.querySelectorAll('h1').length === 1 &&
       document.querySelector('h1').classList.contains('visually-hidden') &&
       document.querySelectorAll('h2.topband__wordmark').length === 3));
+  ok('the band selectors are named per-employer radio groups (B81)',
+    await page.evaluate(() =>
+      [...document.querySelectorAll('.career__band')].length === 3 &&
+      [...document.querySelectorAll('.career__band')].every(b =>
+        b.getAttribute('role') === 'radiogroup' && /^Choose a /.test(b.getAttribute('aria-label')))));
   ok('transitions collapse under prefers-reduced-motion', await page.evaluate(() => {
     const sheet = [...document.styleSheets].find(s => s.ownerNode && !s.href);
     return [...sheet.cssRules].some(r => r.media && r.media.mediaText.includes('prefers-reduced-motion'));

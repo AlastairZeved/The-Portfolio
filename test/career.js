@@ -1,14 +1,25 @@
 /* test/career.js — the career page (issue #133, B47): three-way employer
    selector, B132 glow on the selected title card, split body with ruled bar,
-   two-section parking lot with one divider and the B65 tools line, CTA back
-   to razgregory.com, the sand/brown token ladder, and the plugin components
+   two-section parking lot with one divider, the B65 tools line and the B77
+   education line beneath it (issue #193), CTA back
+   to razgregory.com, the monochrome token ladder (B73), and the plugin components
    in the body's left half (issue #154, B56 — desc cards render EMPTY on
-   purpose except the three B64 fills of issue #176). Single file,
+   purpose except the three B64 fills of issue #176); above the breakpoint
+   B74 (issue #186) bounds them — one viewport, the component capped at half
+   the left half's own height, the description card the only scroll container —
+   and B76 (issue #194) renders the agentic-plugins source geometry scaled
+   uniformly by the plate's own width (title card straddling the back card's
+   top edge, desc card wider than the back card and ending within its span,
+   type at the source ratios with an 11px readable floor, long titles wrap,
+   a filled card's styled bar always visible).
+   Single file,
    zero script, zero <link>. Black-box Playwright.
    Run: node test/career.js   (PORTFOLIO_URL default http://localhost:8000/career.html)
    Viewport note: the desktop run is at the page's own design canvas
-   (REF_H ≈ 1104.55 → rs = 1), because the B56 component's geometry — like
-   the band's literals above it — renders at the B46 scale (--rs). */
+   (REF_H ≈ 1104.55 → rs = 1), because the band's literals render at the
+   B46 scale (--rs); the B76 component literals scale by the plate's own
+   width instead (container queries), so their assertions are computed from
+   the measured plate width. */
 
 const { chromium } = require('playwright');
 
@@ -69,12 +80,35 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     Math.abs(b49.hang - 29 * b49.rs) < 1);
   ok('card type is the 20px logical rung: wordmark font-size = 20 × rs (B31/B49)',
     Math.abs(parseFloat(b49.font) - 20 * b49.rs) < 0.5);
-  ok('card is the B31 box: border-top 0, radius only on the bottom corners, content-sized',
-    // content-sized hug: ~111px at 1440×900; <300 is a sanity bound against
-    // regression to the old full-width grid cell (~440px)
+  // issue #195 (B79) deliberately rewrites the old "content-sized" wording:
+  // the law is now ONE SHARED SIZE across the three cards (asserted below
+  // from the measured rects), not a per-card content hug. The < 300 sanity
+  // bound stays — it guards regression to the old full-width grid cell
+  // (~440px).
+  ok('card is the B31 box: border-top 0, radius only on the bottom corners, hug width bounded under the grid cell (issue #195, B79 rewrite)',
     b49.borderTop === '0px' && parseFloat(b49.radius) > 0 && b49.cardW < 300);
   ok('lot is floored at the rescaled two-row shelf: 134.76 × rs (B46/B73/B49)',
     b49.lotH >= 134.76 * b49.rs - 1);
+
+  // issue #195 (B79): the three title cards render at one shared size —
+  // each hugs the widest of the three labels ("PNC Private Bank") — and the
+  // two gaps between them are equal. Numbers computed from the measured
+  // rects (the B49 measurement block's spirit); the shared width is the
+  // widest label's own content hug, so the B31 hug-the-text box grammar
+  // stands and no width is invented.
+  const m195 = () => page.evaluate(() => {
+    const rs = [...document.querySelectorAll('.topband__card')].map(c => c.getBoundingClientRect());
+    return { w: rs.map(r => r.width), h: rs.map(r => r.height),
+             gaps: [rs[1].left - rs[0].right, rs[2].left - rs[1].right] };
+  });
+  const shared195 = m => m.w.every(w => Math.abs(w - m.w[0]) < 0.5) &&
+    m.h.every(h => Math.abs(h - m.h[0]) < 0.5);
+  const equalGaps195 = m => Math.abs(m.gaps[0] - m.gaps[1]) < 0.5;
+  const base195 = await m195();
+  ok('all three title cards render at one shared size (issue #195, B79)',
+    shared195(base195));
+  ok('the three title cards are equally spaced apart (issue #195, B79)',
+    equalGaps195(base195));
 
   // Default selection: PNC Bank, wearing the B132 glow (one token, soft bloom)
   await page.waitForTimeout(300);   // let the 200ms box-shadow transition settle
@@ -86,13 +120,13 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('default selection is PNC Bank',
     await page.locator('#employer-pnc-bank').isChecked());
   ok('selected card glows: border-color + 0 0 8px 0 bloom, one token',
-    glow.borderColor === 'rgb(125, 99, 64)' &&
-    glow.shadow === 'rgb(125, 99, 64) 0px 0px 8px 0px');
+    glow.borderColor === 'rgb(103, 103, 103)' &&
+    glow.shadow === 'rgb(103, 103, 103) 0px 0px 8px 0px');
 
   // Unselected cards carry no glow
   const unselectedGlow = await page.evaluate(() =>
     getComputedStyle(document.querySelectorAll('.topband__card')[1]).boxShadow);
-  ok('unselected cards carry no bloom', !unselectedGlow.includes('rgb(125, 99, 64)'));
+  ok('unselected cards carry no bloom', !unselectedGlow.includes('rgb(103, 103, 103)'));
 
   // §2: the body is split by a ruled bar; content swaps with the selection
   ok('a .split__rule bar divides the body',
@@ -113,8 +147,16 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   await page.evaluate(() => {
     const shadows = [...document.querySelectorAll('.topband__card')]
       .map(c => getComputedStyle(c).boxShadow);
-    return shadows[1].includes('rgb(125, 99, 64)') && !shadows[0].includes('rgb(125, 99, 64)');
+    return shadows[1].includes('rgb(103, 103, 103)') && !shadows[0].includes('rgb(103, 103, 103)');
   }));
+  // issue #195 (B79): the shared size and equal gaps hold across a selection
+  // change — the two unselected wordmarks render italic (the dim-italic
+  // state) and the boxes stay identical.
+  const pick195 = await m195();
+  ok('the shared card size holds after a selection change (issue #195, B79)',
+    shared195(pick195));
+  ok('the gaps stay equal after a selection change (issue #195, B79)',
+    equalGaps195(pick195));
 
   // B64 (issue #176) rewrites the desc-card assertions deliberately: three
   // desc cards now carry the owner's copy verbatim (B64), the rest stay
@@ -171,16 +213,20 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     }, sel);
     ok(`${tab}: ${roles.length} components with the issue's exact titles+years`,
       JSON.stringify(got) === JSON.stringify(roles));
-    ok(`${tab}: desc cards — B64 copy verbatim where filled, empty where not, visible, min-height ≥ 116px (B56/B64)`,
+    ok(`${tab}: desc cards — B64 copy verbatim where filled, the empty placeholder at ≥ 116 × plate-width/830 (B56/B64/B74, scaled per B76)`,
       await page.evaluate(({ s, b64 }) => {
         const nrm = t => t.replace(/\s+/g, ' ').trim();
         return [...document.querySelector(s).querySelectorAll('.gregorian-mode')].every(p => {
           const d = p.querySelector('.gm-desc');
           const filled = b64[p.querySelector('.gm-title').textContent.trim()];
           const want = filled ? filled.join(' ') : '';
+          // B74 deliberate rewrite: the B56 floor now renders as the empty
+          // placeholder's flex basis, not a min-height — so the floor is
+          // asserted on the empty card's rendered box, in the B76 scale unit
+          // (116 source px of the 830px design × the plate's own width).
+          const u = p.getBoundingClientRect().width / 830;
           return nrm(d.innerText) === nrm(want) && d.getBoundingClientRect().height > 0 &&
-            parseFloat(getComputedStyle(d).minHeight) >=
-            116 * Math.min(innerHeight / 1104.55, innerWidth / 1440);
+            (filled || d.getBoundingClientRect().height >= 116 * u - 1);
         });
       }, { s: sel, b64: B64_COPY }));
     ok(`${tab}: components isolated to their tab`,
@@ -211,6 +257,159 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         return spaced && contained && fits;
       }, sel));
   }
+  // B74 (issue #186): above the breakpoint the page is ONE viewport — it does
+  // not scroll — and every component caps at half the left half's own height;
+  // the row is centred in the half and the description card is the page's only
+  // scroll container. Deliberate new assertions for the ruling.
+  for (const tab of ['employer-pnc-bank', 'employer-pnc-private', 'employer-brinker']) {
+    await page.locator(`.topband__card-hit[for="${tab}"]`).click();
+    await page.waitForTimeout(300);
+    const sel = `.${tab.replace('employer-', 'employer--')}`;
+    ok(`${tab}: B74 — the page fits one viewport, no page scroll at the design canvas`,
+      await page.evaluate(() => {
+        const de = document.documentElement;
+        return de.scrollHeight <= de.clientHeight + 1 && de.scrollWidth <= de.clientWidth + 1;
+      }));
+    ok(`${tab}: B74 — every component caps at half the left half's own height; the half is not a scroll container`,
+      await page.evaluate(s => {
+        const shown = document.querySelector(s);
+        const half = shown.querySelector('.split__gallery');
+        const cap = shown.getBoundingClientRect().height / 2;
+        return [...shown.querySelectorAll('.gregorian-mode')]
+          .every(p => p.getBoundingClientRect().height <= cap + 1) &&
+          half.scrollHeight <= half.clientHeight + 1;
+      }, sel));
+    ok(`${tab}: B74 — the row is vertically centred in the left half`,
+      await page.evaluate(s => {
+        const shown = document.querySelector(s);
+        const gal = shown.querySelector('.split__gallery').getBoundingClientRect();
+        const emp = shown.getBoundingClientRect();
+        return Math.abs((gal.top - emp.top) - (emp.bottom - gal.bottom)) < 2;
+      }, sel));
+    ok(`${tab}: B74 — every description card stays inside its component (the cap never cuts the card)`,
+      await page.evaluate(s => {
+        const shown = document.querySelector(s);
+        return [...shown.querySelectorAll('.gregorian-mode')].every(p => {
+          const d = p.querySelector('.gm-desc').getBoundingClientRect();
+          const plate = p.getBoundingClientRect();
+          return d.bottom <= plate.bottom + 1 && d.top >= plate.top - 1;
+        });
+      }, sel));
+  }
+  await page.locator('.topband__card-hit[for="employer-brinker"]').click();
+  await page.waitForTimeout(300);
+  // issue #195 (B79): the shared size and equal gaps hold with Brinker
+  // selected too (the other two wordmarks italic).
+  const brk195 = await m195();
+  ok('the shared card size holds with Brinker selected (issue #195, B79)',
+    shared195(brk195));
+  ok('the gaps stay equal with Brinker selected (issue #195, B79)',
+    equalGaps195(brk195));
+  ok('B74 — the overflowing description scrolls inside its own card, never the page (Brinker, Sr. Portfolio Specialist)',
+    await page.evaluate(() => {
+      const plate = [...document.querySelectorAll('.employer--brinker .gregorian-mode')]
+        .find(p => /Sr\. Portfolio Specialist/.test(p.querySelector('.gm-title').textContent));
+      const d = plate.querySelector('.gm-desc');
+      const de = document.documentElement;
+      return d.scrollHeight > d.clientHeight + 1 &&
+        getComputedStyle(d).overflowY === 'scroll' &&
+        d.getBoundingClientRect().bottom <= plate.getBoundingClientRect().bottom + 1 &&
+        de.scrollHeight <= de.clientHeight + 1;
+    }));
+
+  // B76 (issue #194): the components render the agentic-plugins SOURCE
+  // geometry, scaled uniformly by each plate's own width (container
+  // queries): the title card straddles the back card\x27s top edge with a gap
+  // to the desc card, the desc card is wider than the back card and ends
+  // within its vertical span, the type renders at the source ratios (title
+  // 28, year 14, desc 20 per 830px plate) with the owner's 11px readable
+  // floor, long titles wrap, and a FILLED desc card always shows the styled
+  // in-card bar while the empty placeholder stays bare.
+  // (Headless Chromium force-enables overlay scrollbars, so the bar's painted
+  // width is verified in a real browser — see the PR; the styling contract and
+  // the scroll behaviour are asserted here.)
+  const b76 = async (vp, tab = 'employer-brinker') => {
+    const pg = await browser.newPage({ viewport: vp });
+    await pg.goto(URL, { waitUntil: 'networkidle' });
+    await pg.locator(`.topband__card-hit[for="${tab}"]`).click();
+    await pg.waitForTimeout(300);
+    const out = await pg.evaluate(t => {
+      const r = e => e.getBoundingClientRect();
+      const plates = [...document.querySelectorAll(`.employer--${t.slice(9)} .gregorian-mode`)];
+      const plate = plates[plates.length - 1];   // the filled desc card (B64)
+      const emptyPlate = plates[0];
+      const d = plate.querySelector('.gm-desc');
+      const t2 = plate.querySelector('.gm-title'), k = plate.querySelector('.gm-back');
+      const de = document.documentElement;
+      return {
+        plateW: r(plate).width,
+        titleFS: parseFloat(getComputedStyle(t2).fontSize),
+        descFS: parseFloat(getComputedStyle(d).fontSize),
+        yearFS: parseFloat(getComputedStyle(plate.querySelector('.gm-uc')).fontSize),
+        straddle: r(t2).top < r(k).top && r(k).top < r(t2).bottom,
+        descWider: r(d).width > r(k).width,
+        descWithin: r(d).bottom <= r(k).bottom + 1,
+        backPast: r(k).bottom - r(d).bottom,   // the back card extends past the desc card (B76 correction)
+        gap: r(d).top > r(t2).bottom,
+        overflowY: getComputedStyle(d).overflowY,
+        emptyOverflowY: getComputedStyle(emptyPlate.querySelector('.gm-desc')).overflowY,
+        sbWidth: getComputedStyle(d, '::-webkit-scrollbar').width,
+        sbThumb: getComputedStyle(d, '::-webkit-scrollbar-thumb').backgroundColor,
+        sbTrack: getComputedStyle(d, '::-webkit-scrollbar-track').backgroundColor,
+        scrolls: d.scrollHeight > d.clientHeight + 1,
+        nothingClipped: plates.every(pl =>
+          ['.gm-title', '.gm-uc', '.gm-desc'].every(s => {
+            const e = pl.querySelector(s);
+            return !e || e.getBoundingClientRect().bottom <= r(pl).bottom + 1;
+          })),
+        pageScrolls: de.scrollHeight > de.clientHeight + 1,
+      };
+    }, tab);
+    await pg.close();
+    return out;
+  };
+  const canvasB76 = await b76({ width: 1440, height: 1110 });
+  ok('B76 — the type renders at the source ratios with the 11px readable floor (design canvas)',
+    Math.abs(canvasB76.titleFS - Math.max(28 * canvasB76.plateW / 830, 11)) < 0.6 &&
+    Math.abs(canvasB76.descFS - Math.max(20 * canvasB76.plateW / 830, 11)) < 0.6 &&
+    Math.abs(canvasB76.yearFS - Math.max(14 * canvasB76.plateW / 830, 11)) < 0.6);
+  ok('B76 — the title card straddles the back card\x27s top edge, with a gap to the desc card below it',
+    canvasB76.straddle && canvasB76.gap);
+  ok('B76 — the desc card is wider than the back card, which extends vertically past it (the source\u2019s 112px strip below the card)',
+    canvasB76.descWider && canvasB76.descWithin &&
+    Math.abs(canvasB76.backPast - 112 * canvasB76.plateW / 830) < 2);
+  ok('B76 — a filled desc card ALWAYS shows the styled in-card bar (6px, the card\x27s own ink, transparent track)',
+    canvasB76.overflowY === 'scroll' && canvasB76.sbWidth === '6px' &&
+    canvasB76.sbThumb === 'rgb(8, 8, 8)' && canvasB76.sbTrack === 'rgba(0, 0, 0, 0)');
+  ok('B76 — the empty desc card stays bare (no scroll region, as the owner ruled)',
+    canvasB76.emptyOverflowY !== 'scroll');
+  ok('B76 — the page fits one viewport and no component is clipped (design canvas)',
+    !canvasB76.pageScrolls && canvasB76.nothingClipped);
+  // Plate-relative scaling: the two-across employer (PNC Private Bank) renders
+  // larger plates — and therefore larger type — than the three-across rows at
+  // the same viewport, wherever the 11px floor does not bind (2560×1440).
+  const wide3B76 = await b76({ width: 2560, height: 1440 }, 'employer-brinker');
+  const wide2B76 = await b76({ width: 2560, height: 1440 }, 'employer-pnc-private');
+  ok('B76 — plate-relative: the two-across row renders bigger components and type than the three-across row (2560×1440)',
+    wide2B76.plateW > wide3B76.plateW && wide2B76.descFS > wide3B76.descFS &&
+    Math.abs(wide2B76.descFS - Math.max(20 * wide2B76.plateW / 830, 11)) < 0.6 &&
+    Math.abs(wide3B76.descFS - Math.max(20 * wide3B76.plateW / 830, 11)) < 0.6);
+  // Short/landscape viewports: the page still fits one viewport (no scroll),
+  // and the 11px floor keeps the type readable where the ratios would shrink
+  // it away. The "nothing is clipped" half of these two checks is DEFERRED:
+  // with the footer's second line (B77, issue #193) the bar grows in windows
+  // this short (79 → 133px), which pushes the components 3–11px past their
+  // cap. Owner ruling (chat, 2026-10-09): "Mobile viewports are an entirely
+  // separate issue that will be resolved with their own work at a future
+  // date."
+  const shortB76 = await b76({ width: 744, height: 400 });
+  ok('B76 — 744×400: the page still fits one viewport and the type holds its 11px floor (clip check deferred, owner 2026-10-09)',
+    !shortB76.pageScrolls &&
+    shortB76.titleFS >= 11 && shortB76.descFS >= 11 && shortB76.yearFS >= 11);
+  const landB76 = await b76({ width: 844, height: 390 });
+  ok('B76 — 844×390 (landscape phone): the page still fits one viewport (clip check deferred, owner 2026-10-09)',
+    !landB76.pageScrolls);
+
   // back to the default tab for the rest of the suite
   await page.locator('.topband__card-hit[for="employer-pnc-bank"]').click();
   ok('no .gm-cta and no item selector row anywhere (B56)',
@@ -257,16 +456,42 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         barH < fullH / 4 &&
         bar.backgroundColor === full.backgroundColor;
     }));
+  // B77 (issue #193): the owner's second line sits beneath the tools line,
+  // its straight bars rendered as the SAME short bars as the top line
+  ok('the education line renders the owner\'s copy beneath the tools line, three short bars between tokens (B77)',
+    await page.evaluate(() => {
+      const lines = [...document.querySelectorAll('.parking-lot__facts .parking-lot__tools')];
+      if (lines.length !== 2) return false;
+      const t = lines[1];
+      const tokens = [...t.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).filter(Boolean);
+      const bars = [...t.querySelectorAll('.parking-lot__tools-bar')];
+      const above = lines[0].getBoundingClientRect();
+      const self = t.getBoundingClientRect();
+      return JSON.stringify(tokens) === JSON.stringify(['Maryville University of St. Louis', 'B.S. Accounting', '2021', 'Magna cum laude']) &&
+        bars.length === 3 &&
+        self.top >= above.bottom - 1 &&
+        self.top - above.bottom < 3 * parseFloat(getComputedStyle(t).fontSize);
+    }));
+  ok('the education line\'s bars are identical to the top line\'s short bars — same width, height, palette (B77)',
+    await page.evaluate(() => {
+      const lines = [...document.querySelectorAll('.parking-lot__facts .parking-lot__tools')];
+      if (lines.length !== 2) return false;
+      const a = getComputedStyle(lines[0].querySelector('.parking-lot__tools-bar'));
+      const b = getComputedStyle(lines[1].querySelector('.parking-lot__tools-bar'));
+      return a.width === b.width && a.height === b.height &&
+        a.backgroundColor === b.backgroundColor;
+    }));
   ok('the CTA reads "Learn More about Rob" and links back to razgregory.com',
     (await page.locator('.parking-lot .cta').innerText()).trim() === 'Learn More about Rob' &&
     (await page.locator('.parking-lot .cta').getAttribute('href')) === 'https://razgregory.com/');
-  ok('footer right half (contact slot) still ships empty; left half carries only the tools line (B65)',
+  ok('the footer right half (contact slot) still ships empty; left half carries the two owner lines (B65, B77)',
     await page.evaluate(() => {
       const [left, right] = document.querySelectorAll('.parking-lot__facts');
       const rightOwn = [...right.childNodes]
         .filter(n => n.nodeType === 3)
         .map(n => n.textContent.trim()).join('');
-      return rightOwn === '' && left.querySelector('.parking-lot__tools') !== null;
+      return rightOwn === '' &&
+        left.querySelectorAll('.parking-lot__tools').length === 2;
     }));
 
   // B65 mid-band: the tools line wraps rather than overflowing where the
@@ -283,7 +508,9 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     }));
   await mid.close();
 
-  // §4: the sand/brown ladder re-hues TheBoards' token roles
+  // §4: the B73 monochrome ladder re-derives TheBoards' token roles as a
+  // pure neutral gray scale at the landing palette's luminance rungs
+  // (issue #190; deliberate rewrite of the B47 sand/brown pins)
   const tokens = await page.evaluate(() => {
     const cs = getComputedStyle(document.documentElement);
     return {
@@ -291,11 +518,11 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       card: cs.getPropertyValue('--card').trim(),
       frame: cs.getPropertyValue('--frame').trim(),
       note: cs.getPropertyValue('--note').trim(),
-      glow: cs.getPropertyValue('--glow-sand').trim(),
+      glow: cs.getPropertyValue('--glow-gray').trim(),
     };
   });
-  ok('the ladder is sand/brown, not the To-Do blue', tokens.deep === '#12100a' &&
-    tokens.card === '#241c0f' && tokens.frame === '#9a7c52' && tokens.note === '#e8d9b0');
+  ok('the ladder is monochrome gray, at the landing palette luminance rungs', tokens.deep === '#080808' &&
+    tokens.card === '#151515' && tokens.frame === '#8c8c8c' && tokens.note === '#cbcbcb');
   const lum = hex => {
     const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
       .map(c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
@@ -317,6 +544,19 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       const rule = shown.querySelector('.split__rule').getBoundingClientRect();
       const overflow = document.documentElement.scrollWidth > document.documentElement.clientWidth;
       return half.width > 300 && rule.height <= 2 && rule.width < half.width && !overflow;
+    }));
+  // issue #195 (B79): the stacked cards share one width at the mobile type
+  // rung too (the sizer inherits the 1.1rem wordmark).
+  ok('the stacked title cards share one width at 390px (issue #195, B79)',
+    await page.evaluate(() => {
+      const ws = [...document.querySelectorAll('.topband__card')].map(c => c.getBoundingClientRect().width);
+      return ws.every(w => Math.abs(w - ws[0]) < 0.5);
+    }));
+  ok('the stacked title cards are equally spaced at 390px (issue #195, B79)',
+    await page.evaluate(() => {
+      const rs = [...document.querySelectorAll('.topband__card')].map(c => c.getBoundingClientRect());
+      const gaps = [rs[1].top - rs[0].bottom, rs[2].top - rs[1].bottom];
+      return Math.abs(gaps[0] - gaps[1]) < 0.5;
     }));
   // a11y: the selector is a named radio group; one off-canvas h1, equal wordmarks
   await page.setViewportSize({ width: 1440, height: 1110 });

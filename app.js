@@ -230,7 +230,7 @@
     drawLinks();
   }
 
-  /* ---- The link layer (UIUX §4.3, B28): thirteen straight 1px --frame lines
+  /* ---- The link layer (UIUX §4.3, B28): fourteen straight 1px --frame lines
      between card centres, one per pair authored in the markup. The pairing
      is authored; the geometry is computed, so a line stays true while a
      card is dragged or resized (TheBoards' link idiom, UIUX §4.6 / B91 —

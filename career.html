@@ -28,22 +28,24 @@
 @font-face { font-family: "Montserrat Alternates"; font-style: normal; font-weight: 800;
   src: url(data:font/woff2;base64,d09GMl5AXkFeQF5AXkBeQFZEXkBeUV5AXkBeQF5A3qxeQF5AVQ==) format("woff2"); font-display: swap; }
 :root {
-  /* B47 sand/brown re-hue of TheBoards' ladder (issue #133 §4). The ladder's
-     luminance relationships are preserved: --deep near-black canvas, --card
-     one step above it, --frame the deep's own hue lifted for rules and
-     borders, --note the brightest ink on the deep, the water ladder the same
-     three-stop mix, and the glow one rung down its base (B132's rung rule). */
-  --deep:      #12100a;            /* deep brown canvas (TheBoards --deep role) */
-  --card:      #241c0f;            /* dark brown card fill, one step above deep */
-  --frame:     #9a7c52;            /* mid sand/brown — borders + all full-width rules */
-  --note:      #e8d9b0;            /* light sand — brightest text on the deep */
-  --water-top: #7a5c38;
-  --water-mid: #5c4429;
-  --water-bot: #3a2c1a;
-  --water-bot-a: 58 44 26;      /* --water-bot's channels, the band's radial foot */
+  /* B73 monochrome re-derivation of TheBoards' ladder (issue #190). A pure
+     neutral gray scale — zero hue — at the landing palette's exact relative
+     luminance rungs: --deep 0.0023, --card 0.0077, the water ladder
+     0.1237/0.0737/0.0325, --frame 0.2611, --note 0.5962. The ladder's
+     relationships are preserved: --deep near-black canvas, --card one step
+     above it, --frame the border/rule rung, --note the brightest ink on the
+     deep, and the glow one rung down its base (B132's rung rule). */
+  --deep:      #080808;            /* neutral near-black canvas (TheBoards --deep role) */
+  --card:      #151515;            /* dark gray card fill, one step above deep */
+  --frame:     #8c8c8c;            /* mid gray — borders + all full-width rules */
+  --note:      #cbcbcb;            /* light gray — brightest text on the deep */
+  --water-top: #636363;
+  --water-mid: #4d4d4d;
+  --water-bot: #333333;
+  --water-bot-a: 51 51 51;      /* --water-bot's channels, the band's radial foot */
   --ink-light: #f4f5f1;
   --ink-dim:   rgb(244 245 241 / 0.55);
-  --glow-sand: #7d6340;            /* selected-card bloom: --frame one rung down (B132) */
+  --glow-gray: #676767;            /* selected-card bloom: --frame one rung down (B132) */
   --elevation: 0 2px 8px rgb(0 0 0 / 0.45);
   --ease:      cubic-bezier(0.22, 0.61, 0.36, 1);
 
@@ -117,7 +119,9 @@ body {
 }
 
 /* Each card is the landing title card's B31 box grammar verbatim (issue #139):
-   content-sized (hugs its text), top-anchored in the band, border-top 0 and
+   content-sized (hugs its text — the three selector cards hug the widest
+   label instead, so all three boxes are identical: issue #195/B79),
+   top-anchored in the band, border-top 0 and
    radius only on the corners that exist, (band-top + 8px) 16px 16px padding,
    the 20px type, and the min-height rule-y + 29px that hangs it over the
    header line. All literals render at B46's scale. */
@@ -147,8 +151,8 @@ body {
    the B132 glow verbatim — border-color + a single soft 0 0 8px 0 bloom, one
    token, no other states (issue #133 §1). */
 .topband__card:has(.topband__tab:checked) {
-  border-color: var(--glow-sand);
-  box-shadow: 0 0 8px 0 var(--glow-sand);
+  border-color: var(--glow-gray);
+  box-shadow: 0 0 8px 0 var(--glow-gray);
 }
 .topband__card:active {
   filter: brightness(0.92);
@@ -191,6 +195,22 @@ body {
   font-size: calc(20 * var(--rs));
   color: var(--ink-light);
   line-height: 1.2;
+}
+/* issue #195 (B79): all three selector cards render at one shared size —
+   each hugs the widest of the three labels ("PNC Private Bank"), so the
+   boxes are identical and the gaps between them equal. The hidden sizer
+   inherits the wordmark's own typography (600, the 20 × --rs type, the
+   mobile 1.1rem, -0.02em, the italic unselected state), so the shared
+   width tracks the type at every breakpoint (the unselected italic is
+   synthetic — the embedded faces ship no true italic — so its advances
+   match the roman). Update the string if a label or a filled oneliner
+   slot ever outgrows it. */
+.topband__wordmark::before {
+  content: "PNC Private Bank";
+  display: block;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
 }
 /* Unselected: the landing page's dim-italic state (faded, italicized). */
 .topband__card:not(:has(.topband__tab:checked)) .topband__wordmark,
@@ -237,39 +257,44 @@ body:has(#employer-brinker:checked) .employer--brinker {
    They need to read left to right" — equally sized (equal flex cells),
    evenly spaced (the page's gutter), contained in the half; the half
    scrolls vertically when the row needs more height (owner grill answer,
-   2026-10-08). The shipped ≤743px readable reflow stacks them again below
-   the breakpoint (owner grill answer, 2026-10-08).
-   Row-width composition: the ruled row gives each plate a fraction of the
-   half's width — below what the wide-plate absolute composition (source
-   insets re-derived against the source's 830px plate) can hold without the
-   title clipping its own text and overlapping the year subscript. The
-   composition therefore renders in the page's own shipped readable reflow
-   grammar (the ≤743px static flow: back card full-bleed behind, title →
-   year → desc stacked and centred) at EVERY width, at the reflow's shipped
-   type values. Ported VERBATIM in structure from
-   the .gregorian-mode class set (.gm-back/.gm-title/.gm-uc/.gm-desc), with
-   NO .gm-cta and NO item selector row (B56). The re-hue re-points the
-   component's token ladder at this page's B47 sand/brown :root tokens —
-   --deep/--card/--frame/--note, the water ladder and --water-bot-a
-   (58 44 26), --elevation and --ink-light (#f4f5f1) all stand from :root;
-   no hex is duplicated here. Geometry is agent-derived per B33's provenance
-   pattern: the source's fixed 830px plate becomes a plate that fills its
-   flex cell, and the source's fixed insets (back 90px 165px 90px; title
-   top 55px; subscript top 153px; desc margin 89px) are re-derived so the
-   composition keeps the source's proportions at every viewport — its
-   vertical rhythm renders at the page's own B46 scale (--rs), exactly like
-   the band literals above. The source's fixed content widths stand inside
-   the scaling plate (title min(427px, 78%), desc min(600px, 78%)) — the
-   78% caps, not the scale, absorb narrow viewports. ---- */
+   2026-10-08); B74 (issue #186) supersedes that half-scroll clause above the
+   breakpoint — there the left half is no longer a scroll container and the
+   description card scrolls instead (see the >743px block). The shipped
+   ≤743px readable reflow stacks them again below the breakpoint (owner
+   grill answer, 2026-10-08).
+   B76 (issue #194): the component renders the agentic-plugins SOURCE
+   geometry at the source's exact proportions, scaled uniformly by the
+   plate's own width — the owner: "Uniform by plate width — component keeps
+   the source's exact proportions everywhere" (the source itself is a fixed
+   830px plate scaled uniformly, styles.css .gregorian-mode). One scale
+   unit, --u below, carries every literal: 1 source px = plate-width/830.
+   The title card STRADDLES the back card's top edge (title top 55 < back
+   top 90) with a gap to the description card below it (owner ruling); the
+   desc card is WIDER than the back card (600 vs 500 source px) and the
+   BACK CARD EXTENDS VERTICALLY PAST it (the source's desc→plate distance,
+   202px, leaves 112px of back card visible below the desc card); long
+   titles WRAP to two lines rather than
+   shrinking (owner ruling); the component's type renders at the source's
+   ratios (title 28, year 14, desc 20 per 830px plate) with the owner's
+   readable floor — nothing below 11px.
+   Ported VERBATIM in structure from the .gregorian-mode class set
+   (.gm-back/.gm-title/.gm-uc/.gm-desc), with NO .gm-cta and NO item
+   selector row (B56). The re-hue re-points the component's token ladder at
+   this page's monochrome :root tokens (§10.1, B73) —
+   --deep/--card/--frame/--note, the water ladder, --water-bot-a,
+   --elevation and --ink-light all stand from :root; no hex is duplicated
+   here. Values are agent-derived under the B33/B40 provenance pattern: the
+   owner ruled the relationships (source proportions, plate-relative scale,
+   straddle, wrap, floor, always-visible filled-card bar); the literals
+   implement them. ---- */
 .split__gallery {
   align-self: stretch;
   min-width: 0;
   min-height: 0;
   display: flex;
   flex-direction: row;           /* B66: the plates read left to right */
-  align-items: flex-start;       /* plates size to their content; the half scrolls (B66) */
+  align-items: flex-start;       /* plates size to their content (B66/B74) */
   gap: 1.25rem;                  /* the page's existing gutter value */
-  overflow-y: auto;
 }
 .gregorian-mode {
   --ink: var(--deep);           /* desc ink on the sand note: the deep itself */
@@ -283,14 +308,20 @@ body:has(#employer-brinker:checked) .employer--brinker {
      the filled card overflowed the cell onto the footer. Spacing stands:
      the 1.25rem gutter keeps the row evenly spaced. In B66's row the equal
      cells equalize the plates' WIDTHS (flex-basis 0); the vertical size is
-     the content, and the half scrolls when the row needs more height. */
+     the content. B74 (issue #186) supersedes B66's half-scroll clause above
+     the breakpoint: the plate caps at half the left half's own height and
+     the description card carries the scroll (see the >743px block). */
   flex: 1 1 0;
   min-height: 0;
   min-width: 0;
   width: 100%;
+  /* B76: the plate is its own container — every literal below scales by the
+     plate's width, 1 source px = --u = plate-width/830 (the source's fixed
+     830px design, rendered at the plate's share of the row). */
+  container-type: inline-size;
+  --u: calc(100cqw / 830);
   display: flex;
   flex-direction: column;       /* title → year → desc, the reflow's flow */
-  padding: 0.75rem;             /* the shipped reflow value */
   background: var(--deep);
   font-family: "Montserrat Alternates", system-ui, sans-serif;
   text-rendering: optimizeLegibility;
@@ -313,11 +344,12 @@ body:has(#employer-brinker:checked) .employer--brinker {
   overflow-wrap: break-word;
 }
 
-/* Card 3 — the background card (the water ladder from :root); full-bleed
-   behind the flowing composition (the shipped reflow's own reset) */
+/* Card 3 — the background card (the water ladder from :root); inset to the
+   source's 90/165/90 plate proportions (B76) — the title card below
+   straddles its 90u top edge */
 .gm-back {
   position: absolute;
-  inset: 0;
+  inset: calc(90 * var(--u)) calc(165 * var(--u)) calc(90 * var(--u));
   z-index: 0;
   background: radial-gradient(
       118% 76% at 50% 24%,
@@ -356,31 +388,31 @@ body:has(#employer-brinker:checked) .employer--brinker {
   border-radius: 1px;
 }
 
-/* Card 1 — the title card */
+/* Card 1 — the title card. In flow (career titles wrap to two lines per the
+   owner's ruling, so the year below must move with it); its top offset
+   (55u) is the source's own absolute top — under the back card's 90u top
+   edge, so the card straddles it. */
 .gm-title {
   position: relative;
   z-index: 1;
   top: auto;
   left: auto;
   transform: none;
-  width: auto;
+  flex: 0 0 auto;
+  width: calc(427 * var(--u));     /* the source's fixed title-card width */
   max-width: 100%;
-  margin: 0 auto;
-  padding: 0.6rem 0.6rem 0.7rem;   /* shipped reflow rungs; the horizontal 0.6rem
-                                      keeps REPRESENTATIVE (144px at 1rem) inside
-                                      the ~167px plate cell where 0.75rem left it
-                                      1px over and orphaned the final glyph */
+  margin: calc(55 * var(--u)) auto 0;   /* the source's top: 55px */
+  padding: calc(26 * var(--u)) calc(12 * var(--u)) calc(30 * var(--u));
   border-color: var(--frame);
   background: var(--card);
   color: var(--ink-light);
-  font-size: 1rem;                 /* the shipped reflow rung, one below the desc's —
-                                      at B66's row width 1.05rem orphaned the last
-                                      glyph of REPRESENTATIVE onto its own line */
+  font-size: max(calc(28 * var(--u)), 11px);  /* the source's 28px type, at the
+                                      owner's 11px readable floor (B76) */
   font-weight: 800;                /* served by the embedded 800 face (above), not synthesized */
   line-height: 1.2;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  white-space: normal;             /* wrap only if a title asks for it */
+  white-space: normal;             /* wrap only if a title asks for it (B76: long titles wrap) */
   box-shadow: var(--elevation);
   overflow: hidden;
 }
@@ -413,43 +445,74 @@ body:has(#employer-brinker:checked) .employer--brinker {
 .gm-back::after { animation-delay: 0.3s; }
 
 /* The year — the italicized subscript in the .gm-uc grammar: own element,
-   positioned under the title card, exactly like the Docket's "Under
-   Construction" on the plugins page. */
+   in flow under the title card, exactly like the Docket's "Under
+   Construction" on the plugins page. The source's absolute top (153px)
+   minus the one-line title card's bottom (≈149px) is the 4px gap. */
 .gm-uc {
   position: relative;
   z-index: 1;
   top: auto;
   left: auto;
   transform: none;
-  margin: 0.4rem auto 0;
+  flex: 0 0 auto;
+  margin: calc(4 * var(--u)) auto 0;
   color: var(--ink-light);
-  font-size: 0.85rem;              /* the shipped reflow value */
+  font-size: max(calc(14 * var(--u)), 11px);   /* the source's 14px, at the 11px floor */
   font-style: italic;
   font-weight: 400;
   line-height: 1;
   letter-spacing: 0.05em;
 }
 
-/* Card 2 — the description card. EMPTY on purpose (B56 owner override of
-   the omit-empty rule), sized for 2-3 sentences: min-height = 3 × 32px
-   line + 2 × 10px padding. */
+/* Card 2 — the description card. WIDER than the back card (600 vs 500
+   source px — the card overhangs the back card on both sides) and, per the
+   owner's ruling, the BACK CARD EXTENDS VERTICALLY PAST it: the desc
+   card's bottom margin is the source's full desc→plate distance (202px:
+   the 122 bottom padding + the 30+50 CTA block the career page does not
+   port), so the back card's own 90px bottom inset leaves 112px of back
+   card visibly showing below the card — long copy scrolls inside instead.
+   EMPTY on purpose (B56 owner override of the omit-empty rule) except the
+   three B64 fills; the 116px empty placeholder is already in source design
+   coordinates (3 × 32px line + 2 × 10px padding at the source's own type). */
 .gm-desc {
   position: relative;
   z-index: 1;
-  width: auto;
+  width: calc(600 * var(--u));
   max-width: 100%;
-  margin: 0.6rem auto 0;
-  padding: calc(10 * var(--rs)) 18px;
+  margin: calc(13 * var(--u)) auto calc(202 * var(--u));  /* top 180u (source); bottom = the source's desc→plate distance */
+  padding: calc(10 * var(--u)) calc(18 * var(--u));
   border-color: var(--ink);
   background: var(--note);
   color: var(--ink);
-  font-size: 1rem;                 /* the shipped reflow value */
+  font-size: max(calc(20 * var(--u)), 11px);   /* the source's 20px, at the 11px floor */
   letter-spacing: 0.015em;
   font-weight: 300;
-  line-height: 1.6;
-  min-height: max(116px, calc(116 * var(--rs)));  /* 2-3 sentences at the reflow's type */
+  line-height: 1.6;                /* the source's 32px at 20px type */
   box-shadow: var(--elevation);
 }
+/* B76: the FILLED card's scroll bar is ALWAYS visible — overflow-y: scroll
+   keeps the styled in-card bar present even where the copy fits (the thumb
+   renders when the content overflows). The empty placeholder stays bare,
+   as the owner ruled, and keeps its 116u size as a shrinkable flex basis
+   under the B74 cap. */
+.gm-desc:empty { flex: 0 1 calc(116 * var(--u)); min-height: 0; }
+.gm-desc:not(:empty) { flex: 0 1 auto; min-height: 0; overflow-y: scroll; }
+/* The bar is a real, visible, in-card scroll bar (B75, carried into B76):
+   ::-webkit-scrollbar forces the classic (non-overlay) bar Chromium and
+   Safari otherwise auto-hide — 6px, so it takes no room — its thumb the
+   card's own ink (--ink) over a transparent track; Firefox reads the
+   standard properties behind @supports (-moz-appearance: none) because in
+   Chromium the standard property wins the cascade and widens the bar. */
+.gm-desc::-webkit-scrollbar { width: 6px; }
+.gm-desc::-webkit-scrollbar-track { background: transparent; }
+.gm-desc::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 3px; }
+@supports (-moz-appearance: none) {
+  .gm-desc { scrollbar-width: thin; scrollbar-color: var(--ink) transparent; }
+}
+/* The card is keyboard-focusable now that it scrolls; the page's own focus
+   ring token, offset 2px so the ring lands on the plate outside the card's
+   ink border. */
+.gm-desc:focus-visible { outline: 2px solid var(--ink-light); outline-offset: 2px; }
 
 .blurb, .role-notes, .accomplishments, .learnings { margin: 0 0 1.25rem; }
 .blurb p, .role-notes p, .accomplishments p, .learnings p { margin: 0 0 0.6em; }
@@ -510,8 +573,9 @@ body:has(#employer-brinker:checked) .employer--brinker {
 .parking-lot__facts p:last-child { margin-bottom: 0; }
 .parking-lot__facts--contact { flex: 0 1 auto; }
 
-/* B65 (issue #177): the owner's one-line tools list, its straight slashes
-   rendered as short divider bars — 1px wide, the footer divider's own
+/* B65 (issue #177), carried by B77 (issue #193): the owner's footer copy
+   lines — the tools line and the education line beneath it — their straight
+   slashes rendered as short divider bars — 1px wide, the footer divider's own
    --frame-mix color, but 0.875em tall (agent-derived under the B33/B40
    pattern: the owner ruled "even shorter and the footer's divider bar ...
    visually distinct ... without changing the color palette"; the value
@@ -576,6 +640,48 @@ body:has(#employer-brinker:checked) .employer--brinker {
   outline: 2px solid var(--ink-light);
   outline-offset: 2px;
   box-shadow: var(--elevation), 0 0 12px 2px var(--frame), 0 0 0 4px var(--deep);
+}
+
+/* ---- B74 (issue #186): above the breakpoint the page is one viewport and the
+   components are bounded. The owner's issue #186: the role components "are NOT
+   to be sized from header to footer's entire length. Half of that length in
+   height for the components is more than enough with a scroll bar inside of
+   the description of the component for overflow" — and "the page does not
+   scroll and it fits on one viewport without a scroll". The cap binds the
+   whole component at half the left half's own height, the row is vertically
+   centred in the half, and the description card is the page's only scroll
+   container (the owner's four grill answers, 2026-10-09). B74 supersedes B66's
+   half-scroll clause; the ≤743px block below stands unchanged (mobile keeps
+   scrolling, owner grill answer).
+
+   B75's viewport type scaling (--c1) is SUPERSEDED by B76 (issue #194): the
+   component's proportions AND type now scale uniformly by its own plate
+   width at the source's exact ratios, floored at 11px (see the base block —
+   no viewport-scale rules remain here). B76 also amends B75's "a card that
+   does not overflow shows none": a FILLED description card always shows the
+   styled in-card bar (overflow-y: scroll in the base block); empty cards
+   stay bare.
+
+   Mechanism: body holds the viewport's height and main is allowed to shrink
+   (min-height 0 — without it the flex chain is content-driven and the page
+   scrolls, the #186 defect), so .split, .employer and its 1fr row are all
+   definite and the gallery's 50% resolves against the grid area; the plates
+   cap at 100% of that box, and the desc card shrinks under the cap and
+   scrolls its own text. The 11px floor can hold the title and year above
+   the cap in an extremely short viewport; the plate's own overflow: hidden
+   then bounds it — the page still never scrolls (measured in the suite). ---- */
+@media (min-width: 744px) {
+  html, body { height: 100vh;         /* the no-dvh fallback, as --rs above */
+               height: 100dvh; }
+  main { min-height: 0; }             /* the bounded chain: main may shrink */
+  /* The fixed-height band and the lot keep their own content height: the lot's
+     CTA (50px min-height) overflowed a shrunken lot by 3–4px and scrolled the
+     page in ≥744px-wide windows under ~470px tall (measured 844×390, 745×400). */
+  .topband, .parking-lot { flex: 0 0 auto; }
+  .split__gallery { height: 50%;      /* half the left half's own height */
+                    align-self: center; }   /* centred in the half */
+  .gregorian-mode { max-height: 100%;               /* the component's own cap */
+                    overflow: hidden; }             /* clip past the cap, never the page */
 }
 
 @media (max-width: 743px) {
@@ -786,6 +892,11 @@ body:has(#employer-brinker:checked) .employer--brinker {
          own --frame-mix color, 0.875em tall), visually distinct from the
          footer's full divider bar, same palette. -->
     <p class="parking-lot__tools">Orion Technology<span class="parking-lot__tools-bar" aria-hidden="true"></span>Factset<span class="parking-lot__tools-bar" aria-hidden="true"></span>Morningstar<span class="parking-lot__tools-bar" aria-hidden="true"></span>Docupace<span class="parking-lot__tools-bar" aria-hidden="true"></span>BPM<span class="parking-lot__tools-bar" aria-hidden="true"></span>Salesforce</p>
+    <!-- B77 (issue #193): the owner's second line, directly beneath the
+         tools line, its straight bars rendered as the SAME short divider
+         bars as the top line (same width, color, height, gap — no new
+         values). -->
+    <p class="parking-lot__tools">Maryville University of St. Louis<span class="parking-lot__tools-bar" aria-hidden="true"></span>B.S. Accounting<span class="parking-lot__tools-bar" aria-hidden="true"></span>2021<span class="parking-lot__tools-bar" aria-hidden="true"></span>Magna cum laude</p>
   </div>
   <div class="parking-lot__divider" aria-hidden="true"></div>
   <div class="parking-lot__facts parking-lot__facts--contact">

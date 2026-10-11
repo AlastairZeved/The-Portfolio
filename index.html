@@ -216,15 +216,15 @@ body {
    stored left/top stays truthful). This supersedes B40's height-driven
    --card-fs law; the owner's authored left/top placements stand (B43).
    The card's rest scale is the owner's drawing scale of record
-   (issue #138 / B52): each card ships its own inline --card-scale —
-   2.25 community, 2.21 career, 1.35 writing, 1.79 software-ai, 1.96
-   plants-rocks, 1.70 music, 0.78 apple-music, 0.79 spotify, 0.81
-   linkedin — so the six board cards render large and the sub
-   cards small, exactly as the owner's visual sizes them. B55 (issue
-   #146) adds four more sub cards at 0.78 each — zeved-boards,
-   agentic-plugins, plants-poles, plants-in-rocks — inside the sub-card
-   band the owner set for them (~0.78–0.81); no drawing sizes these
-   four, so the band's smallest scale of record stands. The gesture
+   (issue #138 / B52 — every card ships its own inline --card-scale).
+   B67 (issue #175) superseded B52's board/sub tier split at scale 1
+   and its list; B78 (issue #189) supersedes B67's list in turn —
+   2.33 community, 2.18 career, 1.86 writing, 1.78 software-ai, 2.26
+   plants-rocks, 1.70 music, 1.01 apple-music, 1.19 spotify, 1.06
+   linkedin, 1.24 zeved-boards, 1.19 agentic-plugins, 0.98
+   plants-poles, 1.02 plants-in-rocks — the owner's #189 drawing
+   sizes every card — plus 1.19 philly-plant-dads, the Spotify scale by
+   the owner's grill words (B80, issue #196). The gesture
    still moves the scale from there (B45/B51 bounds unchanged). */
 .door-card {
   position: absolute;
@@ -324,6 +324,19 @@ body {
   transform: scale(var(--card-scale, 1));   /* B45: the note's own scale stands under hover */
   outline: none;
 }
+
+/* B80 (issue #196): the "Philly Plant Dads" note is the Spotify card's own
+   box — the same 132px min-width, one 17px × 1.4 line (48px outer) at the
+   Spotify rest scale 1.19 — with the label font scaled down to fit inside it
+   (owner, grill 2026-10-10: "same physical size as the Spotify card, with
+   font scaled down to fit"). The label hugs 152px at the note's 17px, so the
+   linear fit is 17 × 104 / 152 = 11.63px into the box's 104px content width —
+   shipped at 11.4px, the largest tenth that keeps the box at 132 × 48px
+   exactly (glyph-advance rounding widens the hug at 11.5px and above;
+   agent-derived, B33). line-height stays the note's 23.8px line box
+   (17 × 1.4, B45) so the box height is exactly Spotify's. B45's fixed-17px
+   font clause is amended for this one card (B80). */
+.door-card.fit-to-spotify { font-size: 11.4px; line-height: 23.8px; }
 
 /* ---- The link layer (UIUX §4.3): the lines that join the note cards ----
    TheBoards' link idiom ported verbatim (TheBoards' UIUX §4.6 / B91): a thin
@@ -511,14 +524,17 @@ body {
 
   <div id="zone-components" class="band-zone">
     <span class="band-label on-light">Components</span>
+    <!-- issue #185 / B69: the zone's line, in the identical anchor grammar
+         (B38/B54 construction; B68 removed the prior line). -->
+    <div class="anchor">Pseudonyms and DBAs: aboveaveragerob, Alastair Zeved, Philly Plant Dads</div>
   </div>
   <div id="zone-requirements" class="band-zone">
     <span class="band-label on-light">Requirements</span>
-    <div class="anchor">Click around to explore my works!</div>
+    <div class="anchor">Click the note cards to launch my various pages and work across the web.</div>
   </div>
 
   <div id="anchor-title">
-    <div class="title-eyebrow">The Portfolio of</div>
+    <div class="title-eyebrow">The Digital Garden of</div>
     <div class="title-pinned">Robert Alastair Zeved Gregory</div>
   </div>
 
@@ -530,38 +546,40 @@ body {
        placement only (B43) — the cards are content-sized with their own
        scale factor, TheBoards' note mechanics. B52 (issue #138): each
        card also carries its drawing scale of record inline (--card-scale).
-       B67 (issue #175): the sizes and placements are the owner's #175
-       drawing — nine cards re-sized and re-placed; the old board/sub tier
-       split at scale 1 no longer holds (several sub cards now sit above 1). -->
-  <a class="door-card" data-id="community" style="--card-scale: 2.25; left:13.6%; top:18.3%" href="https://earp-street-park.netlify.app" target="_blank" rel="noopener noreferrer">
+       B67 (issue #175) re-sized and re-placed nine cards from the owner's
+       #175 drawing and superseded the old board/sub tier split at scale 1.
+       B78 (issue #189): the sizes and placements are the owner's #189
+       drawing — seven cards re-placed and nine re-sized; LinkedIn and
+       Plants on Poles are untouched. -->
+  <a class="door-card" data-id="community" style="--card-scale: 2.33; left:13.6%; top:18.3%" href="https://earp-street-park.netlify.app" target="_blank" rel="noopener noreferrer">
     Community
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="career" style="--card-scale: 2.21; left:42.3%; top:18.5%" href="https://razgregory.com/career" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="career" style="--card-scale: 2.18; left:42.3%; top:18.5%" href="https://razgregory.com/career" target="_blank" rel="noopener noreferrer">
     Career
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="writing" style="--card-scale: 1.77; left:66%; top:24%" href="https://substack.com/@theaboveaveragerob" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="writing" style="--card-scale: 1.86; left:70.9%; top:53.9%" href="https://substack.com/@theaboveaveragerob" target="_blank" rel="noopener noreferrer">
     Writing
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="software-ai" style="--card-scale: 1.79; left:12.3%; top:51.7%" href="https://alastairzeved.com" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="software-ai" style="--card-scale: 1.78; left:66%; top:25.9%" href="https://alastairzeved.com" target="_blank" rel="noopener noreferrer">
     Software & AI
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card" data-id="plants-rocks" style="--card-scale: 2.25; left:40%; top:61.5%" href="https://razgregory.com/plantsandrocks" target="_blank" rel="noopener noreferrer">
+  <a class="door-card" data-id="plants-rocks" style="--card-scale: 2.26; left:40%; top:61.5%" href="https://razgregory.com/plantsandrocks" target="_blank" rel="noopener noreferrer">
     Plants & Rocks
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <div class="door-card note-card" data-id="music" style="--card-scale: 1.7; left:73%; top:54%">
+  <div class="door-card note-card" data-id="music" style="--card-scale: 1.7; left:7.7%; top:51.4%">
     Music
     <span class="resize-handle" aria-hidden="true"></span>
   </div>
-  <a class="door-card sub-card" data-id="apple-music" style="--card-scale: 1.02; left:82.9%; top:45.8%" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
+  <a class="door-card sub-card" data-id="apple-music" style="--card-scale: 1.01; left:17.8%; top:62.7%" href="https://music.apple.com/us/artist/aboveaveragerob/1815357064" target="_blank" rel="noopener noreferrer">
     Apple Music
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
-  <a class="door-card sub-card" data-id="spotify" style="--card-scale: 1.19; left:81.7%; top:63.7%" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
+  <a class="door-card sub-card" data-id="spotify" style="--card-scale: 1.19; left:5.2%; top:61.8%" href="https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ" target="_blank" rel="noopener noreferrer">
     Spotify
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
@@ -572,14 +590,15 @@ body {
 
   <!-- B55 (issue #146): four linked sub cards. They are NOTE cards,
        not doors — the owner ruled no links, like the Music note — so they
-       take the note-card rest-only class and no href. B67 (issue #175):
-       their sizes and placements follow the owner's #175 drawing, like
-       every other card on the board. -->
-  <div class="door-card note-card sub-card" data-id="zeved-boards" style="--card-scale: 1.14; left:3.2%; top:55%">
+       take the note-card rest-only class and no href. B67 (issue #175)
+       drew their sizes and placements from the owner's #175 drawing;
+       B78 (issue #189) supersedes it with the owner's #189 drawing,
+       like every other card on the board. -->
+  <div class="door-card note-card sub-card" data-id="zeved-boards" style="--card-scale: 1.24; left:81%; top:26.7%">
     Zeved Boards
     <span class="resize-handle" aria-hidden="true"></span>
   </div>
-  <div class="door-card note-card sub-card" data-id="agentic-plugins" style="--card-scale: 1.20; left:14.2%; top:61.8%">
+  <div class="door-card note-card sub-card" data-id="agentic-plugins" style="--card-scale: 1.19; left:79%; top:36%">
     Agentic Plugins
     <span class="resize-handle" aria-hidden="true"></span>
   </div>
@@ -587,10 +606,23 @@ body {
     Plants on Poles
     <span class="resize-handle" aria-hidden="true"></span>
   </div>
-  <div class="door-card note-card sub-card" data-id="plants-in-rocks" style="--card-scale: 1.03; left:50.2%; top:73.8%">
+  <div class="door-card note-card sub-card" data-id="plants-in-rocks" style="--card-scale: 1.02; left:50.2%; top:73.8%">
     Plants in Rocks
     <span class="resize-handle" aria-hidden="true"></span>
   </div>
+
+  <!-- B80 (issue #196): "Philly Plant Dads" — a linked sub note of Plants &
+       Rocks (link pair 14) and a door to its Instagram in a new tab, with the
+       full clickable-card states (B14/B25). The owner ruled its seat in
+       words (issue #196 + the grill answers of 2026-10-10): to the right of
+       Plants & Rocks, the gap "a little longer than" the Software & AI ↔
+       Zeved Boards gap, its centre "just a touch lower" than the parent's —
+       transcribed as left 59.5% / top 64.3% at the #189 drawing's own
+       2880×1650 reference (agent-derived, B33). -->
+  <a class="door-card sub-card fit-to-spotify" data-id="philly-plant-dads" style="--card-scale: 1.19; left:59.5%; top:64.3%" href="https://www.instagram.com/philly_plant_dads" target="_blank" rel="noopener noreferrer">
+    Philly Plant Dads
+    <span class="resize-handle" aria-hidden="true"></span>
+  </a>
 
   <!-- Parking Lot: water field closing the sheet (B6) -->
   <div id="lot">
@@ -603,7 +635,13 @@ body {
            form keeps the right half, split and divider per B62. -->
       <div class="lot-split">
         <div class="lot-copy">
-          <p>Hey, I'm Rob. Welcome to my digital garden. This is a sort of central hub for all of the things I work on, across all of the sites and pseudonyms I've used. I'm weary of calling these "hobbies" or "passions"; they're more like symptoms, the after effect of the passion. I simply pursue my curiosity, without much of a thought of whether I can or cannot learn the subject at hand. That also has the side effect of my works sprawling across quite a few domains. The cards on this page link to those works (the digital works at least) to keep everything in one place. None are stale, but my curiosity is ever wandering and I may run out of questions in a subject for a time. But the great work always continues as my curiosity finds its flame again. All it takes to flex curiousity is to ask a question, then keep asking questions and always be <em>curiouser and curiouser.</em></p>
+          <!-- issue #184 / B70: the footer's copy of record, verbatim from
+               the issue, in two paragraphs (the issue's \n break, no gap —
+               .lot-copy p { margin: 0 }). The closing phrase renders italic
+               per the owner's ruling (B68's italic phrase stands), spelled
+               "curiouser" per the owner's correction of the issue's typo. -->
+          <p>Hey, I'm Rob. Welcome to my digital garden. This is a sort of central hub for all of the things I work on, across all of the sites and pseudonyms I've used. I'm weary of calling any of these "hobbies" or "passions"; they're actually more of an after effect of the real passion: simply following my curiosity - through any and all of the vagaries.</p>
+          <p>All it takes to flex one's curiosity is to ask a question, then keep asking questions and always strive to be <em>curiouser and curiouser.</em></p>
         </div>
         <div class="lot-divider" aria-hidden="true"></div>
         <div class="lot-form">
@@ -633,9 +671,9 @@ body {
     </div>
   </div>
 
-  <!-- The link layer (UIUX §4.3, B28): the thirteen straight 1px --frame
+  <!-- The link layer (UIUX §4.3, B28): the fourteen straight 1px --frame
        lines that join the note cards, one `<line>` per pair the owner names
-       in issue #75, #72, #74 and #146. TheBoards' link idiom ported verbatim
+       in issue #75, #72, #74, #146 and #196. TheBoards' link idiom ported verbatim
        (TheBoards' UIUX §4.6 / B91) — a line between two cards' centres,
        below the notes,
        never a hit target. Endpoints are computed from live card geometry
@@ -655,6 +693,7 @@ body {
     <line data-link="11" data-from="software-ai" data-to="agentic-plugins"></line>
     <line data-link="12" data-from="plants-rocks" data-to="plants-poles"></line>
     <line data-link="13" data-from="plants-rocks" data-to="plants-in-rocks"></line>
+    <line data-link="14" data-from="plants-rocks" data-to="philly-plant-dads"></line>
   </svg>
 
 </div>

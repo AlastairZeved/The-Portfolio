@@ -2009,3 +2009,571 @@ formatting answers tied to the Components move (13px/1.5 at weight 300 in
 the band; B20's empty right half restored) lapse with the move they
 governed.
 
+
+
+### B69. The Components zone renders the pseudonyms line (issue #185)
+
+The **Components** band zone renders one text line — **"Pseudonyms and
+DBAs: aboveaveragerob, Alastair Zeved, Philly Plant Dads"** — in the
+identical anchor grammar the B38/B54 line used: hanging from the zone's
+top at `--band-top`, in `--ink` at 15px/600 (`UIUX`'s 16.57px/400 under
+B46's ×1.10455 rescale; weight plain per B54), static, no editing
+affordance. The zone's `pointer-events: none` stands. B68's removal of the
+prior Components line stands — this entry adds the zone's new line; it
+does not restore B38's copy. No new token is invented.
+
+**Source:** owner's issue
+[#185](https://github.com/AlastairZeved/The-Portfolio/issues/185),
+2026-10-08 — "Add this new copy to the \"Components\" section of the header
+bar: \"Pseudonyms and DBAs: aboveaveragerob, Alastair Zeved, Philly Plant
+Dads\"" — with the owner's pre-implementation answer of 2026-10-08 (owner
+chat, multiple choice): the line sits in the identical anchor grammar
+("Second line below the existing one, identical styling and mechanism"
+— given with the B68 state where the prior line is already removed, so the
+pseudonyms line is the zone's only line).
+
+### B70. The Parking Lot's left-half copy is replaced with the issue-#184 text (issue #184)
+
+The Parking Lot keeps **B62's layout** — the owner's copy in the **left
+half**, the Formspree form in the **right half**, the 50/50 split and the
+vertical divider bar unchanged — and the **left half's copy is replaced**
+with the issue-#184 text, verbatim (the copy of record below),
+**superseding B68's issue-#174 copy of record**. The issue's literal
+newline break renders as **two paragraphs with no gap between them**
+(the copy's rendering stands at 13px / 1.5 / 400 in `--ink` per B62, and
+the paragraphs carry no margin). The closing phrase **renders italic**
+(B68's italic-phrase ruling stands) and is spelled **"curiouser"** — the
+owner's pre-implementation correction of the issue's "curioser" typo.
+`UIUX §6.2` is amended accordingly.
+
+**Copy of record (verbatim, issue #184):** "Hey, I'm Rob. Welcome to my
+digital garden. This is a sort of central hub for all of the things I work
+on, across all of the sites and pseudonyms I've used. I'm weary of calling
+any of these "hobbies" or "passions"; they're actually more of an after
+effect of the real passion: simply following my curiosity - through any and
+all of the vagaries. All it takes to flex one's curiosity is to ask a
+question, then keep asking questions and always strive to be curioser and
+curiouser."
+
+**Source:** owner's issue
+[#184](https://github.com/AlastairZeved/The-Portfolio/issues/184),
+2026-10-08 — "Update the copy in the parking lot section to this: [the copy
+of record above]" — with the owner's pre-implementation answers of
+2026-10-08 (owner chat, multiple choice): the issue's newline renders as
+two paragraphs with no blank line between them ("Two paragraphs, no blank
+lines between them. It just starts on a new line."); and the closing phrase
+renders italic with the spelling corrected ("Keep it italic, correct
+spelling to \"curiouser\"").
+
+### B71. The Requirements line's copy is replaced with the issue-#183 text (issue #183)
+
+The **Requirements** line's **copy is replaced**: the line reads **"Click
+the note cards to launch my various pages and work across the web."**,
+**superseding B37's/B54's copy of record** ("Click around to explore my
+works!"). Everything else stands unchanged: B39's anchor (left-anchored at
+the title card's rendered right border + one `--gutter`, at `--band-top`),
+the 15px/600 rung (16.57px/400 under B46's rescale), weight plain per B54,
+`--ink`, static, no editing affordance, the zone's `pointer-events: none`.
+`UIUX §3.3` is amended accordingly.
+
+**Source:** owner's issue
+[#183](https://github.com/AlastairZeved/The-Portfolio/issues/183),
+2026-10-08 — "Replace the existing copy with this new copy to the
+\"Requirements\" section in the right side of the header bar: \"Click the
+note cards to launch my various pages and work across the web.\""
+
+### B72. The title card's eyebrow reads "The Digital Garden of" (issue #188)
+
+The title card's **line 1 (the eyebrow)** reads **"The Digital Garden of"**
+— **superseding B17's "The Portfolio of" on the eyebrow line only**. The
+title card's text otherwise stands byte-identical: line 2 remains
+**"Robert Alastair Zeved Gregory"**, all on the same two lines — the
+eyebrow above the name — with the eyebrow's format unchanged (B61's reduced
+secondary rung, 13.33px/400, `line-height: 1.2`; B31's 20px/600 title rung;
+B19's hug-the-text box). No size, weight, spacing or mechanism changes.
+`UIUX §3.2` is amended accordingly.
+
+**Source:** owner's issue
+[#188](https://github.com/AlastairZeved/The-Portfolio/issues/188),
+2026-10-08 — "The title card currently reads: \"The Portfolio of\" which
+needs to be removed and replaced with \"The Digital Garden of\". Same text
+formatting, all on one line with \"Robert Alastair Zeved Gregory\" below
+it."
+
+### B73. The career page's palette is re-derived as a monochrome gray scale at the landing palette's luminance rungs (issue #190)
+
+`career.html`'s binding is re-derived a second time: the B47 sand/brown
+re-hue is **superseded by a pure neutral gray scale — zero hue** — at the
+**landing page's exact relative luminance rungs**, role for role with
+TheBoards' ladder:
+
+`--deep` `#080808` (0.0023) · `--card` `#151515` (0.0077) ·
+`--water-top` `#636363` (0.1237) · `--water-mid` `#4d4d4d` (0.0737) ·
+`--water-bot` `#333333` (0.0325) · `--frame` `#8c8c8c` (0.2611) ·
+`--note` `#cbcbcb` (0.5962) · `--glow-gray` `#676767` (0.1364 — one rung
+below `--frame`, B132's rung rule) · `--water-bot-a` `51 51 51`.
+
+The ladder's relationships stand unchanged (card above deep, note brightest
+on the deep, glow one rung below frame), and because every rung sits at the
+landing palette's luminance, the ink poles (`--ink-light` `#f4f5f1`,
+`--ink-dim`) and `UIUX §2.3`'s contrast table carry over unchanged. The glow
+token renames `--glow-sand` → `--glow-gray`; no value ships under the old
+name. `UIUX §10.1` is amended accordingly, and `test/career.js`'s ladder
+pins are rewritten deliberately (they pinned the B47 hexes).
+
+**Source:** the owner's issue
+[#190](https://github.com/AlastairZeved/The-Portfolio/issues/190),
+2026-10-09 — "Rederive the color palette of the page /career into a
+monochrome color scale using the same luminescence and hue wheel as the
+landing page's color palette." — with the owner's pre-implementation
+answers of 2026-10-09 (owner chat): on the derivation, "No, monochrome.
+Choose the monochrome colors in the same families as the others with the
+same luminescence and everything."; on the first candidate set (a blue-hued
+monochrome scale), "these colors are not monochrome. monochrome. not blue.
+monochrome."; and on the final neutral gray set, "confirmed and approved
+for use." The final hexes are the owner's sign-off, per the issue-#133
+blank-slot-9 precedent.
+
+### B74. The career components cap at half the header→footer region; the description card carries the scroll (issue #186)
+
+The career body's role components are **bounded above the mobile breakpoint**.
+Each component is capped at **half the left half's own height** — "half of that
+length", the header→footer region the split lays out — and is **never sized from
+the header to the footer's entire length**. Where the cap leaves a description
+card less room than its content needs, the card **scrolls its own text**: above
+the breakpoint the description card is the page's only scroll container. The
+page is **one viewport** — it does not scroll vertically and fits without a
+scroll — and the row of components is **vertically centred** in the left half.
+
+**This entry supersedes B66's half-scroll clause** ("Body half scrolls
+vertically when plates need more height", owner grill answer 2026-10-08): the
+left half is no longer a scroll container; the scroll lives inside the
+description card. B66's left-to-right row, its chronological oldest-leftmost
+order and its two-equal-plates rule stand unchanged, as do B56's ported
+structure and B64's filled copy.
+
+The shipped mechanism is agent-derived under the B33/B40 provenance pattern
+(the owner ruled the relationships — "half of that length", the component as
+the capped thing, the description card as the scroller — the values implement
+them; no literal is invented): above 744px the page holds the viewport's height
+(`html, body { height: 100dvh }`, with the page's `100vh` fallback line above
+it as `--rs` does) and `main` may shrink (`min-height: 0` — without it the flex
+chain is content-driven and the page scrolls, which is the #186 defect), so the
+split, the shown employer and its `1fr` row are all definite and the gallery's
+`height: 50%` resolves against the grid area; the plates cap at `100%` of that
+box, and the description card takes the plate's remainder and scrolls
+(`overflow-y: auto`). The fixed-height band and the lot hold their own content
+height (`flex: 0 0 auto`): without it a shrunken lot's 50px CTA overflowed the
+lot by 3–4px and scrolled the page in ≥744px-wide windows under ~470px tall
+(measured 844×390, 744×400). The B56 description-card floor (`116 × --rs`) renders as a
+**shrinkable flex basis** for the empty placeholder, and a filled card sizes to
+its content (B64), so the cap is met by the card's own scroll rather than by
+cutting it. The component's own `overflow: hidden` bounds it, so the page never
+carries the overflow. At ≤743px nothing changes: the shipped stacked reflow
+keeps scrolling the page (owner grill answer, 2026-10-09).
+
+Measured residue of the same render: in a window **≤900px wide and ≤750px tall**
+the three-plate row's role titles wrap until the title + year + the card's
+minimum box exceed half the half; the cap then holds and the component's bottom
+is bounded rather than scrolled (the page still does not scroll). **B75 (below)
+scales the component's type with the render scale and removes that residue** —
+re-measured: no clipped component at any size from 744×600 to 2560×1440.
+
+**Source:** the owner's issue
+[#186](https://github.com/AlastairZeved/The-Portfolio/issues/186),
+2026-10-08 — quoted verbatim: "The components displaying the roles in /career
+were supposed to carry a vertical scroll if the description card became too
+long. They are NOT to be sized from header to footer's entire length. Half of
+that length in height for the components is more than enough with a scroll bar
+inside of the description of the component for overflow. Under no circumstances
+was a vertical scroll to be introduced to the entire web page. That is standing
+law. The page does not scroll and it fits on one viewport without a scroll." —
+and the owner's four grill answers of 2026-10-09 (owner chat), selected from the
+agent's proposed options and quoted as the selected text:
+
+1. "Half the header→footer region (band bottom → footer top); the cap binds the
+   whole role component, and the description card scrolls inside it".
+2. "Yes — B74 supersedes B66's half-scroll clause; the only scroll is inside the
+   description card".
+3. "Desktop only — the cap + internal description scroll apply above 743px; the
+   ≤743px stacked reflow keeps scrolling the page as today".
+4. "Vertically centred in the left half".
+
+### B75. The career component's type scales with the render scale, and its scroll bar is visible inside the description card (issue #186)
+
+The career body's role components render their **type at the page's render
+scale**. The component's own 1rem is `--rs`-scaled as `--c1`, and every
+type-derived literal of the component is the shipped value × `--c1` — the title
+card's and description card's type, the title card's padding, the year
+subscript and its margin, the description card's margin and padding, the
+plate's own padding, and the description card's placeholder size. The scale
+carries **no floor**: it is the band's own convention (B46/B49), and any floor
+holds the title + year + the card above the cap in a short viewport, where the
+plate would then cut the title — measured at 744×500 and below. Legibility
+rests where the page already puts it: the ≤743px block's shipped readable
+values, the same guarantee the band's scaled literals depend on. Measured, the
+component's type renders 16.08px at 1440×1110 (`--rs` = 1.005 — the design
+canvas is unchanged), 13.04px at 1440×900, 11.12px at 1024×768, 8.69px at
+744×600 and 5.65px at 844×390.
+
+**This removes B74's residue**: measured, no component is clipped and the page
+does not scroll at any tested size from 744×400 through 2560×1440.
+
+The description card's scroll bar is a **real, visible, in-card scroll bar**.
+The platform overlay scrollbar the page inherited paints nothing at rest, so
+the card's overflow read as a clipped card. `::-webkit-scrollbar` forces the
+classic (non-overlay) bar in Chromium and Safari — **6px** wide, so it takes no
+room — its thumb the card's own ink (`--ink`, the token the card's border
+already uses) over a **transparent** track that leaves the card's surface
+showing; Firefox reads `scrollbar-width: thin` / `scrollbar-color`, scoped
+behind `@supports (-moz-appearance: none)` because in Chromium the standard
+property wins the cascade and widens the bar to 10px. The bar occupies layout
+inside the card's border box (measured 6px of the card's 170.4px width at
+1440×1110, thumb `#080808`), and a card that does not overflow shows none. The
+card is keyboard-focusable now that it scrolls, so it wears the page's own
+focus ring (`--ink-light`, offset 2px so the ring lands on the plate outside
+the card's own ink border).
+
+Values are agent-derived under the B33/B40 provenance pattern: the owner ruled
+the relationships — the type scales with the component, it stays readable, the
+bar sits inside the card and takes no room — and the values implement them. No
+new hex or design size is invented; `--c1` carries the scale and `--ink` the
+thumb.
+
+**Source:** the owner's follow-up of 2026-10-09 (owner chat) — quoted verbatim,
+with one expletive removed at the owner's direction: "why is the scroll bar
+outside of the description box? Put it inside [expletive removed]. It takes up
+no room. And in these smaller viewports, why are you not scaling the font down?
+It still needs to be readable but come on man, you're scaling the component down
+but not the font size?"
+
+### B76. The career role components render the agentic-plugins source geometry, scaled uniformly by the plate's own width (issue #194)
+
+The career body's role components had drifted from their source design — the
+owner: the components' title cards "were edited at some point and it needs to
+be fixed in /career". B76 re-renders the `.gregorian-mode` component at the
+**agentic-plugins source geometry exactly** (repo AlastairZeved/AlastairZeved,
+`agentic-plugins` page's components), **scaled uniformly by the plate's own
+width** — the source's fixed 830px design re-rendered as one scale unit:
+**1 source px = plate-width/830** (container queries; the component's own
+proportions are identical to the source's at every size):
+
+- the **back card** is inset `90 / 165 / 90` source px (the source's
+  `.gm-back`), so the plate's canvas shows around it;
+- the **title card** is `427` source px wide at top `55` — **straddling the
+  back card's `90` top edge** (the owner: "It overhangs the background cards
+  top edge straddling the top of the background card. Gap between it and the
+  description card below it.");
+- the **description card** is `600` source px wide — **wider than the `500`
+  back card, which it overhangs on both sides** — and the **back card
+  extends vertically past it**: the card's bottom margin is the source's
+  full desc→plate distance (`202` source px — the `122` bottom padding plus
+  the `30 + 50` CTA block the career page does not port), so the back
+  card's own `90` bottom inset leaves **`112` source px of back card
+  visibly showing below the description card** — long copy scrolls inside
+  the card instead (the owner: "The background card is supposed to extend
+  vertically past the description card");
+- the component's **type renders at the source's ratios** — title `28`, year
+  `14`, desc `20` per `830px` plate — with the **owner's readable floor: no
+  component type renders below `11px`**. The floor may break the proportions
+  on small plates; the owner accepted exactly that trade ("Exact ratios with
+  a readable floor (e.g. desc never below ~11px) — floors slightly break
+  proportionality on small plates").
+- **long titles wrap** to two lines rather than shrinking ("Let long titles
+  wrap to two lines instead of scaling type") — the year subscript stays in
+  flow under the title card so a wrapped title pushes it down instead of
+  colliding with it;
+- **the row count scales the component**: "Yes — plate-relative: two-across
+  rows render bigger components than three-across at the same viewport; type
+  keeps the exact agentic-plugins ratios" — PNC Private Bank's two-across row
+  renders proportionally larger components than the three-across rows.
+
+**This entry supersedes B75's viewport type scaling** (the `--c1 = 16 × --rs`
+law and its measured design-canvas values) and **amends B75's "a card that
+does not overflow shows none" clause**: a **filled** description card always
+shows the styled in-card bar (`overflow-y: scroll` — the bar's gutter is
+present even where the copy fits; the thumb renders when the content
+overflows), while the **empty** placeholder stays bare exactly as today
+("Filled cards always show the bar; empty cards stay bare as today"). B75's
+scroll-bar styling (6px classic in-card bar, thumb `--ink`, transparent
+track, Firefox `@supports`) is carried into B76 unchanged.
+
+**B74 stands untouched**: the page is one viewport, each component caps at
+half the left half's own height, the row is vertically centred in the half,
+and the description card remains the page's only scroll container; the
+≤743px block's shipped page reflow (stacked plates, page may scroll) also
+stands. The component's geometry — unlike the type — is one design at every
+width; the 11px floor keeps the ≤743px render readable where the ratios
+would shrink the type away.
+
+Values are agent-derived under the B33/B40 provenance pattern: the owner
+ruled the relationships (the source design, the plate-relative uniform
+scale, the straddle, the wrap, the floor, the always-visible filled-card
+bar); the literals implement them — every value is a source px of the
+830px design, and the `11px` floor is the owner's own example value.
+
+**Source:** the owner's issue
+[#194](https://github.com/AlastairZeved/The-Portfolio/issues/194),
+2026-10-09 — quoted verbatim: "In /career, the components displaying the
+various roles should have a title card that overhangs the top of the
+description card. The description card is supposed to be wider than the
+background card but shorter than it. These are supposed to be designed
+exactly like the components from GitHub repo AlastairZeved/AlastairZeved on
+the /agentic-plugins page's component selector, but in this color family.
+This component should be standardized. For long titles, scale the text size
+down so it fits. For long descriptions, add a vertical scrollbar (always
+visible and in this color palette) to the description card. The text size of
+the description card should match the text size of the components in
+agentic-plugins. The /career page's components should also look like this,
+but scaled down as a component to fit three across, then scaled up in size
+where there's only two across." — the issue body also embeds three
+screenshots of the agentic-plugins components (github.com/user-attachments/
+assets/46cc0bf7-9a89-4197-9012-735bc0f09a91, /5f3d0b31-7d5b-4d1b-bc19-
+c78b35f9ddf0, /d65cafcd-1ad6-4018-94f0-af2fb11a299e), referenced here, not
+re-rendered — and the owner's seven grill answers of 2026-10-09 (owner chat,
+issue #194 grill), quoted verbatim as answered:
+
+1. "It overhangs the background cards top edge straddling the top of the
+   background card. Gap between it and the description card below it."
+2. "Yes — plate-relative: two-across rows render bigger components than
+   three-across at the same viewport; type keeps the exact agentic-plugins
+   ratios"
+3. "Let long titles wrap to two lines instead of scaling type"
+4. "Filled cards always show the bar; empty cards stay bare as today"
+5. "Yes — desc ends within the back card's vertical span; scroll takes over"
+6. "Uniform by plate width — component keeps the source's exact proportions
+   everywhere"
+7. "Exact ratios with a readable floor (e.g. desc never below ~11px) — floors
+   slightly break proportionality on small plates"
+
+and the owner's correction of 2026-10-09 (owner chat, on the first PR
+render) — quoted verbatim, with one expletive removed at the owner's
+direction: "nope, wrong. The background card is supposed to extend
+vertically past the description card. You have a source of truth, you have
+the components existing already in /agentic-plugins. why is this so
+[expletive removed] difficult?"
+
+### B77. The career footer's left half carries a second line of copy beneath the tools line (issue #193)
+
+The career footer's left half renders **a second line of copy directly
+beneath B65's tools line**: "Maryville University of St. Louis | B.S.
+Accounting | 2021 | Magna cum laude". Where the copy carries straight
+bars, they render as **the same short divider bars as the top line** — the
+same 1px width, the same `--frame`-mix color, the same `0.875em` height,
+the same `0.6em` gap — so the two lines are one grammar stacked, separated
+by the lot's existing `0.35em` paragraph gap. **No new design values are
+introduced**: the line reuses the B65 rule set unchanged.
+
+The line renders on one line wherever the bar's width allows and wraps
+rather than overflows where it doesn't — B65's wrap-only-when-needed
+carries over to the second line unchanged, as does the no-overlap law it
+serves. The footer's structure is untouched: the two-way split, the one
+full divider bar, the `.cta` right, the empty #7/#8 slots (B47), and the
+lot's `134.76 × --rs` floor with content growing past it. B65 stands in
+full; this entry adds the second line beneath it.
+
+**Short viewports are deferred to their own work.** In the ~400px-tall
+windows the suite checks (744×400, 844×390) the bar's floor is tiny
+(~48px) and the copy wraps to two rows per line, so the bar's height is
+set by the copy instead of the CTA: it grows 79px → 133px and the role
+components sit 3–11px past their B74 cap (the page still fits one viewport
+and does not scroll; at every other tested size the bar's height is
+unchanged — 135px / 98px / 79px with and without the line). The owner
+deferred that geometry.
+
+**Source:** the owner's issue
+[#193](https://github.com/AlastairZeved/The-Portfolio/issues/193),
+2026-10-09 — quoted verbatim: "Underneath: "Orion Technology | Factset |
+Morningstar | Docupace | BPM | Salesforce" add another line of copy that
+reads: "Maryville University of St. Louis  | B.S. Accounting | 2021 |
+Magna cum laude"
+
+Use the same dividers in between sections as the top line"
+
+**Source:** the owner in chat, 2026-10-09 — quoted verbatim: "Mobile
+viewports are an entirely separate issue that will be resolved with their
+own work at a future date."
+
+### B78. Every note card's default size and placement follows the owner's issue #189 drawing (issue #189)
+
+The owner logged in issue
+[#189](https://github.com/AlastairZeved/The-Portfolio/issues/189)
+a 2880×1800 screenshot of the board displaying the note cards at their
+new placements and sizes, directing: "Please execute this exact placement
+and exact sizing." Per B33's provenance law, the owner's drawing rules the
+authored card sizes and placements. This entry **supersedes B67's #175
+placement and scale list**.
+
+The values below are **agent-derived measurements of that screenshot**
+(method: outer card footprint — pale fill plus the 2px `--ink-dark` border
+— at the drawing's 2880×1650 page viewport, render scale
+`rs = 1650/1104.55` under B46's height-anchored landscape law, the width
+floor inert at that aspect; calibrated against the unchanged cards' B67
+values; rest scale = drawing footprint ÷ the card's measured unscaled
+content width). Authored `left`% / `top`% / `--card-scale`:
+
+- Community: 13.6% / 18.3% / **2.33** (seat unchanged, scale re-sized)
+- Career: 42.3% / 18.5% / **2.18** (seat unchanged, scale re-sized)
+- Writing: **70.9% / 53.9% / 1.86**
+- Software & AI: **66% / 25.9% / 1.78**
+- Plants & Rocks: 40% / 61.5% / **2.26** (seat unchanged, scale re-sized)
+- Music: **7.7% / 51.4%** / 1.70 (scale unchanged)
+- Apple Music: **17.8% / 62.7% / 1.01**
+- Spotify: **5.2% / 61.8%** / 1.19 (scale unchanged)
+- LinkedIn: 36.6% / 11.5% / 1.06 (unchanged)
+- Zeved Boards: **81% / 26.7% / 1.24**
+- Agentic Plugins: **79% / 36% / 1.19**
+- Plants on Poles: 37.7% / 73.7% / 0.98 (unchanged)
+- Plants in Rocks: 50.2% / 73.8% / **1.02** (seat unchanged, scale re-sized)
+
+Seven cards are re-placed and nine re-sized; LinkedIn and Plants on Poles
+are untouched. The gesture bounds stand unchanged — B45's 0.5 floor and
+B51's one-fifth-of-viewport ceiling still move the scale from these rest
+values. Nothing else changes: the cards' destinations, states, links and
+the per-authored-pair link mechanism (B28) are untouched, and the link
+lines recompute from the moved cards' centres. One mechanism consequence,
+noted for the record: **B46's measured no-overlap width floor binds at
+some landscape aspects** (measured: 1440×900, 1280×800, 1024×768, 800×800;
+inert at 2560×1440 and 1920×1080). The binding pair is now Software & AI
+↔ Zeved Boards at a 15% horizontal gap, and the floor settles at a
+1794.8-logical sheet width — binding below aspect ≈ 1.62 — where the
+sheet, band included, rescales as a whole to keep B44's no-overlap law;
+where the floor is inert, the height-anchored render is unchanged.
+`UIUX §3.4` and `§4` are amended to name this drawing as the placement
+and size authority.
+
+**The drawing collides with B44's no-obscured-line law, and the owner ruled
+the drawing stands.** The exact #189 placement runs the **Software & AI ↔
+Community** link line behind the Career card — visible in the owner's own
+screenshot, where the line dies at Career's left border and re-emerges from
+its bottom edge — reintroducing the "link lines obscured" defect class the
+owner ruled out in issue #121 (`B44`). The conflict was put to the owner,
+who ruled the drawing is executed exactly as-is: this arrangement supersedes
+the no-obscured-line expectation where the two collide, and
+`test/scaling.js`'s assertion is amended to except this owner-authored pair
+(`UIUX §3.4` records the exception).
+
+**Source:** owner's issue
+[#189](https://github.com/AlastairZeved/The-Portfolio/issues/189),
+2026-10-09 — quoted verbatim: "Attached is a screenshot containing the
+new placements of the note cards and how each is to be sized. Please
+execute this exact placement and exact sizing." (screenshot:
+[issue #189](https://github.com/user-attachments/assets/cbc80ef9-2768-4a8e-8695-7d9da29f44fa)).
+
+**Source:** the owner in chat, 2026-10-10 — selecting the offered
+resolution, quoted verbatim: "Execute the drawing exactly as-is — the line
+passes behind Career as your screenshot shows it; B78 records that this
+arrangement supersedes the no-obscured-line expectation where the two
+collide, and scaling.js's assertion is amended for this owner-authored
+pair.".
+
+---
+
+### B79. The career page's three title cards render at one shared size, equally spaced (issue #195)
+
+The owner ruled that the career page's three selector title cards —
+**PNC Bank**, **PNC Private Bank**, **Brinker Capital** — must render
+**all the same size** and **still equally spaced apart**. What the law
+now renders: every card's box is identical (one shared width and one
+shared height) and the two gaps between the three cards are exactly
+equal, at every viewport and in every selection state.
+
+The shared width is **the widest label's own content hug** ("PNC Private
+Bank"). Each card keeps B31's hug-the-text box grammar verbatim —
+`width: max-content`, the `(band-top + 8px) 16px 16px` padding, the
+border/radius/min-height/20px type — and the hug resolves to the widest
+of the three labels instead of each card's own text. Equal boxes centred
+in the band's three equal columns keep B49's "spread across the band",
+and the gaps are equal by construction. **B49's per-card "content-sized"
+clause is amended for these three selector cards only — the later
+ruling wins.** The landing page's single title card (B31) is untouched
+(one card, nothing to equalize), and the body's plugin components are
+explicitly out of scope: "this is not in reference to any of the
+components in the body of the page." The ≤743px stacked reflow inherits
+the same shared width, so the mobile cards are equal-sized too.
+
+Mechanism (agent-derived per B33 — the owner ruled the behaviour, not
+the CSS mechanics): a hidden widest-label sizer in each card's wordmark
+(`::before`, zero height, `visibility: hidden`) inherits the wordmark's
+exact typography — 600 weight, the 20 × `--rs` type (1.1rem mobile),
+-0.02em, the italic unselected state — so every card's `max-content`
+hug resolves to the widest label at every render scale and in every
+selection state, with no invented width value anywhere.
+`test/career.js` pins the law (shared size, equal gaps — at the desktop
+canvas, after a selection change, and at 390px) and its old per-card
+"content-sized" assertion is rewritten deliberately to say so (noted in
+the test's own comment). `UIUX §10.2` is amended accordingly.
+
+**Source:** owner's issue
+[#195](https://github.com/AlastairZeved/The-Portfolio/issues/195),
+2026-10-09 — quoted verbatim: "Equalize the size of the title cards so
+they're all the same size and still equally spaced apart. This is in
+reference to title cards: \"PNC Bank\", \"PNC Private Bank\", and
+\"Brinker Capital\". this is not in reference to any of the components in
+the body of the page."
+
+---
+
+### B80. "Philly Plant Dads" — a linked sub note of Plants & Rocks and a door to its Instagram, at the Spotify card's own size (issue #196)
+
+A new note card joins the board: **Philly Plant Dads**, a child of
+**Plants & Rocks** — linked to it by line pair 14 — and a real link to
+`https://www.instagram.com/philly_plant_dads`, opening in a new tab with the
+full clickable-card states (B14/B25), like every other door.
+
+**Size — the Spotify card's own physical size, the label font scaled down to
+fit.** The card renders in the Spotify box exactly: the same `min-width:
+132px` one-line note box (132 × 48px outer — a 23.8px line + `10px 12px`
+padding + 2px border = 47.8px, reported 48) at the Spotify rest scale
+**1.19**, with the label's font scaled down to fit the box — **11.4px**
+(agent-derived fit under B33/B43: the label hugs 152px at the note's 17px,
+and the 132px box's content width is 104px, so the linear fit is
+17 × 104 / 152 = 11.63; 11.4 is the largest tenth that keeps the box at
+132 × 48px exactly — glyph-advance rounding widens the hug at 11.5px and
+above, measured at 133/134px boxes). The
+line box stays the note's 17 × 1.4 = 23.8px (B45), so the box height is
+Spotify's. **B45's fixed-17px font clause is amended for this one card — the
+later ruling wins.**
+
+**Placement — left 59.5% / top 64.3%** (agent-derived transcription of the
+owner's words at the issue-#189 drawing's own 2880×1650 reference, the B78
+method): the card sits to the right of Plants & Rocks' right edge at a gap of
+~28 logical px — the Software & AI ↔ Zeved Boards gap at that reference
+(23.97 logical px) "a little longer" (×1.2) — and its centre sits ~5.4
+logical px (≈5% of the parent's height) below Plants & Rocks' centre. The
+link line is visible in the gap: B44's no-overlap and no-obscured-line laws
+and their suites stand with **no exception**.
+
+Mechanism consequence, noted for the record: **B46's measured no-overlap
+width floor now binds on the Plants & Rocks ↔ Philly Plant Dads pair at ~1805
+logical sheet width** (agent-derived like B78's floor figures — it was
+Software & AI ↔ Zeved Boards at 1794.8; +0.6%) at the square-ish landscape
+aspects where the floor binds. The suites re-derive the floor from live
+geometry — no constant changes. The link mechanism (B28) draws the new pair
+unchanged.
+
+Counts for the record (B60's "all thirteen" and "the seven linked sub cards"
+are superseded on count only — its 400-weight law stands): the board now
+renders **fourteen note cards**, eight of them linked sub cards, **nine**
+real links (doors) opening in a new tab, and **fourteen** link lines.
+
+`UIUX §3.4`, `§4`, `§4.2`/`§4.3` and `§8` are amended.
+
+**Source:** owner's issue
+[#196](https://github.com/AlastairZeved/The-Portfolio/issues/196),
+2026-10-10 — quoted verbatim: "Add a new note card to the landing page called
+\"Philly Plant Dads\" and link it to the \"Plants & Rocks\" note card. Make
+the \"Philly Plant Dads\" card the same size as the \"Spotify\" card. Place
+the \"Philly Plant Dads\" card to the right of the \"Plants & Rocks\" card
+it's linked to, just a little bit over so the link line is visible, but not
+far away. The \"Philly Plant Dads\" card is clickable and links to
+'https://www.instagram.com/philly_plant_dads' so it will need the same hover
+state and click state as the other clickable cards. Open this linked page in
+a new tab as well."
+
+**Source:** the owner in chat, 2026-10-10 (the pre-implementation grill) —
+quoted verbatim: "same physical size as the Spotify card, with font scaled
+down to fit." (the size); "A little longer than the horizontal gap that
+exists between \"Software & AI\" and \"Zeved Boards\" note cards." (the gap
+at the parent's right edge); "Not vertically centred, just a touch lower
+than that." (the vertical seat).

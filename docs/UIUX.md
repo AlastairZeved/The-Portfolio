@@ -268,7 +268,9 @@ rescaled band grows beneath the box; the box grows around it.
 
 Its two lines, in order (B17, superseding B5; sizes per B31, amended by B61):
 
-1. **"The Portfolio of"** — the reduced secondary rung: **13.33px / 400**,
+1. **"The Digital Garden of"** (B72, issue #188, superseding B17's
+   "The Portfolio of" on the eyebrow line only) — the reduced secondary
+   rung: **13.33px / 400**,
    `line-height: 1.2` (B61, issue #170: TheBoards' title-card convention
    `#anchor-title .title-date` — 10px/400 under a 15px/600 title, a 2/3
    ratio — scaled to this page's 20px title rung, 20 × 2/3; agent-derived
@@ -287,8 +289,8 @@ exceeds the sheet minus the side gutters.
 | Region | Render |
 |---|---|
 | Title | the compartment above (§3.2) |
-| Components | **no anchor line** — the B38/B54 line "Each card links to a page housing my work in that domain." is **removed entirely** (B68, issue #174); the zone keeps its label and renders its furniture only |
-| Requirements | the line **"Click around to explore my works!"** (B37's line, copy per B54), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
+| Components | the line **"Pseudonyms and DBAs: aboveaveragerob, Alastair Zeved, Philly Plant Dads"** (B69, issue #185), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), hanging from the region top at `--band-top` — the identical anchor grammar; B38/B54's prior line is removed (B68) |
+| Requirements | the line **"Click the note cards to launch my various pages and work across the web."** (B71, issue #183, superseding B37/B54's copy), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
 | Parking Lot | water field closing the sheet; sized by its measured contents from the two-row floor (§3.2's own law mirrored at the foot, B46); holds the contact form (§6) |
 
 There is **no All Boards rail** — it is removed from the DOM and the layout
@@ -303,11 +305,15 @@ is committed as an **illustrative reference only**:
 [`docs/proofs/wireframe-illustration-2026-09-29.png`](proofs/wireframe-illustration-2026-09-29.png)
 — it is not law; where the wireframe and this document disagree, this
 document wins. The cards do **not** live inside Components, Requirements, or
-the Parking Lot. The current placement authority is the owner's issue #175
-drawing (`B67`): every card's authored `left/top %` is an agent-derived
-measurement of that screenshot, labelled as such in `B67` (it re-sizes and
-re-places nine cards against `B43`'s #112 drawing; the six board cards and
-Music keep their #112 seats). Since `B45`
+the Parking Lot. The current placement authority is the owner's issue #189
+drawing (`B78`): every card's authored `left/top %` is an agent-derived
+measurement of that screenshot, labelled as such in `B78` (it re-sizes and
+re-places the board against `B67`'s #175 list — seven cards re-placed,
+nine re-sized; LinkedIn and Plants on Poles are untouched). The **Philly
+Plant Dads** note (issue #196, `B80`) seats by the owner's words rather than
+a drawing — **left 59.5% / top 64.3%**, an agent-derived transcription of
+the grill answers of 2026-10-10 at the #189 drawing's own 2880×1650
+reference (the derivation is recorded in `B80`). Since `B45`
 (issue #126) the placements are the **only** authored card geometry — the
 cards are content-sized (§4), no px width/height is authored.
 
@@ -317,8 +323,10 @@ re-authored — the whole sheet scales, so every card
 stays fully inside the sheet edge to edge (no left/right clipping, no
 horizontal overflow) at 320–1023px. Since `B44` (issue #121) the scale is
 uncapped, so desktop viewports render the drawing geometry scaled too — at
-**every** viewport size the sheet shows the #175 drawing (`B67`), no note
-cards overlapping and no link line obscured.
+**every** viewport size the sheet shows the #189 drawing (`B78`), no note
+cards overlapping and — bar the one line the drawing itself runs behind a
+card (Software & AI ↔ Community behind Career, owner-ruled to stand, `B78`)
+— no link line obscured.
 
 ---
 
@@ -347,7 +355,11 @@ drawing authority, `B43`):
   `--card-fs`; the height-driven updater is gone. **Weight:** **400, every
   note card** (`B60`, issue #167 — no note card renders bold; supersedes
   `B53`'s "the six board cards keep 600" clause and subsumes `B53`/`B55`'s
-  sub-card 400).
+  sub-card 400). **One owner-ruled exception (`B80`, issue #196):** the
+  **Philly Plant Dads** note's label renders at **11.4px** — scaled down to
+  fit the Spotify card's box ("font scaled down to fit", the owner's grill
+  answer) — amending `B45`'s fixed-17px clause for that one card; its line
+  box stays the note's 17 × 1.4 = 23.8px.
 - **Sizing:** cards are **content-sized** — `width: max-content`,
   `min-width: 132px` (= TheBoards' `NOTE_MIN_W`, `state.js` / `styles.css`
   `.note-text`, TheBoards `UIUX §4.5`, `B84`), `height` following the
@@ -355,26 +367,33 @@ drawing authority, `B43`):
   is the distance from the card's left edge to the sheet's right edge,
   divided by the card's own scale, floored at `NOTE_MIN_W` — TheBoards
   `geometry.js` `noteMaxW` ported verbatim (`--card-max-w`, set per card in
-  JS, re-derived when the card is dragged or its scale changes).
-- **Rest scale (B67, issue #175; supersedes B52's list):** each card's rest
-  scale is its **drawing scale of record** — the owner's issue #175
-  screenshot sizes every card — shipped inline per card: **2.25** community,
-  **2.21** career, **1.77** writing, **1.79** software-ai, **2.25**
-  plants-rocks, **1.70** music, **1.02** apple-music, **1.19** spotify,
-  **1.06** linkedin, **1.14** zeved-boards, **1.20** agentic-plugins,
-  **0.98** plants-poles, **1.03** plants-in-rocks. The six board cards
+  JS, re-derived when the card is dragged or its scale changes). The
+  **Philly Plant Dads** note (`B80`, issue #196) is content-sized by these
+  same mechanics and lands in the **Spotify card's own box** — the same
+  `min-width: 132px` one-line box at the Spotify rest scale — by the Font
+  bullet's fitted label.
+- **Rest scale (B78, issue #189; supersedes B67's list):** each card's rest
+  scale is its **drawing scale of record** — the owner's issue #189
+  screenshot sizes every card — shipped inline per card: **2.33** community,
+  **2.18** career, **1.86** writing, **1.78** software-ai, **2.26**
+  plants-rocks, **1.70** music, **1.01** apple-music, **1.19** spotify,
+  **1.06** linkedin, **1.24** zeved-boards, **1.19** agentic-plugins,
+  **0.98** plants-poles, **1.02** plants-in-rocks, **1.19**
+  philly-plant-dads (`B80` — the Spotify card's own rest scale, its box
+  being the Spotify box). The six board cards
   render above 1; the sub cards render at their drawing scales — several
   now sit above 1, so **B52's board/sub tier split at scale 1 is
   superseded**: the drawing rules the sizes (B33's provenance), not the
   tier. The gesture still moves
   the scale from there under the floor and ceiling above, unchanged. The
-  values are agent-derived measurements of the #175 drawing (the
+  values are agent-derived measurements of the #189 drawing (the
   `B33`/`B43` provenance pattern) — outer card footprint at the drawing's
-  2560×1223 viewport (render scale rs = 1223/1104.55, the B46 height anchor;
-  calibrated against the unchanged cards' shipped percentages) ÷ the card's
-  measured unscaled content width. The four `B55` sub cards are sized and
-  placed by the #175 drawing like every other card (their B55 0.78 band is
-  superseded).
+  2880×1650 page viewport (render scale rs = 1650/1104.55, the B46 height
+  anchor; the width floor inert at that aspect) ÷ the card's measured
+  unscaled content width, calibrated against the unchanged cards' shipped
+  values. The four `B55` sub cards are sized and
+  placed by the drawing like every other card (their B55 0.78 band was
+  superseded at `B67`).
 - **Resize:** the corner gesture acts as **TheBoards' scale-based resize**
   (`interactions.js` frame-drag resize): the drag changes the card's own
   scale — the pointer's distance to the card's fixed top-left origin,
@@ -403,8 +422,8 @@ drawing authority, `B43`):
 > (`state.js`), not agent inventions; the one-fifth-of-viewport ceiling is
 > the owner's (`B51`, issue #142), and the per-card ceiling arithmetic is
 > agent-derived per the `B33`/`B43` pattern. The per-card **rest scales**
-> are likewise agent-derived, transcribing the owner's issue #175 drawing
-> (`B67`, superseding `B52`'s list).
+> are likewise agent-derived, transcribing the owner's issue #189 drawing
+> (`B78`, superseding `B67`'s list).
 
 **A gesture is never a click** (`B41`, issue #109): the corner resize handle is
 a `<span>` **inside** the card's `<a>`, so a pointer release over it fires the
@@ -460,11 +479,15 @@ no bounce; nothing moves on its own after the interaction ends.
 | Plants & Rocks | `https://razgregory.com/plantsandrocks` | live — the dual-page-reader Plants & Rocks page (B48, `UIUX §11`) |
 | Apple Music | `https://music.apple.com/us/artist/aboveaveragerob/1815357064` | live (B26) |
 | Spotify | `https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ` | live (B26 — the link the Music card carried) |
+| Philly Plant Dads | `https://www.instagram.com/philly_plant_dads` | live (B80) |
 
 The **Music** card is not a door (§4.1, B26): it is the plain parent note the
 **Apple Music** and **Spotify** doors hang under. The two music doors sit
 **below the Music card as a mirrored pair** — Apple Music lower-left, Spotify
 lower-right — at the placement the owner's screenshot gives (issue #72).
+The **Philly Plant Dads** door hangs under **Plants & Rocks** the same way
+(`B80`, issue #196): link pair 14 to its parent, seated at the Spotify
+card's own size to the parent's right.
 
 ### §4.3 Note links (B28)
 
@@ -477,6 +500,7 @@ Plants & Rocks ↔ Community · Plants & Rocks ↔ Writing · Software & AI ↔ 
 Music ↔ Apple Music · Music ↔ Spotify. `B55` (issue #146) adds four more —
 Software & AI ↔ Zeved Boards · Software & AI ↔ Agentic Plugins ·
 Plants & Rocks ↔ Plants on Poles · Plants & Rocks ↔ Plants in Rocks.
+`B80` (issue #196) adds one more — Plants & Rocks ↔ Philly Plant Dads.
 
 A link is the card-to-card relationship drawn as the board's own linework:
 a thin straight line between two cards' **centres**, no label, no arrowhead.
@@ -566,15 +590,18 @@ The form's userspace, per the owner's ruling `B20`, renders left-anchored:
   when the referrer is missing, which would silently brick the form.
 - The form is the page's **only** network call (§3.4, PRD).
 
-### §6.2 The footer's 50/50 split (B62, issue #169; copy text amended by B68, issue #174)
+### §6.2 The footer's 50/50 split (B62, issue #169; copy text amended by B68, issue #174, and by B70, issue #184)
 
 The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 
-- **Left half:** the owner's copy, verbatim from issue #174 (B68's copy of
-  record — the issue-#174 edited version, superseding issue #169's original
-  text), ending in the italic phrase *curiouser and curiouser.* — rendered
+- **Left half:** the owner's copy, verbatim from issue #184 (B70's copy of
+  record — superseding B68's issue-#174 copy of record), rendered as **two
+  paragraphs with no gap between them** (the issue's newline break; the
+  paragraphs carry no margin), ending in the italic phrase *curiouser and
+  curiouser.* (spelled "curiouser" per the owner's correction of the
+  issue's "curioser" typo) — rendered
   **13px / 1.5 / 400** in `--ink` (the lot's own reading-text rung, per
-  B62's rendering, unchanged by B68).
+  B62's rendering, unchanged by B68/B70).
 - **Divider:** the divider grammar career.html ships (`.parking-lot__divider`
   — 1px wide, **3/4** of the section's inner height, centred), re-tokened to
   this page's To-Do blue: `color-mix(in srgb, var(--frame) 45%, transparent)`
@@ -612,13 +639,13 @@ The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 |---|---|
 | §2's tokens, ratios, crossover | `test/tokens.js` — recomputed from shipped hexes |
 | card states, region layout, the full-viewport sheet, no rail in the DOM | `test/mobile.js`, `test/desktop.js` |
-| the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L8]; `test/mobile.js` pins the endpoints at scale < 1 |
+| the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L14]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
 | the band / title-card / lot laws (B46): height-anchored landscape scale, ×1.10455 rescale, 29px overhang, B31's (band-top+8) 16px 16px box, rescaled lot shelf, lot clip | `test/scaling.js` (every viewport) and `test/parity_boards.js` — rendered side-by-side against the local TheBoards checkout at identical viewports |
-| card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B67 drawing rest scales and placements per card, link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
+| card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B78 drawing rest scales and placements per card (B80 for philly-plant-dads, seated by the owner's words), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
-| the career page (B47): employer selector, B132 glow, split body, three-section lot, sand/brown ladder, empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
+| the career page (B47): employer selector, B132 glow, split body, two-way lot (B65), monochrome ladder (B73), empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
 | the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, the B58 Download (PDF anchor), literal idea-green ladder, the B50 landing-convention band/card/lot render | `test/plantsandrocks.js` |
 
 ---
@@ -647,27 +674,34 @@ static single file — all CSS inline, the typeface embedded as a data URI,
 **no script**: the employer selector is a three-way radio group driven by CSS
 `:has`, the landing reference's own mechanism.
 
-### §10.1 Tokens — the sand/brown binding
+### §10.1 Tokens — the monochrome binding *(B73, issue #190)*
 
-TheBoards' token ladder re-hued to sand + deep brown (B47); the ladder's
-luminance relationships are preserved role for role:
+TheBoards' token ladder re-derived as a **pure neutral gray scale — zero
+hue** — at the **landing palette's exact relative luminance rungs** (issue
+#190; supersedes B47's sand/brown binding); the ladder's luminance
+relationships are preserved role for role, and because every rung sits at
+the landing palette's luminance, §2.3's ink-pole contrast table carries over
+unchanged:
 
-| Token | Hex | Role |
-|---|---|---|
-| `--deep` | `#12100a` | page canvas, darkest surface — deep brown, TheBoards `--deep` role |
-| `--card` | `#241c0f` | band/card fill, one step above the deep |
-| `--frame` | `#9a7c52` | card borders + all full-width rules — the deep's hue lifted |
-| `--note` | `#e8d9b0` | brightest ink on the deep — light sand |
-| `--water-top` | `#7a5c38` | gradient ladder, header band |
-| `--water-mid` | `#5c4429` | gradient ladder mid stop |
-| `--water-bot` | `#3a2c1a` | gradient ladder foot |
-| `--ink-light` | `#f4f5f1` | light ink pole |
-| `--ink-dim` | `rgb(244 245 241 / 0.55)` | unselected-card ink |
-| `--glow-sand` | `#7d6340` | selected-card bloom — `--frame` one rung down (B132's rung rule) |
+| Token | Hex | Role | Rel. luminance (landing rung) |
+|---|---|---|---|
+| `--deep` | `#080808` | page canvas, darkest surface — neutral near-black, TheBoards `--deep` role | 0.0023 |
+| `--card` | `#151515` | band/card fill, one step above the deep | 0.0077 |
+| `--frame` | `#8c8c8c` | card borders + all full-width rules — the border/rule rung | 0.2611 |
+| `--note` | `#cbcbcb` | brightest ink on the deep — light gray | 0.5962 |
+| `--water-top` | `#636363` | gradient ladder, header band | 0.1237 |
+| `--water-mid` | `#4d4d4d` | gradient ladder mid stop | 0.0737 |
+| `--water-bot` | `#333333` | gradient ladder foot | 0.0325 |
+| `--ink-light` | `#f4f5f1` | light ink pole | — |
+| `--ink-dim` | `rgb(244 245 241 / 0.55)` | unselected-card ink | — |
+| `--glow-gray` | `#676767` | selected-card bloom — `--frame` one rung down (B132's rung rule) | 0.1364 |
 
-The final hexes are the owner's sign-off (issue #133 blank slot 9); the
-**relationships** above — card above deep, note brightest on the deep, glow
-one rung below frame — are the law.
+The final hexes are the owner's sign-off (issue #190, owner chat 2026-10-09:
+"confirmed and approved for use"); the **relationships** above — card above
+deep, note brightest on the deep, glow one rung below frame — are the law.
+`--water-bot-a` is `51 51 51` (`--water-bot`'s channels, the band's radial
+foot). The glow token renames `--glow-sand` → `--glow-gray`; no value ships
+under the old name.
 
 *(B56, issue #154: the ported component's `.gm-title` carries the source's
 800-weight type. The page's font set gains the **800 face** —
@@ -681,8 +715,8 @@ either; it renders synthesized there and here, unchanged.)*
 *(Band, card and footer rendering law amended by B49, issue #139: the career
 page's header band, title cards and footer render at the landing page's
 conventions — B46's height-anchored scale, B31's title-card box, the lot's
-two-row-shelf floor — re-tokened to the sand/brown binding. The scale is a
-pure-CSS custom property `--rs` (`vh/1104.55` landscape, `min(vw/1440,
+two-row-shelf floor — re-tokened to this page's own binding (§10.1). The
+scale is a pure-CSS custom property `--rs` (`vh/1104.55` landscape, `min(vw/1440,
 vh/1104.55)` portrait) since the page ships no script; every band literal
 renders as `L × --rs`.)*
 
@@ -691,13 +725,18 @@ renders as `L × --rs`.)*
   closed by the 1px `--frame` rule at `--rule-y` (`67.38 × --rs`, the
   rescaled two-line floor) — with three title cards, PNC Bank, PNC Private
   Bank, Brinker Capital, left→right chronological. Each card is the landing
-  title card's B31 box grammar verbatim: content-sized, top-anchored,
+  title card's B31 box grammar verbatim — except the hug: **all three
+  render at one shared size**, each card hugging the widest label's own
+  content width ("PNC Private Bank") rather than its own text, so the
+  three boxes are identical and the two gaps between them exactly equal
+  (B79, issue #195), in every selection state and at every viewport
+  (the ≤743px stacked reflow shares the one width too) — top-anchored,
   `border-top: 0`, radius only on the bottom corners, `(band-top + 8px)
   16px 16px` padding, both lines at the 20px logical type (employer name
   600, oneliner slot 400), `min-height: rule-y + 29px` hanging over the
   rule. Unselected cards are dim + italic (§4's unselected grammar); the
   selected card wears the B132 glow verbatim:
-  `border-color: var(--glow-sand); box-shadow: 0 0 8px 0 var(--glow-sand);`
+  `border-color: var(--glow-gray); box-shadow: 0 0 8px 0 var(--glow-gray);`
   and no other state. Default selection: PNC Bank. The header is the
   selector's `role="radiogroup"` (`aria-label="Choose an employer"`); the
   page's one `h1` ("Career") is visually hidden so no wordmark encodes
@@ -712,14 +751,59 @@ renders as `L × --rs`.)*
   the employer's roles as **plugin components** — the Agentic Plugins page's
   `.gregorian-mode` class set ported verbatim in structure (water back card
   `.gm-back`, uppercase title card `.gm-title`, the italic lowered year
-  subscript in the `.gm-uc` grammar, description card `.gm-desc`), re-hued
-  to this page's own sand/brown tokens (§10.1) with `--ink` on the sand
-  cards reusing `--deep` `#12100a`. One component per role, in **one row
-  reading left to right** (B66: chronological, oldest leftmost; the half
-  scrolls vertically when the row needs more height; at ≤743px the shipped
-  readable reflow stacks the plates again), equally sized and evenly spaced
-  with comfortable padding between each to fit the space, contained within
-  the left half. The component's "Github" CTA is not ported. The description
+  subscript in the `.gm-uc` grammar, description card `.gm-desc`), re-tokened
+  to this page's own monochrome ladder (§10.1), with `--ink` on the light
+  cards reusing `--deep` `#080808`. One component per role, in **one row
+  reading left to right** (B66: chronological, oldest leftmost; at ≤743px the
+  shipped readable reflow stacks the plates again), equally sized and evenly
+  spaced with comfortable padding between each to fit the space, contained
+  within the left half. *(Amended by B74, issue #186)* Above the breakpoint
+  each component is **capped at half the left half's own height** — never the
+  header→footer's entire length — and the row is **vertically centred** in the
+  half; the **description card is the page's only scroll container** (its text
+  scrolls inside the card on overflow — the B56 card floor, `116 × --rs`,
+  rendering as a shrinkable flex basis for the empty placeholder, a filled
+  card sizing to its content per B64); the page is one viewport and does not
+  scroll. **B74 supersedes B66's half-scroll clause** — the left half is no
+  longer a scroll container. *(Amended by B76, issue #194 — supersedes B75's render-scale type)* The
+ component renders the **agentic-plugins source geometry at the source's
+ exact proportions, scaled uniformly by the plate's own width** — the
+ source's fixed 830px plate re-rendered as one scale unit, 1 source px =
+ plate-width/830 (container queries; no viewport-scale rule remains). The
+ back card is inset `90/165/90` source px; the title card is `427` source
+ px wide at top `55` — **straddling the back card's `90` top edge**, with a
+ gap to the description card below it; the description card is `600` source
+ px wide — **wider than the `500` back card, which it overhangs on both
+ sides** — and the **back card extends vertically past it** (the desc
+ card's bottom margin is the source's full desc→plate distance, `202`
+ source px, leaving `112` source px of back card visibly showing below the
+ card; long copy scrolls inside instead). The component's **type renders at
+ the source's ratios** (title
+ `28`, year `14`, desc `20` per `830px` plate) with the **owner's readable
+ floor: no component type below `11px`** — the floor may break the
+ proportions on small plates, per the owner's ruling; **long titles wrap to
+ two lines** rather than shrinking, the year subscript in flow under the
+ title card. Two-across rows render proportionally larger components than
+ three-across rows at the same viewport. The design canvas is unchanged
+ (measured: at 1440×1110's ~195px three-across plates the floored type
+ renders 11px; 12.86px title at 2560×1440's ~381px plates; one viewport at
+ every tested size from 744×400 up, and nothing clipped there except the
+ short windows B77 defers — 744×400 and 844×390 clip the component's bottom
+ by 3–11px with the footer's second line, the owner deferring that to
+ separate future work (chat, 2026-10-09)).
+ Its **scroll bar is visible and inside the description card — always, on a
+ FILLED card**: `overflow-y: scroll` keeps the styled in-card bar present
+ even where the copy fits (the thumb renders when the content overflows;
+ B76 amends B75's "a card that does not overflow shows none").
+ `::-webkit-scrollbar` forces the classic (non-overlay) bar Chromium and
+ Safari otherwise auto-hide — 6px wide, thumb `--ink` (the card's own border
+ token), transparent track — Firefox reads the `thin` standard properties
+ behind `@supports (-moz-appearance: none)`; the **empty** placeholder
+ stays bare (no scroll region), per the owner's ruling; the card is
+ keyboard-focusable now that it scrolls and wears the
+ page's own focus ring (`--ink-light`, offset 2px).
+  The component's "Github" CTA is not ported.
+  The description
   cards carried **B56's explicit override** of the omit-empty rule (empty
   until the owner's fill passes); *(amended by B64, issue #176)* three now
   render the **owner's copy verbatim, three paragraphs per card** — Sr.
@@ -737,13 +821,14 @@ renders as `L × --rs`.)*
   699px filled card overflowed its cell onto the footer, which the
   no-overlap law forbids; the plates then sized to their content. That
   content-sizing now renders in B66's left-to-right row: `flex: 1 1 0`
-  equalizes the plates' widths, the vertical size is the content, and the
-  half scrolls when the row needs more height. The empty-state equal-cell
+  equalizes the plates' widths and the vertical size is the content, **capped
+  by B74 at half the left half's own height**. The empty-state equal-cell
   rendering was the placeholder geometry; the owner's equal-sizing words
   were ruled for the empty state and the filled state sizes to content.)*
   Right half: "Accomplishments" and "Learnings/Skills" (section name
   pending, issue #133 slot 6) render only once filled.
-- **Footer *(amended by B65, issue #177)*** the landing page's
+- **Footer *(amended by B65, issue #177; second line added by B77, issue
+  #193)*** the landing page's
   `.parking-lot` grammar — water gradient over `--deep`, 1px
   `--frame`-mix top rule, same padding — floored at the rescaled two-row
   shelf (`134.76 × --rs`, B49: the landing lot's floor, taken statically;
@@ -752,14 +837,20 @@ renders as `L × --rs`.)*
   BPM | Salesforce" rendered on one line, its straight slashes as **short
   divider bars** (1px wide, the divider's own `--frame`-mix color, `0.875em` tall —
   agent-derived per B33/B40: the owner ruled shorter + visually distinct,
-  same palette) — then **one** full divider bar (1px, 3/4 of the section's
+  same palette) — with the **education line** stacked directly beneath it
+  (B77, issue #193): the owner's copy "Maryville University of St. Louis |
+  B.S. Accounting | 2021 | Magna cum laude", its straight bars rendered as
+  **the same short divider bars** (same width, color, height, gap — no new
+  values), the two lines separated by the lot's `0.35em` paragraph gap —
+  then **one** full divider bar (1px, 3/4 of the section's
   inner length, vertically centred), then the `.cta` "Learn More about
   Rob" → `https://razgregory.com/`. *(B65 supersedes §3's three-way
   split: the second divider bar is removed.)* The professional-blurb
   (blank #7) and contact-info (blank #8) slot comments keep their halves;
-  the empty slots render nothing (B47). The tools line renders on one line
+  the empty slots render nothing (B47). Each line renders on one line
   wherever the bar's width allows and wraps rather than overflows where it
-  doesn't (B65, wrap-only-when-needed — no-overlap law).
+  doesn't (B65, wrap-only-when-needed — no-overlap law; B77 carries it to
+  the education line).
 
 ### §10.3 Blank slots
 
@@ -770,7 +861,7 @@ the final palette hexes. **Owner ruling (2026-10-05): empty blocks are
 omitted from the rendered page entirely until content exists** — no empty
 styled container, no section heading, no filler text, no "coming soon"
 marker. The slot structure lives in the markup as non-rendering `SLOT`
-comments (and the footer's three-section frame, whose empty `<p>` slots
+comments (and the footer's two-way frame, whose empty `<p>` slots
 measure zero height and carry no text) so a targeted fill makes each block
 appear; until then the page invents no copy.
 
@@ -786,11 +877,23 @@ Specialist, Portfolio & Trust Administrator, Branch Banker — now render
 the owner's copy verbatim; every other desc card stays empty under B56.
 Amended by B65, issue #177: the footer's left half carries the owner's
 one-line tools list; the blurb (#7) and contact (#8) slots remain
-unfilled and render nothing.)*
+unfilled and render nothing. Amended by B77, issue #193: the left half
+also carries the owner's second line — the education copy — beneath the
+tools line; the #7/#8 slots are unchanged.)*
 
-**Pinned by:** `test/career.js` — selector mechanics, the B132 glow, the
-split, the two-way lot (B65), the ladder tokens, and the omit-empty-block
-discipline.
+**Pinned by:** `test/career.js` — the B79 selector-card shared size and
+equal gaps, selector mechanics, the B132 glow, the
+split, the two-way lot (B65, with B77's second line and its bars matched
+to the top line's), the ladder tokens, the omit-empty-block
+discipline, B74's one-viewport render (the component cap at half the
+left half's own height, the row centred in the half, the description card as
+the page's only scroll container), and B76's source-geometry render (the
+plate-relative uniform scale, the title card straddling the back card's top
+edge with a gap to the desc card, the wider desc card with the back card
+extending vertically past it, the source-ratio type with its 11px floor,
+long titles wrapping,
+and the always-visible styled bar on filled desc cards with the empty
+placeholder bare).
 
 ---
 

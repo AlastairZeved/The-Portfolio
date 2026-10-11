@@ -64,13 +64,22 @@ function ok(label, cond) {
           Math.abs(+ln.getAttribute('x2') - cB[0]), Math.abs(+ln.getAttribute('y2') - cB[1]));
         return { from: ln.dataset.from, to: ln.dataset.to, d };
       });
-      // no link line runs behind a card that is not its own endpoint
+      // no link line runs behind a card that is not its own endpoint — bar
+      // B78's ONE owner-ruled exception (issue #189): the owner's drawing
+      // runs Software & AI ↔ Community behind Career exactly as the owner's
+      // own screenshot shows it, and the owner ruled that arrangement stands
+      // ("Execute the drawing exactly as-is"), superseding the
+      // no-obscured-line expectation of issue #121 (B44) for this pair.
+      // Keyed direction-agnostically on the sorted pair.
       const obscured = [];
+      const OWNER_HIDDEN = { 'community-software-ai': 'career' };
       for (const lnEl of layer.querySelectorAll('line')) {
         const x1 = +lnEl.getAttribute('x1'), y1 = +lnEl.getAttribute('y1');
         const x2 = +lnEl.getAttribute('x2'), y2 = +lnEl.getAttribute('y2');
+        const pairKey = [lnEl.dataset.from, lnEl.dataset.to].sort().join('-');
         for (const c of cards) {
           if (c.id === lnEl.dataset.from || c.id === lnEl.dataset.to) continue;
+          if (OWNER_HIDDEN[pairKey] === c.id) continue;   // B78
           for (let k = 1; k < 20; k++) {
             const f = k / 20;
             const x = (x1 + (x2 - x1) * f) * rs + br.left;
@@ -179,7 +188,7 @@ function ok(label, cond) {
       Math.abs(r.rs - (r.vw >= r.vh ? Math.min(r.vh / REF_H, r.vw / r.lwMin)
                                     : Math.min(r.vw / REF_W, r.vh / REF_H))) < 1e-6);
     ok(`${tag}: no overlapping note cards`, r.overlaps.length === 0);
-    ok(`${tag}: no link line obscured behind a card`, r.obscured.length === 0);
+    ok(`${tag}: no link line obscured behind a card (bar B78's owner-ruled pair)`, r.obscured.length === 0);
     ok(`${tag}: every link endpoint on its card centre (≤0.6 logical px)`, r.lineMaxDev < 0.6);
     ok(`${tag}: cards render content-sized × own scale × rs (uniform, no reflow)`,
       r.dims.every(d => d.devW < 1 && d.devH < 1));

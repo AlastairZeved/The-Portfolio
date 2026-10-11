@@ -645,7 +645,7 @@ The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 | card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B78 drawing rest scales and placements per card (B80 for philly-plant-dads, seated by the owner's words), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
-| the career page (B47): employer selector, B132 glow, split body, two-way lot (B65), monochrome ladder (B73), empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
+| the career page (B47): employer selector, B132 glow, split body, two-way lot (B65), monochrome ladder (B73), empty blocks omitted; the B49 landing-convention band/card/lot render; the B81 stage + item selector band in the left half | `test/career.js` |
 | the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, the B58 Download (PDF anchor), literal idea-green ladder, the B50 landing-convention band/card/lot render | `test/plantsandrocks.js` |
 
 ---
@@ -825,6 +825,67 @@ renders as `L × --rs`.)*
   by B74 at half the left half's own height**. The empty-state equal-cell
   rendering was the placeholder geometry; the owner's equal-sizing words
   were ruled for the empty state and the filled state sizes to content.)*
+  *(Amended by B81, issue #212 — supersedes B66's one-row arrangement and
+  B76's plate-row scaling law; B74, B75's styled bar, B76's geometry/floor/
+  wrap, B64's copy and B56's empty override all stand.)* The left half is
+  the **agentic-plugins item selector design** (the source page
+  `alastairzeved.com/agentic-plugins`, its `.plugins__stage` +
+  `.plugins__pane`/`.plugins__tab` construction, ported verbatim and
+  re-tokened to §10.1): a **stage** presenting the one band-selected
+  role's component on top, and an **item selector band** beneath it whose
+  title cards launch their roles. The band nests **per employer** under
+  the unchanged three-way header selector; the **default presented role is
+  the employer's most recent one** (Branch Banker; Portfolio & Trust
+  Administrator; Sr. Portfolio Specialist — each band's most-recent card
+  pre-checked); each band card reads the **role name + the year subscript
+  from the component** (the same `.gm-title`/`.gm-uc` strings, no copy
+  changes). The band is a note card lying horizontally — border `2.1px`
+  `--frame` (the source's `--note-ink` seat, the `.gm-card` border
+  literal), 3px radius, the water gradient (radial foot + three-stop
+  ladder + `--water-bot-a` 0.72, as the band and `.gm-back` render it) over
+  `--elevation`, `margin: 1.25rem 0`, padding `0.35rem` and
+  `clamp(0.75rem, 2.5cqw, 1.5rem)` on the sides, gap
+  `clamp(0.5rem, 1.25cqw, 1rem)`, floored at the source's selector height
+  `clamp(3.4rem, 10cqw, 5.5rem)` (a floor so the longer career role names
+  wrap without clipping — the clamp's own intent; agent-derived per B33).
+  Its cards are the source's `.plugins__tab` grammar: equal flex cells
+  (`flex: 1 1 0`), the normalized box ((band-top + 8 × --rs) top padding /
+  `--card-pad` sides, `2 × --rs` border, `3 × --rs` radius, `--card` bg),
+  800-weight `20 × --rs` uppercase type at `.03em` spacing, the year
+  beneath in the component's own `.gm-uc` grammar (italic 400 at
+  `14 × --rs`, not uppercased); states per the source: hover = the
+  two-layer `--frame` glow (`brightness(1.1)`; `0 0 12px 2px` and
+  `0 0 24px 4px` `--frame`, under the `(hover: hover)` guard, on the
+  page's 200ms ease), press = `brightness(0.92)`, `translateY(2px)`, the
+  inset shadows at 80ms, unselected = dim + italic (`--ink-dim`), checked
+  = `--card` bg + `--ink-light`, `:focus-visible` = the page's
+  2px/2px `--ink-light` ring. The glimmer — `::after`'s 105deg
+  `color-mix(in srgb, var(--frame) 70%, transparent)` band at `250% 100%`
+  / `130% 0` on the 6s `gm-marquee` clock, dead under
+  `prefers-reduced-motion` — is the **band cards' alone** (the source
+  repo's B26): the presented component's title/back cards carry none. The
+  presented component's back card carries the source's breathing
+  presentation glow — `gm-breathe`, the 10s ease-in-out loop, `0 0 60px
+  20px` and `0 0 240px 120px` bloom layers at the source's own alphas
+  (.25/.35, .12/.18) — re-tokened to `--glow-gray` (the rung below
+  `--frame`, B132's rule). The stage is a size container taking what the
+  B74 cap leaves above the band; the plate renders the source's fixed
+  830px design at the source's own ratio law — width = min(the stage's
+  width, `830px ×` the stage's height over the role's measured
+  `--plugin-h` plate height at the 830px layout width, carried per role
+  with provenance comments; top-anchored, horizontally centred) — so the
+  plate stays inside the stage at every size, `max-height: 100%` capping
+  it and the desc card shrinking and scrolling under the cap (B74/B75/
+  B76's mechanism unchanged: 6px styled in-card bar, thumb `--ink`,
+  transparent track, Firefox `@supports`, empty cards bare, the 11px
+  floor, the long-title wrap). The `--plugin-h` measurement convention and
+  every band literal above are ported source literals (agentic-plugins
+  `styles.css`), agent-derived in their port mechanics under the B33/B40
+  pattern. At ≤743px the same stage + band column renders in the shipped
+  readable mobile literals (the header cards' own resets: `0.25rem
+  1.1rem` padding, 2px border, 3px radius, `1.1rem` name / `0.8rem` year
+  type; the stage sizes to the presented plate's own content and the page
+  keeps scrolling below the breakpoint, per B74's mobile answer).
   Right half: "Accomplishments" and "Learnings/Skills" (section name
   pending, issue #133 slot 6) render only once filled.
 - **Footer *(amended by B65, issue #177; second line added by B77, issue
@@ -881,19 +942,30 @@ unfilled and render nothing. Amended by B77, issue #193: the left half
 also carries the owner's second line — the education copy — beneath the
 tools line; the #7/#8 slots are unchanged.)*
 
+*(Amended by B81, issue #212: the left half's components are presented by
+the item selector band — one role's component on the stage at a time, the
+band's title cards (role name + year subscript) launching them; the
+component slots themselves — titles, years, the three B64 desc fills and
+the empty desc cards — are unchanged. The omit-empty rule stands for the
+right half and the footer as before.)*
+
 **Pinned by:** `test/career.js` — the B79 selector-card shared size and
-equal gaps, selector mechanics, the B132 glow, the
-split, the two-way lot (B65, with B77's second line and its bars matched
-to the top line's), the ladder tokens, the omit-empty-block
-discipline, B74's one-viewport render (the component cap at half the
-left half's own height, the row centred in the half, the description card as
-the page's only scroll container), and B76's source-geometry render (the
-plate-relative uniform scale, the title card straddling the back card's top
-edge with a gap to the desc card, the wider desc card with the back card
-extending vertically past it, the source-ratio type with its 11px floor,
-long titles wrapping,
-and the always-visible styled bar on filled desc cards with the empty
-placeholder bare).
+equal gaps, selector mechanics, the B132 glow, the split, the two-way lot
+(B65, with B77's second line and its bars matched to the top line's), the
+ladder tokens, the omit-empty-block discipline, B74's one-viewport render
+(the stage + band block capped at half the left half's own height and
+centred in the half, the page never scrolling, the description card as the
+page's only scroll container), B76's surviving source geometry (the title
+card straddling the back card's top edge with a gap to the desc card, the
+wider desc card with the back card extending vertically past it by
+`112 × --u`, the source-ratio type with its 11px floor, long titles
+wrapping, and the always-visible styled bar on filled desc cards with the
+empty placeholder bare), and B81's stage + band render (the per-employer
+radio band beneath the unchanged header selector, the most-recent default,
+band cards reading role name + year, the selected/unselected card states,
+the band-card hover glow and glimmer in `--frame` with the presented
+component's cards unglimmered, the stage presenting exactly one component
+scaled by its min-ratio law inside the stage).
 
 ---
 

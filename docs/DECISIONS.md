@@ -2577,3 +2577,113 @@ down to fit." (the size); "A little longer than the horizontal gap that
 exists between \"Software & AI\" and \"Zeved Boards\" note cards." (the gap
 at the parent's right edge); "Not vertically centred, just a touch lower
 than that." (the vertical seat).
+### B81. The career left half renders the agentic-plugins item selector design — a stage presenting the band-selected role, a title-card band beneath it (issue #212)
+
+The owner ruled that `/career`'s left half match the item selector design
+already built for repo AlastairZeved/AlastairZeved at
+`https://alastairzeved.com/agentic-plugins/`: **a stage presenting the one
+selected role's plugin component on top, and an item selector band with
+title cards beneath it — each card launches its role (presents its
+component) "with the glow and all"** — the exact same design, re-tokened to
+the career page's monochrome ladder (§10.1, B73). No copy updates, no
+stubbed text anywhere: the empty places remain empty of text until the
+design is right.
+
+- **The header employer selector stays; the band nests per employer.**
+  The three-way employer radio selector in the header is unchanged
+  (B47/B49/B79); each employer's left half (`.split__gallery`) becomes the
+  stage + band column — the stage presents that employer's band-selected
+  role's `.gregorian-mode` component, the band beneath carries one title
+  card per role.
+- **The default presented role is the employer's most recent one** — PNC
+  Bank: Branch Banker (2019-2020); PNC Private Bank: Portfolio & Trust
+  Administrator (2021-2022); Brinker Capital: Sr. Portfolio Specialist
+  (2023-2025) — each band's most-recent card pre-checked and its component
+  presented on load and on employer change.
+- **Each band card reads the role name + the year subscript from the
+  component** — the same strings the component itself renders (the
+  `.gm-title` role title and the `.gm-uc` year), no copy changes.
+- **The description card keeps the in-card styled scroll bar** — B75/B76's
+  always-visible 6px styled in-card bar (thumb `--ink`, transparent track,
+  Firefox `@supports`, empty cards bare), the 11px readable type floor and
+  the long-title wrap survive onto the stage render.
+
+The band is the source's own construction, ported verbatim and re-tokened:
+a note card lying horizontally (border `2.1px` in `--frame` — the source's
+`--note-ink` seat — 3px radius, the water gradient over `--elevation`,
+margin `1.25rem 0`, padding `0.35rem` and the `clamp(0.75rem, 2.5cqw,
+1.5rem)` sides, gap `clamp(0.5rem, 1.25cqw, 1rem)`) holding one title card
+per role as equal flex cells — the source's `.plugins__tab` grammar: the
+normalized box ((band-top + 8 × --rs) / --card-pad padding, 2 × --rs
+border, 3 × --rs radius), 800-weight `20 × --rs` uppercase type with
+`.03em` spacing, the year beneath in the component's own `.gm-uc` grammar
+(italic 400 at `14 × --rs`); the hover glow (`brightness(1.1)` + the
+two-layer `0 0 12px 2px` / `0 0 24px 4px` `--frame` bloom, under the
+`(hover: hover)` guard on the 200ms ease), the 80ms press
+(`brightness(0.92)`, `translateY(2px)`, the inset shadows), unselected =
+dim + italic (`--ink-dim`), checked = `--card` bg + `--ink-light`,
+`:focus-visible` = the page's 2px/2px `--ink-light` ring, and the glimmer
+(`::after`, the 105deg `color-mix(in srgb, var(--frame) 70%, transparent)`
+band at `250% 100%` / `130% 0`, on the 6s `gm-marquee` clock, dying under
+`prefers-reduced-motion`) — **the band's title cards are the only
+glimmering surface**: the presented component's own title/back cards carry
+none, per the source repo's own B26. The presented component's back card
+carries the source's breathing presentation glow ("with the glow and all")
+— the `gm-breathe` 10s loop, `0 0 60px 20px` and `0 0 240px 120px` bloom
+layers at the source's own alphas — re-tokened from the source's rose
+triplet to `--glow-gray` (the glow one rung below `--frame`, B132's rung
+rule). The stage scales the presented plate by the source's own ratio law
+— min(the stage's width ratio, the stage's height ratio over the role's
+measured `--plugin-h` plate height at the 830px layout width), the
+per-role constants carried with provenance comments per the source's own
+measured-constant pattern and the B33/B40 agent-derived labelling.
+Selection is a pure-CSS radio group (`:has`), exactly the header
+selector's mechanism — the page ships no script and keeps shipping none.
+
+**This entry supersedes B66's one-row-of-components arrangement** (the
+plates no longer read left-to-right across the half — one is presented,
+the rest launch from the band) **and B76's three-across plate-row scaling
+law** (the plate-relative two-vs-three-across scaling; the stage's own
+min-ratio law above replaces it) — while B76's source geometry, its
+source-ratio type with the 11px floor, its long-title wrap and its
+always-visible filled-card bar, and B75's styled in-card bar all survive
+onto the stage render (the owner's grill answer 4). **B74's one-viewport
+render stands** — the page never scrolls, the stage + band block caps at
+half the left half's own height and is centred in the half, the
+description card remains the page's only scroll container — as do the
+B132 header glow, B79's shared-size header cards, B64's filled copy
+(B56's empty override for the rest), the B47/B49 band/header/footer
+conventions and the header employer selector itself. The ≤743px mobile
+block renders the same stage + band column in the shipped readable
+literals with the page scrolling below the breakpoint, as B74's mobile
+answer rules. Band-card hover glow and glimmer port from the source
+re-tokened to `--frame`; the source's selector-height clamp
+(`clamp(3.4rem, 10cqw, 5.5rem)`) renders as the pane's floor so the
+longer career role names wrap without clipping (the clamp's own
+"tall enough for the longest title to wrap to two lines without clipping"
+intent; agent-derived under the B33/B40 pattern — the owner ruled the
+design, the floor implements it).
+
+`UIUX §10.2`/`§10.3` are amended accordingly and `test/career.js` is
+re-pinned deliberately (the B66 row pins and the B76 plate-row pins it
+asserted are superseded; the band mechanics, the stage's one presented
+component, the band-card states/glow/glimmer, and the surviving B74/B76
+laws are pinned in their place).
+
+**Source:** the owner's issue
+[#212](https://github.com/AlastairZeved/The-Portfolio/issues/212),
+2026-10-11 — title "in /career, big update to the components" — quoted
+verbatim: "We're going to match the design already built for repo AlastairZeved/AlastairZeved at page https://alastairzeved.com/agentic-plugins/ and their presented components. There's an item selector band
+with title cards and each one launches the item (the role on the /career
+page) and presents it - with the glow and all. We're doing the exact same
+design, but brought into the monochrome design tokens used for /career.
+No copy updates, no stubbed text anywhere - let the empty places remain
+empty of text for now until we get this design right."
+
+**Source:** the owner's grill answers of 2026-10-11 (owner chat, the
+pre-implementation clarify form), quoted verbatim as answered:
+
+1. "Yes — header employer selector stays; band nests per employer"
+2. "Last role, most recent"
+3. "Role name + the year subscript from the component"
+4. "Keep the in-card styled scroll bar"

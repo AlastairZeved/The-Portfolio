@@ -2841,3 +2841,61 @@ but not title text. Do not bold any of the text, just increase the size so
 it's readable. Do not mess with the size or vertical height of the footer
 bar." — and the owner's pre-implementation answer of 2026-10-11 (owner
 chat, multiple choice): "Match the 16.57px band-anchor rung".
+
+### B87. The career title cards carry their dates as an in-card subscript (issue #218)
+
+The owner ruled that the career page's three employer title cards must carry
+their employment dates, and that the eight role components list their year in
+the wrong place. The dates therefore render **underneath the title, inside
+the title card, as subscript** — carrying the landing title card's
+reduced-rung convention (B61) forward.
+
+- **The three employer title cards** now read their tenure in the oneliner
+  slot beneath the wordmark — **PNC Bank** `2017-2020`, **PNC Private Bank**
+  `2020-2022`, **Brinker Capital** `2022-Present` — rendered **italic** at
+  the B61 reduced rung (**13.33px / 400**, the 20px title's 2/3 ratio, at
+  `× --rs`). The B79 shared card size is unaffected: the dates are narrower
+  than the "PNC Private Bank" sizer at the 20px rung.
+- **The eight role components** move their year from the separate `.gm-uc`
+  line *below* the title card to **inside the `.gm-title` card**, nested
+  directly under the title text as the italic subscript (the `.gm-uc`
+  grammar, now `display: block` within the card). The card grows to hold
+  title + year. The B76 source geometry is unchanged — the `112px` back-card
+  overhang holds because it depends only on the desc card's bottom margin
+  and the back card's bottom inset, neither of which moved.
+
+**Source:** the owner's issue
+[#218](https://github.com/AlastairZeved/The-Portfolio/issues/218) — quoted
+verbatim: "There should be dates underneath the title (IN THE TITLE CARD) in
+subscript. This convention has already been established on the landing
+page's title card and should be carried forward."; "The title cards in the
+career components has the date listed in the incorrect placement. The date
+is to sit underneath the title (IN THE TITLE CARD) as subscript. All 8
+components needs its date moved to the appropriate placement and fixed." —
+and the three dates as the issue lists them, verbatim: **PNC Bank**
+`2017-2020`, **PNC Private Bank** `2020-2022`, **Brinker Capital**
+`2022-Present`. The owner's two grill answers of 2026-10-11 (owner chat,
+multiple choice) — on the dates: "Italic, 13.33px / weight 400 (reduced 2/3
+rung)"; on the year placement: "Inside the .gm-title box, nested under the
+title text".
+
+### B88. The career footer splits 50/50 with the divider in the middle and the CTA centred in the right half (issue #219)
+
+The owner ruled that the career page's footer divider was incorrectly placed
+against the site's long-established footer convention. The footer therefore
+renders the landing page's B62 50/50 split: the tools + education lines keep
+the left half, the `.cta` "Learn More about Rob" the right half, **one
+vertical divider in the middle** (the existing `.parking-lot__divider`
+grammar unchanged — 1px, 3/4 length, centred), and the CTA **centred within
+the right 50%** (both halves `flex: 1 1 0`; the contact section centres its
+content). The B65/B77 copy lines, the short divider bars and the CTA's text
+and link are unchanged.
+
+**Source:** the owner's issue
+[#219](https://github.com/AlastairZeved/The-Portfolio/issues/219) — quoted
+verbatim: "Once again, this convention has been long established for how to
+structure the footer of a page. The divider should be in the middle of the
+footer. Then the button \"Learn More About Rob\" should be centered within
+it's right 50% of the footer."; "Make both fixes: 1. Move the divider to the
+correct placement: middle of the footer. 2. Move the button so it's centered
+within it's right side of the footer section."

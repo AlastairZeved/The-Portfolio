@@ -195,7 +195,8 @@ body {
 .topband__oneliner {
   margin: 0;
   font-weight: 400;
-  font-size: calc(20 * var(--rs));
+  font-style: italic;            /* the date subscript: italic, at B61's 2/3 reduced rung (20 x 2/3) */
+  font-size: calc(13.33 * var(--rs));
   color: var(--ink-light);
   line-height: 1.2;
 }
@@ -596,7 +597,7 @@ body:has(#role-brinker-3:checked) .plugin--brinker-3 {
 }
 
 /* Card 1 — the title card. In flow (career titles wrap to two lines per the
-   owner's ruling, so the year below must move with it); its top offset
+   owner's ruling; the year now nests inside this card, B87); its top offset
    (55u) is the source's own absolute top — under the back card's 90u top
    edge, so the card straddles it. */
 .gm-title {
@@ -651,18 +652,13 @@ body:has(#role-brinker-3:checked) .plugin--brinker-3 {
 .gm-title::after { animation-delay: 0s; }
 .gm-back::after { animation-delay: 0.3s; }
 
-/* The year — the italicized subscript in the .gm-uc grammar: own element,
-   in flow under the title card, exactly like the Docket's "Under
-   Construction" on the plugins page. The source's absolute top (153px)
-   minus the one-line title card's bottom (≈149px) is the 4px gap. */
+/* The year — the italicized subscript in the .gm-uc grammar, now NESTED
+   INSIDE the title card on its own line under the title (B87, issue #218) —
+   the Docket's "Under Construction" precedent. Its 4px top gap carries the
+   source's title→year spacing into the card. */
 .gm-uc {
-  position: relative;
-  z-index: 1;
-  top: auto;
-  left: auto;
-  transform: none;
-  flex: 0 0 auto;
-  margin: calc(4 * var(--u)) auto 0;
+  display: block;                 /* inside the title card, on its own line under the title (B87) */
+  margin: calc(4 * var(--u)) 0 0;
   color: var(--ink-light);
   font-size: max(calc(14 * var(--u)), 11px);   /* the source's 14px, at the 11px floor */
   font-style: italic;
@@ -778,7 +774,7 @@ body:has(#role-brinker-3:checked) .plugin--brinker-3 {
 }
 .parking-lot__facts p { margin: 0 0 0.35em; }
 .parking-lot__facts p:last-child { margin-bottom: 0; }
-.parking-lot__facts--contact { flex: 0 1 auto; }
+.parking-lot__facts--contact { flex: 1 1 0; display: flex; justify-content: center; }
 
 /* B65 (issue #177), carried by B77 (issue #193): the owner's footer copy
    lines — the tools line and the education line beneath it — their straight
@@ -952,8 +948,7 @@ body:has(#role-brinker-3:checked) .plugin--brinker-3 {
     <input class="topband__tab" type="radio" name="employer"
            id="employer-pnc-bank" checked aria-label="PNC Bank">
     <h2 class="topband__wordmark">PNC Bank</h2>
-    <!-- SLOT (blank #1): employment dates/years — owner fills in -->
-    <p class="topband__oneliner"></p>
+    <p class="topband__oneliner">2017-2020</p>
     <label class="topband__card-hit" for="employer-pnc-bank" aria-label="Select PNC Bank"></label>
   </div>
   <!-- Selector card 2 of 3: PNC Private Bank -->
@@ -961,8 +956,7 @@ body:has(#role-brinker-3:checked) .plugin--brinker-3 {
     <input class="topband__tab" type="radio" name="employer"
            id="employer-pnc-private" aria-label="PNC Private Bank">
     <h2 class="topband__wordmark">PNC Private Bank</h2>
-    <!-- SLOT (blank #1): employment dates/years — owner fills in -->
-    <p class="topband__oneliner"></p>
+    <p class="topband__oneliner">2020-2022</p>
     <label class="topband__card-hit" for="employer-pnc-private" aria-label="Select PNC Private Bank"></label>
   </div>
   <!-- Selector card 3 of 3: Brinker Capital -->
@@ -970,8 +964,7 @@ body:has(#role-brinker-3:checked) .plugin--brinker-3 {
     <input class="topband__tab" type="radio" name="employer"
            id="employer-brinker" aria-label="Brinker Capital">
     <h2 class="topband__wordmark">Brinker Capital</h2>
-    <!-- SLOT (blank #1): employment dates/years — owner fills in -->
-    <p class="topband__oneliner"></p>
+    <p class="topband__oneliner">2022-Present</p>
     <label class="topband__card-hit" for="employer-brinker" aria-label="Select Brinker Capital"></label>
   </div>
 </header>
@@ -992,24 +985,21 @@ body:has(#role-brinker-3:checked) .plugin--brinker-3 {
           <div class="plugin plugin--pnc-bank-1">
             <div class="gregorian-mode">
               <div class="gm-card gm-back" role="presentation"></div>
-              <h3 class="gm-card gm-title" id="role-pnc-bank">Branch Sales &amp; Service Representative</h3>
-              <p class="gm-uc">2017-2018</p>
+              <h3 class="gm-card gm-title" id="role-pnc-bank">Branch Sales &amp; Service Representative<span class="gm-uc">2017-2018</span></h3>
               <p class="gm-card gm-desc"></p>
             </div>
           </div>
           <div class="plugin plugin--pnc-bank-2">
             <div class="gregorian-mode">
               <div class="gm-card gm-back" role="presentation"></div>
-              <h3 class="gm-card gm-title">Branch Sales &amp; Service Associate</h3>
-              <p class="gm-uc">2018-2019</p>
+              <h3 class="gm-card gm-title">Branch Sales &amp; Service Associate<span class="gm-uc">2018-2019</span></h3>
               <p class="gm-card gm-desc"></p>
             </div>
           </div>
           <div class="plugin plugin--pnc-bank-3">
             <div class="gregorian-mode">
               <div class="gm-card gm-back" role="presentation"></div>
-              <h3 class="gm-card gm-title">Branch Banker</h3>
-              <p class="gm-uc">2019-2020</p>
+              <h3 class="gm-card gm-title">Branch Banker<span class="gm-uc">2019-2020</span></h3>
               <!-- Filled by the owner's issue #176 (B64): the copy verbatim. -->
               <p class="gm-card gm-desc">Completed the PNC Leadership Development Program, a high-performer program focused on preparing associates for advancement into specialized financial roles.<br><br>Deployed across the PDSJ region to onboard and coach Branch Relationship Managers on multi-channel client-book development.<br><br>Consistently outperformed branch sales goals while maintaining exceptional client service.</p>
             </div>
@@ -1044,16 +1034,14 @@ body:has(#role-brinker-3:checked) .plugin--brinker-3 {
           <div class="plugin plugin--pnc-private-1">
             <div class="gregorian-mode">
               <div class="gm-card gm-back" role="presentation"></div>
-              <h3 class="gm-card gm-title" id="role-pnc-private">Client Service Associate</h3>
-              <p class="gm-uc">2020-2021</p>
+              <h3 class="gm-card gm-title" id="role-pnc-private">Client Service Associate<span class="gm-uc">2020-2021</span></h3>
               <p class="gm-card gm-desc"></p>
             </div>
           </div>
           <div class="plugin plugin--pnc-private-2">
             <div class="gregorian-mode">
               <div class="gm-card gm-back" role="presentation"></div>
-              <h3 class="gm-card gm-title">Portfolio &amp; Trust Administrator</h3>
-              <p class="gm-uc">2021-2022</p>
+              <h3 class="gm-card gm-title">Portfolio &amp; Trust Administrator<span class="gm-uc">2021-2022</span></h3>
               <!-- Filled by the owner's issue #176 (B64): the copy verbatim. -->
               <p class="gm-card gm-desc">Managed end-to-end account setup, funding, and servicing for complex irrevocable trust portfolios within a highly regulated environment.<br><br>Served as a primary point of contact for trust officers, legal counsel, and beneficiaries, coordinating across stakeholders to resolve complex account and servicing requirements.<br><br>Translated client and operational requirements into practical solutions while balancing service quality, underlying data, and regulatory constraints.</p>
             </div>
@@ -1084,24 +1072,21 @@ body:has(#role-brinker-3:checked) .plugin--brinker-3 {
           <div class="plugin plugin--brinker-1">
             <div class="gregorian-mode">
               <div class="gm-card gm-back" role="presentation"></div>
-              <h3 class="gm-card gm-title" id="role-brinker">Trader</h3>
-              <p class="gm-uc">2022-2023</p>
+              <h3 class="gm-card gm-title" id="role-brinker">Trader<span class="gm-uc">2022-2023</span></h3>
               <p class="gm-card gm-desc"></p>
             </div>
           </div>
           <div class="plugin plugin--brinker-2">
             <div class="gregorian-mode">
               <div class="gm-card gm-back" role="presentation"></div>
-              <h3 class="gm-card gm-title">Portfolio Specialist</h3>
-              <p class="gm-uc">2023</p>
+              <h3 class="gm-card gm-title">Portfolio Specialist<span class="gm-uc">2023</span></h3>
               <p class="gm-card gm-desc"></p>
             </div>
           </div>
           <div class="plugin plugin--brinker-3">
             <div class="gregorian-mode">
               <div class="gm-card gm-back" role="presentation"></div>
-              <h3 class="gm-card gm-title">Sr. Portfolio Specialist</h3>
-              <p class="gm-uc">2023-2025</p>
+              <h3 class="gm-card gm-title">Sr. Portfolio Specialist<span class="gm-uc">2023-2025</span></h3>
               <!-- Filled by the owner's issue #176 (B64): the copy verbatim,
                    three paragraphs, <br><br> breaks in the single desc-card
                    element (the sibling convention). -->

@@ -289,7 +289,7 @@ exceeds the sheet minus the side gutters.
 | Region | Render |
 |---|---|
 | Title | the compartment above (§3.2) |
-| Components | the line **"Pseudonyms and DBAs: aboveaveragerob, Alastair Zeved, Philly Plant Dads"** (B69, issue #185), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), hanging from the region top at `--band-top` — the identical anchor grammar; B38/B54's prior line is removed (B68) |
+| Components | two lines **"Under Construction: Career content, Plants in Rocks content."** / **"Planned future work: Add landing pages"** (B85, issue #208, superseding B69's pseudonyms line), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), hanging from the region top at `--band-top` — the identical anchor grammar; the issue's literal line break renders the second line |
 | Requirements | the line **"Click the note cards to launch my various pages and work across the web."** (B71, issue #183, superseding B37/B54's copy), **16.57px/400 `--ink`** (15px × 1.10455, `B46`; weight plain per `B54`), **left-anchored at the title card's right border + one `--gutter`** (B39), hanging from the region top at `--band-top` |
 | Parking Lot | water field closing the sheet; sized by its measured contents from the two-row floor (§3.2's own law mirrored at the foot, B46); holds the contact form (§6) |
 
@@ -563,8 +563,17 @@ The form's userspace, per the owner's ruling `B20`, renders left-anchored:
 - **Message** sits to their immediate right, anchored to the Name/Email right
   edges, its **size unchanged** from the pre-fix layout (the full Message
   track, `30%`).
-- The **Send** button and the "✱ required — protected by reCAPTCHA" note sit
-  under the Message field, also left-anchored.
+- The **Send** button (`UIUX §6`'s `button[type="submit"]` grammar, unchanged)
+  sits **inline, to the right of the Message textarea** on the same row (B83,
+  issue #210): its bottom edge is flush with the textarea's bottom and its
+  right edge at the form's right — the bottom-right corner — and the Message
+  textarea narrows to make room (it flexes to fill the rest of its `2fr`
+  track). The "✱ required — protected by reCAPTCHA" note stays under the
+  Message field, left-anchored.
+- The Message textarea's **height regains the button's former vertical
+  space** (B84, issue #210 follow-up): its `min-height` is **98px** — the
+  prior 64px floor plus the Send button's 34px height (`resize: vertical`
+  stands).
 - The **right side of the pane is deliberately empty** — free space lives
   free; it is never filled.
 - The **lot's height follows its measured contents** (B46, issue #128 —
@@ -590,18 +599,19 @@ The form's userspace, per the owner's ruling `B20`, renders left-anchored:
   when the referrer is missing, which would silently brick the form.
 - The form is the page's **only** network call (§3.4, PRD).
 
-### §6.2 The footer's 50/50 split (B62, issue #169; copy text amended by B68, issue #174, and by B70, issue #184)
+### §6.2 The footer's 50/50 split (B62, issue #169; copy text amended by B68, issue #174, by B70, issue #184, and by B86, issue #209)
 
 The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 
-- **Left half:** the owner's copy, verbatim from issue #184 (B70's copy of
-  record — superseding B68's issue-#174 copy of record), rendered as **two
-  paragraphs with no gap between them** (the issue's newline break; the
-  paragraphs carry no margin), ending in the italic phrase *curiouser and
-  curiouser.* (spelled "curiouser" per the owner's correction of the
-  issue's "curioser" typo) — rendered
-  **13px / 1.5 / 400** in `--ink` (the lot's own reading-text rung, per
-  B62's rendering, unchanged by B68/B70).
+- **Left half:** the owner's copy, verbatim from issue #209 (B86's copy of
+  record — superseding B70's issue-#184 copy of record), rendered as **two
+  lines with no gap between them** (the issue's line break; the paragraphs
+  carry no margin): "Welcome to Rob's digital garden." and the kept second
+  line ending in the italic phrase *curiouser and curiouser.* (spelled
+  "curiouser" per the owner's correction of the issue's "curioser" typo) —
+  rendered **16.57px / 1.5 / 400** in `--ink` (the band-anchor rung, per
+  the issue's instruction to scale the text up; weight plain, no bold; the
+  footer bar's size and vertical height unchanged).
 - **Divider:** the divider grammar career.html ships (`.parking-lot__divider`
   — 1px wide, **3/4** of the section's inner height, centred), re-tokened to
   this page's To-Do blue: `color-mix(in srgb, var(--frame) 45%, transparent)`
@@ -646,7 +656,7 @@ The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 | the career page (B47): employer selector, B132 glow, split body, two-way lot (B65), monochrome ladder (B73), empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
-| the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, the B58 Download (PDF anchor), literal idea-green ladder, the B50 landing-convention band/card/lot render | `test/plantsandrocks.js` |
+| the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, the B58 Download (PDF anchor) and the B82 Back-to-the-Garden .cta, literal idea-green ladder, the B50 landing-convention band/card/lot render | `test/plantsandrocks.js` |
 
 ---
 
@@ -701,7 +711,10 @@ The final hexes are the owner's sign-off (issue #190, owner chat 2026-10-09:
 deep, note brightest on the deep, glow one rung below frame — are the law.
 `--water-bot-a` is `51 51 51` (`--water-bot`'s channels, the band's radial
 foot). The glow token renames `--glow-sand` → `--glow-gray`; no value ships
-under the old name.
+under the old name. *(B81, issue #212 adds `--glow-gray-a` = `103 103 103`,
+`--glow-gray`'s own channels, so the presented component's breathing
+presentation bloom can reuse the existing glow token in an `rgb(VAR / a)`
+value — the source's rose triplet re-tokened, no new hex.)*
 
 *(B56, issue #154: the ported component's `.gm-title` carries the source's
 800-weight type. The page's font set gains the **800 face** —
@@ -732,8 +745,9 @@ renders as `L × --rs`.)*
   (B79, issue #195), in every selection state and at every viewport
   (the ≤743px stacked reflow shares the one width too) — top-anchored,
   `border-top: 0`, radius only on the bottom corners, `(band-top + 8px)
-  16px 16px` padding, both lines at the 20px logical type (employer name
-  600, oneliner slot 400), `min-height: rule-y + 29px` hanging over the
+  16px 16px` padding, the employer name at 20px/600 and the date oneliner
+  at the 13.33px/400 italic reduced rung (B61, carried by B87, issue #218),
+  `min-height: rule-y + 29px` hanging over the
   rule. Unselected cards are dim + italic (§4's unselected grammar); the
   selected card wears the B132 glow verbatim:
   `border-color: var(--glow-gray); box-shadow: 0 0 8px 0 var(--glow-gray);`
@@ -747,6 +761,26 @@ renders as `L × --rs`.)*
   At ≤743px the shown employer stacks (`flex-direction: column`), the rule
   running horizontal at 33.333% width. Transitions collapse under
   `prefers-reduced-motion: reduce`.
+  *(Amended by B81, issue #212 — supersedes the row description below for the
+  left half.)* The left half is now the Agentic Plugins page's **stage +
+  item-selector band** (repo AlastairZeved/AlastairZeved,
+  `/agentic-plugins/`, `.plugins__stage` + `.plugins__pane`), brought into
+  the monochrome ladder. The stage presents **one** role's component at a
+  time (one across — superseding B66's left-to-right row); the band beneath
+  it is a horizontal row of role title cards (`.plugins__tab`) that launch
+  the role, each carrying the source's full glow — the glimmer sheen
+  (`gm-marquee` 6s), the two-layer `--frame` hover glow, the press inset,
+  the checked / dim-italic unselected and focus states — at `20 × --rs`
+  type, weight 800, uppercase. The presented component gains the source's
+  breathing presentation bloom (`.gm-back` `gm-breathe` 10s), the rose
+  triplet re-tokened to the existing `--glow-gray` (`--glow-gray-a`). The
+  B76 component geometry, uniform plate-width scale and 11px floor stand; the
+  single component now scales to the stage's full width. B74's one-viewport
+  law stands (the description card is still the page's only scroll
+  container). Selection is a per-employer radio group (`aria-label="Choose a
+  role"`) driven by CSS `:has`; the interleaved input+label pairs resolve
+  each card against its own radio via the `+` combinator. No new hex — every
+  re-hued value is an existing §10.1 token.)
   Left half *(amended by B56, issue #154; re-arranged by B66, issue #173)*:
   the employer's roles as **plugin components** — the Agentic Plugins page's
   `.gregorian-mode` class set ported verbatim in structure (water back card
@@ -828,7 +862,7 @@ renders as `L × --rs`.)*
   Right half: "Accomplishments" and "Learnings/Skills" (section name
   pending, issue #133 slot 6) render only once filled.
 - **Footer *(amended by B65, issue #177; second line added by B77, issue
-  #193)*** the landing page's
+  #193; split to 50/50 and CTA centred by B88, issue #219)*** the landing page's
   `.parking-lot` grammar — water gradient over `--deep`, 1px
   `--frame`-mix top rule, same padding — floored at the rescaled two-row
   shelf (`134.76 × --rs`, B49: the landing lot's floor, taken statically;
@@ -843,8 +877,9 @@ renders as `L × --rs`.)*
   **the same short divider bars** (same width, color, height, gap — no new
   values), the two lines separated by the lot's `0.35em` paragraph gap —
   then **one** full divider bar (1px, 3/4 of the section's
-  inner length, vertically centred), then the `.cta` "Learn More about
-  Rob" → `https://razgregory.com/`. *(B65 supersedes §3's three-way
+  inner length, vertically centred) at the 50/50 midpoint, then the `.cta`
+  "Learn More about Rob" → `https://razgregory.com/`, **centred within the
+  right half** (both halves `flex: 1 1 0` — B88, issue #219). *(B65 supersedes §3's three-way
   split: the second divider bar is removed.)* The professional-blurb
   (blank #7) and contact-info (blank #8) slot comments keep their halves;
   the empty slots render nothing (B47). Each line renders on one line
@@ -879,21 +914,28 @@ Amended by B65, issue #177: the footer's left half carries the owner's
 one-line tools list; the blurb (#7) and contact (#8) slots remain
 unfilled and render nothing. Amended by B77, issue #193: the left half
 also carries the owner's second line — the education copy — beneath the
-tools line; the #7/#8 slots are unchanged.)*
+tools line; the #7/#8 slots are unchanged. Amended by B87, issue #218:
+the employment-dates slot (#1) is filled — the three employer title cards
+carry their tenure in an italic subscript oneliner, and the eight role years
+nest inside their title cards.)*
 
 **Pinned by:** `test/career.js` — the B79 selector-card shared size and
 equal gaps, selector mechanics, the B132 glow, the
 split, the two-way lot (B65, with B77's second line and its bars matched
 to the top line's), the ladder tokens, the omit-empty-block
-discipline, B74's one-viewport render (the component cap at half the
-left half's own height, the row centred in the half, the description card as
-the page's only scroll container), and B76's source-geometry render (the
+discipline, B74's one-viewport render (the description card as
+the page's only scroll container), B76's source-geometry render (the
 plate-relative uniform scale, the title card straddling the back card's top
 edge with a gap to the desc card, the wider desc card with the back card
 extending vertically past it, the source-ratio type with its 11px floor,
 long titles wrapping,
 and the always-visible styled bar on filled desc cards with the empty
-placeholder bare).
+placeholder bare), and B81's stage + item-selector band (one role presented
+at a time through the `.plugins__stage`, the `.plugins__pane` band of role
+title cards with the glimmer sheen, hover glow, press inset and
+checked/dim-italic states, the `+`-combinator radio wiring, and the
+`.gm-back` breathing bloom — the old B66 row assertions rewritten
+deliberately).
 
 ---
 
@@ -982,8 +1024,12 @@ values, not new numbers.
   the rescaled two-row shelf (`134.76 × --rs`, B50: the landing lot's floor,
   taken statically; content grows past it), split **two** ways with **one**
   divider bar of 3/4 of the section's inner
-  length, vertically centred. Left section: reserved, renders nothing
-  (comment only, measures zero) — permanently empty. Right section: the
+  length, vertically centred. Left section (**B82, issue #211**): the
+  **"Back to the Garden"** `.cta` — the Download control's same `.cta`
+  grammar, linking back to `https://razgregory.com/` in the same tab (no
+  `target`), docked to the divider bar (justified to the end of its half,
+  mirroring the Download control's divider-adjacent placement) and centred
+  vertically with it — **live on BOTH tabs**. Right section: the
   **Download** `.cta` — career's `.cta` grammar re-tokened to the green
   palette (`background: var(--card); color: var(--ink-light); box-shadow:
   var(--elevation), 0 0 6px 0 var(--frame)`; `--elevation` and `--ease` are
@@ -992,7 +1038,9 @@ values, not new numbers.
   `download` attribute (B58, issue #157)**; on the Plants in Rocks tab it
   renders inert and dimmed via CSS `:has` (`opacity: 0.55`,
   `cursor: not-allowed`, `pointer-events: none` — B48's shipped dim value,
-  reused; the inert state is CSS-only, the page has no script).
+  reused; the inert state is CSS-only, the page has no script). The B58
+  inert-on-Rocks selector is scoped to the Download anchor (`.[download]`),
+  so the Back-to-the-Garden `.cta` stays live on both tabs.
 
 At ≤743px the band stacks to one column and the lot stacks (career.html's
 media pattern); transitions collapse under `prefers-reduced-motion: reduce`.
@@ -1006,12 +1054,15 @@ implementation (B57 keeps B48's blank-reader discipline for that
 container). The Download target is **filled as of B58** (issue #157): the
 control serves the shipped `Flattened-Monstera-Division.pdf` (repo root)
 via the `download` attribute, live on the Plants on Poles tab only. The
-footer's left section is **permanently empty** by spec (not a pending fill).
+footer's left section holds the **"Back to the Garden"** `.cta` as of B82
+(issue #211) — back to `https://razgregory.com/`, live on both tabs (not a
+pending fill).
 The slot structure lives in the markup as non-rendering `SLOT` comments so a
 targeted fill lands in place; the page invents no copy.
 
 **Pinned by:** `test/plantsandrocks.js` — selector mechanics, the `--frame`
 glow, the poles reader's storybook iframe and the empty rocks reader (B57),
 the two-section lot, the B58 Download (PDF anchor, live on the poles tab,
-inert on the rocks tab), the literal idea-green tokens,
+inert on the rocks tab) and the B82 Back-to-the-Garden anchor (live on both
+tabs, docked to the divider), the literal idea-green tokens,
 the single-file law, and the B50 landing-convention band/card/lot render.

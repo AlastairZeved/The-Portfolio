@@ -2577,3 +2577,325 @@ down to fit." (the size); "A little longer than the horizontal gap that
 exists between \"Software & AI\" and \"Zeved Boards\" note cards." (the gap
 at the parent's right edge); "Not vertically centred, just a touch lower
 than that." (the vertical seat).
+
+### B81. The career body's left half is the Agentic Plugins page's stage + item-selector band (issue #212)
+
+The `/career` page's left half is rebuilt to the **Agentic Plugins page's
+presented design** (repo AlastairZeved/AlastairZeved,
+`https://alastairzeved.com/agentic-plugins/`) — the `.plugins__stage` that
+presents **one** role's component and the `.plugins__pane` **item selector
+band** of title cards beneath it, each launching its item (the role) —
+brought into the career page's monochrome tokens (§10.1, B73). The three
+employer header cards (PNC Bank / PNC Private Bank / Brinker Capital,
+B47/B49/B79) are **unchanged and stay the employer selector**; per employer,
+the body's left half now holds that employer's **roles** as a stage + band.
+
+- **The stage presents one role at a time** (supersedes B66's left-to-right
+  row): the `.plugins__stage` centres the selected role's `.gregorian-mode`
+  component, which still renders B76's source geometry scaled uniformly by
+  the plate's own width (`1 source px = plate-width/830`, the `--u`
+  container-query law — now the stage's full width, so the single component
+  renders larger than any row cell did, exactly the #194 "then scaled up"
+  direction taken to one-across). B74's one-viewport law stands: the
+  description card remains the page's only scroll container, the filled
+  card's styled bar always visible, the empty placeholder bare.
+- **The selector band** is the source's `.plugins__pane` note-card glance
+  (the dark note-ink border — re-tokened to `--deep`, the token the
+  component's own `.gm-card` reads as `--ink` — 3px radius, the water fill,
+  the elevation), one horizontal
+  row of role title cards evenly spaced. Each `.plugins__tab` carries the
+  source's **full glow treatment** — the animated glimmer sheen
+  (`::after`, the `gm-marquee` 6s clock), the two-layer hover glow
+  (`0 0 12px 2px` + `0 0 24px 4px` `--frame`), the press inset
+  (`translateY(2px)` + the `--elevation-inset` value), and the
+  checked / dim-italic unselected and focus states — at `20 × --rs` type,
+  weight 800, uppercase, re-tokened to the monochrome ladder. Unselected
+  cards dim + italic (`--ink-dim`); the selected card reads `--ink-light`
+  on `--card`. Selection is a per-employer **radio group**
+  (`role="radiogroup"`, `aria-label="Choose a role"`) driven by CSS `:has`,
+  the page's zero-JS law; the interleaved input+label pairs let the `+`
+  sibling combinator resolve each card against its own radio without
+  per-id selectors.
+- **The presented component gains the source's breathing presentation
+  bloom**: `.gm-back` animates the source's `gm-breathe` (10s ease-in-out),
+  its rose triplet (`--glow-rose`) re-tokened to this page's existing
+  `--glow-gray` channels (`--glow-gray-a`, `#676767`) — the geometry and
+  alphas ported verbatim (`0 0 60px 20px` / `0 0 240px 120px`,
+  `0.25/0.35/0.12/0.18`). The component's own `gm-title`/`gm-back` glimmer
+  stands (B56). No new hex is invented anywhere: every re-hued value is an
+  existing §10.1 token (`--deep`, `--frame`, `--card`, `--ink-light`,
+  `--ink-dim`, `--glow-gray`), per B56's re-hue rule.
+
+**This entry supersedes** B56's "no item selector tool ships" clause (the
+item selector band ships) and B66's row geometry (the plates no longer read
+left-to-right in one row; they read one-at-a-time through the stage). B74's
+"component caps at half the left half's own height" was the row's cap —
+the stage now fills the half above the band, the single component caps at
+the stage's height and the description card still scrolls; B74's one
+viewport, no-page-scroll, desc-scrolls and mobile-scrolls laws stand
+unchanged. B76's source geometry, uniform plate-width scale, 11px readable
+floor, long-title wrap and filled-card bar stand unchanged. The right half
+(Accomplishments / Learnings) stays empty and no copy changes — the three
+B64-filled desc cards keep their text, every other desc card and slot stays
+empty, no stubbed text anywhere.
+
+The mechanism is the source's own `.plugins__stage` / `.plugins__pane` /
+`.plugins__tab` grammar ported verbatim and re-tokened; the width-scale
+(`--u`), the band's row geometry, the `+`-combinator radio wiring and the
+`--glow-gray-a` channel token are agent-derived implementations of the
+owner's relationships under the B33/B40 provenance pattern — the owner ruled
+the design, not the literals (the literals are the source's own px values
+and the existing §10.1 tokens). `test/career.js` pins the stage, the band,
+the glow states and the one-viewport law; its old B66 row assertions are
+rewritten deliberately (noted in the test's own comment). The mobile reflow
+(≤743px) shows the one component at natural size and the band beneath it —
+the page scrolls as B74/B76's grill answers already ruled; the band's type
+resets to a readable mobile size (the topband-card reset's own pattern), and
+mobile-viewport polish beyond that stays deferred per the owner's 2026-10-09
+ruling ("Mobile viewports are an entirely separate issue …").
+
+**Source:** the owner's issue
+[#212](https://github.com/AlastairZeved/The-Portfolio/issues/212),
+2026-10-11 — quoted verbatim: "We're going to match the design already built
+for repo AlastairZeved/AlastairZeved at page
+https://alastairzeved.com/agentic-plugins/ and their presented components.
+There's an item selector band with title cards and each one launches the item
+(the role on the /career page) and presents it - with the glow and all. We're
+doing the exact same design, but brought into the monochrome design tokens
+used for /career. No copy updates, no stubbed text anywhere - let the empty
+places remain empty of text for now until we get this design right." — and
+the owner's four pre-implementation answers of 2026-10-11 (owner chat,
+multiple choice), quoted verbatim as selected:
+
+1. "Keep the 3 employer header cards, and per employer add a stage +
+   role-selector band (2-3 role cards each)."
+2. "One role at a time in a 'stage' + selector band beneath it (matches the
+   source exactly; supersedes the row)."
+3. "Full source treatment re-tokened monochrome: glimmer sheen + hover glow
+   + press inset + checked/dim-italic."
+4. "Yes: right half stays empty, no copy changes (3 filled desc cards keep
+   text, rest empty), no stubs, new B ruling + UIUX + test updates."
+
+— and the owner's mid-implementation scope directive of 2026-10-11 (owner
+chat), quoted verbatim, with one phrase at the owner's direction recorded as
+written: "everything in the left half of the body concerning the component
+IS IN SCOPE." (this directive is the source of the breathing presentation
+bloom and the full component presentation being in scope, not the selector
+band alone).
+
+### B82. The footer's left section holds a "Back to the Garden" button linking back to razgregory.com (issue #211)
+
+The `/plantsandrocks` page's footer left section — reserved and permanently
+empty per B48 — gains a **"Back to the Garden"** button: the Download
+control's same `.cta` grammar (B58, issue #157), an `<a>` linking back to
+`https://razgregory.com/` **in the same tab** (no `target`, matching
+career.html's "Learn More about Rob"), docked to the divider bar (justified
+to the end of its half via a `.parking-lot__facts--back` modifier, mirroring
+the Download control's divider-adjacent placement in the right half) and
+centred vertically with it — **live on BOTH tabs**.
+
+Because the new button shares the `.cta` class with the Download control,
+B58's inert-on-Rocks dim (which targeted every `.cta`) is **scoped to the
+Download anchor only** — `body:has(#page-rocks:checked) .cta[download]` — so
+the Back-to-the-Garden button never disables on the Plants in Rocks tab,
+while the Download control's 0.55 dim / `not-allowed` / `pointer-events:
+none` inert state stands unchanged. No new design value is introduced: the
+button reuses the shipped `.cta` grammar (B58), `--elevation`/`--ease`, the
+`.parking-lot__facts` section and the B48 0.55 shipped dim alpha (only its
+selector scope changed, to `.[download]`).
+
+**This entry supersedes** B48's "left section permanently empty" clause — the
+left section now renders the Back-to-the-Garden button. The B58 Download
+discipline and its inert-on-Rocks state stand unchanged; B57, B50 and the
+page's no-script law (B48) stand unchanged.
+
+**Source:** the owner's issue
+[#211](https://github.com/AlastairZeved/The-Portfolio/issues/211),
+2026-10-11 — quoted verbatim: "In the footer, on the left side of the
+divider bar, add a button that reads "Back to the Garden". It should link
+back to razgregory.com and be in the same design as the existing button to
+"Download". Anchor the button to the divider bar, centered vertically." —
+and the owner's two pre-implementation answers of 2026-10-11 (owner chat,
+multiple choice), quoted verbatim as selected:
+
+1. "Live on both tabs (scope the inert CSS rule to the Download button
+   only)."
+2. "Same tab (match the footer's 'Learn More about Rob' precedent)."
+
+### B83. The contact-form Send button moves inline to the Message textarea's right (issue #210)
+
+The Parking Lot contact form's **Send** button moves from below the Message
+field to **inline, to the right of the Message textarea** on the same row:
+its bottom edge is flush with the textarea's bottom and its right edge sits
+at the form's right — the **bottom-right corner**. The Message textarea
+narrows to make room (it flexes to fill the rest of its `2fr` track). The
+"protected by reCAPTCHA" note stays under the Message field, left-anchored.
+`UIUX §6.1`.
+
+Rendering: the button keeps its existing `#contact-form
+button[type="submit"]` grammar (fill, label, radius, 34px height — `UIUX §6`);
+a new `.message-row` wrapper (a plain flex row: `flex-direction: row`,
+`align-items: flex-end` so the button bottom-aligns with the textarea, and
+`gap: 12px` — the form's existing gap) holds the textarea and button side by
+side. **No new design value is introduced** — no new token, hex, px, ms or
+state.
+
+**Source:** the owner's issue
+[#210](https://github.com/AlastairZeved/The-Portfolio/issues/210), 2026-10-11
+— quoted verbatim: "Move the \"Submit\" button for the formspree form to the
+RIGHT side of the form. It should be anchored to the bottom right of the
+form, in-line with the text box." — and the owner's two pre-implementation
+answers of 2026-10-11 (owner chat, multiple choice), quoted verbatim as
+selected:
+
+1. "Beside the message box, bottom-right corner (message box narrows to make
+   room)"
+2. "Keep it as \"Send\""
+
+### B84. The Message textarea regains the Send button's vertical space (issue #210 follow-up)
+
+When the Send button moved inline to the right of the Message textarea (B83),
+it left behind the vertical space it had occupied below the field. That space
+**returns to the Message textarea**: its `min-height` grows from `64px` to
+**`98px`** — the prior floor plus the Send button's `34px` height. The `98px`
+value is agent-derived (the sum of two existing values — the textarea's 64px
+floor and the button's 34px height), carrying out the owner's words rather
+than inventing a new size. The button stays inline at the bottom-right of the
+now-taller textarea; the "protected by reCAPTCHA" note stays under the field.
+`UIUX §6.1`.
+
+**Source:** the owner's mid-implementation directive, 2026-10-11 (owner chat),
+quoted verbatim: "Give that vertical space back to the 'Say hello' text box of
+the form."
+
+### B85. The Components copy is replaced with the under-construction two lines (issue #208)
+
+The **Components** band zone's anchor copy is **replaced**: B69's pseudonyms
+line ("Pseudonyms and DBAs: aboveaveragerob, Alastair Zeved, Philly Plant
+Dads") is superseded by the issue-#208 text, rendered as the issue's two
+lines with its literal line break:
+
+> Under Construction: Career content, Plants in Rocks content.
+> Planned future work: Add landing pages
+
+The line keeps the identical anchor grammar (`UIUX §3.3`): hanging from the
+zone top at `--band-top`, in `--ink` at 16.57px/400 (15px × 1.10455 under
+`B46`; weight plain per `B54`), static, no editing affordance; the zone's
+`pointer-events: none` stands. The two lines fit the band's existing
+`--rule-y` two-line floor, so the **header bar's vertical height is
+unchanged** and the text is **not scaled down** — the issue's "scale the
+text to fit if it needs to be scaled down a touch" contingency does not
+bind. `UIUX §3.3` is amended accordingly.
+
+**Source:** the owner's issue
+[#208](https://github.com/AlastairZeved/The-Portfolio/issues/208),
+2026-10-11 — quoted verbatim: "Remove the current copy from the
+"Components" section and replace it with:
+
+"Under Construction: Career content, Plants in Rocks content.
+Planned future work: Add landing pages"
+
+Include the line break.
+Do not increase the header bar's vertical height. Scale the text to fit if
+it needs to be scaled down a touch."
+
+### B86. The Parking Lot copy is replaced with two lines and scaled to the band-anchor rung (issue #209)
+
+The Parking Lot's **left-half copy is replaced** with the issue-#209 text —
+two lines (the issue's line break) — **superseding B70's issue-#184 copy of
+record**. Line 1 reads **"Welcome to Rob's digital garden."**; line 2 is
+**kept verbatim** — "All it takes to flex one's curiosity is to ask a
+question, then keep asking questions and always strive to be curiouser and
+curiouser." — ending in the italic phrase *curiouser and curiouser.*
+(spelled "curiouser" per the owner's correction of the issue's typo; B68's
+italic-phrase ruling stands). B62's layout — copy left, form right, 50/50
+split, vertical divider — is unchanged.
+
+The copy **scales up** from B62/B70's 13px to the **16.57px band-anchor
+rung** (16.57px/400 — the 15px × 1.10455 `B46` rescale), per the owner's
+pre-implementation answer of 2026-10-11 selecting "Match the 16.57px
+band-anchor rung". The weight stays **400 (no bold)**; the line-height stays
+**1.5** (the lot's reading-text line height). The **footer bar's size and
+vertical height are unchanged** (`--lot-h` is re-derived by the unchanged
+form and floor, not by the two-line copy). `UIUX §6.2` is amended
+accordingly.
+
+**Copy of record (verbatim, issue #209):** "Welcome to Rob's digital
+garden. All it takes to flex one's curiosity is to ask a question, then keep
+asking questions and always strive to be curiouser and curiouser."
+
+**Source:** the owner's issue
+[#209](https://github.com/AlastairZeved/The-Portfolio/issues/209),
+2026-10-11 — quoted verbatim: "In the Parking Lot section, replace this
+copy: "Hey, I'm Rob. Welcome to my digital garden. This is a sort of central
+hub for all of the things I work on, across all of the sites and pseudonyms
+I've used. I'm weary of calling any of these "hobbies" or "passions";
+they're actually more of an after effect of the real passion: simply
+following my curiosity - through any and all of the vagaries." With this
+new copy: "Welcome to Rob's digital garden." Keep the line break and this
+line below it: "All it takes to flex one's curiosity is to ask a question,
+then keep asking questions and always strive to be curiouser and
+curiouser." Just those two lines of text should exist in the Parking Lot
+section once complete. Scale the text up in size to fit in the footer bar,
+but not title text. Do not bold any of the text, just increase the size so
+it's readable. Do not mess with the size or vertical height of the footer
+bar." — and the owner's pre-implementation answer of 2026-10-11 (owner
+chat, multiple choice): "Match the 16.57px band-anchor rung".
+
+### B87. The career title cards carry their dates as an in-card subscript (issue #218)
+
+The owner ruled that the career page's three employer title cards must carry
+their employment dates, and that the eight role components list their year in
+the wrong place. The dates therefore render **underneath the title, inside
+the title card, as subscript** — carrying the landing title card's
+reduced-rung convention (B61) forward.
+
+- **The three employer title cards** now read their tenure in the oneliner
+  slot beneath the wordmark — **PNC Bank** `2017-2020`, **PNC Private Bank**
+  `2020-2022`, **Brinker Capital** `2022-Present` — rendered **italic** at
+  the B61 reduced rung (**13.33px / 400**, the 20px title's 2/3 ratio, at
+  `× --rs`). The B79 shared card size is unaffected: the dates are narrower
+  than the "PNC Private Bank" sizer at the 20px rung.
+- **The eight role components** move their year from the separate `.gm-uc`
+  line *below* the title card to **inside the `.gm-title` card**, nested
+  directly under the title text as the italic subscript (the `.gm-uc`
+  grammar, now `display: block` within the card). The card grows to hold
+  title + year. The B76 source geometry is unchanged — the `112px` back-card
+  overhang holds because it depends only on the desc card's bottom margin
+  and the back card's bottom inset, neither of which moved.
+
+**Source:** the owner's issue
+[#218](https://github.com/AlastairZeved/The-Portfolio/issues/218) — quoted
+verbatim: "There should be dates underneath the title (IN THE TITLE CARD) in
+subscript. This convention has already been established on the landing
+page's title card and should be carried forward."; "The title cards in the
+career components has the date listed in the incorrect placement. The date
+is to sit underneath the title (IN THE TITLE CARD) as subscript. All 8
+components needs its date moved to the appropriate placement and fixed." —
+and the three dates as the issue lists them, verbatim: **PNC Bank**
+`2017-2020`, **PNC Private Bank** `2020-2022`, **Brinker Capital**
+`2022-Present`. The owner's two grill answers of 2026-10-11 (owner chat,
+multiple choice) — on the dates: "Italic, 13.33px / weight 400 (reduced 2/3
+rung)"; on the year placement: "Inside the .gm-title box, nested under the
+title text".
+
+### B88. The career footer splits 50/50 with the divider in the middle and the CTA centred in the right half (issue #219)
+
+The owner ruled that the career page's footer divider was incorrectly placed
+against the site's long-established footer convention. The footer therefore
+renders the landing page's B62 50/50 split: the tools + education lines keep
+the left half, the `.cta` "Learn More about Rob" the right half, **one
+vertical divider in the middle** (the existing `.parking-lot__divider`
+grammar unchanged — 1px, 3/4 length, centred), and the CTA **centred within
+the right 50%** (both halves `flex: 1 1 0`; the contact section centres its
+content). The B65/B77 copy lines, the short divider bars and the CTA's text
+and link are unchanged.
+
+**Source:** the owner's issue
+[#219](https://github.com/AlastairZeved/The-Portfolio/issues/219) — quoted
+verbatim: "Once again, this convention has been long established for how to
+structure the footer of a page. The divider should be in the middle of the
+footer. Then the button \"Learn More About Rob\" should be centered within
+it's right 50% of the footer."; "Make both fixes: 1. Move the divider to the
+correct placement: middle of the footer. 2. Move the button so it's centered
+within it's right side of the footer section."

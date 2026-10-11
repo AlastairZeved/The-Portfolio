@@ -277,6 +277,13 @@ body:has(#page-rocks:checked) .reader--rocks {
   font-size: 0.85rem;
   color: rgb(244 245 241 / 0.7);   /* reading text keeps ≥ 4.5:1 */
 }
+/* The "Back to the Garden" anchor (B82, issue #211) lives in the left section,
+   docked to the divider bar (justified to the end of its half), mirroring the
+   Download control's divider-adjacent placement in the right half. */
+.parking-lot__facts--back {
+  display: flex;
+  justify-content: flex-end;
+}
 
 /* The CTA, career.html's .cta grammar re-tokened to the idea-green palette. */
 .cta {
@@ -307,8 +314,10 @@ body:has(#page-rocks:checked) .reader--rocks {
    only while the Plants on Poles tab is selected; on the Plants in Rocks
    tab it is inert and dimmed at career.html's shipped 0.55 alpha (B48's
    dim value, reused), no pointer cursor, pointer-events none. The inert
-   state is CSS-driven because the page has no script (B48 law). */
-body:has(#page-rocks:checked) .cta {
+   state is CSS-driven because the page has no script (B48 law). The select-
+   or is scoped to the Download anchor (its download attribute) so the
+   "Back to the Garden" .cta stays live on both tabs (B82, issue #211). */
+body:has(#page-rocks:checked) .cta[download] {
   opacity: 0.55;
   cursor: not-allowed;
   pointer-events: none;
@@ -402,9 +411,13 @@ body:has(#page-rocks:checked) .cta {
 </main>
 
 <footer class="parking-lot">
-  <div class="parking-lot__facts">
-    <!-- SLOT (blank #3): footer left section — PERMANENTLY EMPTY per B48
-         (the spec reserves it; it renders nothing, measures zero). -->
+  <div class="parking-lot__facts parking-lot__facts--back">
+    <!-- SLOT (blank #3 → filled, issue #211/B82): the "Back to the Garden"
+         anchor — same .cta grammar as the Download control (B58), linking
+         back to razgregory.com in the same tab (no target), docked to the
+         divider bar. Live on BOTH tabs: the B58 inert-on-Rocks dim is scoped
+         to the Download anchor only, so this button never disables. -->
+    <a class="cta" href="https://razgregory.com/">Back to the Garden</a>
   </div>
   <div class="parking-lot__divider" aria-hidden="true"></div>
   <div class="parking-lot__facts">

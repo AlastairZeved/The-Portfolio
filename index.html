@@ -420,7 +420,7 @@ body {
 .lot-copy {
   flex: 1 1 0;
   min-width: 0;
-  font-size: 13px; line-height: 1.5; font-weight: 400;
+  font-size: 16.57px; line-height: 1.5; font-weight: 400;   /* 15 × 1.10455 (#128/B46) — issue #209/B86 scales the copy to the band-anchor rung; weight 400, no bold */
   color: var(--ink);
 }
 .lot-copy p { margin: 0; }
@@ -470,6 +470,19 @@ body {
 #contact-form .right-column {
   display: flex; flex-direction: column; gap: 4px;
 }
+/* issue #210 / B83: the Send button sits inline to the RIGHT of the Message
+   textarea on the same row, its bottom edge flush with the textarea's, in the
+   form's bottom-right corner. The textarea narrows to make room. */
+#contact-form .message-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 12px;
+}
+#contact-form .message-row textarea {
+  flex: 1 1 auto;
+  min-width: 0;
+}
 #contact-form .field { display: flex; flex-direction: column; gap: 4px; }
 #contact-form label {
   font-size: 11px; font-weight: 600; color: var(--ink);
@@ -486,7 +499,9 @@ body {
   font-size: 14px;
   min-height: 34px;
 }
-#contact-form textarea { min-height: 64px; resize: vertical; }
+#contact-form textarea { min-height: 98px; resize: vertical; }
+/* B84 (issue #210 follow-up): the Send button's former vertical footprint
+   (34px) is given back to the Message textarea — 64px floor + 34px = 98px. */
 #contact-form input::placeholder,
 #contact-form textarea::placeholder { color: var(--ink); opacity: 0.55; }
 #contact-form button[type="submit"] {
@@ -499,7 +514,7 @@ body {
   font-size: 14px; font-weight: 600;
   cursor: pointer;
   height: 34px;
-  align-self: flex-start;
+  flex: 0 0 auto;
 }
 #contact-form button[type="submit"]:hover { filter: brightness(1.1); }
 #contact-form button[type="submit"]:active { filter: brightness(0.92); }
@@ -524,9 +539,11 @@ body {
 
   <div id="zone-components" class="band-zone">
     <span class="band-label on-light">Components</span>
-    <!-- issue #185 / B69: the zone's line, in the identical anchor grammar
-         (B38/B54 construction; B68 removed the prior line). -->
-    <div class="anchor">Pseudonyms and DBAs: aboveaveragerob, Alastair Zeved, Philly Plant Dads</div>
+    <!-- issue #208 / B85: the zone's two-line copy, in the identical anchor
+         grammar (B38/B54 construction); B69's pseudonyms line is replaced;
+         the literal newline renders the issue's line break (pre-wrap). -->
+    <div class="anchor">Under Construction: Career content, Plants in Rocks content.
+Planned future work: Add landing pages</div>
   </div>
   <div id="zone-requirements" class="band-zone">
     <span class="band-label on-light">Requirements</span>
@@ -635,12 +652,14 @@ body {
            form keeps the right half, split and divider per B62. -->
       <div class="lot-split">
         <div class="lot-copy">
-          <!-- issue #184 / B70: the footer's copy of record, verbatim from
-               the issue, in two paragraphs (the issue's \n break, no gap —
-               .lot-copy p { margin: 0 }). The closing phrase renders italic
-               per the owner's ruling (B68's italic phrase stands), spelled
-               "curiouser" per the owner's correction of the issue's typo. -->
-          <p>Hey, I'm Rob. Welcome to my digital garden. This is a sort of central hub for all of the things I work on, across all of the sites and pseudonyms I've used. I'm weary of calling any of these "hobbies" or "passions"; they're actually more of an after effect of the real passion: simply following my curiosity - through any and all of the vagaries.</p>
+          <!-- issue #209 / B86: the footer's copy of record, two lines (line
+               1 replaced, line 2 kept verbatim), no gap — .lot-copy p
+               { margin: 0 }. The closing phrase renders italic (B68's
+               italic phrase stands), spelled "curiouser" per the owner's
+               correction. The copy scales up to the 16.57px band-anchor
+               rung (15 × 1.10455, B46); weight 400, no bold; footer bar
+               size and height unchanged. -->
+          <p>Welcome to Rob's digital garden.</p>
           <p>All it takes to flex one's curiosity is to ask a question, then keep asking questions and always strive to be <em>curiouser and curiouser.</em></p>
         </div>
         <div class="lot-divider" aria-hidden="true"></div>
@@ -659,11 +678,13 @@ body {
         <div class="right-column">
           <div class="field">
             <label for="cf-message">Got a question? Ask away! (required)</label>
-            <textarea id="cf-message" name="message" placeholder="Say hello." required></textarea>
+            <div class="message-row">
+              <textarea id="cf-message" name="message" placeholder="Say hello." required></textarea>
+              <button type="submit">Send</button>
+            </div>
             <div id="form-note" role="note">protected by reCAPTCHA</div>
           </div>
           <input type="text" name="_gotcha" class="gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <button type="submit">Send</button>
         </div>
       </form>
         </div><!-- /.lot-form -->

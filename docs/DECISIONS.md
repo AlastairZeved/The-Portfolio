@@ -2577,3 +2577,108 @@ down to fit." (the size); "A little longer than the horizontal gap that
 exists between \"Software & AI\" and \"Zeved Boards\" note cards." (the gap
 at the parent's right edge); "Not vertically centred, just a touch lower
 than that." (the vertical seat).
+
+### B81. The career body's left half is the Agentic Plugins page's stage + item-selector band (issue #212)
+
+The `/career` page's left half is rebuilt to the **Agentic Plugins page's
+presented design** (repo AlastairZeved/AlastairZeved,
+`https://alastairzeved.com/agentic-plugins/`) — the `.plugins__stage` that
+presents **one** role's component and the `.plugins__pane` **item selector
+band** of title cards beneath it, each launching its item (the role) —
+brought into the career page's monochrome tokens (§10.1, B73). The three
+employer header cards (PNC Bank / PNC Private Bank / Brinker Capital,
+B47/B49/B79) are **unchanged and stay the employer selector**; per employer,
+the body's left half now holds that employer's **roles** as a stage + band.
+
+- **The stage presents one role at a time** (supersedes B66's left-to-right
+  row): the `.plugins__stage` centres the selected role's `.gregorian-mode`
+  component, which still renders B76's source geometry scaled uniformly by
+  the plate's own width (`1 source px = plate-width/830`, the `--u`
+  container-query law — now the stage's full width, so the single component
+  renders larger than any row cell did, exactly the #194 "then scaled up"
+  direction taken to one-across). B74's one-viewport law stands: the
+  description card remains the page's only scroll container, the filled
+  card's styled bar always visible, the empty placeholder bare.
+- **The selector band** is the source's `.plugins__pane` note-card glance
+  (the dark note-ink border — re-tokened to `--deep`, the token the
+  component's own `.gm-card` reads as `--ink` — 3px radius, the water fill,
+  the elevation), one horizontal
+  row of role title cards evenly spaced. Each `.plugins__tab` carries the
+  source's **full glow treatment** — the animated glimmer sheen
+  (`::after`, the `gm-marquee` 6s clock), the two-layer hover glow
+  (`0 0 12px 2px` + `0 0 24px 4px` `--frame`), the press inset
+  (`translateY(2px)` + the `--elevation-inset` value), and the
+  checked / dim-italic unselected and focus states — at `20 × --rs` type,
+  weight 800, uppercase, re-tokened to the monochrome ladder. Unselected
+  cards dim + italic (`--ink-dim`); the selected card reads `--ink-light`
+  on `--card`. Selection is a per-employer **radio group**
+  (`role="radiogroup"`, `aria-label="Choose a role"`) driven by CSS `:has`,
+  the page's zero-JS law; the interleaved input+label pairs let the `+`
+  sibling combinator resolve each card against its own radio without
+  per-id selectors.
+- **The presented component gains the source's breathing presentation
+  bloom**: `.gm-back` animates the source's `gm-breathe` (10s ease-in-out),
+  its rose triplet (`--glow-rose`) re-tokened to this page's existing
+  `--glow-gray` channels (`--glow-gray-a`, `#676767`) — the geometry and
+  alphas ported verbatim (`0 0 60px 20px` / `0 0 240px 120px`,
+  `0.25/0.35/0.12/0.18`). The component's own `gm-title`/`gm-back` glimmer
+  stands (B56). No new hex is invented anywhere: every re-hued value is an
+  existing §10.1 token (`--deep`, `--frame`, `--card`, `--ink-light`,
+  `--ink-dim`, `--glow-gray`), per B56's re-hue rule.
+
+**This entry supersedes** B56's "no item selector tool ships" clause (the
+item selector band ships) and B66's row geometry (the plates no longer read
+left-to-right in one row; they read one-at-a-time through the stage). B74's
+"component caps at half the left half's own height" was the row's cap —
+the stage now fills the half above the band, the single component caps at
+the stage's height and the description card still scrolls; B74's one
+viewport, no-page-scroll, desc-scrolls and mobile-scrolls laws stand
+unchanged. B76's source geometry, uniform plate-width scale, 11px readable
+floor, long-title wrap and filled-card bar stand unchanged. The right half
+(Accomplishments / Learnings) stays empty and no copy changes — the three
+B64-filled desc cards keep their text, every other desc card and slot stays
+empty, no stubbed text anywhere.
+
+The mechanism is the source's own `.plugins__stage` / `.plugins__pane` /
+`.plugins__tab` grammar ported verbatim and re-tokened; the width-scale
+(`--u`), the band's row geometry, the `+`-combinator radio wiring and the
+`--glow-gray-a` channel token are agent-derived implementations of the
+owner's relationships under the B33/B40 provenance pattern — the owner ruled
+the design, not the literals (the literals are the source's own px values
+and the existing §10.1 tokens). `test/career.js` pins the stage, the band,
+the glow states and the one-viewport law; its old B66 row assertions are
+rewritten deliberately (noted in the test's own comment). The mobile reflow
+(≤743px) shows the one component at natural size and the band beneath it —
+the page scrolls as B74/B76's grill answers already ruled; the band's type
+resets to a readable mobile size (the topband-card reset's own pattern), and
+mobile-viewport polish beyond that stays deferred per the owner's 2026-10-09
+ruling ("Mobile viewports are an entirely separate issue …").
+
+**Source:** the owner's issue
+[#212](https://github.com/AlastairZeved/The-Portfolio/issues/212),
+2026-10-11 — quoted verbatim: "We're going to match the design already built
+for repo AlastairZeved/AlastairZeved at page
+https://alastairzeved.com/agentic-plugins/ and their presented components.
+There's an item selector band with title cards and each one launches the item
+(the role on the /career page) and presents it - with the glow and all. We're
+doing the exact same design, but brought into the monochrome design tokens
+used for /career. No copy updates, no stubbed text anywhere - let the empty
+places remain empty of text for now until we get this design right." — and
+the owner's four pre-implementation answers of 2026-10-11 (owner chat,
+multiple choice), quoted verbatim as selected:
+
+1. "Keep the 3 employer header cards, and per employer add a stage +
+   role-selector band (2-3 role cards each)."
+2. "One role at a time in a 'stage' + selector band beneath it (matches the
+   source exactly; supersedes the row)."
+3. "Full source treatment re-tokened monochrome: glimmer sheen + hover glow
+   + press inset + checked/dim-italic."
+4. "Yes: right half stays empty, no copy changes (3 filled desc cards keep
+   text, rest empty), no stubs, new B ruling + UIUX + test updates."
+
+— and the owner's mid-implementation scope directive of 2026-10-11 (owner
+chat), quoted verbatim, with one phrase at the owner's direction recorded as
+written: "everything in the left half of the body concerning the component
+IS IN SCOPE." (this directive is the source of the breathing presentation
+bloom and the full component presentation being in scope, not the selector
+band alone).

@@ -2721,3 +2721,33 @@ multiple choice), quoted verbatim as selected:
 1. "Live on both tabs (scope the inert CSS rule to the Download button
    only)."
 2. "Same tab (match the footer's 'Learn More about Rob' precedent)."
+
+### B83. The contact-form Send button moves inline to the Message textarea's right (issue #210)
+
+The Parking Lot contact form's **Send** button moves from below the Message
+field to **inline, to the right of the Message textarea** on the same row:
+its bottom edge is flush with the textarea's bottom and its right edge sits
+at the form's right — the **bottom-right corner**. The Message textarea
+narrows to make room (it flexes to fill the rest of its `2fr` track). The
+"protected by reCAPTCHA" note stays under the Message field, left-anchored.
+`UIUX §6.1`.
+
+Rendering: the button keeps its existing `#contact-form
+button[type="submit"]` grammar (fill, label, radius, 34px height — `UIUX §6`);
+a new `.message-row` wrapper (a plain flex row: `flex-direction: row`,
+`align-items: flex-end` so the button bottom-aligns with the textarea, and
+`gap: 12px` — the form's existing gap) holds the textarea and button side by
+side. **No new design value is introduced** — no new token, hex, px, ms or
+state.
+
+**Source:** the owner's issue
+[#210](https://github.com/AlastairZeved/The-Portfolio/issues/210), 2026-10-11
+— quoted verbatim: "Move the \"Submit\" button for the formspree form to the
+RIGHT side of the form. It should be anchored to the bottom right of the
+form, in-line with the text box." — and the owner's two pre-implementation
+answers of 2026-10-11 (owner chat, multiple choice), quoted verbatim as
+selected:
+
+1. "Beside the message box, bottom-right corner (message box narrows to make
+   room)"
+2. "Keep it as \"Send\""

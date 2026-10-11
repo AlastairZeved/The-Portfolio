@@ -470,6 +470,19 @@ body {
 #contact-form .right-column {
   display: flex; flex-direction: column; gap: 4px;
 }
+/* issue #210 / B83: the Send button sits inline to the RIGHT of the Message
+   textarea on the same row, its bottom edge flush with the textarea's, in the
+   form's bottom-right corner. The textarea narrows to make room. */
+#contact-form .message-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 12px;
+}
+#contact-form .message-row textarea {
+  flex: 1 1 auto;
+  min-width: 0;
+}
 #contact-form .field { display: flex; flex-direction: column; gap: 4px; }
 #contact-form label {
   font-size: 11px; font-weight: 600; color: var(--ink);
@@ -499,7 +512,7 @@ body {
   font-size: 14px; font-weight: 600;
   cursor: pointer;
   height: 34px;
-  align-self: flex-start;
+  flex: 0 0 auto;
 }
 #contact-form button[type="submit"]:hover { filter: brightness(1.1); }
 #contact-form button[type="submit"]:active { filter: brightness(0.92); }
@@ -659,11 +672,13 @@ body {
         <div class="right-column">
           <div class="field">
             <label for="cf-message">Got a question? Ask away! (required)</label>
-            <textarea id="cf-message" name="message" placeholder="Say hello." required></textarea>
+            <div class="message-row">
+              <textarea id="cf-message" name="message" placeholder="Say hello." required></textarea>
+              <button type="submit">Send</button>
+            </div>
             <div id="form-note" role="note">protected by reCAPTCHA</div>
           </div>
           <input type="text" name="_gotcha" class="gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <button type="submit">Send</button>
         </div>
       </form>
         </div><!-- /.lot-form -->

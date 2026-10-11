@@ -3,7 +3,7 @@
 # The repo has no package.json and no dependencies (AGENTS.md law), so until
 # now nothing ran the tests automatically — only a human remembering to,
 # locally, after the fact. This runs every suite on every PR and on push to
-# main, before a bad change can reach the Pages deploy.
+# main, before a bad change can reach the Netlify deploy (see _headers).
 #
 # Shape ported from AlastairZeved/TheBoards' .github/workflows/ci.yml, the
 # owner-designated reference for issue #149.
@@ -17,7 +17,7 @@ on:
 permissions:
   contents: read
 
-# Superseding a PR push mid-run is fine to cancel — unlike a Pages deploy,
+# Superseding a PR push mid-run is fine to cancel — unlike a Netlify deploy,
 # there is nothing here that needs to finish once started.
 concurrency:
   group: ci-${{ github.ref }}
@@ -56,6 +56,12 @@ jobs:
       - name: tokens.js
         run: node test/tokens.js
 
+      # security.js guards the shipped contract: the _headers CSP, zero on*=
+      # handlers and zero eval in shipped JS (issue #222). Browserless, so it
+      # runs before Chromium boots, like tokens.js and records.js.
+      - name: security.js
+        run: node test/security.js
+
       # records.js is the second browserless suite: it guards DECISIONS.md's
       # `### B<n>` citation space — no duplicate number, ascending in file
       # order (issue #149, ported from TheBoards' test/records.js). Also
@@ -63,9 +69,7 @@ jobs:
       - name: records.js
         run: node test/records.js
 
-      # Browser suites follow. test/parity_boards.js is deliberately NOT run
-      # here: it requires a checkout of TheBoards, and CI stays single-repo
-      # (owner ruling on issue #149).
+      # Browser suites follow. CI stays single-repo (owner ruling on issue #149).
       - name: career.js
         run: node test/career.js
 

@@ -666,10 +666,14 @@ body:has(#employer-brinker:checked) .employer--brinker {
 }
 /* Active (press): the source's press state, verbatim — the pressed dim,
    the 2px drop, the inset elevation on the 80ms press clock. */
+/* --elevation-inset is scoped to the plugin component (.gregorian-mode),
+   not this band, so its value is inlined verbatim. */
 .career__tab:active {
   filter: brightness(0.92);
   transform: translateY(2px);
-  box-shadow: var(--elevation-inset);
+  box-shadow:
+    inset -3px 0 8px rgb(0 0 0 / 0.16),
+    inset 0 2px 4px rgb(0 0 0 / 0.1);
   transition-duration: 80ms;
 }
 /* Checked: the selected card state (the source's re-stated card + ink). */
@@ -928,7 +932,7 @@ body:has(#employer-brinker:checked) .employer--brinker {
     border: 2px solid var(--frame);
     border-radius: 3px;
     font-size: 1.1rem; }
-  .career__tab-year { margin-top: 4px; font-size: 0.8rem; }
+  .career__tab-year { margin: 0; font-size: 0.8rem; }
   .parking-lot { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .parking-lot__divider { width: auto; align-self: flex-start; }
   .parking-lot__divider::before { width: 75%; height: 1px; }

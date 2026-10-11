@@ -2767,3 +2767,77 @@ now-taller textarea; the "protected by reCAPTCHA" note stays under the field.
 **Source:** the owner's mid-implementation directive, 2026-10-11 (owner chat),
 quoted verbatim: "Give that vertical space back to the 'Say hello' text box of
 the form."
+
+### B85. The Components copy is replaced with the under-construction two lines (issue #208)
+
+The **Components** band zone's anchor copy is **replaced**: B69's pseudonyms
+line ("Pseudonyms and DBAs: aboveaveragerob, Alastair Zeved, Philly Plant
+Dads") is superseded by the issue-#208 text, rendered as the issue's two
+lines with its literal line break:
+
+> Under Construction: Career content, Plants in Rocks content.
+> Planned future work: Add landing pages
+
+The line keeps the identical anchor grammar (`UIUX §3.3`): hanging from the
+zone top at `--band-top`, in `--ink` at 16.57px/400 (15px × 1.10455 under
+`B46`; weight plain per `B54`), static, no editing affordance; the zone's
+`pointer-events: none` stands. The two lines fit the band's existing
+`--rule-y` two-line floor, so the **header bar's vertical height is
+unchanged** and the text is **not scaled down** — the issue's "scale the
+text to fit if it needs to be scaled down a touch" contingency does not
+bind. `UIUX §3.3` is amended accordingly.
+
+**Source:** the owner's issue
+[#208](https://github.com/AlastairZeved/The-Portfolio/issues/208),
+2026-10-11 — quoted verbatim: "Remove the current copy from the
+"Components" section and replace it with:
+
+"Under Construction: Career content, Plants in Rocks content.
+Planned future work: Add landing pages"
+
+Include the line break.
+Do not increase the header bar's vertical height. Scale the text to fit if
+it needs to be scaled down a touch."
+
+### B86. The Parking Lot copy is replaced with two lines and scaled to the band-anchor rung (issue #209)
+
+The Parking Lot's **left-half copy is replaced** with the issue-#209 text —
+two lines (the issue's line break) — **superseding B70's issue-#184 copy of
+record**. Line 1 reads **"Welcome to Rob's digital garden."**; line 2 is
+**kept verbatim** — "All it takes to flex one's curiosity is to ask a
+question, then keep asking questions and always strive to be curiouser and
+curiouser." — ending in the italic phrase *curiouser and curiouser.*
+(spelled "curiouser" per the owner's correction of the issue's typo; B68's
+italic-phrase ruling stands). B62's layout — copy left, form right, 50/50
+split, vertical divider — is unchanged.
+
+The copy **scales up** from B62/B70's 13px to the **16.57px band-anchor
+rung** (16.57px/400 — the 15px × 1.10455 `B46` rescale), per the owner's
+pre-implementation answer of 2026-10-11 selecting "Match the 16.57px
+band-anchor rung". The weight stays **400 (no bold)**; the line-height stays
+**1.5** (the lot's reading-text line height). The **footer bar's size and
+vertical height are unchanged** (`--lot-h` is re-derived by the unchanged
+form and floor, not by the two-line copy). `UIUX §6.2` is amended
+accordingly.
+
+**Copy of record (verbatim, issue #209):** "Welcome to Rob's digital
+garden. All it takes to flex one's curiosity is to ask a question, then keep
+asking questions and always strive to be curiouser and curiouser."
+
+**Source:** the owner's issue
+[#209](https://github.com/AlastairZeved/The-Portfolio/issues/209),
+2026-10-11 — quoted verbatim: "In the Parking Lot section, replace this
+copy: "Hey, I'm Rob. Welcome to my digital garden. This is a sort of central
+hub for all of the things I work on, across all of the sites and pseudonyms
+I've used. I'm weary of calling any of these "hobbies" or "passions";
+they're actually more of an after effect of the real passion: simply
+following my curiosity - through any and all of the vagaries." With this
+new copy: "Welcome to Rob's digital garden." Keep the line break and this
+line below it: "All it takes to flex one's curiosity is to ask a question,
+then keep asking questions and always strive to be curiouser and
+curiouser." Just those two lines of text should exist in the Parking Lot
+section once complete. Scale the text up in size to fit in the footer bar,
+but not title text. Do not bold any of the text, just increase the size so
+it's readable. Do not mess with the size or vertical height of the footer
+bar." — and the owner's pre-implementation answer of 2026-10-11 (owner
+chat, multiple choice): "Match the 16.57px band-anchor rung".

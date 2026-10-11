@@ -72,9 +72,10 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('Requirements zone label', (await page.locator('#zone-requirements .band-label').innerText()) === 'Requirements');
   ok('Parking Lot header', (await page.locator('#lot-header').innerText()) === 'Parking Lot');
 
-  // issue #174/B68 removed the prior Components line; issue #185/B69 adds the
-  // zone's line — the pseudonyms line, in the identical anchor grammar.
-  // Requirements keeps that grammar; issue #183/B71 replaces its copy.
+  // issue #174/B68 removed the prior Components line; issue #185/B69 added the
+  // pseudonyms line; issue #208/B85 replaces it with two lines — the issue's
+  // literal line break. Requirements keeps the anchor grammar; issue
+  // #183/B71 replaced its copy.
   const bandCopy = await page.evaluate(() => {
     const g = sel => { const el = document.querySelector(sel); return el ? { text: el.textContent.trim(), weight: getComputedStyle(el).fontWeight } : null; };
     return {
@@ -82,24 +83,25 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       requirements: g('#zone-requirements .anchor'),
     };
   });
-  ok('Components zone renders the issue-#185 pseudonyms line (issue #185/B69)',
+  ok('Components zone renders the issue-#208 two-line copy (issue #208/B85)',
     bandCopy.componentsAnchor !== null &&
-    bandCopy.componentsAnchor.text === 'Pseudonyms and DBAs: aboveaveragerob, Alastair Zeved, Philly Plant Dads');
-  ok('Components zone renders its label and the pseudonyms line only (issue #185/B69)',
+    bandCopy.componentsAnchor.text === 'Under Construction: Career content, Plants in Rocks content.\nPlanned future work: Add landing pages');
+  ok('Components zone renders its label and the two-line copy only (issue #208/B85)',
     (await page.locator('#zone-components').textContent()).replace(/\s+/g, ' ').trim() ===
-    'Components Pseudonyms and DBAs: aboveaveragerob, Alastair Zeved, Philly Plant Dads');
+    'Components Under Construction: Career content, Plants in Rocks content. Planned future work: Add landing pages');
   ok('Requirements line is the issue-#183 copy (issue #183/B71)',
     bandCopy.requirements &&
     bandCopy.requirements.text === 'Click the note cards to launch my various pages and work across the web.');
   ok('Requirements band anchor renders plain 400 text (issue #147/B54)',
     bandCopy.requirements && bandCopy.requirements.weight === '400');
 
-  // issue #184/B70: the footer keeps B62's layout (copy left, form right);
-  // the left half's copy is the issue-#184 text, verbatim, in two
-  // paragraphs (the issue's \n break) with no gap between them, and the
-  // closing phrase renders italic (spelled "curiouser" per the owner's
-  // correction of the issue's typo).
-  const LOT_COPY = "Hey, I'm Rob. Welcome to my digital garden. This is a sort of central hub for all of the things I work on, across all of the sites and pseudonyms I've used. I'm weary of calling any of these \"hobbies\" or \"passions\"; they're actually more of an after effect of the real passion: simply following my curiosity - through any and all of the vagaries. All it takes to flex one's curiosity is to ask a question, then keep asking questions and always strive to be curiouser and curiouser.";
+  // issue #209/B86: the footer keeps B62's layout (copy left, form right);
+  // the left half's copy is the issue-#209 text, verbatim — two lines (the
+  // issue's line break) with no gap between them — line 1 replaced, line 2
+  // kept, the closing phrase renders italic (spelled "curiouser" per the
+  // owner's correction), and the copy scales to the 16.57px band-anchor
+  // rung (weight 400, no bold; footer bar size and height unchanged).
+  const LOT_COPY = "Welcome to Rob's digital garden. All it takes to flex one's curiosity is to ask a question, then keep asking questions and always strive to be curiouser and curiouser.";
   const footer = await page.evaluate(() => {
     const copy = document.querySelector('.lot-copy');
     const copyBox = copy.getBoundingClientRect();
@@ -115,18 +117,20 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       em,
       italic: em ? getComputedStyle(em).fontStyle : null,
       margins,
+      copyFs: getComputedStyle(copy).fontSize,
       half: Math.abs(copyBox.width - form.width) < 2,
       divider: dv.width < 2 && dv.height > 0,
       sides: copyBox.left < form.left && form.right <= items.right + 0.5,
     };
   });
-  ok('footer copy matches the issue-#184 copy of record verbatim (issue #184/B70)',
+  ok('footer copy matches the issue-#209 copy of record verbatim (issue #209/B86)',
     footer.text !== null && footer.text === LOT_COPY);
-  ok('footer copy renders two paragraphs (issue #184/B70)', footer.paragraphs === 2);
-  ok('the paragraphs carry no gap between them (issue #184/B70)',
+  ok('footer copy renders two lines (issue #209/B86)', footer.paragraphs === 2);
+  ok('the lines carry no gap between them (issue #209/B86)',
     footer.margins.every(m => m === '0px/0px'));
-  ok('the italic phrase is present (issue #184/B70)', footer.em !== null);
-  ok('the closing phrase renders italic (issue #184/B70)', footer.italic === 'italic');
+  ok('the italic phrase is present (issue #209/B86)', footer.em !== null);
+  ok('the closing phrase renders italic (issue #209/B86)', footer.italic === 'italic');
+  ok('the copy renders at the 16.57px band-anchor rung (issue #209/B86)', footer.copyFs === '16.57px');
   ok('footer halves are equal width (50/50, issue #169/B62)', footer.half);
   ok('vertical divider bar present between the halves (issue #169/B62)', footer.divider);
   ok('copy sits left of the form inside the lot (issue #169/B62)', footer.sides);

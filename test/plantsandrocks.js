@@ -3,7 +3,8 @@
    card, the poles reader rendering the shipped monstera-storybook.html
    iframe (issue #156, B57 — deliberate rewrite of the blank-body pin) while
    the rocks reader stays empty, two-section parking lot with one divider, a
-   rendered-but-disabled Download button, and the literal TheBoards
+   Download PDF anchor (live on poles, inert on rocks) plus a live
+   "Back to the Garden" anchor, and the literal TheBoards
    idea-board green palette (byte-exact, NOT a re-hue). Single file, zero
    script on plantsandrocks.html itself, zero <link>.
    Black-box Playwright, career.js's harness.
@@ -172,36 +173,58 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     return getComputedStyle(d, '::before').width === '1px' &&
       Math.abs(bar - 0.75 * (lot.height - 24)) < 6;
   }));
-  ok('the left footer section renders nothing (measures zero)',
+
+  // Two .cta controls. The Download is a PDF anchor (B58, issue #157), live
+  // on the poles tab and inert/dimmed on the rocks tab. The "Back to the
+  // Garden" anchor (B82, issue #211) links back to razgregory.com in the
+  // same tab and stays live on BOTH tabs.
+  const downloadCta = page.locator('.parking-lot .cta[download]');
+  const backCta = page.locator('.parking-lot .cta[href="https://razgregory.com/"]');
+
+  ok('the "Back to the Garden" control renders as a same-tab anchor back to razgregory.com',
+    await backCta.count() === 1 &&
+    (await backCta.innerText()).trim() === 'Back to the Garden' &&
+    (await backCta.getAttribute('href')) === 'https://razgregory.com/' &&
+    (await backCta.getAttribute('target')) === null &&
+    (await backCta.getAttribute('download')) === null &&
+    (await backCta.getAttribute('onclick')) === null);
+
+  ok('the Back and Download controls dock to the divider bar symmetrically, centred vertically',
     await page.evaluate(() => {
-      const f = document.querySelector('.parking-lot__facts');
-      return f.innerText.trim() === '' && f.getBoundingClientRect().height === 0;
+      const div = document.querySelector('.parking-lot__divider').getBoundingClientRect();
+      const back = document.querySelector('.parking-lot .cta[href="https://razgregory.com/"]').getBoundingClientRect();
+      const dl = document.querySelector('.parking-lot .cta[download]').getBoundingClientRect();
+      const midY = (b) => b.top + b.height / 2;
+      const gapL = div.left - back.right;   // divider ← back
+      const gapR = dl.left - div.right;     // divider → download
+      return gapL > 0 && gapR > 0 && Math.abs(gapL - gapR) < 4 &&
+        Math.abs(midY(back) - midY(div)) < 6 && Math.abs(midY(dl) - midY(div)) < 6;
     }));
 
-  // The Download control: a PDF anchor, live on the poles tab, inert on
-  // the rocks tab (B58, issue #157 — supersedes B48's disabled state)
-  const cta = page.locator('.parking-lot .cta');
   ok('the Download control renders as an anchor targeting the shipped PDF',
-    (await cta.innerText()).trim() === 'Download' && await cta.count() === 1 &&
-    (await cta.getAttribute('href')) === 'Flattened-Monstera-Division.pdf' &&
-    (await cta.getAttribute('download')) !== null);
+    await downloadCta.count() === 1 &&
+    (await downloadCta.innerText()).trim() === 'Download' &&
+    (await downloadCta.getAttribute('href')) === 'Flattened-Monstera-Division.pdf' &&
+    (await downloadCta.getAttribute('download')) !== null);
   ok('the Download control has no script handler (the page has no script)',
-    (await cta.getAttribute('onclick')) === null);
-  ok('on the poles tab the Download control is live (not dimmed, clickable)', await (async () => {
-    // re-select Plants on Poles: the §3 swap step above left Plants in Rocks checked
+    (await downloadCta.getAttribute('onclick')) === null);
+  ok('on the poles tab both controls are live, the Download not dimmed', await (async () => {
+    // re-select Plants on Poles: the §2 swap step above left Plants in Rocks checked
     await page.locator('.topband__card-hit[for="page-poles"]').click();
     return await page.evaluate(() => {
-      const b = document.querySelector('.parking-lot .cta');
-      const s = getComputedStyle(b);
-      return s.opacity === '1' && s.pointerEvents !== 'none';
+      const dl = getComputedStyle(document.querySelector('.parking-lot .cta[download]'));
+      const back = getComputedStyle(document.querySelector('.parking-lot .cta[href="https://razgregory.com/"]'));
+      return dl.opacity === '1' && dl.pointerEvents !== 'none' &&
+        back.opacity === '1' && back.pointerEvents !== 'none';
     });
   })());
-  ok('on the rocks tab the Download control is inert and dimmed at 0.55', await (async () => {
+  ok('on the rocks tab the Download dims to 0.55 but the Back control stays live', await (async () => {
     await page.locator('#page-rocks').check({ force: true });
     return await page.evaluate(() => {
-      const b = document.querySelector('.parking-lot .cta');
-      const s = getComputedStyle(b);
-      return s.opacity === '0.55' && s.cursor === 'not-allowed' && s.pointerEvents === 'none';
+      const dl = getComputedStyle(document.querySelector('.parking-lot .cta[download]'));
+      const back = getComputedStyle(document.querySelector('.parking-lot .cta[href="https://razgregory.com/"]'));
+      return dl.opacity === '0.55' && dl.cursor === 'not-allowed' && dl.pointerEvents === 'none' &&
+        back.opacity === '1' && back.pointerEvents !== 'none';
     });
   })());
 

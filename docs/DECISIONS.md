@@ -2682,3 +2682,42 @@ written: "everything in the left half of the body concerning the component
 IS IN SCOPE." (this directive is the source of the breathing presentation
 bloom and the full component presentation being in scope, not the selector
 band alone).
+
+### B82. The footer's left section holds a "Back to the Garden" button linking back to razgregory.com (issue #211)
+
+The `/plantsandrocks` page's footer left section — reserved and permanently
+empty per B48 — gains a **"Back to the Garden"** button: the Download
+control's same `.cta` grammar (B58, issue #157), an `<a>` linking back to
+`https://razgregory.com/` **in the same tab** (no `target`, matching
+career.html's "Learn More about Rob"), docked to the divider bar (justified
+to the end of its half via a `.parking-lot__facts--back` modifier, mirroring
+the Download control's divider-adjacent placement in the right half) and
+centred vertically with it — **live on BOTH tabs**.
+
+Because the new button shares the `.cta` class with the Download control,
+B58's inert-on-Rocks dim (which targeted every `.cta`) is **scoped to the
+Download anchor only** — `body:has(#page-rocks:checked) .cta[download]` — so
+the Back-to-the-Garden button never disables on the Plants in Rocks tab,
+while the Download control's 0.55 dim / `not-allowed` / `pointer-events:
+none` inert state stands unchanged. No new design value is introduced: the
+button reuses the shipped `.cta` grammar (B58), `--elevation`/`--ease`, the
+`.parking-lot__facts` section and the B48 0.55 shipped dim alpha (only its
+selector scope changed, to `.[download]`).
+
+**This entry supersedes** B48's "left section permanently empty" clause — the
+left section now renders the Back-to-the-Garden button. The B58 Download
+discipline and its inert-on-Rocks state stand unchanged; B57, B50 and the
+page's no-script law (B48) stand unchanged.
+
+**Source:** the owner's issue
+[#211](https://github.com/AlastairZeved/The-Portfolio/issues/211),
+2026-10-11 — quoted verbatim: "In the footer, on the left side of the
+divider bar, add a button that reads "Back to the Garden". It should link
+back to razgregory.com and be in the same design as the existing button to
+"Download". Anchor the button to the divider bar, centered vertically." —
+and the owner's two pre-implementation answers of 2026-10-11 (owner chat,
+multiple choice), quoted verbatim as selected:
+
+1. "Live on both tabs (scope the inert CSS rule to the Download button
+   only)."
+2. "Same tab (match the footer's 'Learn More about Rob' precedent)."

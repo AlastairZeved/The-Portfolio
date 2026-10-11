@@ -23,11 +23,8 @@ const ok = (n, c, extra) => {
 };
 const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');
 
-// Every page and script the site ships. Keep in step with the Netlify deploy.
-const SHIPPED_HTML = ['index.html', 'career.html', 'plantsandrocks.html', 'monstera-storybook.html'];
-const SHIPPED_JS = ['app.js', 'monstera-storybook.js'];
 
-// [1] _headers — the CSP the Netlify deploy actually sends.
+// [1] _headers — the CSP delivered by Netlify.
 console.log('\n[1] _headers — the CSP delivered by Netlify');
 const headers = read('_headers');
 // Blocks: a path line at column 0, then indented header lines beneath it.
@@ -42,7 +39,7 @@ for (const raw of headers.split('\n')) {
 const rootHeaders = blocks['/*'] || [];
 const rootCsp = (rootHeaders.find(h => /^Content-Security-Policy:/i.test(h)) || '').replace(/^Content-Security-Policy:\s*/i, '');
 ok('the root block "/*" declares a Content-Security-Policy', rootCsp !== '');
-for (const directive of [
+const expected = [
   "default-src 'none'",
   "script-src 'self'",
   "style-src 'self' 'unsafe-inline'",
@@ -50,11 +47,17 @@ for (const directive of [
   "font-src 'self' data:",
   "form-action https://formspree.io",
   "base-uri 'none'",
+  "frame-src 'self'",
   "frame-ancestors 'none'",
   'upgrade-insecure-requests',
-]) {
-  ok(`root CSP declares ${directive}`, rootCsp.split(';').map(s => s.trim()).includes(directive));
-}
+];
+const actual = rootCsp.split(';').map(s => s.trim()).filter(Boolean);
+for (const d of expected) ok(`root CSP declares ${d}`, actual.includes(d));
+// Exact set: any unlisted directive (e.g. connect-src *) is a loosening.
+ok('root CSP has exactly the ruled directives and nothing else',
+  actual.length === expected.length && actual.every(d => expected.includes(d)),
+  'extra/missing: ' + actual.filter(d => !expected.includes(d)).concat(expected.filter(d => !actual.includes(d))).join(' | '));
+ok("no wildcard source (*) anywhere in the CSP", !/(^|\s)\*(\s|;|$)/.test(rootCsp));
 ok("no CSP in any block loosens script-src with 'unsafe-inline' or 'unsafe-eval'",
   !/script-src[^;]*'unsafe-(inline|eval)'/.test(headers));
 ok('no Referrer-Policy header is set (AGENTS.md §4: Formspree needs the referrer)',
@@ -63,14 +66,26 @@ const sbCsp = ((blocks['/monstera-storybook.html'] || []).find(h => /^Content-Se
 ok("the storybook block allows self-framing only (frame-ancestors 'self', B57)",
   /frame-ancestors 'self'(;|$)/.test(sbCsp));
 
+// Every shipped page and script, discovered from the repo root (not a hardcoded list).
+const SHIPPED_HTML = fs.readdirSync(ROOT).filter(f => f.endsWith('.html')).sort();
+const SHIPPED_JS = fs.readdirSync(ROOT).filter(f => f.endsWith('.js')).sort();
+
 // [2] Markup — the policy is satisfiable by the shipped HTML.
 console.log('\n[2] Shipped HTML — the markup honours the policy');
 const inlineScripts = [], handlers = [];
+// A tag: '<name' then attributes, where quoted values may contain '>' or '/'.
+const TAG = /<[a-zA-Z][^\s/>]*(?:[\s/]+(?:[^>"'\s]|"[^"]*"|'[^']*')*)?>/g;
 for (const f of SHIPPED_HTML) {
   const html = read(f);
-  for (const m of html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>/gi)) inlineScripts.push(`${f}: ${m[0]}`);
-  // Attribute-position handlers only: whitespace, then on<name>=, inside a tag.
-  for (const m of html.matchAll(/<[^>]*\s(on[a-z]+)\s*=/gi)) handlers.push(`${f}: ${m[1]}=`);
+  for (const m of html.matchAll(/<script\b[^>]*>/gi)) {
+    if (!/\bsrc\s*=/i.test(m[0])) inlineScripts.push(`${f}: ${m[0]}`);
+  }
+  for (const m of html.matchAll(TAG)) {
+    // Strip quoted values so an on*= inside a value is not counted as an attribute.
+    const attrs = m[0].replace(/"[^"]*"|'[^']*'/g, '""');
+    const h = attrs.match(/[\s/"'](on[a-z]+)\s*=/i);
+    if (h) handlers.push(`${f}: ${h[1]}=`);
+  }
 }
 ok('zero inline <script> blocks in shipped HTML', inlineScripts.length === 0, inlineScripts.join(' | '));
 ok('zero on*= event-handler attributes in shipped HTML', handlers.length === 0, handlers.join(' | '));
@@ -79,13 +94,18 @@ ok('zero on*= event-handler attributes in shipped HTML', handlers.length === 0, 
 console.log('\n[3] Shipped JS — no eval surface');
 const offenders = [];
 for (const file of SHIPPED_JS) {
-  // Strip comments first: prose may name eval() without calling it.
-  const text = read(file).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/gm, '$1');
-  for (const m of text.matchAll(/\beval\s*\(|new\s+Function\s*\(|setTimeout\s*\(\s*["'`]|setInterval\s*\(\s*["'`]/g)) {
-    offenders.push(`${file}: ${m[0]}`);
-  }
+  const raw = read(file);
+  // String-form timers are checked on the raw source.
+  for (const m of raw.matchAll(/\b(setTimeout|setInterval)\s*\(\s*["'`]/g)) offenders.push(`${file}: ${m[0]}`);
+  // Remove string literals, then comments, so text like "//" inside a string cannot hide code.
+  const code = raw
+    .replace(/"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|`(?:\\.|[^`\\])*`/g, '""')
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/(^|[^:\\])\/\/[^\n]*/gm, '$1');
+  // Any identifier named eval or Function used as a call, aliased or not.
+  for (const m of code.matchAll(/\beval\b|\bFunction\s*\(/g)) offenders.push(`${file}: ${m[0]}`);
 }
-ok('no eval(), new Function(), or string-form timers in shipped JS', offenders.length === 0, offenders.join(' | '));
+ok('no eval, Function(), or string-form timers in shipped JS (root-level, discovered)', offenders.length === 0, offenders.join(' | '));
 
 // [4] Every script the HTML loads is a shipped, same-origin file.
 console.log('\n[4] Script sources — external and same-origin');

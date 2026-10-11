@@ -17,7 +17,7 @@ on:
 permissions:
   contents: read
 
-# Superseding a PR push mid-run is fine to cancel — unlike a Pages deploy,
+# Superseding a PR push mid-run is fine to cancel — unlike a Netlify deploy,
 # there is nothing here that needs to finish once started.
 concurrency:
   group: ci-${{ github.ref }}

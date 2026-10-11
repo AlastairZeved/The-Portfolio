@@ -61,8 +61,8 @@ the suites `.github/workflows/ci.yml` runs, in CI's order:
 ```
 npm install playwright        # onto NODE_PATH; not committed, no package.json
 node test/tokens.js           # design contract: UIUX §2 recomputed from shipped hexes (no browser)
-node test/records.js          # DECISIONS.md B<n> numbering: no duplicate, ascending (no browser)
 node test/security.js         # _headers CSP, zero on*= handlers, zero eval in shipped JS (no browser)
+node test/records.js          # DECISIONS.md B<n> numbering: no duplicate, ascending (no browser)
 node test/career.js           # the career page (issue #133/B47): employer selector, glow, split, three-section lot
 node test/desktop.js          # desktop grammar: full-viewport sheet, no rail, card link semantics, PDF-free (no export here)
 node test/mobile.js           # touch + band/lot geometry + card states at mobile widths

@@ -2687,3 +2687,31 @@ pre-implementation clarify form), quoted verbatim as answered:
 2. "Last role, most recent"
 3. "Role name + the year subscript from the component"
 4. "Keep the in-card styled scroll bar"
+
+**Correction (2026-10-11, the PR #213 review):** the sizes as first
+rendered were wrong — the selector band had grown content-driven past the
+source's own selector-height law, and the stage was taking only what a
+half-height cap left it. The band now renders at the source's `--selector-h`
+law **verbatim — `height: clamp(3.4rem, 10cqw, 5.5rem)`, a FIXED height,
+never content-driven** — with the band cards' type and padding
+**agent-derived under the B33/B40 pattern to fit the clamp**: the name drops
+to the page's 11px readable-floor rung (`max(calc(11 × --rs), 11px)`,
+line-height 1.15, `0.02em` track, `2 × --rs` card padding) so the longest
+role name wraps at most two lines inside its card with the year subscript
+beneath (`max(calc(9 × --rs), 9px)`), nothing clipped; below the ≤743px
+breakpoint the clamp returns as the pane's floor and the stacked cards grow
+it content-driven (B74's mobile answer — the page keeps scrolling), the name
+keeping the same 11px rung so the longest word never clips its cell. **The
+stage takes the half's FULL column above the band** (`flex: 1` — the plate
+never overflows it, `max-height` caps it and the desc card scrolls inside,
+so B74's one-viewport render stands) — **superseding B74's half-cap for the
+stage render**; B74's one-viewport render and B76's geometry, 11px floor,
+long-title wrap and in-card scroll all survive unchanged. Measured
+2026-10-11 at 1440×1110 (band 62.3px, stage 327px, plate 546×327) and
+1920×1080 (band 86.3px, stage 291px, plate 485×291), names ≤ 2 lines, year
+beneath, no page scroll at either.
+
+**Source:** the owner's PR
+[#213](https://github.com/AlastairZeved/The-Portfolio/pull/213) review,
+2026-10-11, quoted verbatim: "the sizes are very clearly wrong. the selector
+bar should not be that large and the component should be much larger."

@@ -326,10 +326,13 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
           .every(sec => sec.getBoundingClientRect().height === 0), sel));
   }
 
-  // ---- B74 (issue #186), as it stands under B81: above the breakpoint
-  // the page is ONE viewport — it does not scroll — and the stage + band
-  // block caps at half the left half's own height, centred in the half;
-  // the description card remains the page's only scroll container.
+  // ---- B74 (issue #186), as it stands under B81 + the issue #213 review:
+  // above the breakpoint the page is ONE viewport — it does not scroll —
+  // and the STAGE TAKES THE HALF'S FULL COLUMN ABOVE THE BAND (flex: 1 —
+  // the #213 correction supersedes B74's half-cap for the stage render;
+  // the plate never overflows the stage, max-height caps it and the desc
+  // card scrolls inside, so the one-viewport render stands); the
+  // description card remains the page's only scroll container.
   // Deliberate rewrite: the B66 row pins are superseded (one presented
   // component, not a row of plates). ----
   for (const tab of ['employer-pnc-bank', 'employer-pnc-private', 'employer-brinker']) {
@@ -341,14 +344,17 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         const de = document.documentElement;
         return de.scrollHeight <= de.clientHeight + 1 && de.scrollWidth <= de.clientWidth + 1;
       }));
-    ok(`${tab}: B74 — the stage + band block caps at half the left half's own height, centred in the half; the half is not a scroll container`,
+    ok(`${tab}: B81/#213 — the stage takes the half's FULL column above the band (supersedes B74's half-cap for the stage render); the half is not a scroll container`,
       await page.evaluate(s => {
         const shown = document.querySelector(s);
         const gal = shown.querySelector('.split__gallery');
-        const emp = shown.getBoundingClientRect();
+        const st = shown.querySelector('.career__stage').getBoundingClientRect();
+        const b = shown.querySelector('.career__band').getBoundingClientRect();
         const g = gal.getBoundingClientRect();
-        return g.height <= emp.height / 2 + 1 &&
-          Math.abs((g.top - emp.top) - (emp.bottom - g.bottom)) < 2 &&
+        return Math.abs(st.top - g.top) < 1 &&
+          b.top >= st.bottom - 1 &&
+          Math.abs((b.top - st.bottom) - (g.bottom - b.bottom)) < 2 &&
+          Math.abs(g.height - st.height - b.height - 2 * (b.top - st.bottom)) < 2 &&
           gal.scrollHeight <= gal.clientHeight + 1;
       }, sel));
     ok(`${tab}: B81 — the band sits beneath the stage; the stage presents one plate inside it`,
@@ -427,6 +433,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       const de = document.documentElement;
       return {
         plateW: r(plate).width, stageW: r(stage).width, stageH: r(stage).height,
+        bandH: r(document.querySelector('.employer--' + t.slice(9) + ' .career__band')).height,
         pluginH: parseFloat(getComputedStyle(roleEl).getPropertyValue('--plugin-h')),
         titleFS: parseFloat(getComputedStyle(t2).fontSize),
         descFS: parseFloat(getComputedStyle(d).fontSize),
@@ -473,16 +480,18 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     canvasB81.emptyOverflowY !== 'scroll');
   ok('B76/B74 — the page fits one viewport and nothing is clipped (design canvas)',
     !canvasB81.pageScrolls && canvasB81.nothingClipped);
-  // B81 supersedes B76's plate-row pins: the deliberate rewrite is the
-  // stage's own law — the same viewport renders a bigger plate for the
-  // employer whose band leaves the stage more room (PNC Private Bank's
-  // two-card band vs PNC Bank's three-card band at 2560×1440).
+  // B81 + the issue #213 review supersede the old "band height
+  // differentiates the plate" pin: the band is now the source's FIXED
+  // clamp(3.4rem, 10cqw, 5.5rem) — identical for every employer, never
+  // content-driven — so every employer's stage takes the same column and
+  // each plate obeys the same min-ratio law (2560×1440).
   const wide3B81 = await b81({ width: 2560, height: 1440 }, 'employer-pnc-bank');
   const wide2B81 = await b81({ width: 2560, height: 1440 }, 'employer-pnc-private');
-  ok('B81 — the employer whose band leaves the stage more room renders the bigger plate (2560×1440; supersedes B76\x27s plate-row pin)',
-    wide2B81.plateW > wide3B81.plateW &&
-    Math.abs(wide2B81.plateW - Math.min(wide2B81.stageW, 830 * wide2B81.stageH / wide2B81.pluginH)) < 2 &&
-    Math.abs(wide3B81.plateW - Math.min(wide3B81.stageW, 830 * wide3B81.stageH / wide3B81.pluginH)) < 2);
+  ok('B81/#213 — the band renders at the same fixed clamp height for every employer (never content-driven) and each plate obeys the stage min-ratio law (2560×1440; deliberate rewrite of the band-differentiates plate pin)',
+    Math.abs(wide3B81.bandH - wide2B81.bandH) < 0.5 &&
+    Math.abs(wide3B81.stageH - wide2B81.stageH) < 0.5 &&
+    [wide2B81, wide3B81].every(x =>
+      Math.abs(x.plateW - Math.min(x.stageW, 830 * x.stageH / x.pluginH)) < 2));
   const midB81 = await b81({ width: 1024, height: 768 });
   ok('B81 — the min-ratio law holds at 1024×768 too',
     Math.abs(midB81.plateW - Math.min(midB81.stageW, 830 * midB81.stageH / midB81.pluginH)) < 2 &&
@@ -540,19 +549,48 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       return cs.animationName === 'gm-breathe' && cs.animationDuration === '10s' &&
         cs.boxShadow.includes('240px');
     }));
-  ok('B81 — the band pane is the source\x27s note card: 2.1px --frame border, the water fill, the elevation',
+  ok('B81/#213 — the band pane is the source\u2019s note card (2.1px --frame border, the water fill, the elevation) at the source\u2019s FIXED selector height clamp(3.4rem, 10cqw, 5.5rem) — never content-driven',
     await page.evaluate(() => {
       const sec = [...document.querySelectorAll('section.employer')]
         .find(x => getComputedStyle(x).display !== 'none');
       const b = sec.querySelector('.career__band');
       const cs = getComputedStyle(b);
       const gal = sec.querySelector('.split__gallery');
+      const galW = gal.getBoundingClientRect().width;
+      const clampH = Math.min(Math.max(3.4 * 16, 0.10 * galW), 5.5 * 16);
       return parseFloat(cs.borderTopWidth) > 1.9 && parseFloat(cs.borderTopWidth) < 2.2 &&
         cs.borderTopColor === 'rgb(140, 140, 140)' &&
         cs.borderRadius === '3px' &&
         cs.backgroundImage.includes('radial-gradient') && cs.backgroundImage.includes('linear-gradient') &&
         cs.boxShadow.includes('rgba(0, 0, 0, 0.45)') &&
-        Math.abs(parseFloat(cs.minHeight) - 0.10 * gal.getBoundingClientRect().width) < 1;
+        Math.abs(parseFloat(cs.height) - clampH) < 1 &&
+        cs.minHeight === 'auto';
+    }));
+  // issue #213: the cards' type/padding are agent-derived under B33/B40 to
+  // fit the fixed clamp — the name wraps AT MOST TWO LINES inside its card
+  // (nothing clipped, the longest word never past the cell) with the year
+  // subscript beneath. Deliberate rewrite: the 20 × --rs card-type pin and
+  // the (band-top + 8 × --rs)/--card-pad padding pin are superseded.
+  ok('B81/#213 — the band names wrap ≤ 2 lines inside their cards with the year beneath (type agent-derived under B33/B40 to fit the clamp)',
+    await page.evaluate(() => {
+      const bands = [...document.querySelectorAll('.career__band')]
+        .filter(b => b.getBoundingClientRect().height > 0);
+      const measure = c => {
+        const range = document.createRange();
+        const tn = [...c.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+        if (!tn) return false;
+        range.selectNodeContents(tn);
+        const lines = [...range.getClientRects()];
+        if (!lines.length) return false;
+        const y = c.querySelector('.career__tab-year').getBoundingClientRect();
+        const box = c.getBoundingClientRect();
+        return lines.length <= 2 &&
+          lines.every(l => l.right <= box.right + 0.5 && l.left >= box.left - 0.5) &&
+          y.top >= lines[lines.length - 1].bottom - 1 &&
+          y.right <= box.right + 0.5;
+      };
+      return bands.length === 1 &&
+        bands.every(b => [...b.querySelectorAll('.career__tab')].every(measure));
     }));
 
   // back to the default tab for the rest of the suite
@@ -700,22 +738,31 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       const rs = [...document.querySelectorAll('.topband__card')].map(c => c.getBoundingClientRect());
       const gaps = [rs[1].top - rs[0].bottom, rs[2].top - rs[1].bottom];
       return Math.abs(gaps[0] - gaps[1]) < 0.5;
-    }));  // B81 at mobile: the stage + band column stays (one presented
-  // component, the band beneath it) in the shipped readable literals; the
-  // page keeps scrolling below the breakpoint (B74's mobile answer).
-  ok('at 390px the stage still presents one component with the band beneath it (B81)',
+    }));
+  // B81 at mobile + the issue #213 review: the stage + band column stays
+  // (one presented component, the band beneath it) in the shipped readable
+  // literals — the clamp returns as the pane's FLOOR below the breakpoint
+  // and the stacked cards grow it content-driven, the name keeping the
+  // 11px readable-floor rung (deliberate rewrite: the 1.1rem header-card
+  // name rung clipped "Representative" past its ~95px cell; agent-derived
+  // under B33/B40) — and the page keeps scrolling below the breakpoint
+  // (B74's mobile answer).
+  ok('at 390px the stage still presents one component with the band beneath it, the band content-driven above its clamp floor, the name at the 11px rung, the page scrolling (B81/B74 mobile, #213)',
     await page.evaluate(() => {
       const shown = [...document.querySelectorAll('section.employer')]
         .find(s => s.getBoundingClientRect().height > 0);
       const st = shown.querySelector('.career__stage').getBoundingClientRect();
-      const b = shown.querySelector('.career__band').getBoundingClientRect();
+      const band = shown.querySelector('.career__band');
+      const b = band.getBoundingClientRect();
       const plates = [...shown.querySelectorAll('.role')]
         .filter(w => w.getBoundingClientRect().height > 0);
       const tab = shown.querySelector('.career__tab');
       const year = tab.querySelector('.career__tab-year');
       return b.top >= st.bottom - 1 && plates.length === 1 &&
-        getComputedStyle(tab).fontSize === '17.6px' &&
-        getComputedStyle(year).fontSize === '12.8px';
+        getComputedStyle(band).minHeight === '54.4px' && b.height > 54.4 + 1 &&
+        getComputedStyle(tab).fontSize === '11px' &&
+        getComputedStyle(year).fontSize === '9px' &&
+        document.documentElement.scrollHeight > document.documentElement.clientHeight + 1;
     }));
   // a11y: the selector is a named radio group; one off-canvas h1, equal wordmarks
   await page.setViewportSize({ width: 1440, height: 1110 });

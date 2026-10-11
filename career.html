@@ -292,7 +292,9 @@ body:has(#employer-brinker:checked) .employer--brinker {
 
 /* The stage (the source's .plugins__stage): a size container holding the
    ONE selected role's component — the other roles' wrappers render nothing.
-   The stage takes what the B74 cap leaves above the band. */
+   The stage takes the half's FULL column above the band (flex: 1 — B81
+   corrected: the plate never overflows it, max-height caps it and the desc
+   card scrolls inside, so the one-viewport render stands). */
 .career__stage {
   position: relative;
   flex: 1 1 auto;
@@ -562,13 +564,15 @@ body:has(#employer-brinker:checked) .employer--brinker {
   gap: clamp(0.5rem, 1.25cqw, 1rem);   /* the source's even spacing */
   flex: 0 0 auto;
   width: 100%;
-  /* the source's selector height (clamp(3.4rem, 10cqw, 5.5rem)), rendered
-     as a floor: the source sized it "tall enough for the longest title to
-     wrap to two lines without clipping" — the career role names wrap
-     deeper than the plugins' labels, so the pane grows past the clamp
-     rather than clipping (B81, agent-derived under the B33/B40 pattern;
-     the clamp's own literals stand). */
-  min-height: clamp(3.4rem, 10cqw, 5.5rem);
+  /* B81 corrected (owner, PR #213 review, 2026-10-11: "the sizes are very
+     clearly wrong. the selector bar should not be that large and the
+     component should be much larger."): the source's selector height law
+     ported VERBATIM — clamp(3.4rem, 10cqw, 5.5rem) as a FIXED height, as
+     on the source pane itself (height: var(--selector-h)) — the pane is
+     NEVER content-driven; the band cards' type and padding scale to fit
+     it below (the longest role name wraps at most two lines, the year
+     beneath, nothing clipped). */
+  height: clamp(3.4rem, 10cqw, 5.5rem);
   margin: 1.25rem 0;              /* the source's floats: gutter above, edge below */
   padding: 0.35rem clamp(0.75rem, 2.5cqw, 1.5rem);   /* the source's, equal either side */
   border: 2.1px solid var(--frame);   /* the gm-card border, verbatim (re-tokened) */
@@ -598,14 +602,23 @@ body:has(#employer-brinker:checked) .employer--brinker {
   pointer-events: none;
 }
 
-/* The band's title card: the source's .plugins__tab, ported verbatim and
-   re-tokened — the normalized box grammar ((band-top + 8 × --rs) top
-   padding / --card-pad sides, the 2 × --rs border, the 3 × --rs radius,
-   the 20 × --rs 800 uppercase type), equal flex cells across the row, the
-   two-layer --frame hover glow on the 200ms ease, the 80ms press. The
-   card reads the role name + the year subscript beneath it (owner grill
-   answer, 2026-10-11) — the year in the component's own .gm-uc grammar
-   (italic, 400, the 14 × --rs rung), not uppercased. */
+/* The band's title card: the source's .plugins__tab, ported and re-tokened —
+   the normalized box grammar (the 2 × --rs border, the 3 × --rs radius,
+   equal flex cells across the row, the two-layer --frame hover glow on the
+   200ms ease, the 80ms press), with the type and padding SCALED TO FIT the
+   pane's fixed clamp height (B81 corrected, owner, PR #213 review,
+   2026-10-11: "the sizes are very clearly wrong. the selector bar should
+   not be that large and the component should be much larger."): the
+   source's 20 × --rs type sits on ~150px cards with one-word labels; the
+   career role names run far longer, so the name drops to the 11 × --rs
+   rung (the page's 11px readable floor) on a 2 × --rs padding, a 1.15
+   line and a 0.02em track — the longest name ("Branch Sales & Service
+   Representative") wraps at most two lines inside its card with the year
+   subscript beneath, nothing clipped (measured 2026-10-11 at 1440×1110
+   and 1920×1080; agent-derived under the B33/B40 pattern). The card reads
+   the role name + the year subscript beneath it (owner grill answer,
+   2026-10-11) — the year in the component's own .gm-uc grammar (italic,
+   400), not uppercased. */
 .career__tab {
   box-sizing: border-box;
   display: flex;
@@ -614,16 +627,16 @@ body:has(#employer-brinker:checked) .employer--brinker {
   align-items: center;
   justify-content: center;
   min-width: 0;
-  padding: calc(var(--band-top) + calc(8 * var(--rs))) var(--card-pad);
+  padding: calc(2 * var(--rs));      /* fits the fixed pane (was band-top + 8 × --rs / --card-pad) */
   border: calc(2 * var(--rs)) solid var(--frame);
   border-radius: calc(3 * var(--rs));
   background: var(--card);
   color: var(--ink-light);
   font-weight: 800;
-  font-size: calc(20 * var(--rs));
-  letter-spacing: 0.03em;
+  font-size: max(calc(11 * var(--rs)), 11px);   /* the 11px readable floor rung (B81 corrected) */
+  letter-spacing: 0.02em;
   text-transform: uppercase;
-  line-height: 1.2;
+  line-height: 1.15;
   text-align: center;
   cursor: pointer;
   position: relative;             /* anchors the glimmer ::after */
@@ -635,8 +648,8 @@ body:has(#employer-brinker:checked) .employer--brinker {
 }
 .career__tab-year {
   display: block;
-  margin-top: calc(8 * var(--rs));   /* the source .gm-uc's own top margin */
-  font-size: calc(14 * var(--rs));  /* the component's year rung */
+  margin-top: calc(2 * var(--rs));   /* the year beneath the name's two lines (B81 corrected) */
+  font-size: max(calc(9 * var(--rs)), 9px);  /* the year rung, scaled with the name */
   font-style: italic;
   font-weight: 400;
   letter-spacing: 0.05em;
@@ -925,14 +938,25 @@ body:has(#employer-brinker:checked) .employer--brinker {
                    height: auto; overflow: visible; }
   .role { position: static; }
   .gregorian-mode { width: 100cqw; max-height: none; overflow: visible; }
+  /* The fixed clamp height is a ≥744px law: below the breakpoint the pane
+     keeps its shipped content-driven readable reflow — the clamp returns
+     as a floor, the stacked cards grow it, and the page keeps scrolling
+     (B74's mobile answer; the base block's fixed height is reset here). */
+  .career__band { height: auto; min-height: clamp(3.4rem, 10cqw, 5.5rem); }
   /* The band cards take the shipped mobile card literals (the header
      cards' own readable resets): the pane's clamps already resolve to
      their floors at this width, so only the card grammar is reset. */
   .career__tab { padding: 0.25rem 1.1rem;
     border: 2px solid var(--frame);
     border-radius: 3px;
-    font-size: 1.1rem; }
-  .career__tab-year { margin: 0; font-size: 0.8rem; }
+    /* the name drops to the same 11px readable-floor rung the ≥744px
+       band uses (measured 2026-10-11: at 390px the equal cells run ~95px
+       of content width and the 1.1rem header-card rung CLIPS "Representative"
+       past the card — the scaled rung wraps the names inside their cells,
+       nothing clipped; agent-derived under the B33/B40 pattern) */
+    font-size: max(calc(11 * var(--rs)), 11px); }
+  .career__tab-year { margin: 0;
+    font-size: max(calc(9 * var(--rs)), 9px); }
   .parking-lot { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .parking-lot__divider { width: auto; align-self: flex-start; }
   .parking-lot__divider::before { width: 75%; height: 1px; }

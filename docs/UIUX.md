@@ -888,6 +888,24 @@ renders as `L × --rs`.)*
   keeps scrolling below the breakpoint, per B74's mobile answer).
   Right half: "Accomplishments" and "Learnings/Skills" (section name
   pending, issue #133 slot 6) render only once filled.
+  *(Amended by B81, issue #213 review, 2026-10-11: the band renders at the
+  source's own selector-height clamp VERBATIM — `height:
+  clamp(3.4rem, 10cqw, 5.5rem)`, a FIXED height, never content-driven — and
+  the band cards' type and padding are agent-derived under the B33/B40
+  pattern to fit the clamp: the name at `max(calc(11 × --rs), 11px)` (the
+  page's 11px readable floor; line-height 1.15, `0.02em` track, `2 × --rs`
+  card padding), the year beneath at `max(calc(9 × --rs), 9px)`, the
+  longest role name wrapping ≤ 2 lines inside its card, nothing clipped;
+  below ≤743px the clamp returns as the pane's floor and the stacked cards
+  grow it content-driven (B74's mobile answer — the page keeps scrolling),
+  the name keeping the same 11px rung. The stage takes the half's FULL
+  column above the band — `flex: 1`, the plate never overflowing it,
+  `max-height` capping it with the desc card scrolling inside — superseding
+  B74's half-cap for the stage render; B74's one-viewport render and
+  B76's geometry, 11px floor, long-title wrap and in-card scroll stand
+  unchanged. Measured 2026-10-11: band 62.3px / stage 327px / plate
+  546×327 at 1440×1110; band 86.3px / stage 291px / plate 485×291 at
+  1920×1080.)*
 - **Footer *(amended by B65, issue #177; second line added by B77, issue
   #193)*** the landing page's
   `.parking-lot` grammar — water gradient over `--deep`, 1px
@@ -949,12 +967,22 @@ component slots themselves — titles, years, the three B64 desc fills and
 the empty desc cards — are unchanged. The omit-empty rule stands for the
 right half and the footer as before.)*
 
+*(Amended by B81, issue #213 review, 2026-10-11: the band renders at the
+source's `clamp(3.4rem, 10cqw, 5.5rem)` as a fixed height — never
+content-driven — with the cards' name rung `max(calc(11 × --rs), 11px)` and
+year `max(calc(9 × --rs), 9px)` agent-derived under B33/B40 to fit it
+(names wrap ≤ 2 lines, year beneath), and the stage takes the half's full
+column above the band, superseding B74's half-cap for the stage render —
+B74's one-viewport render and B76's geometry/11px floor/wrap/scroll stand
+unchanged.)*
+
 **Pinned by:** `test/career.js` — the B79 selector-card shared size and
 equal gaps, selector mechanics, the B132 glow, the split, the two-way lot
 (B65, with B77's second line and its bars matched to the top line's), the
 ladder tokens, the omit-empty-block discipline, B74's one-viewport render
-(the stage + band block capped at half the left half's own height and
-centred in the half, the page never scrolling, the description card as the
+(the stage + band block centred in the half with the stage taking its full
+column above the band — the issue #213 review superseding B74's half-cap
+for the stage render — the page never scrolling, the description card as the
 page's only scroll container), B76's surviving source geometry (the title
 card straddling the back card's top edge with a gap to the desc card, the
 wider desc card with the back card extending vertically past it by
@@ -965,7 +993,11 @@ radio band beneath the unchanged header selector, the most-recent default,
 band cards reading role name + year, the selected/unselected card states,
 the band-card hover glow and glimmer in `--frame` with the presented
 component's cards unglimmered, the stage presenting exactly one component
-scaled by its min-ratio law inside the stage).
+scaled by its min-ratio law inside the stage — with the band's height
+pinned to the source's `clamp(3.4rem, 10cqw, 5.5rem)` fixed (never
+content-driven), the stage pinned to the half's full column above the
+band, and the band names pinned to ≤ 2 lines with the year beneath
+(issue #213 review).
 
 ---
 

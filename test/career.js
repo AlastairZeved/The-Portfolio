@@ -53,6 +53,20 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('chronological order PNC Bank → PNC Private Bank → Brinker Capital',
     JSON.stringify(names) === JSON.stringify(['PNC Bank', 'PNC Private Bank', 'Brinker Capital']));
 
+  // B87 (issue #218): each employer title card carries its employment dates as an
+  // italic subscript oneliner (reduced rung), carrying the landing title-card
+  // subscript convention forward.
+  const b87dates = await page.evaluate(() => {
+    const cards = [...document.querySelectorAll('.topband__card')];
+    return {
+      dates: cards.map(c => c.querySelector('.topband__oneliner').textContent.trim()),
+      italic: cards.every(c => getComputedStyle(c.querySelector('.topband__oneliner')).fontStyle === 'italic'),
+    };
+  });
+  ok('B87 — the three title cards carry their employment dates in an italic subscript',
+    JSON.stringify(b87dates.dates) === JSON.stringify(['2017-2020', '2020-2022', '2022-Present']) &&
+    b87dates.italic);
+
   // Cards hang over the header rule
   const hang = await page.evaluate(() => {
     const band = document.querySelector('.topband');
@@ -232,7 +246,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       const shown = await page.evaluate(({ s, b64 }) => {
         const p = [...document.querySelector(s).querySelectorAll('.plugin')]
           .find(x => x.getBoundingClientRect().height > 0);
-        const t = p.querySelector('.gm-title').textContent.trim();
+        const t = p.querySelector('.gm-title').childNodes[0].textContent.trim();
         const y = p.querySelector('.gm-uc').textContent.trim();
         const d = p.querySelector('.gm-desc');
         const nrm = x => x.replace(/\s+/g, ' ').trim();
@@ -416,6 +430,11 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       document.querySelectorAll('.plugins__radio').length === 8 &&
       document.querySelectorAll('.plugins__tab').length === 8 &&
       document.querySelectorAll('.plugins__pane').length === 3));
+  // B87 (issue #218): each role's year is nested INSIDE its title card as the subscript
+  ok('B87 — each of the 8 role years is nested inside its title card',
+    await page.evaluate(() =>
+      document.querySelectorAll('.gm-title .gm-uc').length === 8 &&
+      [...document.querySelectorAll('.gm-uc')].every(u => !!u.closest('.gm-title'))));
   ok('each employer body still carries its gm-title cards and slot comments for the owner\'s fill passes',
     await page.evaluate(() =>
       [...document.querySelectorAll('section.employer')].every(s =>
@@ -435,6 +454,20 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     return getComputedStyle(d, '::before').width === '1px' &&
       Math.abs(bar - 0.75 * (lot.height - 24)) < 6;
   }));
+  // B88 (issue #219): the footer splits 50/50 — the divider in the middle, the CTA
+  // centred within the right half.
+  ok('B88 — the footer splits 50/50 (divider at the midpoint)',
+    await page.evaluate(() => {
+      const left = document.querySelector('.parking-lot__facts').getBoundingClientRect();
+      const right = document.querySelector('.parking-lot__facts--contact').getBoundingClientRect();
+      return Math.abs(left.width - right.width) < 3;
+    }));
+  ok('B88 — the CTA is centred within the right half',
+    await page.evaluate(() => {
+      const cta = document.querySelector('.parking-lot .cta').getBoundingClientRect();
+      const contact = document.querySelector('.parking-lot__facts--contact').getBoundingClientRect();
+      return Math.abs((cta.left + cta.width / 2) - (contact.left + contact.width / 2)) < 3;
+    }));
   ok('the tools line renders the owner\'s copy on one line, five short bars between tokens (B65)',
     await page.evaluate(() => {
       const t = document.querySelector('.parking-lot__tools');

@@ -745,8 +745,9 @@ renders as `L × --rs`.)*
   (B79, issue #195), in every selection state and at every viewport
   (the ≤743px stacked reflow shares the one width too) — top-anchored,
   `border-top: 0`, radius only on the bottom corners, `(band-top + 8px)
-  16px 16px` padding, both lines at the 20px logical type (employer name
-  600, oneliner slot 400), `min-height: rule-y + 29px` hanging over the
+  16px 16px` padding, the employer name at 20px/600 and the date oneliner
+  at the 13.33px/400 italic reduced rung (B61, carried by B87, issue #218),
+  `min-height: rule-y + 29px` hanging over the
   rule. Unselected cards are dim + italic (§4's unselected grammar); the
   selected card wears the B132 glow verbatim:
   `border-color: var(--glow-gray); box-shadow: 0 0 8px 0 var(--glow-gray);`
@@ -861,7 +862,7 @@ renders as `L × --rs`.)*
   Right half: "Accomplishments" and "Learnings/Skills" (section name
   pending, issue #133 slot 6) render only once filled.
 - **Footer *(amended by B65, issue #177; second line added by B77, issue
-  #193)*** the landing page's
+  #193; split to 50/50 and CTA centred by B88, issue #219)*** the landing page's
   `.parking-lot` grammar — water gradient over `--deep`, 1px
   `--frame`-mix top rule, same padding — floored at the rescaled two-row
   shelf (`134.76 × --rs`, B49: the landing lot's floor, taken statically;
@@ -876,8 +877,9 @@ renders as `L × --rs`.)*
   **the same short divider bars** (same width, color, height, gap — no new
   values), the two lines separated by the lot's `0.35em` paragraph gap —
   then **one** full divider bar (1px, 3/4 of the section's
-  inner length, vertically centred), then the `.cta` "Learn More about
-  Rob" → `https://razgregory.com/`. *(B65 supersedes §3's three-way
+  inner length, vertically centred) at the 50/50 midpoint, then the `.cta`
+  "Learn More about Rob" → `https://razgregory.com/`, **centred within the
+  right half** (both halves `flex: 1 1 0` — B88, issue #219). *(B65 supersedes §3's three-way
   split: the second divider bar is removed.)* The professional-blurb
   (blank #7) and contact-info (blank #8) slot comments keep their halves;
   the empty slots render nothing (B47). Each line renders on one line
@@ -912,7 +914,10 @@ Amended by B65, issue #177: the footer's left half carries the owner's
 one-line tools list; the blurb (#7) and contact (#8) slots remain
 unfilled and render nothing. Amended by B77, issue #193: the left half
 also carries the owner's second line — the education copy — beneath the
-tools line; the #7/#8 slots are unchanged.)*
+tools line; the #7/#8 slots are unchanged. Amended by B87, issue #218:
+the employment-dates slot (#1) is filled — the three employer title cards
+carry their tenure in an italic subscript oneliner, and the eight role years
+nest inside their title cards.)*
 
 **Pinned by:** `test/career.js` — the B79 selector-card shared size and
 equal gaps, selector mechanics, the B132 glow, the

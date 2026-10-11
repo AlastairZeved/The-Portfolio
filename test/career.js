@@ -8,11 +8,16 @@
    internals: source geometry, 11px floor, long-title wrap, the always-
    visible styled in-card bar on filled desc cards, empty cards bare) with
    the title-card selector BAND beneath it (one card per role, role name +
-   year subscript, most-recent default, per-employer radio group, hover glow
+   the year subscript, most-recent default, per-employer radio group, hover glow
    + glimmer in --frame, the presented component's cards unglimmered).
-   B74's one-viewport render stands: the stage + band block caps at half
-   the left half's own height, centred in the half, the page never scrolls,
-   the description card the only scroll container.
+   B74's one-viewport render stands: the page never scrolls, the
+   description card the only scroll container. B81's SECOND correction
+   (owner, PR #213 review, 2026-10-11: "Agentic-plugins positions its item
+   selector just above the footer and makes use of all of the width and
+   vertical height"): the stage + band column owns the half's FULL box —
+   the stage flexes from the COLUMN TOP, the band PINNED AT THE COLUMN
+   BOTTOM just above the footer (the source pane's position) — B74's
+   half-cap and centring die.
    Single file, zero script, zero <link>. Black-box Playwright.
    Run: node test/career.js   (PORTFOLIO_URL default http://localhost:8000/career.html)
    Viewport note: the desktop run is at the page's own design canvas
@@ -326,15 +331,21 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
           .every(sec => sec.getBoundingClientRect().height === 0), sel));
   }
 
-  // ---- B74 (issue #186), as it stands under B81 + the issue #213 review:
-  // above the breakpoint the page is ONE viewport — it does not scroll —
-  // and the STAGE TAKES THE HALF'S FULL COLUMN ABOVE THE BAND (flex: 1 —
-  // the #213 correction supersedes B74's half-cap for the stage render;
-  // the plate never overflows the stage, max-height caps it and the desc
-  // card scrolls inside, so the one-viewport render stands); the
-  // description card remains the page's only scroll container.
-  // Deliberate rewrite: the B66 row pins are superseded (one presented
-  // component, not a row of plates). ----
+  // ---- B74 (issue #186), as it stands under B81 + the issue #213 review's
+  // second correction: above the breakpoint the page is ONE viewport — it
+  // does not scroll — and the STAGE + BAND COLUMN OWNS THE HALF'S FULL BOX
+  // (all the width, top of the column to its bottom — the owner, PR #213
+  // review, 2026-10-11: "Agentic-plugins positions its item selector just
+  // above the footer and makes use of all of the width and vertical
+  // height"): the STAGE takes ALL the column height above the band
+  // (flex: 1, from the COLUMN TOP — career has no boards carousel, so the
+  // source's boards-plate-top stage offset does not port) and the BAND is
+  // PINNED AT THE COLUMN BOTTOM, just above the footer, its 1.25rem bottom
+  // margin floating the gutter above the column's bottom edge (the source
+  // pane's own position). B74's half-cap and vertical centring die here
+  // (deliberate rewrite); its one-viewport render stands, the plate never
+  // overflows the stage (max-height caps it) and the description card
+  // remains the page's only scroll container. ----
   for (const tab of ['employer-pnc-bank', 'employer-pnc-private', 'employer-brinker']) {
     await page.locator(`.topband__card-hit[for="${tab}"]`).click();
     await page.waitForTimeout(300);
@@ -344,18 +355,26 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         const de = document.documentElement;
         return de.scrollHeight <= de.clientHeight + 1 && de.scrollWidth <= de.clientWidth + 1;
       }));
-    ok(`${tab}: B81/#213 — the stage takes the half's FULL column above the band (supersedes B74's half-cap for the stage render); the half is not a scroll container`,
+    ok(`${tab}: B81/#213 2nd correction — the stage + band column owns the half's FULL box: the gallery fills the employer row (B74's half-cap dead), the stage runs from the column top, the band pinned at the column bottom just above the footer, the half no scroll container`,
       await page.evaluate(s => {
         const shown = document.querySelector(s);
         const gal = shown.querySelector('.split__gallery');
         const st = shown.querySelector('.career__stage').getBoundingClientRect();
         const b = shown.querySelector('.career__band').getBoundingClientRect();
         const g = gal.getBoundingClientRect();
-        return Math.abs(st.top - g.top) < 1 &&
-          b.top >= st.bottom - 1 &&
-          Math.abs((b.top - st.bottom) - (g.bottom - b.bottom)) < 2 &&
-          Math.abs(g.height - st.height - b.height - 2 * (b.top - st.bottom)) < 2 &&
-          gal.scrollHeight <= gal.clientHeight + 1;
+        const sec = shown.getBoundingClientRect();       // the 1fr grid row
+        const footer = document.querySelector('.parking-lot').getBoundingClientRect();
+        const bm = parseFloat(getComputedStyle(shown.querySelector('.career__band')).marginBottom);
+        return Math.abs(g.top - sec.top) < 1 &&          // full column: top edge of the employer row
+          Math.abs(g.height - sec.height) < 2 &&          // full vertical height (not B74's half)
+          Math.abs(g.left - sec.left) < 1 &&              // from the column's own left edge (full width)
+          Math.abs(st.width - g.width) < 1 &&             // the stage spans the column's width
+          Math.abs(b.width - g.width) < 1 &&              // the band spans it too
+          Math.abs(st.top - g.top) < 1 &&                 // the stage from the column top
+          b.top >= st.bottom - 1 &&                      // the band beneath the stage
+          Math.abs(g.bottom - b.bottom - bm) < 2 &&      // pinned: its bottom margin above the column bottom
+          b.bottom < footer.top - 1 &&                  // just above the footer
+          gal.scrollHeight <= gal.clientHeight + 1;      // the half is not a scroll container
       }, sel));
     ok(`${tab}: B81 — the band sits beneath the stage; the stage presents one plate inside it`,
       await page.evaluate(s => {
@@ -387,18 +406,39 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     shared195(brk195));
   ok('the gaps stay equal with Brinker selected (issue #195, B79)',
     equalGaps195(brk195));
-  ok('B74 — the overflowing description scrolls inside its own card, never the page (Brinker, Sr. Portfolio Specialist)',
+  ok('B81/#213 — the full-column stage holds the Brinker plate: the filled desc card renders INSIDE the plate at the design canvas (the old half-cap overflow premise is dead), nothing past the plate, the page never scrolls',
     await page.evaluate(() => {
       const shown = [...document.querySelectorAll('section.employer--brinker .role')]
         .filter(w => getComputedStyle(w).display === 'block');
-      const plate = shown[0];
+      const plate = shown[0].querySelector('.gregorian-mode');
       const d = plate.querySelector('.gm-desc');
       const de = document.documentElement;
-      return d.scrollHeight > d.clientHeight + 1 &&
-        getComputedStyle(d).overflowY === 'scroll' &&
+      return getComputedStyle(d).overflowY === 'scroll' &&   // the filled card keeps the styled in-card bar
         d.getBoundingClientRect().bottom <= plate.getBoundingClientRect().bottom + 1 &&
         de.scrollHeight <= de.clientHeight + 1;
     }));
+  // Where a viewport's stage cap does force the copy past the desc card
+  // (measured at 1024×768 after the #213 re-pin), it scrolls INSIDE its own
+  // card — never past the plate, never the page.
+  {
+    const pg = await browser.newPage({ viewport: { width: 1024, height: 768 } });
+    await pg.goto(URL, { waitUntil: 'networkidle' });
+    await pg.locator('.topband__card-hit[for="employer-brinker"]').click();
+    await pg.waitForTimeout(300);
+    ok('B74 — where the copy overflows (1024×768) the description scrolls inside its own card, never past the plate, never the page (Brinker, Sr. Portfolio Specialist)',
+      await pg.evaluate(() => {
+        const shown = [...document.querySelectorAll('section.employer--brinker .role')]
+          .filter(w => getComputedStyle(w).display === 'block');
+        const plate = shown[0].querySelector('.gregorian-mode');
+        const d = plate.querySelector('.gm-desc');
+        const de = document.documentElement;
+        return d.scrollHeight > d.clientHeight + 1 &&
+          getComputedStyle(d).overflowY === 'scroll' &&
+          d.getBoundingClientRect().bottom <= plate.getBoundingClientRect().bottom + 1 &&
+          de.scrollHeight <= de.clientHeight + 1;
+      }));
+    await pg.close();
+  }
 
   // ---- B76's surviving geometry + B81's stage mechanics, at several
   // viewports: the presented component renders the agentic-plugins SOURCE

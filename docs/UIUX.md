@@ -868,8 +868,9 @@ renders as `L × --rs`.)*
   presentation glow — `gm-breathe`, the 10s ease-in-out loop, `0 0 60px
   20px` and `0 0 240px 120px` bloom layers at the source's own alphas
   (.25/.35, .12/.18) — re-tokened to `--glow-gray` (the rung below
-  `--frame`, B132's rule). The stage is a size container taking what the
-  B74 cap leaves above the band; the plate renders the source's fixed
+  `--frame`, B132's rule). The stage is a size container taking ALL the
+  column height above the band (the PR #213 review's second correction:
+  from the column top — B74's half-cap is dead); the plate renders the source's fixed
   830px design at the source's own ratio law — width = min(the stage's
   width, `830px ×` the stage's height over the role's measured
   `--plugin-h` plate height at the 830px layout width, carried per role
@@ -906,6 +907,26 @@ renders as `L × --rs`.)*
   unchanged. Measured 2026-10-11: band 62.3px / stage 327px / plate
   546×327 at 1440×1110; band 86.3px / stage 291px / plate 485×291 at
   1920×1080.)*
+  *(Second correction, B81, the PR #213 review, 2026-10-11 — the owner:
+  "Agentic-plugins positions its item selector just above the footer and
+  makes use of all of the width and vertical height", the expletive
+  redacted per the standing 2026-10-06 rule. Supersedes B74's half-cap and
+  the first correction's mid-column placement: the **stage + band column
+  owns the half's full box** — all the width, top of the column to its
+  bottom — the stage `flex: 1` from the **column top** (career has no
+  boards carousel, so the source's boards-plate-top stage offset does not
+  port), the band **pinned at the column bottom, just above the footer** —
+  the source pane's own position, its `margin: 1.25rem 0` bottom float
+  leaving the 20px gutter above the column's bottom edge; the selector
+  column's side matches the deployed source as measured (selector left of
+  the divider, copy right — no side swap). B74's one-viewport render, the
+  band's fixed `clamp(3.4rem, 10cqw, 5.5rem)`, B76's geometry/11px
+  floor/long-title wrap/in-card scroll, B79/B132 and all copy stand
+  unchanged. Measured after the fix at 1440×1110: gallery 91.7→950.6
+  (858.9 — the full column), stage 91.7→848.2 (756.5, from the column top),
+  band 868.2→930.6 (62.3, its bottom 20px above the column bottom, 44px
+  above the footer top), plate 623.5 wide — the stage's full width — vs
+  the pre-fix 545.6×327.1.)*
 - **Footer *(amended by B65, issue #177; second line added by B77, issue
   #193)*** the landing page's
   `.parking-lot` grammar — water gradient over `--deep`, 1px
@@ -980,9 +1001,11 @@ unchanged.)*
 equal gaps, selector mechanics, the B132 glow, the split, the two-way lot
 (B65, with B77's second line and its bars matched to the top line's), the
 ladder tokens, the omit-empty-block discipline, B74's one-viewport render
-(the stage + band block centred in the half with the stage taking its full
-column above the band — the issue #213 review superseding B74's half-cap
-for the stage render — the page never scrolling, the description card as the
+(the stage + band column OWNING the half's full box — the stage from the
+column top, the band pinned at the column bottom just above the footer —
+the issue #213 review's second correction superseding B74's half-cap and
+the first correction's mid-column placement; the page never scrolling, the
+description card as the
 page's only scroll container), B76's surviving source geometry (the title
 card straddling the back card's top edge with a gap to the desc card, the
 wider desc card with the back card extending vertically past it by
@@ -995,9 +1018,19 @@ the band-card hover glow and glimmer in `--frame` with the presented
 component's cards unglimmered, the stage presenting exactly one component
 scaled by its min-ratio law inside the stage — with the band's height
 pinned to the source's `clamp(3.4rem, 10cqw, 5.5rem)` fixed (never
-content-driven), the stage pinned to the half's full column above the
+content-driven), and the stage pinned to the half's full column above the
 band, and the band names pinned to ≤ 2 lines with the year beneath
 (issue #213 review).
+*(Second correction, B81, the PR #213 review, 2026-10-11: the stage +
+band column owns the half's full box — the stage `flex: 1` from the
+column top, the band pinned at the column bottom just above the footer
+(the source pane's position, its `margin: 1.25rem 0` bottom float),
+B74's half-cap and the first correction's mid-column placement dead. The
+slots themselves, the copy and the omit-empty discipline are unchanged;
+the B64 copy now fits the desc card at the design canvas, the in-card
+styled bar staying always-visible on filled cards per B76 — where a
+viewport's stage cap forces the copy past the card it scrolls in-card,
+never past the plate, never the page.)*
 
 ---
 

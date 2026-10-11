@@ -2715,3 +2715,52 @@ beneath, no page scroll at either.
 [#213](https://github.com/AlastairZeved/The-Portfolio/pull/213) review,
 2026-10-11, quoted verbatim: "the sizes are very clearly wrong. the selector
 bar should not be that large and the component should be much larger."
+
+**Second correction (2026-10-11, the PR #213 review, after the sizes
+correction above):** the placement as corrected was still wrong — the
+stage + band block floated mid-column: the stage started ~215px below the
+column top and the band sat ~259px above the footer. The owner, quoted
+verbatim (the owner's words, lightly edited to omit an expletive, per the
+standing 2026-10-06 rule): "This doesn't look right at all. Agentic-plugins
+positions its item selector just above the footer and makes use of all of
+the width and vertical height on the right side of the divider. You are not
+doing that at all. You're just making [expletive removed] up." The selector
+column's side matches the deployed source as measured on
+`alastairzeved.com/agentic-plugins` (2026-10-11, Chromium 1440×1110): the
+item selector renders LEFT of the divider (x 16–687.5, the rule at 720.5,
+the copy to its right), exactly as career ships it — the ruling below is
+position/height/width, not a side swap.
+
+The law, matching the deployed source's arrangement in career's monochrome
+tokens (every literal the source's own, `agentic-plugins` `styles.css`):
+
+- **The stage + band column owns its half's FULL box — all the width and
+  all the vertical height** (`align-self: stretch`, the top of the column
+  to its bottom). **B74's half-cap (`height: 50%`) and its vertical
+  centring die** for this render — superseded here as the first correction
+  superseded them for the stage render; B74's one-viewport render (the page
+  never scrolls, the description card the only scroll container) stands.
+- **The band is PINNED AT THE COLUMN BOTTOM, just above the footer** — the
+  source pane's own position, its `margin: 1.25rem 0` bottom float leaving
+  the 20px gutter above the column's bottom edge — not floating mid-column.
+- **The stage takes ALL the column height above the band** — `flex: 1`
+  from the COLUMN TOP: career has no boards carousel, so the source's
+  boards-plate-top stage offset does not port; the ~215px of dead space
+  above the stage is removed.
+- **The plate keeps the source's min(width-ratio, height-ratio) scale law**
+  and now fills the stage's width. Measured after the fix at 1440×1110:
+  gallery 91.7→950.6 (858.9 tall — the full column), stage 91.7→848.2
+  (756.5, from the column top), band 868.2→930.6 (62.3 — the source clamp
+  `clamp(3.4rem, 10cqw, 5.5rem)`, its bottom 20px above the column bottom,
+  44px above the footer top), plate 623.5 wide (the stage's full width) —
+  vs the pre-fix 545.6×327.1; no page scroll.
+
+`UIUX §10.2`/`§10.3` are amended accordingly and `test/career.js` is
+re-pinned deliberately (the B74 half-cap pins — the centred mid-column
+placement and the design-canvas desc-overflow premise — die; the
+full-column/band-pinned geometry, the 1024×768 in-card-scroll contract and
+the surviving B74/B76/B79/B132 laws are pinned in their place).
+
+**Source:** the owner's PR
+[#213](https://github.com/AlastairZeved/The-Portfolio/pull/213) review,
+2026-10-11 — quoted verbatim above, the expletive redacted.

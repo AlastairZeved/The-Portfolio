@@ -266,9 +266,8 @@ body:has(#employer-brinker:checked) .employer--brinker {
    + the year subscript from the component"); the desc card keeps B75/B76's
    in-card styled scroll bar ("Keep the in-card styled scroll bar").
    B81 supersedes B66's one-row-of-components arrangement and B76's
-   three-across plate-row scaling law; B74's one-viewport render (the cap
-   at half the left half's own height, the block centred in the half, the
-   page never scrolling), the B132 header glow, B79 and the header
+   three-across plate-row scaling law; B74's one-viewport render (the page
+   never scrolling), the B132 header glow, B79 and the header
    employer selector stand unchanged. The component's own internals remain
    B76's: the source geometry (straddle, wider desc card, back card
    extending past it), the source type ratios with the 11px floor, long
@@ -282,7 +281,7 @@ body:has(#employer-brinker:checked) .employer--brinker {
    this page's existing tokens; the port mechanics are agent-derived under
    the B33/B40 provenance pattern. ---- */
 .split__gallery {
-  align-self: stretch;
+  align-self: stretch;            /* B81 2nd correction (#213 review): the column owns the half's FULL box */
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -292,9 +291,12 @@ body:has(#employer-brinker:checked) .employer--brinker {
 
 /* The stage (the source's .plugins__stage): a size container holding the
    ONE selected role's component — the other roles' wrappers render nothing.
-   The stage takes the half's FULL column above the band (flex: 1 — B81
-   corrected: the plate never overflows it, max-height caps it and the desc
-   card scrolls inside, so the one-viewport render stands). */
+   The stage takes ALL the column height above the band — flex: 1, from the
+   COLUMN TOP (B81's second correction, owner, PR #213 review, 2026-10-11:
+   "Agentic-plugins ... makes use of all of the width and vertical height";
+   career has no boards carousel, so the source's boards-plate-top stage
+   offset does not port) — the plate never overflows it, max-height caps it
+   and the desc card scrolls inside, so the one-viewport render stands. */
 .career__stage {
   position: relative;
   flex: 1 1 auto;
@@ -360,7 +362,7 @@ body:has(#employer-brinker:checked) .employer--brinker {
   --u: calc(100cqw / 830);
   width: 100cqw;
   width: min(100cqw, calc(830px * (100cqh / var(--plugin-h))));
-  max-height: 100%;              /* B74's cap: never past the stage, never the page */
+  max-height: 100%;              /* the stage's cap: never past the stage, never the page */
   margin: 0 auto;
   overflow: hidden;
   display: flex;
@@ -529,7 +531,7 @@ body:has(#employer-brinker:checked) .employer--brinker {
    keeps the styled in-card bar present even where the copy fits (the thumb
    renders when the content overflows). The empty placeholder stays bare,
    as the owner ruled, and keeps its 116u size as a shrinkable flex basis
-   under the B74 cap. */
+   under the stage's cap. */
 .gm-desc:empty { flex: 0 1 calc(116 * var(--u)); min-height: 0; }
 .gm-desc:not(:empty) { flex: 0 1 auto; min-height: 0; overflow-y: scroll; }
 /* The bar is a real, visible, in-card scroll bar (B75, carried into B76):
@@ -573,7 +575,10 @@ body:has(#employer-brinker:checked) .employer--brinker {
      it below (the longest role name wraps at most two lines, the year
      beneath, nothing clipped). */
   height: clamp(3.4rem, 10cqw, 5.5rem);
-  margin: 1.25rem 0;              /* the source's floats: gutter above, edge below */
+  margin: 1.25rem 0;              /* the source pane's floats: gutter above the stage, its bottom
+                                      edge 1.25rem above the column's bottom — the band PINNED AT THE
+                                      COLUMN BOTTOM, just above the footer (B81's second correction,
+                                      PR #213 review, 2026-10-11 — the source pane's own position) */
   padding: 0.35rem clamp(0.75rem, 2.5cqw, 1.5rem);   /* the source's, equal either side */
   border: 2.1px solid var(--frame);   /* the gm-card border, verbatim (re-tokened) */
   border-radius: 3px;
@@ -884,15 +889,22 @@ body:has(#employer-brinker:checked) .employer--brinker {
    Mechanism: body holds the viewport's height and main is allowed to shrink
    (min-height 0 — without it the flex chain is content-driven and the page
    scrolls, the #186 defect), so .split, .employer and its 1fr row are all
-   definite and the gallery's 50% resolves against the grid area. B81: the
-   50% box now holds the STAGE + BAND column (the presented component on
-   top, the selector band beneath), still centred in the half — the stage
-   flexes to what the band leaves, the plate's own width law (min of the
-   stage's two ratios) keeps it inside the stage, the plate's max-height
-   caps it, and the desc card shrinks under the cap and scrolls its own
-   text. The 11px floor can hold the title and year above the cap in an
-   extremely short viewport; the plate's own overflow: hidden then bounds
-   it — the page still never scrolls (measured in the suite). ---- */
+   definite and the gallery's align-self: stretch resolves the column's
+   FULL box. B81's second correction (owner, PR #213 review, 2026-10-11:
+   "Agentic-plugins positions its item selector just above the footer and
+   makes use of all of the width and vertical height"): the STAGE + BAND
+   column owns the half's full box — all the width, top of the column to its
+   bottom — the stage takes everything above the band (flex: 1 from the
+   column top) and the band is PINNED AT THE COLUMN BOTTOM, just above the
+   footer, its 1.25rem bottom margin floating the gutter above the column's
+   bottom edge (the source pane's own position). The plate's own width law
+   (min of the stage's two ratios) keeps it inside the stage, the plate's
+   max-height caps it, and the desc card shrinks under the cap and scrolls
+   its own text. The 11px floor can hold the title and year above the cap in
+   an extremely short viewport; the plate's own overflow: hidden then
+   bounds it — the page still never scrolls (measured in the suite). B74's
+   half-cap and vertical centring die for this render (deliberate rewrite,
+   #213); B74's one-viewport law stands. ---- */
 @media (min-width: 744px) {
   html, body { height: 100vh;         /* the no-dvh fallback, as --rs above */
                height: 100dvh; }
@@ -901,8 +913,10 @@ body:has(#employer-brinker:checked) .employer--brinker {
      CTA (50px min-height) overflowed a shrunken lot by 3–4px and scrolled the
      page in ≥744px-wide windows under ~470px tall (measured 844×390, 745×400). */
   .topband, .parking-lot { flex: 0 0 auto; }
-  .split__gallery { height: 50%;      /* half the left half's own height (B74) */
-                    align-self: center; }   /* centred in the half (B74) */
+  /* B81's second correction (#213 review, 2026-10-11): B74's half-cap and
+     centring override are DELETED — the gallery keeps the base block's
+     align-self: stretch and owns the column's full height; the stage flexes
+     from the column top and the band pins at the column bottom. */
 }
 
 @media (max-width: 743px) {

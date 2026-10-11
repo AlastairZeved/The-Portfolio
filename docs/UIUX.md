@@ -701,7 +701,10 @@ The final hexes are the owner's sign-off (issue #190, owner chat 2026-10-09:
 deep, note brightest on the deep, glow one rung below frame — are the law.
 `--water-bot-a` is `51 51 51` (`--water-bot`'s channels, the band's radial
 foot). The glow token renames `--glow-sand` → `--glow-gray`; no value ships
-under the old name.
+under the old name. *(B81, issue #212 adds `--glow-gray-a` = `103 103 103`,
+`--glow-gray`'s own channels, so the presented component's breathing
+presentation bloom can reuse the existing glow token in an `rgb(VAR / a)`
+value — the source's rose triplet re-tokened, no new hex.)*
 
 *(B56, issue #154: the ported component's `.gm-title` carries the source's
 800-weight type. The page's font set gains the **800 face** —
@@ -747,6 +750,26 @@ renders as `L × --rs`.)*
   At ≤743px the shown employer stacks (`flex-direction: column`), the rule
   running horizontal at 33.333% width. Transitions collapse under
   `prefers-reduced-motion: reduce`.
+  *(Amended by B81, issue #212 — supersedes the row description below for the
+  left half.)* The left half is now the Agentic Plugins page's **stage +
+  item-selector band** (repo AlastairZeved/AlastairZeved,
+  `/agentic-plugins/`, `.plugins__stage` + `.plugins__pane`), brought into
+  the monochrome ladder. The stage presents **one** role's component at a
+  time (one across — superseding B66's left-to-right row); the band beneath
+  it is a horizontal row of role title cards (`.plugins__tab`) that launch
+  the role, each carrying the source's full glow — the glimmer sheen
+  (`gm-marquee` 6s), the two-layer `--frame` hover glow, the press inset,
+  the checked / dim-italic unselected and focus states — at `20 × --rs`
+  type, weight 800, uppercase. The presented component gains the source's
+  breathing presentation bloom (`.gm-back` `gm-breathe` 10s), the rose
+  triplet re-tokened to the existing `--glow-gray` (`--glow-gray-a`). The
+  B76 component geometry, uniform plate-width scale and 11px floor stand; the
+  single component now scales to the stage's full width. B74's one-viewport
+  law stands (the description card is still the page's only scroll
+  container). Selection is a per-employer radio group (`aria-label="Choose a
+  role"`) driven by CSS `:has`; the interleaved input+label pairs resolve
+  each card against its own radio via the `+` combinator. No new hex — every
+  re-hued value is an existing §10.1 token.)
   Left half *(amended by B56, issue #154; re-arranged by B66, issue #173)*:
   the employer's roles as **plugin components** — the Agentic Plugins page's
   `.gregorian-mode` class set ported verbatim in structure (water back card
@@ -885,15 +908,19 @@ tools line; the #7/#8 slots are unchanged.)*
 equal gaps, selector mechanics, the B132 glow, the
 split, the two-way lot (B65, with B77's second line and its bars matched
 to the top line's), the ladder tokens, the omit-empty-block
-discipline, B74's one-viewport render (the component cap at half the
-left half's own height, the row centred in the half, the description card as
-the page's only scroll container), and B76's source-geometry render (the
+discipline, B74's one-viewport render (the description card as
+the page's only scroll container), B76's source-geometry render (the
 plate-relative uniform scale, the title card straddling the back card's top
 edge with a gap to the desc card, the wider desc card with the back card
 extending vertically past it, the source-ratio type with its 11px floor,
 long titles wrapping,
 and the always-visible styled bar on filled desc cards with the empty
-placeholder bare).
+placeholder bare), and B81's stage + item-selector band (one role presented
+at a time through the `.plugins__stage`, the `.plugins__pane` band of role
+title cards with the glimmer sheen, hover glow, press inset and
+checked/dim-italic states, the `+`-combinator radio wiring, and the
+`.gm-back` breathing bloom — the old B66 row assertions rewritten
+deliberately).
 
 ---
 

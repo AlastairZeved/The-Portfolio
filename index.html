@@ -499,7 +499,9 @@ body {
   font-size: 14px;
   min-height: 34px;
 }
-#contact-form textarea { min-height: 64px; resize: vertical; }
+#contact-form textarea { min-height: 98px; resize: vertical; }
+/* B84 (issue #210 follow-up): the Send button's former vertical footprint
+   (34px) is given back to the Message textarea — 64px floor + 34px = 98px. */
 #contact-form input::placeholder,
 #contact-form textarea::placeholder { color: var(--ink); opacity: 0.55; }
 #contact-form button[type="submit"] {

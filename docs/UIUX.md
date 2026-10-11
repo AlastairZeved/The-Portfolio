@@ -570,6 +570,10 @@ The form's userspace, per the owner's ruling `B20`, renders left-anchored:
   textarea narrows to make room (it flexes to fill the rest of its `2fr`
   track). The "✱ required — protected by reCAPTCHA" note stays under the
   Message field, left-anchored.
+- The Message textarea's **height regains the button's former vertical
+  space** (B84, issue #210 follow-up): its `min-height` is **98px** — the
+  prior 64px floor plus the Send button's 34px height (`resize: vertical`
+  stands).
 - The **right side of the pane is deliberately empty** — free space lives
   free; it is never filled.
 - The **lot's height follows its measured contents** (B46, issue #128 —

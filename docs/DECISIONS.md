@@ -2751,3 +2751,19 @@ selected:
 1. "Beside the message box, bottom-right corner (message box narrows to make
    room)"
 2. "Keep it as \"Send\""
+
+### B84. The Message textarea regains the Send button's vertical space (issue #210 follow-up)
+
+When the Send button moved inline to the right of the Message textarea (B83),
+it left behind the vertical space it had occupied below the field. That space
+**returns to the Message textarea**: its `min-height` grows from `64px` to
+**`98px`** — the prior floor plus the Send button's `34px` height. The `98px`
+value is agent-derived (the sum of two existing values — the textarea's 64px
+floor and the button's 34px height), carrying out the owner's words rather
+than inventing a new size. The button stays inline at the bottom-right of the
+now-taller textarea; the "protected by reCAPTCHA" note stays under the field.
+`UIUX §6.1`.
+
+**Source:** the owner's mid-implementation directive, 2026-10-11 (owner chat),
+quoted verbatim: "Give that vertical space back to the 'Say hello' text box of
+the form."

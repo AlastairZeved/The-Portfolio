@@ -646,7 +646,7 @@ The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 | the career page (B47): employer selector, B132 glow, split body, two-way lot (B65), monochrome ladder (B73), empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
-| the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, the B58 Download (PDF anchor), literal idea-green ladder, the B50 landing-convention band/card/lot render | `test/plantsandrocks.js` |
+| the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, the B58 Download (PDF anchor) and the B82 Back-to-the-Garden .cta, literal idea-green ladder, the B50 landing-convention band/card/lot render | `test/plantsandrocks.js` |
 
 ---
 
@@ -1009,8 +1009,12 @@ values, not new numbers.
   the rescaled two-row shelf (`134.76 × --rs`, B50: the landing lot's floor,
   taken statically; content grows past it), split **two** ways with **one**
   divider bar of 3/4 of the section's inner
-  length, vertically centred. Left section: reserved, renders nothing
-  (comment only, measures zero) — permanently empty. Right section: the
+  length, vertically centred. Left section (**B82, issue #211**): the
+  **"Back to the Garden"** `.cta` — the Download control's same `.cta`
+  grammar, linking back to `https://razgregory.com/` in the same tab (no
+  `target`), docked to the divider bar (justified to the end of its half,
+  mirroring the Download control's divider-adjacent placement) and centred
+  vertically with it — **live on BOTH tabs**. Right section: the
   **Download** `.cta` — career's `.cta` grammar re-tokened to the green
   palette (`background: var(--card); color: var(--ink-light); box-shadow:
   var(--elevation), 0 0 6px 0 var(--frame)`; `--elevation` and `--ease` are
@@ -1019,7 +1023,9 @@ values, not new numbers.
   `download` attribute (B58, issue #157)**; on the Plants in Rocks tab it
   renders inert and dimmed via CSS `:has` (`opacity: 0.55`,
   `cursor: not-allowed`, `pointer-events: none` — B48's shipped dim value,
-  reused; the inert state is CSS-only, the page has no script).
+  reused; the inert state is CSS-only, the page has no script). The B58
+  inert-on-Rocks selector is scoped to the Download anchor (`.[download]`),
+  so the Back-to-the-Garden `.cta` stays live on both tabs.
 
 At ≤743px the band stacks to one column and the lot stacks (career.html's
 media pattern); transitions collapse under `prefers-reduced-motion: reduce`.
@@ -1033,12 +1039,15 @@ implementation (B57 keeps B48's blank-reader discipline for that
 container). The Download target is **filled as of B58** (issue #157): the
 control serves the shipped `Flattened-Monstera-Division.pdf` (repo root)
 via the `download` attribute, live on the Plants on Poles tab only. The
-footer's left section is **permanently empty** by spec (not a pending fill).
+footer's left section holds the **"Back to the Garden"** `.cta` as of B82
+(issue #211) — back to `https://razgregory.com/`, live on both tabs (not a
+pending fill).
 The slot structure lives in the markup as non-rendering `SLOT` comments so a
 targeted fill lands in place; the page invents no copy.
 
 **Pinned by:** `test/plantsandrocks.js` — selector mechanics, the `--frame`
 glow, the poles reader's storybook iframe and the empty rocks reader (B57),
 the two-section lot, the B58 Download (PDF anchor, live on the poles tab,
-inert on the rocks tab), the literal idea-green tokens,
+inert on the rocks tab) and the B82 Back-to-the-Garden anchor (live on both
+tabs, docked to the divider), the literal idea-green tokens,
 the single-file law, and the B50 landing-convention band/card/lot render.

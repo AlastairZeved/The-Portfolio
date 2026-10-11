@@ -250,76 +250,117 @@ body:has(#employer-brinker:checked) .employer--brinker {
   align-items: center;
 }
 
-/* ---- B56 (issue #154): the career body's left half carries the Agentic
-   Plugins page's plugin component — one per role. B66 (issue #173) rules
-   the plates READ LEFT TO RIGHT in one row — the owner: "These components
-   will never fit in a top to bottom layout once description text is added.
-   They need to read left to right" — equally sized (equal flex cells),
-   evenly spaced (the page's gutter), contained in the half; the half
-   scrolls vertically when the row needs more height (owner grill answer,
-   2026-10-08); B74 (issue #186) supersedes that half-scroll clause above the
-   breakpoint — there the left half is no longer a scroll container and the
-   description card scrolls instead (see the >743px block). The shipped
-   ≤743px readable reflow stacks them again below the breakpoint (owner
-   grill answer, 2026-10-08).
-   B76 (issue #194): the component renders the agentic-plugins SOURCE
-   geometry at the source's exact proportions, scaled uniformly by the
-   plate's own width — the owner: "Uniform by plate width — component keeps
-   the source's exact proportions everywhere" (the source itself is a fixed
-   830px plate scaled uniformly, styles.css .gregorian-mode). One scale
-   unit, --u below, carries every literal: 1 source px = plate-width/830.
-   The title card STRADDLES the back card's top edge (title top 55 < back
-   top 90) with a gap to the description card below it (owner ruling); the
-   desc card is WIDER than the back card (600 vs 500 source px) and the
-   BACK CARD EXTENDS VERTICALLY PAST it (the source's desc→plate distance,
-   202px, leaves 112px of back card visible below the desc card); long
-   titles WRAP to two lines rather than
-   shrinking (owner ruling); the component's type renders at the source's
-   ratios (title 28, year 14, desc 20 per 830px plate) with the owner's
-   readable floor — nothing below 11px.
-   Ported VERBATIM in structure from the .gregorian-mode class set
-   (.gm-back/.gm-title/.gm-uc/.gm-desc), with NO .gm-cta and NO item
-   selector row (B56). The re-hue re-points the component's token ladder at
-   this page's monochrome :root tokens (§10.1, B73) —
-   --deep/--card/--frame/--note, the water ladder, --water-bot-a,
-   --elevation and --ink-light all stand from :root; no hex is duplicated
-   here. Values are agent-derived under the B33/B40 provenance pattern: the
-   owner ruled the relationships (source proportions, plate-relative scale,
-   straddle, wrap, floor, always-visible filled-card bar); the literals
-   implement them. ---- */
+/* ---- B81 (issue #212): the left half renders the agentic-plugins item
+   selector design — the STAGE presents the one band-selected role's
+   component on top (the source's .plugins__stage), and the title-card
+   selector BAND beneath it launches each role (the source's .plugins__pane
+   + .plugins__tab). The owner: "There's an item selector band with title
+   cards and each one launches the item (the role on the /career page) and
+   presents it - with the glow and all. We're doing the exact same design,
+   but brought into the monochrome design tokens used for /career."
+   The band nests PER EMPLOYER (owner grill answer, 2026-10-11: "Yes —
+   header employer selector stays; band nests per employer") beneath the
+   unchanged three-way header selector; the default presented role is the
+   employer's MOST RECENT one ("Last role, most recent"); each band card
+   reads the role name + the year subscript from the component ("Role name
+   + the year subscript from the component"); the desc card keeps B75/B76's
+   in-card styled scroll bar ("Keep the in-card styled scroll bar").
+   B81 supersedes B66's one-row-of-components arrangement and B76's
+   three-across plate-row scaling law; B74's one-viewport render (the cap
+   at half the left half's own height, the block centred in the half, the
+   page never scrolling), the B132 header glow, B79 and the header
+   employer selector stand unchanged. The component's own internals remain
+   B76's: the source geometry (straddle, wider desc card, back card
+   extending past it), the source type ratios with the 11px floor, long
+   titles wrapping, the year in flow, the always-visible styled bar on
+   filled desc cards. The presented component's back card carries the
+   source's breathing presentation glow ("with the glow and all"),
+   re-tokened to --glow-gray (the glow one rung below --frame, B132's rung
+   rule); the band's title cards are the ONLY glimmering surface (the
+   source's B26 — the component's title/back cards carry none).
+   Values are the source's own literals (agentic-plugins styles.css) or
+   this page's existing tokens; the port mechanics are agent-derived under
+   the B33/B40 provenance pattern. ---- */
 .split__gallery {
   align-self: stretch;
   min-width: 0;
   min-height: 0;
   display: flex;
-  flex-direction: row;           /* B66: the plates read left to right */
-  align-items: flex-start;       /* plates size to their content (B66/B74) */
-  gap: 1.25rem;                  /* the page's existing gutter value */
+  flex-direction: column;          /* the stage on top, the band beneath */
+  container-type: inline-size;     /* the band's own clamps read the half's width */
 }
+
+/* The stage (the source's .plugins__stage): a size container holding the
+   ONE selected role's component — the other roles' wrappers render nothing.
+   The stage takes what the B74 cap leaves above the band. */
+.career__stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  container-type: size;
+  overflow: hidden;
+}
+.role {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+/* The pure-CSS radio mechanism (the header selector's own): the checked
+   band radio presents its role's wrapper — no script, per the page's law. */
+.employer--pnc-bank:has(#pnc-rep:checked) .role--pnc-rep,
+.employer--pnc-bank:has(#pnc-associate:checked) .role--pnc-associate,
+.employer--pnc-bank:has(#pnc-banker:checked) .role--pnc-banker,
+.employer--pnc-private:has(#ppb-csa:checked) .role--ppb-csa,
+.employer--pnc-private:has(#ppb-pta:checked) .role--ppb-pta,
+.employer--brinker:has(#brinker-trader:checked) .role--brinker-trader,
+.employer--brinker:has(#brinker-specialist:checked) .role--brinker-specialist,
+.employer--brinker:has(#brinker-sr-specialist:checked) .role--brinker-sr-specialist {
+  display: block;
+}
+/* The per-role plate heights, the source's own measured-constant pattern
+   (agentic-plugins styles.css .plugin--x { --plugin-h }: "the plate's
+   measured box at its 830px layout width ... Re-measure with any change
+   to the copy or the component"). Measured 2026-10-11 for each role's
+   plate at its 830px layout width with the description card at the B56
+   116px placeholder floor — the long B64 copy scrolls inside the card
+   under the stage's cap, so the plate's design height is the empty-state
+   geometry (B81, agent-derived under the B33/B40 pattern). */
+.role--pnc-rep              { --plugin-h: 531.2px; }
+.role--pnc-associate        { --plugin-h: 531.2px; }
+.role--pnc-banker           { --plugin-h: 497.6px; }
+.role--ppb-csa              { --plugin-h: 531.2px; }
+.role--ppb-pta              { --plugin-h: 531.2px; }
+.role--brinker-trader       { --plugin-h: 497.6px; }
+.role--brinker-specialist   { --plugin-h: 497.6px; }
+.role--brinker-sr-specialist { --plugin-h: 531.2px; }
+
 .gregorian-mode {
-  --ink: var(--deep);           /* desc ink on the sand note: the deep itself */
+  --ink: var(--deep);           /* desc ink on the note card: the deep itself */
   --elevation-inset: inset -3px 0 8px rgb(0 0 0 / 0.16),
     inset 0 2px 4px rgb(0 0 0 / 0.1);   /* the inset press value, verbatim */
   position: relative;
   box-sizing: border-box;
-  /* B64 (issue #176): the plates size to their content (the filled desc
-     cards) and share the half's leftover space equally — the B56 equal
-     flex cells (1 1 0) clamped every plate to the empty state's height and
-     the filled card overflowed the cell onto the footer. Spacing stands:
-     the 1.25rem gutter keeps the row evenly spaced. In B66's row the equal
-     cells equalize the plates' WIDTHS (flex-basis 0); the vertical size is
-     the content. B74 (issue #186) supersedes B66's half-scroll clause above
-     the breakpoint: the plate caps at half the left half's own height and
-     the description card carries the scroll (see the >743px block). */
-  flex: 1 1 0;
   min-height: 0;
   min-width: 0;
-  width: 100%;
-  /* B76: the plate is its own container — every literal below scales by the
-     plate's width, 1 source px = --u = plate-width/830 (the source's fixed
-     830px design, rendered at the plate's share of the row). */
+  /* B81 (issue #212): the plate renders the source's fixed 830px design
+     inside the stage, scaled by the source's own ratio law — min(the
+     stage's width ratio, the stage's height ratio over the role's measured
+     --plugin-h) — expressed as the plate's WIDTH (the source expresses the
+     same min() as transform: scale(...) about the plate's top centre; the
+     width form keeps B76's container-query literals, --u = plate-width/830,
+     so the 11px floor and the long-title wrap survive onto the stage
+     render). The plain width line below is the no-division fallback: the
+     width ratio alone, the desc card's own scroll absorbing any excess
+     height. The plate is top-anchored and horizontally centred in the
+     stage (the source's top-centre origin). */
   container-type: inline-size;
   --u: calc(100cqw / 830);
+  width: 100cqw;
+  width: min(100cqw, calc(830px * (100cqh / var(--plugin-h))));
+  max-height: 100%;              /* B74's cap: never past the stage, never the page */
+  margin: 0 auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;       /* title → year → desc, the reflow's flow */
   background: var(--deep);
@@ -362,22 +403,32 @@ body:has(#employer-brinker:checked) .employer--brinker {
       var(--water-mid) 46%,
       var(--water-bot) 100%
     );
-  box-shadow: var(--elevation);
+  /* B81 (issue #212): the source's breathing presentation glow ("with the
+     glow and all"), ported verbatim in geometry — the gm-breathe 10s loop,
+     the 0 0 60px 20px and 0 0 240px 120px bloom layers — re-tokened from
+     the source's rose triplet to this ladder's --glow-gray (the glow one
+     rung below --frame, B132's rung rule; the alphas are the source's own
+     .25/.35 and .12/.18, rendered as color-mix percentages). */
+  box-shadow:
+    var(--elevation),
+    0 0 60px 20px color-mix(in srgb, var(--glow-gray) 25%, transparent),
+    0 0 240px 120px color-mix(in srgb, var(--glow-gray) 12%, transparent);
+  animation: gm-breathe 10s ease-in-out infinite;
   overflow: hidden;
 }
-.gm-back::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    105deg,
-    transparent 32%,
-    color-mix(in srgb, var(--frame) 70%, transparent) 50%,
-    transparent 68%
-  );
-  background-size: 250% 100%;
-  background-position: 130% 0;
+@keyframes gm-breathe {
+  0%, 100% {
+    box-shadow:
+      var(--elevation),
+      0 0 60px 20px color-mix(in srgb, var(--glow-gray) 25%, transparent),
+      0 0 240px 120px color-mix(in srgb, var(--glow-gray) 12%, transparent);
+  }
+  50% {
+    box-shadow:
+      var(--elevation),
+      0 0 60px 20px color-mix(in srgb, var(--glow-gray) 35%, transparent),
+      0 0 240px 120px color-mix(in srgb, var(--glow-gray) 18%, transparent);
+  }
 }
 .gm-back::before {
   content: "";
@@ -416,33 +467,15 @@ body:has(#employer-brinker:checked) .employer--brinker {
   box-shadow: var(--elevation);
   overflow: hidden;
 }
-.gm-title::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    105deg,
-    transparent 32%,
-    color-mix(in srgb, var(--frame) 70%, transparent) 50%,
-    transparent 68%
-  );
-  background-size: 250% 100%;
-  background-position: 130% 0;
-}
 @keyframes gm-marquee {
   0%   { background-position: 130% 0; }
   30%  { background-position: -30% 0; }
   100% { background-position: -30% 0; }
 }
-/* The glimmer clock (the plugins page's issue #95 grammar): title card
-   first, background card 0.3s behind it. */
-.gm-title::after,
-.gm-back::after {
-  animation: gm-marquee 6s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
-}
-.gm-title::after { animation-delay: 0s; }
-.gm-back::after { animation-delay: 0.3s; }
+/* B81 (issue #212): the presented component's title and back cards carry
+   NO glimmer — on the source page the item selector's title cards are the
+   only glimmering surface (AlastairZeved B26); the career band's cards
+   carry it here (see .career__tab::after below). */
 
 /* The year — the italicized subscript in the .gm-uc grammar: own element,
    in flow under the title card, exactly like the Docket's "Under
@@ -513,6 +546,175 @@ body:has(#employer-brinker:checked) .employer--brinker {
    ring token, offset 2px so the ring lands on the plate outside the card's
    ink border. */
 .gm-desc:focus-visible { outline: 2px solid var(--ink-light); outline-offset: 2px; }
+
+/* ---- B81 (issue #212): the item selector band — the source's
+   .plugins__pane, ported verbatim and re-tokened: a note card lying
+   horizontally (the gm-card border at 2.1px — here --frame, the source's
+   --note-ink seat — the 3px radius, the water fill, the elevation), one
+   title card per role across it. The band nests per employer beneath its
+   stage; selection is a pure-CSS radio group (a title card is a <label
+   for>), exactly the header selector's own mechanism — no script. ---- */
+.career__band {
+  position: relative;             /* anchors the off-flow radios */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  gap: clamp(0.5rem, 1.25cqw, 1rem);   /* the source's even spacing */
+  flex: 0 0 auto;
+  width: 100%;
+  /* the source's selector height (clamp(3.4rem, 10cqw, 5.5rem)), rendered
+     as a floor: the source sized it "tall enough for the longest title to
+     wrap to two lines without clipping" — the career role names wrap
+     deeper than the plugins' labels, so the pane grows past the clamp
+     rather than clipping (B81, agent-derived under the B33/B40 pattern;
+     the clamp's own literals stand). */
+  min-height: clamp(3.4rem, 10cqw, 5.5rem);
+  margin: 1.25rem 0;              /* the source's floats: gutter above, edge below */
+  padding: 0.35rem clamp(0.75rem, 2.5cqw, 1.5rem);   /* the source's, equal either side */
+  border: 2.1px solid var(--frame);   /* the gm-card border, verbatim (re-tokened) */
+  border-radius: 3px;
+  background:                       /* the gm-back water, verbatim */
+    radial-gradient(
+      118% 76% at 50% 24%,
+      rgb(0 0 0 / 0) 32%,
+      rgb(var(--water-bot-a) / 0.72) 128%
+    ),
+    linear-gradient(
+      180deg,
+      var(--water-top) 0%,
+      var(--water-mid) 46%,
+      var(--water-bot) 100%
+    );
+  box-shadow: var(--elevation);
+}
+
+/* The radio: focusable, never drawn — the header selector's off-flow pattern. */
+.career__radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The band's title card: the source's .plugins__tab, ported verbatim and
+   re-tokened — the normalized box grammar ((band-top + 8 × --rs) top
+   padding / --card-pad sides, the 2 × --rs border, the 3 × --rs radius,
+   the 20 × --rs 800 uppercase type), equal flex cells across the row, the
+   two-layer --frame hover glow on the 200ms ease, the 80ms press. The
+   card reads the role name + the year subscript beneath it (owner grill
+   answer, 2026-10-11) — the year in the component's own .gm-uc grammar
+   (italic, 400, the 14 × --rs rung), not uppercased. */
+.career__tab {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;                    /* equal cards, evenly spaced */
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: calc(var(--band-top) + calc(8 * var(--rs))) var(--card-pad);
+  border: calc(2 * var(--rs)) solid var(--frame);
+  border-radius: calc(3 * var(--rs));
+  background: var(--card);
+  color: var(--ink-light);
+  font-weight: 800;
+  font-size: calc(20 * var(--rs));
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  position: relative;             /* anchors the glimmer ::after */
+  overflow: hidden;
+  transition:
+    box-shadow 200ms var(--ease),
+    filter 200ms var(--ease),
+    transform 200ms var(--ease);
+}
+.career__tab-year {
+  display: block;
+  margin-top: calc(8 * var(--rs));   /* the source .gm-uc's own top margin */
+  font-size: calc(14 * var(--rs));  /* the component's year rung */
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: none;             /* the year is not uppercase — the .gm-uc grammar */
+  line-height: 1;
+}
+/* Unselected: the page's dim-italic convention, carried by the radio's
+   checked state (the source's per-id :has lists, verbatim mechanics). */
+.career__band:not(:has(#pnc-rep:checked)) label[for="pnc-rep"],
+.career__band:not(:has(#pnc-associate:checked)) label[for="pnc-associate"],
+.career__band:not(:has(#pnc-banker:checked)) label[for="pnc-banker"],
+.career__band:not(:has(#ppb-csa:checked)) label[for="ppb-csa"],
+.career__band:not(:has(#ppb-pta:checked)) label[for="ppb-pta"],
+.career__band:not(:has(#brinker-trader:checked)) label[for="brinker-trader"],
+.career__band:not(:has(#brinker-specialist:checked)) label[for="brinker-specialist"],
+.career__band:not(:has(#brinker-sr-specialist:checked)) label[for="brinker-sr-specialist"] {
+  color: var(--ink-dim);
+  font-style: italic;
+}
+/* Hover: the source's two-layer --frame glow, under the same hover guard,
+   on the same 200ms ease the card already transitions. */
+@media (hover: hover) {
+  .career__tab:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 0 12px 2px var(--frame), 0 0 24px 4px var(--frame);
+  }
+}
+/* Active (press): the source's press state, verbatim — the pressed dim,
+   the 2px drop, the inset elevation on the 80ms press clock. */
+.career__tab:active {
+  filter: brightness(0.92);
+  transform: translateY(2px);
+  box-shadow: var(--elevation-inset);
+  transition-duration: 80ms;
+}
+/* Checked: the selected card state (the source's re-stated card + ink). */
+.career__band:has(#pnc-rep:checked) label[for="pnc-rep"],
+.career__band:has(#pnc-associate:checked) label[for="pnc-associate"],
+.career__band:has(#pnc-banker:checked) label[for="pnc-banker"],
+.career__band:has(#ppb-csa:checked) label[for="ppb-csa"],
+.career__band:has(#ppb-pta:checked) label[for="ppb-pta"],
+.career__band:has(#brinker-trader:checked) label[for="brinker-trader"],
+.career__band:has(#brinker-specialist:checked) label[for="brinker-specialist"],
+.career__band:has(#brinker-sr-specialist:checked) label[for="brinker-sr-specialist"] {
+  background: var(--card);
+  color: var(--ink-light);
+}
+/* Focus: the page's own focus ring, on the card the radio drives. */
+.career__band:has(#pnc-rep:focus-visible) label[for="pnc-rep"],
+.career__band:has(#pnc-associate:focus-visible) label[for="pnc-associate"],
+.career__band:has(#pnc-banker:focus-visible) label[for="pnc-banker"],
+.career__band:has(#ppb-csa:focus-visible) label[for="ppb-csa"],
+.career__band:has(#ppb-pta:focus-visible) label[for="ppb-pta"],
+.career__band:has(#brinker-trader:focus-visible) label[for="brinker-trader"],
+.career__band:has(#brinker-specialist:focus-visible) label[for="brinker-specialist"],
+.career__band:has(#brinker-sr-specialist:focus-visible) label[for="brinker-sr-specialist"] {
+  outline: 2px solid var(--ink-light);
+  outline-offset: 2px;
+}
+/* The glimmer is the band's title cards' sheen alone (the source's B26):
+   the 105deg color-mix 70% --frame band on the 6s gm-marquee clock — the
+   ONLY glimmering surface on the page; it dies outright under
+   prefers-reduced-motion (the block below). */
+.career__tab::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 32%,
+    color-mix(in srgb, var(--frame) 70%, transparent) 50%,
+    transparent 68%
+  );
+  background-size: 250% 100%;
+  background-position: 130% 0;
+  animation: gm-marquee 6s var(--ease) infinite;
+}
 
 .blurb, .role-notes, .accomplishments, .learnings { margin: 0 0 1.25rem; }
 .blurb p, .role-notes p, .accomplishments p, .learnings p { margin: 0 0 0.6em; }
@@ -665,11 +867,15 @@ body:has(#employer-brinker:checked) .employer--brinker {
    Mechanism: body holds the viewport's height and main is allowed to shrink
    (min-height 0 — without it the flex chain is content-driven and the page
    scrolls, the #186 defect), so .split, .employer and its 1fr row are all
-   definite and the gallery's 50% resolves against the grid area; the plates
-   cap at 100% of that box, and the desc card shrinks under the cap and
-   scrolls its own text. The 11px floor can hold the title and year above
-   the cap in an extremely short viewport; the plate's own overflow: hidden
-   then bounds it — the page still never scrolls (measured in the suite). ---- */
+   definite and the gallery's 50% resolves against the grid area. B81: the
+   50% box now holds the STAGE + BAND column (the presented component on
+   top, the selector band beneath), still centred in the half — the stage
+   flexes to what the band leaves, the plate's own width law (min of the
+   stage's two ratios) keeps it inside the stage, the plate's max-height
+   caps it, and the desc card shrinks under the cap and scrolls its own
+   text. The 11px floor can hold the title and year above the cap in an
+   extremely short viewport; the plate's own overflow: hidden then bounds
+   it — the page still never scrolls (measured in the suite). ---- */
 @media (min-width: 744px) {
   html, body { height: 100vh;         /* the no-dvh fallback, as --rs above */
                height: 100dvh; }
@@ -678,10 +884,8 @@ body:has(#employer-brinker:checked) .employer--brinker {
      CTA (50px min-height) overflowed a shrunken lot by 3–4px and scrolled the
      page in ≥744px-wide windows under ~470px tall (measured 844×390, 745×400). */
   .topband, .parking-lot { flex: 0 0 auto; }
-  .split__gallery { height: 50%;      /* half the left half's own height */
-                    align-self: center; }   /* centred in the half */
-  .gregorian-mode { max-height: 100%;               /* the component's own cap */
-                    overflow: hidden; }             /* clip past the cap, never the page */
+  .split__gallery { height: 50%;      /* half the left half's own height (B74) */
+                    align-self: center; }   /* centred in the half (B74) */
 }
 
 @media (max-width: 743px) {
@@ -708,12 +912,23 @@ body:has(#employer-brinker:checked) .employer--brinker {
     display: flex; flex-direction: column; align-items: stretch; gap: 0.75rem;
   }
   .split__rule { width: 33.333%; height: 1px; }
-  /* B66: below 743px the shipped readable reflow stacks the plates again
-     (owner grill answer, 2026-10-08). */
-  .split__gallery { flex-direction: column; align-items: stretch; }
-  .gregorian-mode { flex: 0 0 auto; }
-  /* B56 component stack on mobile: the row drops to a column — the plates
-     themselves already render in the reflow grammar at every width. */
+  /* B81 on mobile: the stage + band column stays (one presented component,
+     the band beneath), rendered in the shipped readable literals — the
+     page keeps scrolling below the breakpoint (B74's owner grill answer,
+     2026-10-09), so the stage sizes to the presented plate's own content
+     (the width ratio alone, no height cap) instead of the cqh ratio. */
+  .career__stage { container-type: inline-size; flex: 0 0 auto;
+                   height: auto; overflow: visible; }
+  .role { position: static; }
+  .gregorian-mode { width: 100cqw; max-height: none; overflow: visible; }
+  /* The band cards take the shipped mobile card literals (the header
+     cards' own readable resets): the pane's clamps already resolve to
+     their floors at this width, so only the card grammar is reset. */
+  .career__tab { padding: 0.25rem 1.1rem;
+    border: 2px solid var(--frame);
+    border-radius: 3px;
+    font-size: 1.1rem; }
+  .career__tab-year { margin-top: 4px; font-size: 0.8rem; }
   .parking-lot { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .parking-lot__divider { width: auto; align-self: flex-start; }
   .parking-lot__divider::before { width: 75%; height: 1px; }
@@ -724,8 +939,10 @@ body:has(#employer-brinker:checked) .employer--brinker {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
-  /* B56: the component's glimmer dies outright with the motion preference. */
-  .gm-title::after, .gm-back::after { animation: none; content: none; }
+  /* B81: the band cards' glimmer (the only glimmering surface) and the
+     back card's breathing glow die outright with the motion preference. */
+  .career__tab::after { animation: none; content: none; }
+  .gm-back { animation: none; }
 }
 </style>
 </head>
@@ -768,33 +985,55 @@ body:has(#employer-brinker:checked) .employer--brinker {
     <!-- PNC Bank detail (default) -->
     <section class="employer employer--pnc-bank" aria-labelledby="role-pnc-bank">
       <div class="split__gallery">
-        <!-- B56 (issue #154): the left half carries the Agentic Plugins page's
-             plugin component, one per role, stacked to fill the half — ported
-             verbatim in structure (.gregorian-mode → gm-back/gm-title/gm-uc/
-             gm-desc), re-hued to the B47 sand/brown ladder. The year is the
-             .gm-uc italicized subscript in the title card's grammar. -->
+        <!-- B81 (issue #212): the left half renders the agentic-plugins item
+             selector design — the STAGE presents the one band-selected role's
+             component (the .gregorian-mode class set, B56/B76: gm-back /
+             gm-title / the .gm-uc year subscript / gm-desc), and the BAND
+             beneath carries one title card per role, each launching its
+             role. The header employer selector is unchanged; the band nests
+             per employer. Default presented role: the most recent (Branch
+             Banker) — owner grill answers, 2026-10-11. -->
         <!-- SLOT: description card text — owner fills in. Per B64 (issue
              #176): three desc cards carry the owner's copy verbatim; every
              other .gm-desc card stays EMPTY on purpose (B56's override of
              B47 for these components). -->
-        <div class="gregorian-mode">
-          <div class="gm-card gm-back" role="presentation"></div>
-          <h3 class="gm-card gm-title" id="role-pnc-bank">Branch Sales &amp; Service Representative</h3>
-          <p class="gm-uc">2017-2018</p>
-          <p class="gm-card gm-desc"></p>
+        <div class="career__stage">
+          <div class="role role--pnc-rep">
+            <div class="gregorian-mode">
+              <div class="gm-card gm-back" role="presentation"></div>
+              <h3 class="gm-card gm-title" id="role-pnc-bank">Branch Sales &amp; Service Representative</h3>
+              <p class="gm-uc">2017-2018</p>
+              <p class="gm-card gm-desc"></p>
+            </div>
+          </div>
+          <div class="role role--pnc-associate">
+            <div class="gregorian-mode">
+              <div class="gm-card gm-back" role="presentation"></div>
+              <h3 class="gm-card gm-title">Branch Sales &amp; Service Associate</h3>
+              <p class="gm-uc">2018-2019</p>
+              <p class="gm-card gm-desc"></p>
+            </div>
+          </div>
+          <div class="role role--pnc-banker">
+            <div class="gregorian-mode">
+              <div class="gm-card gm-back" role="presentation"></div>
+              <h3 class="gm-card gm-title">Branch Banker</h3>
+              <p class="gm-uc">2019-2020</p>
+              <!-- Filled by the owner's issue #176 (B64): the copy verbatim. -->
+              <p class="gm-card gm-desc">Completed the PNC Leadership Development Program, a high-performer program focused on preparing associates for advancement into specialized financial roles.<br><br>Deployed across the PDSJ region to onboard and coach Branch Relationship Managers on multi-channel client-book development.<br><br>Consistently outperformed branch sales goals while maintaining exceptional client service.</p>
+            </div>
+          </div>
         </div>
-        <div class="gregorian-mode">
-          <div class="gm-card gm-back" role="presentation"></div>
-          <h3 class="gm-card gm-title">Branch Sales &amp; Service Associate</h3>
-          <p class="gm-uc">2018-2019</p>
-          <p class="gm-card gm-desc"></p>
-        </div>
-        <div class="gregorian-mode">
-          <div class="gm-card gm-back" role="presentation"></div>
-          <h3 class="gm-card gm-title">Branch Banker</h3>
-          <p class="gm-uc">2019-2020</p>
-          <!-- Filled by the owner's issue #176 (B64): the copy verbatim. -->
-          <p class="gm-card gm-desc">Completed the PNC Leadership Development Program, a high-performer program focused on preparing associates for advancement into specialized financial roles.<br><br>Deployed across the PDSJ region to onboard and coach Branch Relationship Managers on multi-channel client-book development.<br><br>Consistently outperformed branch sales goals while maintaining exceptional client service.</p>
+        <div class="career__band" role="radiogroup" aria-label="Choose a PNC Bank role">
+          <input class="career__radio" type="radio" name="pnc-bank-role" id="pnc-rep"
+                 aria-label="Branch Sales &amp; Service Representative">
+          <input class="career__radio" type="radio" name="pnc-bank-role" id="pnc-associate"
+                 aria-label="Branch Sales &amp; Service Associate">
+          <input class="career__radio" type="radio" name="pnc-bank-role" id="pnc-banker" checked
+                 aria-label="Branch Banker">
+          <label class="career__tab" for="pnc-rep">Branch Sales &amp; Service Representative<span class="career__tab-year">2017-2018</span></label>
+          <label class="career__tab" for="pnc-associate">Branch Sales &amp; Service Associate<span class="career__tab-year">2018-2019</span></label>
+          <label class="career__tab" for="pnc-banker">Branch Banker<span class="career__tab-year">2019-2020</span></label>
         </div>
       </div>
       <div class="split__rule" aria-hidden="true"></div>
@@ -811,24 +1050,40 @@ body:has(#employer-brinker:checked) .employer--brinker {
     <!-- PNC Private Bank detail -->
     <section class="employer employer--pnc-private" aria-labelledby="role-pnc-private">
       <div class="split__gallery">
-        <!-- B56 (issue #154): same component grammar as the PNC Bank tab —
-             one .gregorian-mode per role, stacked to fill the half. -->
+        <!-- B81 (issue #212): the same stage + band design as the PNC Bank
+             tab — the stage presents the band-selected role's component, the
+             band beneath launches each role. Default presented role: the
+             most recent (Portfolio &amp; Trust Administrator). -->
         <!-- SLOT: description card text — owner fills in. Per B64 (issue
              #176): three desc cards carry the owner's copy verbatim; every
              other .gm-desc card stays EMPTY on purpose (B56's override of
              B47 for these components). -->
-        <div class="gregorian-mode">
-          <div class="gm-card gm-back" role="presentation"></div>
-          <h3 class="gm-card gm-title" id="role-pnc-private">Client Service Associate</h3>
-          <p class="gm-uc">2020-2021</p>
-          <p class="gm-card gm-desc"></p>
+        <div class="career__stage">
+          <div class="role role--ppb-csa">
+            <div class="gregorian-mode">
+              <div class="gm-card gm-back" role="presentation"></div>
+              <h3 class="gm-card gm-title" id="role-pnc-private">Client Service Associate</h3>
+              <p class="gm-uc">2020-2021</p>
+              <p class="gm-card gm-desc"></p>
+            </div>
+          </div>
+          <div class="role role--ppb-pta">
+            <div class="gregorian-mode">
+              <div class="gm-card gm-back" role="presentation"></div>
+              <h3 class="gm-card gm-title">Portfolio &amp; Trust Administrator</h3>
+              <p class="gm-uc">2021-2022</p>
+              <!-- Filled by the owner's issue #176 (B64): the copy verbatim. -->
+              <p class="gm-card gm-desc">Managed end-to-end account setup, funding, and servicing for complex irrevocable trust portfolios within a highly regulated environment.<br><br>Served as a primary point of contact for trust officers, legal counsel, and beneficiaries, coordinating across stakeholders to resolve complex account and servicing requirements.<br><br>Translated client and operational requirements into practical solutions while balancing service quality, underlying data, and regulatory constraints.</p>
+            </div>
+          </div>
         </div>
-        <div class="gregorian-mode">
-          <div class="gm-card gm-back" role="presentation"></div>
-          <h3 class="gm-card gm-title">Portfolio &amp; Trust Administrator</h3>
-          <p class="gm-uc">2021-2022</p>
-          <!-- Filled by the owner's issue #176 (B64): the copy verbatim. -->
-          <p class="gm-card gm-desc">Managed end-to-end account setup, funding, and servicing for complex irrevocable trust portfolios within a highly regulated environment.<br><br>Served as a primary point of contact for trust officers, legal counsel, and beneficiaries, coordinating across stakeholders to resolve complex account and servicing requirements.<br><br>Translated client and operational requirements into practical solutions while balancing service quality, underlying data, and regulatory constraints.</p>
+        <div class="career__band" role="radiogroup" aria-label="Choose a PNC Private Bank role">
+          <input class="career__radio" type="radio" name="pnc-private-role" id="ppb-csa"
+                 aria-label="Client Service Associate">
+          <input class="career__radio" type="radio" name="pnc-private-role" id="ppb-pta" checked
+                 aria-label="Portfolio &amp; Trust Administrator">
+          <label class="career__tab" for="ppb-csa">Client Service Associate<span class="career__tab-year">2020-2021</span></label>
+          <label class="career__tab" for="ppb-pta">Portfolio &amp; Trust Administrator<span class="career__tab-year">2021-2022</span></label>
         </div>
       </div>
       <div class="split__rule" aria-hidden="true"></div>
@@ -843,32 +1098,52 @@ body:has(#employer-brinker:checked) .employer--brinker {
     <!-- Brinker Capital detail -->
     <section class="employer employer--brinker" aria-labelledby="role-brinker">
       <div class="split__gallery">
-        <!-- B56 (issue #154): same component grammar as the PNC Bank tab —
-             one .gregorian-mode per role, stacked to fill the half. -->
+        <!-- B81 (issue #212): the same stage + band design as the PNC Bank
+             tab. Default presented role: the most recent (Sr. Portfolio
+             Specialist). -->
         <!-- SLOT: description card text — owner fills in. Per B64 (issue
              #176): three desc cards carry the owner's copy verbatim; every
              other .gm-desc card stays EMPTY on purpose (B56's override of
              B47 for these components). -->
-        <div class="gregorian-mode">
-          <div class="gm-card gm-back" role="presentation"></div>
-          <h3 class="gm-card gm-title" id="role-brinker">Trader</h3>
-          <p class="gm-uc">2022-2023</p>
-          <p class="gm-card gm-desc"></p>
+        <div class="career__stage">
+          <div class="role role--brinker-trader">
+            <div class="gregorian-mode">
+              <div class="gm-card gm-back" role="presentation"></div>
+              <h3 class="gm-card gm-title" id="role-brinker">Trader</h3>
+              <p class="gm-uc">2022-2023</p>
+              <p class="gm-card gm-desc"></p>
+            </div>
+          </div>
+          <div class="role role--brinker-specialist">
+            <div class="gregorian-mode">
+              <div class="gm-card gm-back" role="presentation"></div>
+              <h3 class="gm-card gm-title">Portfolio Specialist</h3>
+              <p class="gm-uc">2023</p>
+              <p class="gm-card gm-desc"></p>
+            </div>
+          </div>
+          <div class="role role--brinker-sr-specialist">
+            <div class="gregorian-mode">
+              <div class="gm-card gm-back" role="presentation"></div>
+              <h3 class="gm-card gm-title">Sr. Portfolio Specialist</h3>
+              <p class="gm-uc">2023-2025</p>
+              <!-- Filled by the owner's issue #176 (B64): the copy verbatim,
+                   three paragraphs, <br><br> breaks in the single desc-card
+                   element (the sibling convention). -->
+              <p class="gm-card gm-desc">Manage daily trade execution across client liquidity needs, portfolio re-allocations, and new business for the firm’s $12B UHNW Wealth Management UMA products.<br><br>Mapped, documented, and trained the end-to-end trading workflows for new UMA product offerings and SRM platform migrations while maintaining SLA performance without client or business disruption.<br><br>Architected the Brinker Trading PowerBI dashboard 0->1, partnering with a developer, to monitor daily trading volume and metrics previously siloed in vendor databases to develop actionable KPI metrics, automated alerts, and data visualizations using the 3-30-300 framework.</p>
+            </div>
+          </div>
         </div>
-        <div class="gregorian-mode">
-          <div class="gm-card gm-back" role="presentation"></div>
-          <h3 class="gm-card gm-title">Portfolio Specialist</h3>
-          <p class="gm-uc">2023</p>
-          <p class="gm-card gm-desc"></p>
-        </div>
-        <div class="gregorian-mode">
-          <div class="gm-card gm-back" role="presentation"></div>
-          <h3 class="gm-card gm-title">Sr. Portfolio Specialist</h3>
-          <p class="gm-uc">2023-2025</p>
-          <!-- Filled by the owner's issue #176 (B64): the copy verbatim,
-               three paragraphs, <br><br> breaks in the single desc-card
-               element (the sibling convention). -->
-          <p class="gm-card gm-desc">Manage daily trade execution across client liquidity needs, portfolio re-allocations, and new business for the firm’s $12B UHNW Wealth Management UMA products.<br><br>Mapped, documented, and trained the end-to-end trading workflows for new UMA product offerings and SRM platform migrations while maintaining SLA performance without client or business disruption.<br><br>Architected the Brinker Trading PowerBI dashboard 0->1, partnering with a developer, to monitor daily trading volume and metrics previously siloed in vendor databases to develop actionable KPI metrics, automated alerts, and data visualizations using the 3-30-300 framework.</p>
+        <div class="career__band" role="radiogroup" aria-label="Choose a Brinker Capital role">
+          <input class="career__radio" type="radio" name="brinker-role" id="brinker-trader"
+                 aria-label="Trader">
+          <input class="career__radio" type="radio" name="brinker-role" id="brinker-specialist"
+                 aria-label="Portfolio Specialist">
+          <input class="career__radio" type="radio" name="brinker-role" id="brinker-sr-specialist" checked
+                 aria-label="Sr. Portfolio Specialist">
+          <label class="career__tab" for="brinker-trader">Trader<span class="career__tab-year">2022-2023</span></label>
+          <label class="career__tab" for="brinker-specialist">Portfolio Specialist<span class="career__tab-year">2023</span></label>
+          <label class="career__tab" for="brinker-sr-specialist">Sr. Portfolio Specialist<span class="career__tab-year">2023-2025</span></label>
         </div>
       </div>
       <div class="split__rule" aria-hidden="true"></div>

@@ -123,7 +123,7 @@
    The band: rule-y = 15.46 + max(2, lines) × 21.54 + 8.84 — band-top, the
    tallest zone's line count at 16.57px/1.3, and the gap to the rule (67.38
    at the two-line floor, 88.92 at three). The Parking Lot: measured from its
-   content from the rescaled two-row shelf (TheBoards B73), bottom-anchored so
+   content from the rescaled two-row shelf (TheBoards `B73`), bottom-anchored so
    it grows UPWARD, ceiling half the sheet with #lot-items clipping past it.
    B18's fixed 180px --lot-h is superseded as a mechanism — fallback only.
    The lot's 34px head and 8px base literal are kept UNSCALED (TheBoards'
@@ -215,7 +215,7 @@
   /* TheBoards interactions.js applyNoteScale (shared tail of pinch and the
      desktop frame-drag resize): apply the scale, re-derive the cap (a scale
      change rewraps the unscaled width), re-clamp the footprint into the
-     sheet, recompute the links (B91 — a scaled card's links track its new
+     sheet, recompute the links (TheBoards' `B91` — a scaled card's links track its new
      centre). The min/max-of-the-same-pair clamp is TheBoards' inverted
      constraint for a folded scale that outgrows the sheet. */
   function applyCardScale(card, scale) {
@@ -233,7 +233,7 @@
   /* ---- The link layer (UIUX §4.3, B28): fourteen straight 1px --frame lines
      between card centres, one per pair authored in the markup. The pairing
      is authored; the geometry is computed, so a line stays true while a
-     card is dragged or resized (TheBoards' link idiom, UIUX §4.6 / B91 —
+     card is dragged or resized (TheBoards' link idiom, TheBoards' `UIUX §4.6` / `B91` —
      endpoints are plain board-logical centres, recomputed on every path
      that moves a note). The SVG's user units ARE the board's logical px, so
      a measured rect — which is physical — is converted with toLogical()

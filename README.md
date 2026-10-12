@@ -1,7 +1,7 @@
 # The Portfolio of Robert Alastair Zeved Gregory
 
 The central hub for Robert A. Gregory's scattered pseudonyms and websites —
-one page, built literally on TheBoards as the template. A static, single-file
+one page, built literally on TheBoards as the template. A static
 HTML page that wears TheBoards' own design system and is itself a functional
 advertisement for it: six door-cards in the free board space, each a real
 link opening in a new tab, and a contact form in the Parking Lot.
@@ -55,13 +55,8 @@ state — notes drag and resize for delight, nothing persists.
 
 ## Tests
 
-```
-npm install playwright   # onto NODE_PATH; not committed
-node test/tokens.js      # design contract: UIUX §2 recomputed from shipped hexes
-node test/mobile.js      # touch + band/lot geometry + card states at mobile widths
-node test/desktop.js     # desktop grammar: full-viewport sheet, no rail, card link semantics
-node test/career.js      # the career page (issue #133/B47): employer selector, glow, split, three-section lot
-```
+The suites, and the order CI runs them in, are listed once, in
+[AGENTS.md](AGENTS.md#commands) — the same list as `.github/workflows/ci.yml`.
 
 There is deliberately no `test/sw-update.js` — the site ships no service
 worker (B13).
@@ -77,7 +72,7 @@ Pull requests are accepted. Requirements:
 - **Behavior changes resolve against the governing records.** A PR that
   changes card, layout, region, form, or link behavior without a `B ` entry
   will be asked to add one.
-- **All three test suites must pass**, and a change that pins what a suite
+- **Every test suite CI runs must pass**, and a change that pins what a suite
   asserts rewrites that assertion deliberately — say so in the commit
   message.
 - **No invented design values.** A diff hunk introducing a token, hex, ratio,

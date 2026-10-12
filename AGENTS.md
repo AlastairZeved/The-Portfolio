@@ -8,9 +8,12 @@ governing records instead.
 
 The-Portfolio — Robert A. Gregory's portfolio site and the central hub for his
 scattered pseudonyms and websites. It is built **literally on TheBoards as the
-template** (owner ruling, 2026-09-29): one static single-page `index.html`
-with all CSS inline and JS as external .js files (issue #151, B59) — **no calendar rail**, no service worker, no
-backend, no build step, no package manager, no dependencies.
+template** (owner ruling, 2026-09-29): a landing page, `index.html`, and
+three static sub-pages — `career.html` (B47), `plantsandrocks.html` (B48) and
+the `monstera-storybook.html` document it frames (B57) — each with its CSS
+inline and its JS in external .js files (issue #151, B59). **No calendar
+rail**, no service worker, no backend, no build step, no package manager, no
+dependencies.
 
 The site is a **functional advertisement for TheBoards**: it wears TheBoards'
 own design system (same tokens, same regions, same fonts) and behaves as a
@@ -41,6 +44,14 @@ asked to add one.
 
 **Cite with the document prefix** (`UIUX §3`, not bare `§3`) — the numbering
 spaces overlap between records.
+
+**Quote TheBoards' numbers; never cite them bare.** TheBoards' record uses
+the same `B` prefix and the same `UIUX §` numbering as this one. A bare
+`B91` or `UIUX §4.6` in this repository means *this* repository's ruling or
+heading — and when that number does not exist yet, it will the day the
+ledger reaches it, and silently point at the wrong ruling. Write TheBoards'
+numbers in a code span with the owner named: TheBoards' `B91`, TheBoards'
+`UIUX §4.6`.
 
 `UIUX.md` is the rendering authority: every hex, contrast ratio, size, radius,
 duration, threshold, and state lives there and nowhere else. **Do not invent
@@ -146,8 +157,8 @@ No accounts, sync, sharing, tags, folders, search, filters, rich text,
 images, snapping, reminders, due dates, streaks, infinite canvas, settings,
 theme switch, calendar rail, blog/CMS, analytics, comments, newsletter
 signup, service worker, PWA manifest, backend, bundler, framework, or
-`package.json`. Static single-file page with one Formspree form — nothing
-else. If a request collides with this list, the answer is a PRD amendment
+`package.json`. Static pages (the landing page and the sub-pages B47, B48
+and B57 rule in) with one Formspree form — nothing else. If a request collides with this list, the answer is a PRD amendment
 and an owner ruling first, not code.
 
 ## Never do (record law — issue #51)

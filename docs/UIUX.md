@@ -257,7 +257,7 @@ rule-y = 15.46 + max(2, lines) × 21.54 + 8.84
 `lines` is the tallest band zone's line count at 16.57px/1.3 (`band-top`
 15.46, line 21.54, gap 8.84 — TheBoards `state.js` 14/19.5/8 × k). The label
 term is gone from the budget: the header hangs below the rule as a tab
-(`.band-label` 14.36px — TheBoards B54's 13px × k), so it reserves no height
+(`.band-label` 14.36px — TheBoards `B54`'s 13px × k), so it reserves no height
 above it.
 
 **The title compartment is untouched: B31 stands** (`B46`, owner ruling 3).
@@ -655,7 +655,7 @@ The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 | card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B78 drawing rest scales and placements per card (B80 for philly-plant-dads, seated by the owner's words), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
-| the career page (B47): employer selector, B132 glow, split body, two-way lot (B65), monochrome ladder (B73), empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
+| the career page (B47): employer selector, TheBoards' `B132` glow, split body, two-way lot (B65), monochrome ladder (B73), empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
 | the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, the B58 Download (PDF anchor) and the B82 Back-to-the-Garden .cta, literal idea-green ladder, the B50 landing-convention band/card/lot render | `test/plantsandrocks.js` |
 
 ---
@@ -704,7 +704,7 @@ unchanged:
 | `--water-bot` | `#333333` | gradient ladder foot | 0.0325 |
 | `--ink-light` | `#f4f5f1` | light ink pole | — |
 | `--ink-dim` | `rgb(244 245 241 / 0.55)` | unselected-card ink | — |
-| `--glow-gray` | `#676767` | selected-card bloom — `--frame` one rung down (B132's rung rule) | 0.1364 |
+| `--glow-gray` | `#676767` | selected-card bloom — `--frame` one rung down (TheBoards' `B132` rung rule) | 0.1364 |
 
 The final hexes are the owner's sign-off (issue #190, owner chat 2026-10-09:
 "confirmed and approved for use"); the **relationships** above — card above
@@ -749,7 +749,7 @@ renders as `L × --rs`.)*
   at the 13.33px/400 italic reduced rung (B61, carried by B87, issue #218),
   `min-height: rule-y + 29px` hanging over the
   rule. Unselected cards are dim + italic (§4's unselected grammar); the
-  selected card wears the B132 glow verbatim:
+  selected card wears TheBoards' `B132` glow verbatim:
   `border-color: var(--glow-gray); box-shadow: 0 0 8px 0 var(--glow-gray);`
   and no other state. Default selection: PNC Bank. The header is the
   selector's `role="radiogroup"` (`aria-label="Choose an employer"`); the
@@ -920,7 +920,7 @@ carry their tenure in an italic subscript oneliner, and the eight role years
 nest inside their title cards.)*
 
 **Pinned by:** `test/career.js` — the B79 selector-card shared size and
-equal gaps, selector mechanics, the B132 glow, the
+equal gaps, selector mechanics, TheBoards' `B132` glow, the
 split, the two-way lot (B65, with B77's second line and its bars matched
 to the top line's), the ladder tokens, the omit-empty-block
 discipline, B74's one-viewport render (the description card as

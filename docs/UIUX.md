@@ -79,11 +79,11 @@ Verified contrast, each at the worst extreme of its range:
 
 | Ground | Ink | Ratio | Level |
 |---|---|---|---|
-| `--deep` `#020812` | light | **18.33:1** | AAA |
-| `--card` `#08152c` | light | **16.62:1** | AAA |
-| `--water`, lightest stop `#34697f` | light | **5.52:1** | AA |
-| `--water`, darkest stop `#163646` | light | **11.62:1** | AAA |
-| `--note` `#a0d4da` | dark | **11.84:1** | AAA |
+| `--deep` `#020812` | `--ink-light` | **18.33:1** | AAA |
+| `--card` `#08152c` | `--ink-light` | **16.62:1** | AAA |
+| water, lightest stop `--water-top` `#34697f` | `--ink-light` | **5.52:1** | AA |
+| water, darkest stop `--water-bot` `#163646` | `--ink-light` | **11.62:1** | AAA |
+| `--note` `#a0d4da` | `--ink-dark` | **11.84:1** | AAA |
 
 **The crossover and the forbidden band carry from TheBoards, verbatim:**
 

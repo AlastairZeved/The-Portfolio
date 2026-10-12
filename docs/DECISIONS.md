@@ -456,7 +456,7 @@ no card is added.
 **No invented design value.** The owner's statement names the six pairs and
 nothing else; every rendered value this entry binds is either a token already
 printed in `UIUX §2.2` (`--frame`) or the reference implementation's own ruled
-value, transcribed from TheBoards' `UIUX §4.6` (B91) — "1px `--frame`" between
+value, transcribed from TheBoards' `UIUX §4.6` (`B91`) — "1px `--frame`" between
 note centres, `pointer-events: none`, `z-index: 1` under the notes,
 `non-scaling-stroke`, "no fill, no cap decoration, no marker". `UIUX §4.3`
 carries the rendering; `test/desktop.js` pins the six pairs.
@@ -925,7 +925,7 @@ notes. The mechanism of record:
   (`17 × clamp(h/96, 0.5, 2.0)`).
 - **Sizing:** cards are **content-sized**, as TheBoards sizes notes —
   `width: max-content` capped at the sheet's edge, floored at **min-width
-  132** (TheBoards' `NOTE_MIN_W`, TheBoards `UIUX §4.5`, B84), height
+  132** (TheBoards' `NOTE_MIN_W`, TheBoards `UIUX §4.5`, `B84`), height
   following the wrapped text. This **supersedes B43's authored fixed
   boxes** (`left/top %` + `px width/height`) as a sizing mechanism; the
   placements remain the owner's drawing authority.
@@ -977,11 +977,11 @@ second-round confirmation). The ruling:
   the pure height anchor would compress the sheet below the cards' right
   edges and clip it). **This
   supersedes B44's scale-formula clause for landscape viewports only.** The
-  band literals follow TheBoards' B37/B47 chain through k: `rule-y =
+  band literals follow TheBoards' `B37`/`B47` chain through k: `rule-y =
   15.46 + max(2, lines) × 21.54 + 8.84` (67.38 at the two-line floor), the
   band label 14.36px, the band anchors 16.57px. The numbers are agent-derived
   (per the `B33` precedent: the owner ruled the behaviour, not the digits).
-- **The Parking Lot sizes by TheBoards' B73 measured-content law:** measure
+- **The Parking Lot sizes by TheBoards' `B73` measured-content law:** measure
   the rendered rows, floor at the rescaled two-row shelf (TheBoards' 122-shelf
   × k = 134.76px, header included), cap at half the logical sheet,
   bottom-anchored, content clipped past the ceiling. This supersedes B18's
@@ -1004,7 +1004,7 @@ quoted verbatim —
    61→67.4): every landscape screen then renders the band exactly at
    TheBoards' size (54.9px rule at 1440×900, 6.1% of viewport height) — full
    match, and the title card/labels also match exactly."
-2. "Port TheBoards B73's law: measure the rendered form, floor at the
+2. "Port TheBoards `B73`'s law: measure the rendered form, floor at the
    rescaled two-row shelf, cap at half the logical sheet."
 3. "Keep 20px (B31 stands); the rescaled box grows around it."
 
@@ -1024,7 +1024,7 @@ title cards in the landing page's top-band grammar (**PNC Bank**, **PNC
 Private Bank**, **Brinker Capital**, left→right chronological), each hanging
 over the header line exactly as the landing page's title card does; selecting
 a card swaps the body to that employer (a selector, not a carousel), the
-default state being **PNC Bank**. The selected card wears the B132 glow
+default state being **PNC Bank**. The selected card wears TheBoards' `B132` glow
 verbatim — `border-color: <glow token>; box-shadow: 0 0 8px 0 <glow token>` —
 one glow token, a soft bloom, no other states.
 
@@ -1042,7 +1042,7 @@ ladder's structure, luminance relationships and role assignments are
 preserved (`--deep` near-black canvas, `--card` one step above, `--frame` the
 lifted rule hue, `--note` the brightest ink on the deep, the same
 three-stop water mix), and the glow sits **one rung below its base** per the
-B132 rung rule. The page stays a static single file with all CSS inline and
+TheBoards' `B132` rung rule. The page stays a static single file with all CSS inline and
 **no script** — the selector is a three-way radio group driven by CSS
 `:has`, exactly the landing reference's own mechanism. Nine content slots
 (dates, role titles, blurbs, notes, accomplishments, learnings, footer
@@ -1061,7 +1061,7 @@ verbatim: "The page presents Robert Gregory's banking career as an employer
 selector with a per-employer detail body."; "selecting a title card switches
 the body content below to that employer (wireframe shows PNC Bank selected).
 There is no scrolling carousel — it's a selector."; "the selected card gets a
-soft bloom exactly like TheBoards' card glow (B132 mechanism):
+soft bloom exactly like TheBoards' card glow (`B132` mechanism):
 `border-color: <glow token>; box-shadow: 0 0 8px 0 <glow token>;` — one glow
 token, soft bloom, no other states."; "Use TheBoards' default blue palette
 (`styles.css` root tokens) **as the structural template** — same token
@@ -1180,7 +1180,7 @@ the landing page's conventions, re-tokened to the B47 sand/brown binding:
   employer name the pinned 600 line, the oneliner slot the eyebrow 400
   line), `min-height: rule-y + 29px` hanging each card over the header
   line — all rendered at `--rs`. B47's selection mechanics stand unchanged:
-  the B132 glow verbatim, unselected cards dim + italic, default PNC Bank.
+  TheBoards' `B132` glow verbatim, unselected cards dim + italic, default PNC Bank.
 - **The footer takes the landing lot's floor statically**: the rescaled
   two-row shelf (TheBoards' 122-shelf × k = 134.76 logical, B46/TheBoards
   B73) rendered at `--rs` as a `min-height`; content grows past the floor.
@@ -2111,7 +2111,7 @@ TheBoards' ladder:
 `--water-top` `#636363` (0.1237) · `--water-mid` `#4d4d4d` (0.0737) ·
 `--water-bot` `#333333` (0.0325) · `--frame` `#8c8c8c` (0.2611) ·
 `--note` `#cbcbcb` (0.5962) · `--glow-gray` `#676767` (0.1364 — one rung
-below `--frame`, B132's rung rule) · `--water-bot-a` `51 51 51`.
+below `--frame`, TheBoards' `B132` rung rule) · `--water-bot-a` `51 51 51`.
 
 The ladder's relationships stand unchanged (card above deep, note brightest
 on the deep, glow one rung below frame), and because every rung sits at the
@@ -2905,3 +2905,28 @@ within it's right side of the footer section."
 **Ruling (owner, verbatim):** "Fold the parity pins into scaling.js/tokens.js and delete parity_boards.js"
 
 **Source:** the owner's reply in the Hermes chat, 2026-10-11, to the agent's question on [issue #221](https://github.com/AlastairZeved/The-Portfolio/issues/221) — quoted verbatim: "Fold the parity pins into scaling.js/tokens.js and delete parity_boards.js"
+
+### B90. TheBoards' rule numbers in this ledger are labelled and quoted; the label is not an amendment (owner chat, 2026-10-12)
+
+**Ruling (owner, verbatim):** "A"
+
+The owner ruled that the bare TheBoards rule numbers already inside this
+ledger's entries — `B37`, `B47`, `B73`, `B84`, `B91` and `B132`, written
+where TheBoards' record was meant — are labelled as TheBoards' and put in a
+code span, in place, as the rest of the repository already does
+(`AGENTS.md`, "Quote TheBoards' numbers; never cite them bare"). This is the
+one sanctioned edit to existing entries: it changes no ruling's wording,
+value or meaning, only marks whose numbering a cite belongs to. Every other
+entry stays append-only. Lines touched: the bodies of B28 (`B91`), B45
+(`B84`), B46 (`B37`/`B47`, `B73`, and backticks only inside the owner's
+verbatim quote of `B73`), B47 (`B132` ×3), B49 (`B132`) and B73 (`B132`).
+Reason: TheBoards' record shares this ledger's `B` numbering, so a bare
+TheBoards number here resolves to this ledger's ruling of the same number —
+`B37`, `B47`, `B73` and `B84` already pointed at the wrong ruling, and `B91`
+would have at the next-but-one ruling.
+
+**Source:** the owner's reply in the Claude Code chat, 2026-10-12, quoted
+verbatim: "A" — answering the question: "(A) Allow a small exception. I add
+the "TheBoards'" label to those 10 places in the rulebook, and the wording of
+your rules stays exactly the same. (B) Don't touch the rulebook. Instead,
+your next new rule becomes number 133, skipping 90–132."

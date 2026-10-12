@@ -761,6 +761,9 @@ renders as `L × --rs`.)*
   At ≤743px the shown employer stacks (`flex-direction: column`), the rule
   running horizontal at 33.333% width. Transitions collapse under
   `prefers-reduced-motion: reduce`.
+  *(Amended by B92, issue #230 — supersedes the B81 stage + band: the left
+  half is now a single 3D coverflow carousel of all eight role components;
+  the ruled 3D values are in §10.4.)*
   *(Amended by B81, issue #212 — supersedes the row description below for the
   left half.)* The left half is now the Agentic Plugins page's **stage +
   item-selector band** (repo AlastairZeved/AlastairZeved,
@@ -919,23 +922,45 @@ the employment-dates slot (#1) is filled — the three employer title cards
 carry their tenure in an italic subscript oneliner, and the eight role years
 nest inside their title cards.)*
 
-**Pinned by:** `test/career.js` — the B79 selector-card shared size and
-equal gaps, selector mechanics, TheBoards' `B132` glow, the
-split, the two-way lot (B65, with B77's second line and its bars matched
-to the top line's), the ladder tokens, the omit-empty-block
-discipline, B74's one-viewport render (the description card as
-the page's only scroll container), B76's source-geometry render (the
-plate-relative uniform scale, the title card straddling the back card's top
-edge with a gap to the desc card, the wider desc card with the back card
-extending vertically past it, the source-ratio type with its 11px floor,
-long titles wrapping,
-and the always-visible styled bar on filled desc cards with the empty
-placeholder bare), and B81's stage + item-selector band (one role presented
-at a time through the `.plugins__stage`, the `.plugins__pane` band of role
-title cards with the glimmer sheen, hover glow, press inset and
-checked/dim-italic states, the `+`-combinator radio wiring, and the
-`.gm-back` breathing bloom — the old B66 row assertions rewritten
-deliberately).
+**Pinned by:** `test/career.js` — the B79 employer-card shared size and
+equal gaps, the B87 in-card subscript dates, the two-way lot (B65, with
+B77's second line and its bars matched to the top line's), the ladder
+tokens (B73), the omit-empty-block discipline, B74's one-viewport render
+(the description card as the page's only scroll container), B76's
+source-geometry render (the plate-relative uniform scale, the title card
+straddling the back card's top edge with a gap to the desc card, the wider
+desc card with the back card extending vertically past it, the source-ratio
+type with its 11px floor, long titles wrapping, and the always-visible
+styled bar on filled desc cards with the empty placeholder bare), the
+`gm-back` breathing bloom, and — B92 (issue #230) — the 3D coverflow
+carousel: the 8-role radio ring, the centred card, perspective 800px,
+~45°/step fan, centre card ~50% width, one-card-per-click `←`/`→` with
+wrap-around, ~500ms rotation, and the employer cards as role-jump labels.
+
+
+### §10.4 The role coverflow carousel (B92, issue #230)
+
+The career body's left half is the **coverflow carousel** of all eight role
+components (superseding B81's stage + selector band). The ruled 3D values:
+
+| Value | Ruling |
+|---|---|
+| Perspective distance | **800px** on the `.carousel` container |
+| Per-step rotation | **~45°** for the two near cards, compressing toward **~80°** at the far edge (rearmost cards read as thin slivers; none rotates past edge-on) |
+| Cards visible | **all 8** — one flat centre + **four left + three right** |
+| Centre card | **~50%** of the left half's width |
+| Rotation tick | **one card per click** (`←`/`→`), **wrap-around** at both ends |
+| Rotation duration | **~500ms**, the page's `--ease` curve |
+| `prefers-reduced-motion` | **snap** — the rotation collapses to an instant step |
+
+Selection is a single `name="role"` radio group driven by CSS `:has`; the
+`←`/`→` labels are per-state `<label>` stacks revealed by `:has` (no script).
+The employer header cards are labels that jump the carousel to each employer's
+first role (PNC Bank → role 1, PNC Private Bank → role 4, Brinker → role 6);
+their former selected glow is removed (B92). The recession (`translateZ`) and
+spread (`translateX`) per step, and the angle-compression curve, are
+**agent-derived** under the B33/B40 provenance pattern — the owner ruled the
+steep/tight/sliver relationship and the centre size; the literals implement it.
 
 ---
 

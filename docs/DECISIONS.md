@@ -2936,3 +2936,63 @@ your next new rule becomes number 133, skipping 90–132."
 **Ruling (owner, verbatim):** "Public pages in the site tree: `index.html`, `career.html`, `plantsandrocks.html`, `monstera-storybook.html`." "Add `sitemap.xml` listing the public pages above (canonical `https://razgregory.com/...` URLs)." "Add `robots.txt` that allows crawling and points to the sitemap:" `User-agent: *` / `Allow: /` / `Sitemap: https://razgregory.com/sitemap.xml`. "Confirm both files are served with `text/xml` / `text/plain` and don't trip the CSP."
 
 **Source:** the owner's issue [#229](https://github.com/AlastairZeved/The-Portfolio/issues/229) — quoted verbatim.
+
+### B92. The career body's left half is a 3D coverflow carousel of all eight role components (issue #230)
+
+The `/career` page's left half is rebuilt as a single **3D coverflow carousel**
+presenting **all eight role components** — PNC Bank's three, PNC Private Bank's
+two, Brinker's three — in one fan, replacing the B81 `.plugins__stage` +
+`.plugins__pane` item-selector band (which it does **not** sit alongside).
+
+- **One carousel of all 8 roles.** The **centred card** is the **checked role
+  radio**; the other seven fan out around it — **four left, three right** — each
+  rotated around the Y axis in perspective and **progressively narrower toward
+  the edges** (tight overlap, thin slivers at the far edges). The card internals
+  are the existing `.gregorian-mode` component (`.gm-back`/`.gm-title`/`.gm-uc`/
+  `.gm-desc`), carried over **verbatim** — this ruling repackages them, it does
+  not rebuild them.
+- **Selection is a single radio group of eight** (`name="role"`,
+  `role="radiogroup"` `aria-label="Choose a role"`), driven by CSS `:has` — the
+  page's zero-JS law. The `←` / `→` labels step **one role per click** with
+  **wrap-around** at both ends; each arrow is a stack of per-state `<label>`s
+  revealed by `:has` (a pure-CSS "step ±1 with wrap" has no native "next"), the
+  one agent-built mechanism this ruling requires beyond the existing selector.
+- **The three employer header cards stop being radios.** They become labels
+  that jump the carousel to each employer's first role (PNC Bank → role 1, PNC
+  Private Bank → role 4, Brinker → role 6). This supersedes B47/B79/B81's
+  employer-radiogroup and its selected-card glow — the owner ruled the glow
+  **out** ("lose the glow state") rather than re-derive it.
+- **The ruled 3D values** (UIUX §10.4): **perspective 800px**; **~45° per step**
+  for the near cards, compressing toward **~80°** at the far edge so the rearmost
+  cards read as thin slivers instead of flipping past edge-on; the **centre card
+  ~half the left half's width (50%)**; **all eight visible** (centre + four left
+  + three right); a **~500ms** rotation; **snap** (no animation) under
+  `prefers-reduced-motion`. The recession (`translateZ`) and spread
+  (`translateX`) literals and the angle-compression curve are **agent-derived
+  under the B33/B40 provenance pattern** — the owner ruled the steep / tight /
+  sliver relationship and the centre size; the numbers implement it.
+
+**Carried over unchanged:** the `.gm-*` component internals, B76's source
+geometry and `--u` plate-width scale with the 11px readable floor (now re-anchored
+to the slot's 50%-of-the-left-half width), B74's one-viewport /
+description-card-scrolls law, B73's monochrome tokens, B64's three filled desc
+cards, and the `prefers-reduced-motion` collapse. No new hex, no new token, no
+script.
+
+**Source:** the owner's issue [#230](https://github.com/AlastairZeved/The-Portfolio/issues/230), quoted
+verbatim — "All 8 components containing individual roles needs to be pulled
+from their pages and put in one large 3D carousel. The attached image is the UI
+we're after for this new carousel." and "This carousel is being placed in the
+left 50% of the body section of the page, replacing the components currently
+there." — and the owner's twelve planning answers (owner chat, 2026-10-12,
+multiple choice, quoted verbatim as selected): (1) one carousel holds all 8
+roles fanned together; (2) employer cards stay — picking one spins the carousel
+to that employer's roles; (3) `←`/`→` arrow buttons wired to the hidden radios,
+CSS-only; (4) all 8 visible — centre + four left + three right; (5) steep, ~45°
+tilt per step; (6) one card per click; (7) wrap around both ends; (8) ~500ms
+rotation; (9) reduced motion: snap instantly; (10) perspective ~800px
+(dramatic); (11) centre card ~half the left half's width; (12) tight pack —
+thin slivers at the edges. — and the owner's direction on the employer glow,
+quoted verbatim: "lose the glow state … if you can figure out how to keep the
+glow, then keep it. otherwise lose it."
+

@@ -2930,3 +2930,9 @@ verbatim: "A" — answering the question: "(A) Allow a small exception. I add
 the "TheBoards'" label to those 10 places in the rulebook, and the wording of
 your rules stays exactly the same. (B) Don't touch the rulebook. Instead,
 your next new rule becomes number 133, skipping 90–132."
+
+### B91. Add sitemap.xml (and reference it from robots.txt)
+
+**Ruling (owner, verbatim):** "Public pages in the site tree: `index.html`, `career.html`, `plantsandrocks.html`, `monstera-storybook.html`." "Add `sitemap.xml` listing the public pages above (canonical `https://razgregory.com/...` URLs)." "Add `robots.txt` that allows crawling and points to the sitemap:" `User-agent: *` / `Allow: /` / `Sitemap: https://razgregory.com/sitemap.xml`. "Confirm both files are served with `text/xml` / `text/plain` and don't trip the CSP."
+
+**Source:** the owner's issue [#229](https://github.com/AlastairZeved/The-Portfolio/issues/229) — quoted verbatim.

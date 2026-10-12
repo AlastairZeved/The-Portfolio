@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "the-docket": {
+      "source": {
+        "source": "github",
+        "repo": "AlastairZeved/The-Docket"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "the-docket@the-docket": true
+  }
+}

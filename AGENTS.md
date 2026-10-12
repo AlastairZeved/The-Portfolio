@@ -74,6 +74,7 @@ npm install playwright        # onto NODE_PATH; not committed, no package.json
 node test/tokens.js           # design contract: UIUX §2 recomputed from shipped hexes (no browser)
 node test/security.js         # _headers CSP, zero on*= handlers, zero eval in shipped JS (no browser)
 node test/records.js          # DECISIONS.md B<n> numbering: no duplicate, ascending (no browser)
+node test/docket.js           # the docket's witness: every cite resolves, UIUX token/contrast rows match the CSS, no ledger entry edited (no browser)
 node test/career.js           # the career page (issue #133/B47): employer selector, glow, split, three-section lot
 node test/desktop.js          # desktop grammar: full-viewport sheet, no rail, card link semantics, PDF-free (no export here)
 node test/mobile.js           # touch + band/lot geometry + card states at mobile widths
@@ -130,6 +131,23 @@ none.
 5. **One scene.** The site wears exactly ONE binding of TheBoards' design
    ladder: the To-Do blue (`UIUX §2.1`, owner ruling `DECISIONS.md` B1). The
    ladder does not rotate — a portfolio is not five board types.
+
+## The Docket
+
+This repository runs the Docket plugin (AlastairZeved/The-Docket), enabled
+for every session by `.claude/settings.json`. It enforces the records above;
+it adds no law of its own.
+
+- **Before an edit** it prints the rulings cited near the lines you are about
+  to change. Name the one you rely on.
+- **When you stop** a judge reads your diff against `DECISIONS.md` and
+  `UIUX.md` and can block the stop with the ruling, the line and the way
+  out. Fix the code, or get the owner's ruling — never argue past it.
+- **`test/docket.js`** is the Docket's checker, vendored; CI runs it.
+  Never edit it by hand — re-vendor it from The-Docket (`docket vendor .`).
+- **`/rule`** drafts a ruling and waits for the owner's `confirm`. The
+  record law below still applies on top of it: the entry carries a
+  `Source:` line quoting the owner verbatim.
 
 ## Shipping discipline
 

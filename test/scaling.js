@@ -1,4 +1,6 @@
 /* test/scaling.js — issue #121 (B44): the board scales to ANY viewport size.
+   Also pins the B46 band / title-card / lot laws from UIUX §3.1 literals
+   (issue #221, B89: folded in from the removed cross-repo parity_boards.js).
    The scene renders the owner's issue #112 drawing (B43 geometry in the
    drawing's own reference space, 2560/z × 1440/z, z = 1.3037) through one
    uniform scale, down AND up. At every desktop viewport the render must show:
@@ -169,6 +171,8 @@ function ok(label, cond) {
         if (need <= lwMin + 0.5) break;
         lwMin = need;
       }
+      const rulePx = document.getElementById('band-rule').getBoundingClientRect().top - br.top;
+      const labelFont = getComputedStyle(document.querySelector('.band-label')).fontSize;
       return {
         rs, lwMin, boardRect: [br.left, br.top, br.width, br.height],
         vw: innerWidth, vh: innerHeight,
@@ -176,7 +180,7 @@ function ok(label, cond) {
         overlaps, obscured: obscured,
         lineMaxDev: Math.max(...lines.map(l => l.d)),
         dims,
-        band: { expectedRuleY: bandRuleY(), ruleY, bandTop, cardMinH, cardPad, lotH: lotH(), lotHval, lotItemsClip,
+        band: { rulePx, labelFont, expectedRuleY: bandRuleY(), ruleY, bandTop, cardMinH, cardPad, lotH: lotH(), lotHval, lotItemsClip,
                 cardBottomLogical: (card.getBoundingClientRect().bottom - br.top) / rs }
       };
     }, { REF_W, REF_H });
@@ -204,6 +208,10 @@ function ok(label, cond) {
       r.band.cardPad === `${23.46.toFixed(2)}px 16px 16px` && r.band.cardBottomLogical >= r.band.ruleY + 28);
     ok(`${tag}: lot-h = min(max(134.76 shelf, 34 + Σ rows), ⌈half the sheet⌉) (TheBoards B73 × k)`,
       Math.abs(r.band.lotHval - r.band.lotH) < 0.5, `lot-h ${r.band.lotHval} vs expected ${r.band.lotH}`);
+    ok(`${tag}: band rule renders at rule-y × rs physical px (UIUX §3.1; the 6.1% of vh at floor-inert sizes)`,
+      Math.abs(r.band.rulePx - r.band.ruleY * r.rs) < 1, `rule ${r.band.rulePx} vs ${r.band.ruleY * r.rs}`);
+    ok(`${tag}: band label font-size is 14.36px (UIUX §3.1; B46: TheBoards B54's 13px × k)`,
+      r.band.labelFont === '14.36px', r.band.labelFont);
     ok(`${tag}: #lot-items clips past the lot ceiling`, r.band.lotItemsClip === 'hidden');
   }
   await browser.close();

@@ -2899,3 +2899,9 @@ footer. Then the button \"Learn More About Rob\" should be centered within
 it's right 50% of the footer."; "Make both fixes: 1. Move the divider to the
 correct placement: middle of the footer. 2. Move the button so it's centered
 within it's right side of the footer section."
+
+### B89. Fold the parity pins into scaling.js and delete parity_boards.js (issue #221)
+
+**Ruling (owner, verbatim):** "Fold the parity pins into scaling.js/tokens.js and delete parity_boards.js"
+
+**Source:** the owner's reply in the Hermes chat, 2026-10-11, to the agent's question on [issue #221](https://github.com/AlastairZeved/The-Portfolio/issues/221) — quoted verbatim: "Fold the parity pins into scaling.js/tokens.js and delete parity_boards.js"

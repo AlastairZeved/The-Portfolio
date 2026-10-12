@@ -56,24 +56,34 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 ```
 
 Run the regression suite (dev-only; same black-box Playwright style as
-TheBoards; whole files only, each is one linear scenario):
+TheBoards; whole files only, each is one linear scenario). These are exactly
+the suites `.github/workflows/ci.yml` runs, in CI's order:
 ```
 npm install playwright        # onto NODE_PATH; not committed, no package.json
 node test/tokens.js           # design contract: UIUX §2 recomputed from shipped hexes (no browser)
-node test/mobile.js           # touch + band/lot geometry + card states at mobile widths
-node test/desktop.js          # desktop grammar: full-viewport sheet, no rail, card link semantics, PDF-free (no export here)
+node test/security.js         # _headers CSP, zero on*= handlers, zero eval in shipped JS (no browser)
+node test/records.js          # DECISIONS.md B<n> numbering: no duplicate, ascending (no browser)
 node test/career.js           # the career page (issue #133/B47): employer selector, glow, split, three-section lot
+node test/desktop.js          # desktop grammar: full-viewport sheet, no rail, card link semantics, PDF-free (no export here)
+node test/mobile.js           # touch + band/lot geometry + card states at mobile widths
+node test/movable_resizable.js  # note drag/resize behavior
+node test/plantsandrocks.js   # the plants-and-rocks page
+node test/proof.js            # captures desktop + mobile screenshots for visual review
 node test/scaling.js          # issue #121/B44: the board scales to ANY viewport — no overlaps, no obscured links (B44's own suite; one owner-ruled exception, B78); since B46 also pins the band/title-card/lot laws
-node test/parity_boards.js    # issue #128/B46: rendered side-by-side against a local TheBoards checkout (BOARDS_DIR) — band, title card and lot size by the same convention
 ```
+The former cross-repo `test/parity_boards.js` (issue #128/B46) was removed; its
+geometry pins live in `test/scaling.js` (B89, issue #221).
 
 There is **no `test/sw-update.js`** — the site ships **no service worker**
 (owner ruling, `DECISIONS.md` B13), and that suite's entire subject (the SW
 `CACHE` string) does not exist here. Do not add it. Do not add a service
 worker.
 
-Env overrides: `PORTFOLIO_URL` (default `http://localhost:8000/index.html`),
-`CHROMIUM_PATH`. There is no lint/build/typecheck command — the project has
+Env overrides (read by the tests): `PORTFOLIO_URL` (default
+`http://localhost:8000/index.html`; `career.js` and `plantsandrocks.js` default to
+their own pages on `:8000`), `PORTFOLIO_OUT` (screenshot directory for `mobile.js`,
+`desktop.js`, `movable_resizable.js`), `PROOF_DIR` (output directory for `proof.js`,
+default `/tmp/portfolio-proof`). There is no lint/build/typecheck command — the project has
 none.
 
 ## Architecture: facts that explain most of `index.html`

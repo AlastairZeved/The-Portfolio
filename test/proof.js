@@ -1,7 +1,7 @@
 /* proof.js — capture the shipped page at desktop + mobile for visual review. */
 const { chromium } = require('playwright');
 const path = require('path');
-const URL = process.env.PORTFOLIO_URL || 'http://127.0.0.1:8391/index.html';
+const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/index.html';
 const OUT = process.env.PROOF_DIR || '/tmp/portfolio-proof';
 
 (async () => {

@@ -34,7 +34,7 @@
      0.1237/0.0737/0.0325, --frame 0.2611, --note 0.5962. The ladder's
      relationships are preserved: --deep near-black canvas, --card one step
      above it, --frame the border/rule rung, --note the brightest ink on the
-     deep, and the glow one rung down its base (B132's rung rule). */
+     deep, and the glow one rung down its base (TheBoards' `B132` rung rule). */
   --deep:      #080808;            /* neutral near-black canvas (TheBoards --deep role) */
   --card:      #151515;            /* dark gray card fill, one step above deep */
   --frame:     #8c8c8c;            /* mid gray — borders + all full-width rules */
@@ -45,7 +45,7 @@
   --water-bot-a: 51 51 51;      /* --water-bot's channels, the band's radial foot */
   --ink-light: #f4f5f1;
   --ink-dim:   rgb(244 245 241 / 0.55);
-  --glow-gray: #676767;            /* selected-card bloom: --frame one rung down (B132) */
+  --glow-gray: #676767;            /* selected-card bloom: --frame one rung down (TheBoards' `B132`) */
   --glow-gray-a: 103 103 103;      /* --glow-gray's channels — the component's
                                       breathing presentation bloom re-tokened (B56:
                                       every re-hued value is an existing token) */
@@ -63,7 +63,7 @@
   --band-top: calc(15.46 * var(--rs));   /* TheBoards' 14 × 1.10455 (B46) */
   --rule-y:   calc(67.38 * var(--rs));   /* the rescaled two-line floor (B46): wordmark + oneliner slot */
   --card-pad: calc(16 * var(--rs));      /* the B31 card's 16px logical padding */
-  --lot-floor: calc(134.76 * var(--rs)); /* the rescaled two-row shelf (B46/TheBoards B73) */
+  --lot-floor: calc(134.76 * var(--rs)); /* the rescaled two-row shelf (B46/TheBoards `B73`) */
 }
 @media (min-aspect-ratio: 1) {
   :root { --rs: calc(100vh / 1104.55);   /* vh fallback */
@@ -151,7 +151,7 @@ body {
 }
 
 /* Selection: the radio is checked (default PNC Bank). The selected card wears
-   the B132 glow verbatim — border-color + a single soft 0 0 8px 0 bloom, one
+   TheBoards' `B132` glow verbatim — border-color + a single soft 0 0 8px 0 bloom, one
    token, no other states (issue #133 §1). */
 .topband__card:has(.topband__tab:checked) {
   border-color: var(--glow-gray);
@@ -740,7 +740,7 @@ body:has(#role-brinker-3:checked) .plugin--brinker-3 {
   align-items: center;
   gap: 2rem;
   /* The landing lot's floor (issue #139): the rescaled two-row shelf
-     (TheBoards' 122-shelf × k = 134.76 logical, B46/TheBoards B73), rendered
+     (TheBoards' 122-shelf × k = 134.76 logical, B46/TheBoards `B73`), rendered
      at B46's scale. Content grows past the floor; the padding stands. */
   min-height: var(--lot-floor);
   padding: 0.75rem clamp(1.5rem, 5vw, 4rem);

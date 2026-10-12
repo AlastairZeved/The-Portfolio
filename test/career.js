@@ -1,5 +1,5 @@
 /* test/career.js — the career page (issue #133, B47): three-way employer
-   selector, the B132 glow on the selected title card, split body with ruled bar,
+   selector, TheBoards' `B132` glow on the selected title card, split body with ruled bar,
    two-section parking lot with one divider, the B65 tools line and the B77
    education line beneath it (issue #193), CTA back
    to razgregory.com, the monochrome token ladder (B73), and the plugin components
@@ -126,7 +126,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('the three title cards are equally spaced apart (issue #195, B79)',
     equalGaps195(base195));
 
-  // Default selection: PNC Bank, wearing the B132 glow (one token, soft bloom)
+  // Default selection: PNC Bank, wearing TheBoards' `B132` glow (one token, soft bloom)
   await page.waitForTimeout(300);   // let the 200ms box-shadow transition settle
   const glow = await page.evaluate(() => {
     const card = document.querySelector('.topband__card');
@@ -561,7 +561,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       .map(c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   };
-  ok('luminance ladder holds: card one step above deep, glow one rung below frame (B132 rule)',
+  ok('luminance ladder holds: card one step above deep, glow one rung below frame (TheBoards `B132` rule)',
     lum(tokens.card) > lum(tokens.deep) && lum(tokens.card) / lum(tokens.deep) < 4 &&
     lum(tokens.glow) < lum(tokens.frame));
 

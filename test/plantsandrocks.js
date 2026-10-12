@@ -1,5 +1,5 @@
 /* test/plantsandrocks.js — the Plants & Rocks page (issue #134, B48):
-   two-page selector over the band rule, B132 glow mechanism on the selected
+   two-page selector over the band rule, TheBoards' `B132` glow mechanism on the selected
    card, the poles reader rendering the shipped monstera-storybook.html
    iframe (issue #156, B57 — deliberate rewrite of the blank-body pin) while
    the rocks reader stays empty, two-section parking lot with one divider, a

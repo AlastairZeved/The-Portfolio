@@ -1,11 +1,14 @@
 /* test/career.js — the career page (issue #133, B47): three employer cards,
    the monochrome token ladder (B73), the plugin components (B56/B64/B76), and
-   — B92 (issue #230) — the body's left half as a single 3D coverflow carousel
-   of all 8 role components. One role radio group drives the centred card via
-   CSS :has; the ← / → labels step one role per click with wrap-around; the
-   employer cards jump to each employer's first role. Steep fan (~45°/step,
+   — B92 (issue #230) — the 3D coverflow carousel of all 8 role components,
+   since B95 (issue #250) spanning the WHOLE body (no divider, no right half).
+   One role radio group drives the centred card via CSS :has; the ← / →
+   labels step one role per click with wrap-around; the employer cards jump
+   to each employer's LAST role (B95) and glow two-way with the centred
+   card's employer; the 8 components render at one standardized size (B95).
+   Steep fan (~45°/step,
    compressed at the far edge so the rearmost cards stay thin slivers),
-   perspective 800px, centre card ~half the left half's width, ~500ms rotation,
+   perspective 800px, centre card ~half the carousel's width, ~500ms rotation,
    snap under reduced motion. B74 still bounds the page to one viewport with
    the description card as the only scroll container; B76 still renders the
    agentic-plugins source geometry scaled uniformly by the plate's own width.
@@ -184,19 +187,56 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('clicking next at the last role wraps to the first',
     (await centered()).role === '1');
 
-  // The employer cards spin the carousel to each employer's first role.
-  await page.locator('.topband__card-hit[for="role-4"]').click();
+  // B95 (issue #250): the body is one full-width cell — the divider bar and
+  // the empty right half are gone, and the carousel spans the whole body.
+  ok('B95 — no .split__rule divider, no .split__copy right half (full-width body)',
+    (await page.locator('.split__rule').count()) === 0 &&
+    (await page.locator('.split__copy').count()) === 0 &&
+    (await page.evaluate(() => {
+      const car = document.querySelector('.carousel');
+      const clip = document.querySelector('.clip');
+      return Math.abs(car.getBoundingClientRect().width - clip.getBoundingClientRect().width) < 2;
+    })));
+
+  // B95 (issue #250): the employer cards spin the carousel to each
+  // employer's LAST role (superseding B92's first-role jumps).
+  await page.locator('.topband__card-hit[for="role-3"]').click();
   await page.waitForTimeout(600);
-  ok('the PNC Private Bank card spins the carousel to "Client Service Associate" (role-4)',
-    (await centered()).role === '4' && (await centered()).title === 'Client Service Associate');
-  await page.locator('.topband__card-hit[for="role-6"]').click();
+  ok('the PNC Bank card spins the carousel to "Branch Banker" (role-3, its last)',
+    (await centered()).role === '3' && (await centered()).title === 'Branch Banker');
+  await page.locator('.topband__card-hit[for="role-5"]').click();
   await page.waitForTimeout(600);
-  ok('the Brinker Capital card spins the carousel to "Trader" (role-6)',
-    (await centered()).role === '6' && (await centered()).title === 'Trader');
-  await page.locator('.topband__card-hit[for="role-1"]').click();
+  ok('the PNC Private Bank card spins the carousel to "Portfolio & Trust Administrator" (role-5, its last)',
+    (await centered()).role === '5' && (await centered()).title === 'Portfolio & Trust Administrator');
+  await page.locator('.topband__card-hit[for="role-8"]').click();
   await page.waitForTimeout(600);
-  ok('the PNC Bank card spins the carousel back to role-1',
-    (await centered()).role === '1');
+  ok('the Brinker Capital card spins the carousel to "Sr. Portfolio Specialist" (role-8, its last)',
+    (await centered()).role === '8' && (await centered()).title === 'Sr. Portfolio Specialist');
+
+  // B95 (issue #250): two-way glow — the title card whose employer owns the
+  // centred role carries the selected glow (TheBoards' `B132` border-color +
+  // 0 0 8px 0 bloom, reintroduced), the other two do not.
+  const glowMap = await (async () => {
+    const out = [];
+    for (let role = 1; role <= 8; role++) {
+      await page.evaluate(r => document.getElementById('role-' + r).click(), role);
+      await page.waitForTimeout(350);   // past the card's 200ms box-shadow transition
+      const glow = await page.evaluate(() => {
+        const o = {};
+        for (const e of ['pnc-bank', 'pnc-private-bank', 'brinker-capital']) {
+          o[e] = getComputedStyle(document.querySelector('.topband__card[data-employer="' + e + '"]')).boxShadow.includes('103, 103, 103');
+        }
+        return o;
+      });
+      out.push(role + ':' + Object.keys(glow).find(e => glow[e]));
+    }
+    return out;
+  })();
+  ok('B95 — the two-way title-card glow tracks the centred role\'s employer',
+    JSON.stringify(glowMap) === JSON.stringify([
+      '1:pnc-bank', '2:pnc-bank', '3:pnc-bank',
+      '4:pnc-private-bank', '5:pnc-private-bank',
+      '6:brinker-capital', '7:brinker-capital', '8:brinker-capital']));
 
   // B64 (issue #176): three desc cards carry the owner's copy verbatim; the rest stay empty.
   const B64_COPY = {
@@ -252,6 +292,31 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     await page.evaluate(() =>
       document.querySelectorAll('.gm-title .gm-uc').length === 8 &&
       [...document.querySelectorAll('.gm-uc')].every(u => !!u.closest('.gm-title'))));
+
+  // B95 (issue #250): uniform components — all 8 plates render at one
+  // standardized size (the desc and title cards at one uniform footprint),
+  // scaled together by the slot's single --u; only the longest copy
+  // (role 8, the issue's stated exception) scrolls.
+  const b95uniform = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll('.carousel__slot')].map(s => {
+      const gm = s.querySelector('.gregorian-mode');
+      const d = s.querySelector('.gm-desc');
+      const t = s.querySelector('.gm-title');
+      return { plateW: gm.clientWidth, plateH: gm.offsetHeight,
+               descW: d.clientWidth, descH: d.offsetHeight, titleH: t.offsetHeight,
+               scrollable: d.scrollHeight > d.clientHeight + 1 };
+    });
+    return {
+      onePlate: rows.every(r => r.plateW === rows[0].plateW && r.plateH === rows[0].plateH),
+      oneDesc: rows.every(r => r.descW === rows[0].descW && r.descH === rows[0].descH),
+      oneTitle: rows.every(r => r.titleH === rows[0].titleH),
+      scrollRoles: rows.filter(r => r.scrollable).length,
+    };
+  });
+  ok('B95 — all 8 components render at one standardized plate size',
+    b95uniform.onePlate && b95uniform.oneTitle && b95uniform.oneDesc);
+  ok('B95 — only the longest copy (role 8) scrolls inside the uniform desc card',
+    b95uniform.scrollRoles === 1);
 
   // B76 (issue #194) geometry, on a filled card (role-8, "Sr. Portfolio Specialist").
   const b76 = await (async () => {

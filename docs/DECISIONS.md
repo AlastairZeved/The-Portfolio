@@ -3180,6 +3180,7 @@ the centre card", "Placeholder state"; on the glow: "Pool replaces it",
 "Dims mid-turn", "Subtle", "Keep as is"; on load: "Allow CSS dim to run once
 upon page load as an exemption."; and on shipping: "In the same PR as the
 build" ([issue comment](https://github.com/AlastairZeved/The-Portfolio/issues/257#issuecomment-6156541948)).
+> Addendum 2026-10-13: This entry was appended by the agent without a RULING — PLEASE CONFIRM block or the owner's confirm, so it was never law; B98, put to the owner through /rule and confirmed, replaces it, and every cite now names B98.
 
 ### B98. The career page's role carousel is rebuilt from a left/right coverflow fan into a closed 3D ring of all 8 roles, lit by a light pool on the dark canvas (issue #257; replaces B97; supersedes B92; supersedes B94; partially supersedes B95; keeps B93; keeps B76; keeps B74)
 Principle: One page, one scene.

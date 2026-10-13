@@ -1,6 +1,6 @@
 /* test/career.js — the career page (issue #133, B47): three employer cards,
    the monochrome token ladder (B73), the plugin components (B56/B64/B76), and
-   — B97 (issue #257, superseding B92's coverflow fan) — the 3D RING of all 8
+   — B98 (issue #257, superseding B92's coverflow fan) — the 3D RING of all 8
    role components, since B95 (issue #250) spanning the WHOLE body.
    One role radio group drives the centred card via CSS :has; the ← / →
    labels step one role per click with wrap-around; the employer cards jump
@@ -107,7 +107,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('the three employer cards are equally spaced apart (issue #195, B79)',
     equalGaps195(base195));
 
-  // ---- B92 (issue #230) → B97 (issue #257): the 3D role ring ---- //
+  // ---- B92 (issue #230) → B98 (issue #257): the 3D role ring ---- //
 
   // Structure: one radio group of 8, one slot per role, all in the left half.
   ok('the role ring is one named radio group of 8 (aria-label "Choose a role")',
@@ -124,7 +124,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     await page.locator('#role-1').isChecked());
 
   // The centred card is the checked radio's slot, at zero rotation.
-  // B97: a slot's ring angle is read off its computed transform (the
+  // B98: a slot's ring angle is read off its computed transform (the
   // rotateY's cosine is the matrix's m11); the front card sits at 0°.
   // The turn is a 500ms transition; wait for it to land rather than trust a
   // fixed sleep (a loaded runner can still be mid-turn at 600ms).
@@ -147,7 +147,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     firstCenter.role === '1' && firstCenter.title === 'Branch Sales & Service Representative' &&
     firstCenter.year === '2017-2018');
 
-  // B97 (issue #257): the ring. Eight cards, 45° apart; the front card is
+  // B98 (issue #257): the ring. Eight cards, 45° apart; the front card is
   // the nearest object; the camera sits above; flatter than B92's 800px.
   const ring = await page.evaluate(() => {
     const car = document.querySelector('.carousel');
@@ -182,20 +182,20 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       backOpacity: parseFloat(getComputedStyle(slots[4]).opacity),
     };
   });
-  ok('B97 — 8 cards stand in one ring, 45° apart (0, 45×2, 90×2, 135×2, 180)',
+  ok('B98 — 8 cards stand in one ring, 45° apart (0, 45×2, 90×2, 135×2, 180)',
     JSON.stringify(ring.angles) === JSON.stringify([0, 45, 45, 90, 90, 135, 135, 180]));
-  ok('B97 — the front card is the nearest object: every other card sits behind its plane',
+  ok('B98 — the front card is the nearest object: every other card sits behind its plane',
     Math.abs(ring.frontZ) < 1 && ring.othersBehind);
-  ok('B97 — the front card is the tallest card on screen (each nearest edge, projected)', ring.frontTallest);
-  ok('B97 — flatter than B92\'s 800px, proportional to the card (3.6 card widths)',
+  ok('B98 — the front card is the tallest card on screen (each nearest edge, projected)', ring.frontTallest);
+  ok('B98 — flatter than B92\'s 800px, proportional to the card (3.6 card widths)',
     ring.perspective > 800 && Math.abs(ring.perspective - ring.cardW * 3.6) < 2);
-  ok('B97 — the camera sits above the ring (perspective-origin above the stage)',
+  ok('B98 — the camera sits above the ring (perspective-origin above the stage)',
     parseFloat(ring.originY) < 0);
-  ok('B97 — cards darken with distance; the rearmost is see-through',
+  ok('B98 — cards darken with distance; the rearmost is see-through',
     ring.frontBrightness === 'brightness(1)' &&
     parseFloat(ring.backBrightness.replace(/[^\d.]/g, '')) < 0.2 &&
     ring.backOpacity < 0.5);
-  ok('B97 — the whole ring stays inside the body: no card leaves the page',
+  ok('B98 — the whole ring stays inside the body: no card leaves the page',
     await page.evaluate(() => {
       const c = document.querySelector('.clip').getBoundingClientRect();
       return [...document.querySelectorAll('.carousel__slot')].every(s => {
@@ -206,18 +206,18 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('the ring\'s transitions are ~500ms (ruled)', await page.evaluate(() =>
     getComputedStyle(document.querySelector('.carousel__slot')).transitionDuration
       .split(',').every(d => d.trim() === '0.5s')));
-  ok('B97 — side cards show titles only; the front card\'s description reads',
+  ok('B98 — side cards show titles only; the front card\'s description reads',
     await page.evaluate(() => {
       const d = r => getComputedStyle(document.querySelector(`.carousel__slot[data-role="${r}"] .gm-desc`)).color;
       return d('1') !== 'rgba(0, 0, 0, 0)' && d('3') === 'rgba(0, 0, 0, 0)' && d('8') === 'rgba(0, 0, 0, 0)';
     }));
-  ok('B97 — an empty role shows the quiet "Description coming soon" placeholder',
+  ok('B98 — an empty role shows the quiet "Description coming soon" placeholder',
     await page.evaluate(() => {
       const d = document.querySelector('.carousel__slot[data-role="1"] .gm-desc');
       const b = getComputedStyle(d, '::before');
       return d.matches(':empty') && b.content === '"Description coming soon"' && b.fontStyle === 'italic';
     }));
-  ok('B97 — the arrows sit below the front card, previous left of next, nothing over them',
+  ok('B98 — the arrows sit below the front card, previous left of next, nothing over them',
     await page.evaluate(() => {
       const vis = d => [...document.querySelectorAll(`.carousel__nav--${d} .carousel__nav-hit`)]
         .find(l => getComputedStyle(l).display !== 'none');
@@ -228,14 +228,14 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) === el; };
       return !p.closest('.carousel') && pr.right <= nr.left && pr.top >= back.bottom - 1 && top(p) && top(n);
     }));
-  ok('B97 — the light pool sits outside the 3D context, and no card carries B94\'s glow',
+  ok('B98 — the light pool sits outside the 3D context, and no card carries B94\'s glow',
     await page.evaluate(() => {
       const pool = document.querySelector('.carousel__pool');
       return pool && !pool.closest('.carousel') &&
         getComputedStyle(pool).backgroundImage.startsWith('radial-gradient') &&
         [...document.querySelectorAll('.gm-back')].every(k => !getComputedStyle(k).boxShadow.includes('103, 103, 103'));
     }));
-  ok('B97 — the pool dips on each turn: every role names its own copy of the dip',
+  ok('B98 — the pool dips on each turn: every role names its own copy of the dip',
     await page.evaluate(() => getComputedStyle(document.querySelector('.carousel__pool')).animationName === 'pool-dip-1'));
 
   // Navigation: the ← / → labels step one role per click with wrap-around.
@@ -437,7 +437,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     Math.abs(b76.backPast - 112 * b76.plateW / 830) < 3);
   ok('B76 — a filled desc card always shows the styled in-card bar (overflow-y: scroll)',
     b76.overflowY === 'scroll');
-  ok('B97 — the turn re-names the pool\'s dip (role 8 centred → pool-dip-8)',
+  ok('B98 — the turn re-names the pool\'s dip (role 8 centred → pool-dip-8)',
     await page.evaluate(() => getComputedStyle(document.querySelector('.carousel__pool')).animationName === 'pool-dip-8'));
   ok('B93 — the component base is transparent (the --deep back plate is gone)',
     await page.evaluate(() =>
@@ -508,11 +508,11 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     return [...sheet.cssRules].some(r => r.media && r.media.mediaText.includes('prefers-reduced-motion'));
   }));
 
-  // B97 (issue #257): on a phone the ring is the same ring, scaled down —
+  // B98 (issue #257): on a phone the ring is the same ring, scaled down —
   // the B95 clip wrapper collapsed to 0px tall here before.
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await phone.goto(URL, { waitUntil: 'networkidle' });
-  ok('B97 — at 390px the ring renders (non-zero height) and every card stays on the page',
+  ok('B98 — at 390px the ring renders (non-zero height) and every card stays on the page',
     await phone.evaluate(() => {
       const c = document.querySelector('.clip').getBoundingClientRect();
       const slots = [...document.querySelectorAll('.carousel__slot')];
@@ -521,7 +521,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         return r.left >= -1 && r.right <= innerWidth + 1;
       });
     }));
-  ok('B97 — at 390px the front card is the nearest and the arrows sit below it',
+  ok('B98 — at 390px the front card is the nearest and the arrows sit below it',
     await phone.evaluate(() => {
       const back = document.querySelector('.carousel__slot[data-role="1"] .gm-back').getBoundingClientRect();
       const n = [...document.querySelectorAll('.carousel__nav--next .carousel__nav-hit')]

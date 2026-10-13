@@ -539,7 +539,7 @@ entrance animations, no staggered reveals. **Nothing animates on load.** If a
 new motion cannot name its job in one sentence it is costume and comes out.
 
 
-*(Exemption, B97, issue #257 — the career page's light pool dims mid-turn as
+*(Exemption, B98, issue #257 — the career page's light pool dims mid-turn as
 the role ring turns, and that dim may run once on page load. The owner:
 "Allow CSS dim to run once upon page load as an exemption." Nothing else
 animates on load.)*
@@ -953,7 +953,7 @@ wrap-around, ~500ms rotation, and the employer cards as role-jump labels.
 
 ### §10.4 The role coverflow carousel (B92, issue #230)
 
-*(Superseded by §10.5, B97, issue #257 — the fan is rebuilt as a closed
+*(Superseded by §10.5, B98, issue #257 — the fan is rebuilt as a closed
 ring. The table below is kept as the record of what B92 ruled.)*
 
 The career body's left half is the **coverflow carousel** of all eight role
@@ -1013,7 +1013,7 @@ the centred glow blooms past it without drawing the component's boundary.)*
 
 ---
 
-### §10.5 The role ring (B97, issue #257)
+### §10.5 The role ring (B98, issue #257)
 
 The 8 role components stand in **one closed ring**, 45° apart, turning
 around a vertical axis; the checked role is the front card. One unit carries

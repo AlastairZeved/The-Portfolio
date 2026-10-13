@@ -2,7 +2,7 @@
 <!-- razgregory.com/career — the employer-selector career page (issue #133,
      DECISIONS.md B47). Structure:
      header.topband with title cards over the water band, .split with
-     the full-width role ring (B97), footer .parking-lot with a .cta. The palette is TheBoards'
+     the full-width role ring (B98), footer .parking-lot with a .cta. The palette is TheBoards'
      token ladder re-hued to monochrome (B73; owner signs off on the
      final hexes — blank slot 9). Selection is the eight-way role radio group
      driven by CSS :has — this page needs no script. -->
@@ -226,7 +226,7 @@ main { flex: 1 1 auto; display: flex; }
   width: 100%;
   height: 100%;
   overflow: clip;
-  /* B97 (issue #257): the ring's size container (--ring-w resolves against
+  /* B98 (issue #257): the ring's size container (--ring-w resolves against
      it) and a column -- the ring's stage, then the arrows below it. */
   container-type: size;
   display: flex;
@@ -250,7 +250,7 @@ main { flex: 1 1 auto; display: flex; }
   align-items: center;
 }
 
-/* ---- B97 (issue #257): the role RING. The 8 role components stand in one
+/* ---- B98 (issue #257): the role RING. The 8 role components stand in one
    closed ring, 45deg apart, turning around a vertical axis -- superseding
    B92's left/right coverflow fan (the owner: "it was supposed to be circular
    and dimensional with all 8 in a circle shape, utilizing the background").
@@ -574,7 +574,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   box-shadow: var(--elevation);
   overflow: hidden;
 }
-/* B97 (issue #257): B94's selected glow on the centred card's back card is
+/* B98 (issue #257): B94's selected glow on the centred card's back card is
    removed -- the light pool behind the ring (.carousel__pool) is the scene's
    one light source, so no box edge can show. */
 .gm-back::after {
@@ -717,7 +717,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
    the owner ruled. Width is the B76 source ratio (600 of 830). */
 .gm-desc { flex: 0 1 calc(450 * var(--u)); }
 .gm-desc:empty { min-height: 0; }
-/* B97 (issue #257): a role whose copy is not written yet shows a quiet
+/* B98 (issue #257): a role whose copy is not written yet shows a quiet
    placeholder instead of a blank slab -- the landing page's dim-italic
    grammar, in the card's own ink at reduced strength (~5:1 on --note). It
    fades with the description text on the side cards. The card stays
@@ -918,7 +918,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
      row: the left half now fills its grid cell (the stage above, the band
      below). The stage's single component still caps at the stage height and
      the description card remains the page's only scroll container. The
-     component does not clip (`visible`, B94) -- since B97 nothing blooms past
+     component does not clip (`visible`, B94) -- since B98 nothing blooms past
      it, but a clip would cut the title card where it straddles the back card. */
   .gregorian-mode { max-height: 100%;               /* the component's own cap */
                     overflow: visible; }            /* no clip */
@@ -946,7 +946,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
      would render ~5.4px) to a readable mobile size, the topband-card reset's
      own pattern. */
   .gregorian-mode { flex: 0 0 auto; max-height: none; overflow: visible; }
-  /* B97 (issue #257): the same ring, scaled down. The page scrolls here, so
+  /* B98 (issue #257): the same ring, scaled down. The page scrolls here, so
      the ring's size container takes a height from the width (a size container
      cannot take it from its content), and the card takes a larger share of
      the narrow body than on desktop. */
@@ -1072,7 +1072,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
       </div>
     </section>
     </div>
-    <!-- B97 (issue #257): the arrows sit below the front card, outside the
+    <!-- B98 (issue #257): the arrows sit below the front card, outside the
          ring's 3D context. -->
     <div class="carousel__controls">
       <div class="carousel__nav carousel__nav--next">

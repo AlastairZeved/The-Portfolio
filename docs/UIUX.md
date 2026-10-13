@@ -751,11 +751,19 @@ renders as `L × --rs`.)*
   rule. Unselected cards are dim + italic (§4's unselected grammar); the
   selected card wears TheBoards' `B132` glow verbatim:
   `border-color: var(--glow-gray); box-shadow: 0 0 8px 0 var(--glow-gray);`
-  and no other state. Default selection: PNC Bank. The header is the
+  and no other state. *(B95, issue #250: the glow — removed by B92 — is
+  REINTRODUCED as a two-way state: the card whose employer owns the centred
+  carousel role is the selected one, the values unchanged.)* Default
+  selection: PNC Bank. The header is the
   selector's `role="radiogroup"` (`aria-label="Choose an employer"`); the
   page's one `h1` ("Career") is visually hidden so no wordmark encodes
   selection state in the heading outline.
-- **Body (per-employer detail):** the shown employer is the split grid —
+- **Body (per-employer detail):** *(amended by B95, issue #250 — the split is
+  gone: no `1fr 1px 1fr` grid, no `.split__rule` divider, no `.split__copy`
+  right half; the body is ONE full-width cell and the carousel spans the
+  entire body content area, bounded by an `overflow: clip` wrapper so the
+  fanned plates' projected corners cannot scroll the page.)* the shown
+  employer is the split grid —
   `1fr 1px 1fr` with a 2rem gutter, the ruled bar `--frame` at 33.333% of a
   definite row track, the landing page's `.split`/`.split__rule` verbatim.
   At ≤743px the shown employer stacks (`flex-direction: column`), the rule
@@ -941,7 +949,8 @@ wrap-around, ~500ms rotation, and the employer cards as role-jump labels.
 ### §10.4 The role coverflow carousel (B92, issue #230)
 
 The career body's left half is the **coverflow carousel** of all eight role
-components (superseding B81's stage + selector band). The ruled 3D values:
+components (superseding B81's stage + selector band; since B95, issue #250,
+the carousel spans the ENTIRE body content area). The ruled 3D values:
 
 | Value | Ruling |
 |---|---|
@@ -961,6 +970,26 @@ their former selected glow is removed (B92). The recession (`translateZ`) and
 spread (`translateX`) per step, and the angle-compression curve, are
 **agent-derived** under the B33/B40 provenance pattern — the owner ruled the
 steep/tight/sliver relationship and the centre size; the literals implement it.
+
+*(Amended by B95, issue #250 — the employer cards now jump to each employer's
+LAST role: PNC Bank → role 3 "Branch Banker", PNC Private Bank → role 5
+"Portfolio & Trust Administrator", Brinker Capital → role 8 "Sr. Portfolio
+Specialist". The selected glow is REINTRODUCED, now two-way: the title card
+whose employer owns the centred role (roles 1–3 → PNC Bank, 4–5 → PNC Private
+Bank, 6–8 → Brinker Capital) carries TheBoards' `B132` glow verbatim
+(`border-color` + a single soft `0 0 8px 0` bloom, the existing `--glow-gray`
+token), driven by the carousel's checked role through `body:has(...)`. — and
+the 8 components render at ONE standardized size: one uniform `--u` on the
+`.carousel__slot` container query scales every piece of every component
+together (the B76 per-plate container query is superseded — it sized each
+plate by its own fan position's rendered width, so the 8 came out different
+sizes); the description card is uniform in height and width with an always
+visible scroll bar where the text exceeds the space (roles 3 and 5 fit
+without scrolling; role 8, the longest, scrolls — the issue's stated
+exception); the title card renders at the tallest natural wrap (3 title lines
++ the year) so all 8 components are the same height; no piece individually
+scales on viewport size — the component as a whole scales 1:1 for different
+viewport sizes.)*
 
 *(Amended by B93, PR #236 — the component's own `--deep` base fill (the "black
 back plate") is removed: each `.gregorian-mode` is **transparent** and its

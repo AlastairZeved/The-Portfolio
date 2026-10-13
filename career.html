@@ -163,6 +163,21 @@ body {
   inset: calc(-2 * var(--rs));
   cursor: pointer;
 }
+/* B95 (issue #250): the employer title cards glow again, two-way. The
+   selected state is TheBoards' `B132` glow verbatim, as it was before B92
+   removed it (border-color + a single soft 0 0 8px 0 bloom, the one token)
+   — but it is now driven by the CAROUSEL, not its own radio: the card whose
+   employer owns the centred (checked) role is the selected one (PNC Bank
+   owns roles 1-3, PNC Private Bank 4-5, Brinker 6-8). */
+body:has(#role-1:checked, #role-2:checked, #role-3:checked)
+  .topband__card[data-employer="pnc-bank"],
+body:has(#role-4:checked, #role-5:checked)
+  .topband__card[data-employer="pnc-private-bank"],
+body:has(#role-6:checked, #role-7:checked, #role-8:checked)
+  .topband__card[data-employer="brinker-capital"] {
+  border-color: var(--glow-gray);
+  box-shadow: 0 0 8px 0 var(--glow-gray);
+}
 
 /* The B31 type: both lines at 20px logical, single size in the card — the
    employer name is the pinned line (600), the oneliner slot the eyebrow (400),
@@ -202,8 +217,21 @@ body {
 
 main { flex: 1 1 auto; display: flex; }
 
-/* ---- Body — per-employer detail (issue #133 §2). Split in half by a bar,
-   exactly the landing page's .split with .split__rule. ---- */
+/* B95 (issue #250): the full-width carousel's fanned plates' projected
+   corners reach past the viewport (measured -641px left at the design
+   canvas) and scroll the page; the clip wrapper bounds them without
+   touching the .carousel's own 3D context (overflow: clip on the carousel
+   itself would force transform-style: flat and flatten the fan). */
+.clip {
+  width: 100%;
+  height: 100%;
+  overflow: clip;
+}
+
+/* ---- Body — per-employer detail (issue #133 §2). B95 (issue #250): the
+   body is a single full-width cell — the landing page's .split .split__rule
+   divider and the empty .split__copy right half are removed; the carousel
+   spans the entire body content area. ---- */
 .split {
   flex: 1 1 auto;
   min-height: 0;
@@ -212,20 +240,10 @@ main { flex: 1 1 auto; display: flex; }
   padding: 1.5rem clamp(1.5rem, 5vw, 4rem);
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 1fr 1px 1fr;
+  grid-template-columns: 1fr;
   grid-template-rows: 1fr;
-  column-gap: 2rem;
   align-items: center;
 }
-.split__rule {
-  height: 33.333%;
-  background: var(--frame);
-}
-
-/* The shown employer is itself the split grid — same columns, gutter and
-   centred ruled bar as the landing page's .split. A definite row track (the
-   grid stretches to the main area's height) is what makes the rule's
-   33.333% height resolve. */
 
 /* ---- B92 (issue #230): the left half is a 3D coverflow carousel of all 8
    role components. The one checked role radio is the centred card; the other
@@ -243,7 +261,6 @@ main { flex: 1 1 auto; display: flex; }
    script. ---- */
 .carousel {
   position: relative;
-  align-self: stretch;
   min-width: 0;
   min-height: 0;
   width: 100%;
@@ -267,6 +284,15 @@ main { flex: 1 1 auto; display: flex; }
   left: 50%; top: 50%;
   width: 50%;
   min-width: 0;
+  /* B95 (issue #250): the SLOT is the scale container — one uniform --u for
+     all 8 components (the B76 per-plate container query is superseded: it
+     sized each plate by its own fan position's rendered width, so the 8 came
+     out different sizes). Every slot is 50% of the carousel, so
+     1 source px = --u = own-slot-width/830 for every piece of every
+     component — the whole component scales together as one unit, and all 8
+     render at exactly the same standardized height and width. */
+  container-type: inline-size;
+  --u: calc(100cqw / 830);
   transform-origin: 50% 50%;
   transform: translate(-50%, -50%) translateX(var(--tx, 0))
              rotateY(var(--ry, 0deg)) translateZ(var(--tz, 0));
@@ -445,11 +471,11 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   min-height: 0;
   min-width: 0;
   width: 100%;
-  /* B76: the plate is its own container — every literal below scales by the
-     plate's width, 1 source px = --u = plate-width/830 (the source's fixed
-     830px design, rendered at the plate's share of the row). */
-  container-type: inline-size;
-  --u: calc(100cqw / 830);
+  /* B95 (issue #250): the component's pieces all scale by the ONE uniform
+     --u inherited from its .carousel__slot (the B76 per-plate container
+     query is superseded — it sized each plate by its own fan position's
+     rendered width, so the 8 came out different sizes). The component
+     scales together as a whole; no piece sizes itself. */
   display: flex;
   flex-direction: column;       /* title → year → desc, the reflow's flow */
   /* B93 (PR #236): no base fill — the component's own `--deep` ("black back
@@ -564,6 +590,11 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: 
   letter-spacing: 0.05em;
   text-transform: uppercase;
   white-space: normal;             /* wrap only if a title asks for it (B76: long titles wrap) */
+  /* B95 (issue #250): the title card is UNIFORM — the flex-basis is the
+     tallest natural wrap (3 lines of title + the year, the longest role
+     title), so every component renders at the same height whatever its
+     title's line count. */
+  flex: 0 1 calc(180 * var(--u));
   box-shadow: var(--elevation);
   overflow: hidden;
 }
@@ -636,13 +667,22 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: 
   line-height: 1.6;                /* the source's 32px at 20px type */
   box-shadow: var(--elevation);
 }
-/* B76: the FILLED card's scroll bar is ALWAYS visible — overflow-y: scroll
-   keeps the styled in-card bar present even where the copy fits (the thumb
-   renders when the content overflows). The empty placeholder stays bare,
-   as the owner ruled, and keeps its 116u size as a shrinkable flex basis
-   under the B74 cap. */
-.gm-desc:empty { flex: 0 1 calc(116 * var(--u)); min-height: 0; }
-.gm-desc:not(:empty) { flex: 0 1 auto; min-height: 0; overflow-y: scroll; }
+/* B95 (issue #250): the 8 description cards are UNIFORM — one standardized
+   height and width (the user's issue #250 answers: "the description card of
+   each component should be uniform in height and width, enabling an always
+   visible vertical scroll bar where text exceeds space. No piece of the
+   component should be individually scaling based on any viewport size. The
+   component as a whole should scale larger and smaller 1:1 for different
+   viewport sizes."). The uniform height is sized from the longest copies:
+   roles 3 and 5 fit inside it without scrolling; role 8 (the longest, the
+   issue's stated exception) scrolls — the FILLED card's styled in-card bar
+   stays ALWAYS visible (B76), the thumb rendering when the content
+   overflows. The empty card keeps the same uniform box as the filled ones
+   (the B56 116u placeholder is superseded), bare of the scroll region, as
+   the owner ruled. Width is the B76 source ratio (600 of 830). */
+.gm-desc { flex: 0 1 calc(450 * var(--u)); }
+.gm-desc:empty { min-height: 0; }
+.gm-desc:not(:empty) { min-height: 0; overflow-y: scroll; }
 /* The bar is a real, visible, in-card scroll bar (B75, carried into B76):
    ::-webkit-scrollbar forces the classic (non-overlay) bar Chromium and
    Safari otherwise auto-hide — 6px, so it takes no room — its thumb the
@@ -849,10 +889,6 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: 
   .topband__card-hit { inset: -2px; }
   .topband__wordmark { font-size: 1.1rem; }
   .topband__oneliner { font-size: 0.8rem; }
-  /* The mobile stack targets the shown employer itself — the split grid lives
-     on .employer, not on a .split wrapper (the landing reference has no such
-     wrapper), so the :has selectors keep the specificity race won. */
-  .split__rule { width: 33.333%; height: 1px; }
   /* B81 (issue #212): on mobile the stage shows the one component at its
      natural size (the page scrolls, B74's grill answer) and the role band
      sits beneath it; the cap and the internal desc scroll are lifted. The
@@ -881,34 +917,34 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: 
 
 <header class="topband">
   <!-- Selector card 1 of 3: PNC Bank (default selection) -->
-  <div class="topband__card">
+  <div class="topband__card" data-employer="pnc-bank">
     <h2 class="topband__wordmark">PNC Bank</h2>
     <p class="topband__oneliner">2017-2020</p>
-    <label class="topband__card-hit" for="role-1" aria-label="PNC Bank roles"></label>
+    <label class="topband__card-hit" for="role-3" aria-label="PNC Bank roles"></label>
   </div>
   <!-- Selector card 2 of 3: PNC Private Bank -->
-  <div class="topband__card">
+  <div class="topband__card" data-employer="pnc-private-bank">
     <h2 class="topband__wordmark">PNC Private Bank</h2>
     <p class="topband__oneliner">2020-2022</p>
-    <label class="topband__card-hit" for="role-4" aria-label="PNC Private Bank roles"></label>
+    <label class="topband__card-hit" for="role-5" aria-label="PNC Private Bank roles"></label>
   </div>
   <!-- Selector card 3 of 3: Brinker Capital -->
-  <div class="topband__card">
+  <div class="topband__card" data-employer="brinker-capital">
     <h2 class="topband__wordmark">Brinker Capital</h2>
     <p class="topband__oneliner">2022-Present</p>
-    <label class="topband__card-hit" for="role-6" aria-label="Brinker Capital roles"></label>
+    <label class="topband__card-hit" for="role-8" aria-label="Brinker Capital roles"></label>
   </div>
 </header>
 
 <main>
   <div class="split">
+    <div class="clip">
     <section class="carousel" role="radiogroup" aria-label="Choose a role">
-      <!-- B92 (issue #230): the career body's left half is a 3D coverflow
-           carousel of all 8 role components. Each role is one radio in a single
-           group; the checked radio is the centred card; the &#8592; / &#8594;
-           labels step one role per click with wrap-around; the employer header
-           cards jump to each employer's first role. Selection is CSS :has only
-           -- no script. -->
+      <!-- B95 (issue #250): the carousel spans the whole body content area — the
+           .split__rule divider and the empty .split__copy right half are gone.
+           Each employer title card jumps to that employer's LAST role; the
+           carousel sets a selected glow on the title card whose employer owns
+           the centred role. Still CSS :has only — no script. -->
       <input class="carousel__radio" type="radio" name="role" id="role-1" checked aria-label="Branch Sales &amp; Service Representative">
       <input class="carousel__radio" type="radio" name="role" id="role-2" aria-label="Branch Sales &amp; Service Associate">
       <input class="carousel__radio" type="radio" name="role" id="role-3" aria-label="Branch Banker">
@@ -996,12 +1032,6 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: 
         </div>
       </div>
     </section>
-    <div class="split__rule" aria-hidden="true"></div>
-    <div class="split__copy">
-      <!-- SLOT (blank #5): accomplishments -- owner fills in.
-           SLOT (blank #6): learnings/skills -- owner fills in.
-           Per B47 (owner ruling): empty blocks are OMITTED from the rendered
-           page entirely until owner content exists. -->
     </div>
   </div>
 </main>

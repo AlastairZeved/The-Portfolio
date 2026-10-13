@@ -3048,3 +3048,63 @@ suddenly turning back looks like a border in the shape of a rectangle all the
 way ALL THREE cards in the component. It's like the border radius of the
 component as a whole."
 
+
+### B95. The carousel spans the full body; the 8 components render at one standardized size; the employer title cards jump to the last role and glow two-way with the carousel (issue #250)
+
+Three changes to the `/career` body, superseding the named clauses of B92
+and B76 below:
+
+1. **Full-width carousel, no divider.** The `.split` body's `1fr 1px 1fr`
+   grid, its `.split__rule` divider bar and the empty `.split__copy` right
+   half are removed; the carousel spans the entire body content area as one
+   full-width cell. A `overflow: clip` wrapper bounds the fanned plates'
+   projected corners (they reach past the viewport at the full width and
+   scrolled the page) without touching the carousel's own 3D context.
+
+2. **Uniform component size.** All 8 role components render at one
+   standardized height and width, each piece scaled by ONE uniform `--u`
+   carried on the `.carousel__slot` container query (the B76 per-plate
+   container query is superseded — it sized each plate by its own fan
+   position's rendered width, so the 8 came out different sizes). The
+   description card is uniform in height and width, with an always visible
+   vertical scroll bar where the text exceeds the space; the longest copies
+   (roles 3 and 5) fit without scrolling and the longest (role 8, the issue's
+   stated exception) scrolls. The title card renders at the tallest natural
+   wrap (3 title lines + the year) so all 8 are the same height whatever
+   their title's line count. No piece of the component individually scales
+   on any viewport size — the component as a whole scales 1:1 for different
+   viewport sizes.
+
+3. **Two-way employer title-card navigation.** Selecting a title card swipes
+   the carousel to that employer's LAST role (PNC Bank → role 3 "Branch
+   Banker", PNC Private Bank → role 5 "Portfolio & Trust Administrator",
+   Brinker Capital → role 8 "Sr. Portfolio Specialist"), superseding B92's
+   first-role jumps. Clicking through the carousel sets the selected glow on
+   the title card whose employer owns the centred role (roles 1–3 → PNC
+   Bank, 4–5 → PNC Private Bank, 6–8 → Brinker Capital) — the pre-B92
+   employer-glow mechanism reintroduced, now driven by the carousel: the
+   `B132` glow verbatim (border-color + a single soft 0 0 8px 0 bloom, the
+   existing `--glow-gray` token; no new value).
+
+**Source:** the owner's issue
+[#250](https://github.com/AlastairZeved/The-Portfolio/issues/250), quoted
+verbatim — "Full-width carousel, no divider. The `/career` body currently
+splits into a left half (the carousel), a 1px `.split__rule` divider, and an
+empty right half (`.split__copy`). The carousel should span the entire body
+content area; remove the divider bar (and the now-empty right half).";
+"Each role component should render at a standardized height and width so all
+8 are the same size. Aim to fit every description card's copy without a
+vertical scroll bar, but allow exceptions (e.g. the longest descriptions)
+where a scroll is unavoidable."; and the two-way navigation with its exact
+role mappings ("PNC Bank → Branch Banker (role 3)", "PNC Private Bank →
+Portfolio & Trust Administrator (role 5)", "Brinker Capital → Sr. Portfolio
+Specialist (role 8)"; "roles 1–3 → PNC Bank", "roles 4–5 → PNC Private Bank",
+"roles 6–8 → Brinker Capital"). — and the owner's clarify answers on the
+uniform sizing (2026-10-13), quoted verbatim — "the description card of each
+component should be uniform in height and width, enabling an always visible
+vertical scroll bar where text exceeds space. No piece of the component
+should be individually scaling based on any viewport size. The component as a
+whole should scale larger and smaller 1:1 for different viewport sizes." —
+and, choosing the footprint to size against, "Match the longest description
+card (role 8, ~3 short paragraphs) with no scroll — the size every card
+copies" and "~480px — a middle ground, still readable, tighter fan".

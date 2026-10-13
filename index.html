@@ -6,7 +6,8 @@
 <title>The Portfolio of Robert Alastair Zeved Gregory</title>
 <style>
 /* ============================================================
-   The-Portfolio — single-file landing page (B12, B16, B17)
+   The-Portfolio — landing page, CSS inline (B12, B16, B17);
+   JS external in app.js (issue #151, B59)
    Rendering authority: docs/UIUX.md. One binding: To-Do blue.
    ============================================================ */
 
@@ -65,15 +66,8 @@ body {
 }
 
 /* ---- The page: one bounded sheet (PRD §3.1) ---- */
-/* One logical page, one render scale (issue #87, B30). The sheet is a fixed
-   reference-width scene (REF_W×REF_H, the widths at which the B2 authored
-   geometry fills without clipping) rendered through a single uniform
-   transform: scale(). On narrow viewports the sheet shrinks as a whole — the
-   authored left/top % and px width/height stand untouched, every card scales
-   with the scene, nothing reflows and nothing clips. Width/height are set in
-   JS to the logical size (vw/scale, vh/scale) so the scaled sheet always
-   fills the viewport exactly, edge to edge. transform-origin 0 0 keeps the
-   top-left coordinate truthful (TheBoards AGENTS.md architecture point 1). */
+/* One logical page, one render scale — the scale law lives in the scale
+   block in app.js (issue #87, B30; #121, B44; #128, B46). */
 #board {
   position: absolute;
   left: 0; top: 0;
@@ -116,10 +110,11 @@ body {
 #zone-components   { left: var(--gutter);
                      right: calc(100% - var(--card-l) + var(--card-gap)); }
 /* issue #107: the Requirements zone anchors to the TITLE CARD's rendered right
-   border (see the scale block) — the door-column calc below assumes the card
-   spans the whole --card-w slot, but the card hugs its text (B19), so the calc
-   strand leaves a dead gap between the border and the line. Kept as the
-   no-JS fallback; the scale block overrides --req-left from the rendered card. */
+   border (see the scale block in app.js, issue #151, B59) — the door-column
+   calc below assumes the card spans the whole --card-w slot, but the card
+   hugs its text (B19), so the calc strand leaves a dead gap between the
+   border and the line. Kept as the no-JS fallback; app.js's scale block
+   overrides --req-left from the rendered card. */
 #zone-requirements { left: var(--req-left, calc(var(--card-l) + var(--card-w) + var(--card-gap)));
                      right: var(--gutter); }
 .band-label {
@@ -460,9 +455,6 @@ body {
   align-items: start;
   justify-content: start;           /* anchored left; right side of the pane stays free */
   width: 100%;
-
-  /* Name (top) + Email (bottom) stack in the left 15% column; Message takes the 30% track,
-     single full width, its size unchanged from the pre-fix three-equal-fields layout. */
 }
 #contact-form .left-column {
   display: flex; flex-direction: column; gap: 12px;
@@ -698,8 +690,8 @@ Planned future work: Add landing pages</div>
        (TheBoards' `UIUX §4.6` / `B91`) — a line between two cards' centres,
        below the notes,
        never a hit target. Endpoints are computed from live card geometry
-       in the script below, so a line follows a card that is dragged or
-       resized; only the pairing is authored here. -->
+       in app.js (issue #151, B59), so a line follows a card that is dragged
+       or resized; only the pairing is authored here. -->
   <svg id="link-layer" aria-hidden="true" focusable="false">
     <line data-link="1" data-from="music" data-to="writing"></line>
     <line data-link="2" data-from="software-ai" data-to="community"></line>

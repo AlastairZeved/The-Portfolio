@@ -538,6 +538,11 @@ glow ~120–200ms ease-out; pressed inset ~80ms; no keyframes that loop, no
 entrance animations, no staggered reveals. **Nothing animates on load.** If a
 new motion cannot name its job in one sentence it is costume and comes out.
 
+
+*(Exemption, B97, issue #257 — the career page's light pool dims mid-turn as
+the role ring turns, and that dim may run once on page load. The owner:
+"Allow CSS dim to run once upon page load as an exemption." Nothing else
+animates on load.)*
 ---
 
 ## §6 The contact form (Parking Lot)
@@ -948,6 +953,9 @@ wrap-around, ~500ms rotation, and the employer cards as role-jump labels.
 
 ### §10.4 The role coverflow carousel (B92, issue #230)
 
+*(Superseded by §10.5, B97, issue #257 — the fan is rebuilt as a closed
+ring. The table below is kept as the record of what B92 ruled.)*
+
 The career body's left half is the **coverflow carousel** of all eight role
 components (superseding B81's stage + selector band; since B95, issue #250,
 the carousel spans the ENTIRE body content area). The ruled 3D values:
@@ -1004,6 +1012,40 @@ it **cross-fades** between cards on the carousel's 500ms rotation
 the centred glow blooms past it without drawing the component's boundary.)*
 
 ---
+
+### §10.5 The role ring (B97, issue #257)
+
+The 8 role components stand in **one closed ring**, 45° apart, turning
+around a vertical axis; the checked role is the front card. One unit carries
+every value: `--ring-w`, the card width, sized against the `.clip` container
+so the whole ring scales 1:1 with the body.
+
+| Value | Ruling (owner) | Literal (agent-derived, B33/B40) |
+|---|---|---|
+| Shape | closed ring of all 8, 45° apart | `--a = (i − n) × 45deg`, not normalized: the ring turns rigidly |
+| Front card | the nearest object; no card pokes out in front | at z = 0; every other card's nearest edge at z < 0 |
+| Card width | — | `min(40cqw, 70cqh)` desktop · `min(48cqw, 70cqh)` ≤743px |
+| Ring radius | wide, dark gaps between cards | `1.6 × --ring-w` desktop · `1.25 ×` ≤743px (edge-to-edge is ~1.21) |
+| Perspective | flatter than B92's 800px | `3.6 × --ring-w` (~1690px at 1440 × 900) |
+| Camera | slightly above, looking down | `perspective-origin: 50% -12%` |
+| Depth falloff | darken with distance; rearmost near `--deep` | `brightness(0.12 + 0.88·c⁴)`, `c = (1 + cos a) / 2` → 1, 0.59, 0.18, 0.12, 0.12 |
+| Back cards | face outward, see-through | `opacity: clamp(0.4, 1 + 0.85·cos a, 1)` — 1 to edge-on, 0.4 behind |
+| Side-card text | titles only | `.gm-desc` text `transparent` except on the front card, faded on the turn |
+| Edges | nothing leaves the page | the ring's projected span fits the body at every width |
+| Turn | one card per click, wrap at both ends, ~500ms, `--ease` | CSS-only: the wrap and some employer jumps turn the long way round |
+| Reduced motion | snap | the page's global collapse |
+| Arrows | below the front card | `.carousel__controls`, outside the 3D context, previous left of next |
+| Mobile | the same ring, scaled down | full-bleed body, `.clip` height `96vw` |
+| Empty roles | quiet placeholder | "Description coming soon", italic, the card's own ink at `opacity: 0.6` |
+
+**Light.** B94's centred-card glow is removed. A **soft, edgeless light pool**
+sits on the canvas behind the front card, outside the 3D context, so it never
+sorts in front of a card: a `radial-gradient` of the existing
+`--glow-gray-a` channels (alpha 0.2 → 0.12 → 0.04 → 0 at 0 / 30 / 60 / 90%),
+`2.4 × 1.7` card widths. It stays fixed and **dims mid-turn** to `opacity:
+0.45` at 50% of a 500ms dip; each role names its own copy of the keyframes
+(`pool-dip-1` … `pool-dip-8`), so a change of role restarts the dip. The dip
+runs once on load (the §5 exemption). B95's employer title-card glow stands.
 
 ## §11 The Plants & Rocks page (issue #134, B48; conventions fixed by B50)
 

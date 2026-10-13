@@ -2,10 +2,10 @@
 <!-- razgregory.com/career — the employer-selector career page (issue #133,
      DECISIONS.md B47). Structure:
      header.topband with title cards over the water band, .split with
-     the full-width role carousel, footer .parking-lot with a .cta. The palette is TheBoards'
+     the full-width role ring (B97), footer .parking-lot with a .cta. The palette is TheBoards'
      token ladder re-hued to monochrome (B73; owner signs off on the
-     final hexes — blank slot 9). Selection is a three-way radio group driven
-     by CSS :has — this page needs no script. -->
+     final hexes — blank slot 9). Selection is the eight-way role radio group
+     driven by CSS :has — this page needs no script. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -226,6 +226,11 @@ main { flex: 1 1 auto; display: flex; }
   width: 100%;
   height: 100%;
   overflow: clip;
+  /* B97 (issue #257): the ring's size container (--ring-w resolves against
+     it) and a column -- the ring's stage, then the arrows below it. */
+  container-type: size;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ---- Body — per-employer detail (issue #133 §2). B95 (issue #250): the
@@ -245,31 +250,52 @@ main { flex: 1 1 auto; display: flex; }
   align-items: center;
 }
 
-/* ---- B92 (issue #230): the left half is a 3D coverflow carousel of all 8
-   role components. The one checked role radio is the centred card; the other
-   seven fan out -- 4 left, 3 right -- each rotated around the Y axis in
-   perspective, progressively narrower toward the edges (tight, thin slivers at
-   the far edges). The 8 radios form one group, so the page's native radio
-   arrow keys step one role per press; the &#8592; / &#8594; labels step one
-   role per click with wrap-around. Ruled values (owner, issue #230,
-   2026-10-12): perspective 800px, ~45deg per step (rearmost ~155deg so the far
-   cards stay thin slivers instead of vanishing edge-on), the centre card ~half
-   the left half's width (50%), ~500ms rotation, snap under reduced motion. The
-   recession (translateZ) and spread (translateX) literals are agent-derived
-   under the B33/B40 provenance pattern (the owner ruled the tight-overlap
-   relationship; the numbers implement it). Selection is CSS :has only -- no
-   script. ---- */
+/* ---- B97 (issue #257): the role RING. The 8 role components stand in one
+   closed ring, 45deg apart, turning around a vertical axis -- superseding
+   B92's left/right coverflow fan (the owner: "it was supposed to be circular
+   and dimensional with all 8 in a circle shape, utilizing the background").
+   The checked role is the FRONT card, the nearest object in the scene; the
+   ring is wide, with dark gaps between cards; the back cards face outward,
+   see-through, so their mirrored fronts show faintly; the camera sits
+   slightly above, looking down onto the ring; cards darken with distance
+   until the rearmost almost melt into --deep; nothing leaves the page.
+
+   One formula per card instead of B92's 64-rule state table: each slot's
+   angle is its ring offset from the checked role, --a = (i - n) x 45deg, and
+   its depth cue is read off cos(--a) (1 at the front, -1 at the back). The
+   angle is NOT normalized, so every card turns by the same delta and the
+   ring rotates rigidly; the accepted CSS-only cost (owner, issue #257) is
+   that the wrap (8->1, 1->8) and some employer jumps turn the long way round.
+
+   Geometry is one unit, --ring-w (the card width), sized against the .clip
+   container so the whole ring -- radius, perspective, falloff -- scales 1:1
+   with the body ("the same ring, scaled down" on phones). The literals below
+   are agent-derived under the B33/B40 provenance pattern: the owner ruled
+   the relationships (front nearest, wide gaps, camera above, flatter than
+   800px, darken with distance, see-through backs); the numbers implement
+   them, recorded in UIUX §10.4. ---- */
+.carousel__stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  /* The card width: bounded by the body's width (the ring's projected span is
+     ~2.2 card widths) and by its height (back cards rise above the front card,
+     the arrows sit below it). */
+  --ring-w: min(40cqw, 70cqh);
+}
 .carousel {
   position: relative;
+  z-index: 1;
   min-width: 0;
   min-height: 0;
   width: 100%;
   height: 100%;
-  perspective: 800px;            /* ruled ~800px -- dramatic (owner, issue #230) */
+  /* Flatter than B92's 800px, and proportional to the card so the ring keeps
+     one look at every size. The eye sits above the ring: the far cards rise
+     toward it and read as standing behind the front card. */
+  perspective: calc(var(--ring-w) * 3.6);
+  perspective-origin: 50% -12%;
   transform-style: preserve-3d;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 /* The radio: focusable, never drawn -- the .topband__tab's own off-flow pattern. */
 .carousel__radio {
@@ -277,104 +303,129 @@ main { flex: 1 1 auto; display: flex; }
   width: 1px; height: 1px; margin: 0;
   opacity: 0; pointer-events: none;
 }
-/* One slot per role -- centred, width 50% of the carousel (the ruled centre-card
-   size), transformed by its ring distance from the checked role. */
+/* Each role's ring index, and the checked role's index. */
+.carousel__slot[data-role="1"] { --i: 1; }
+.carousel__slot[data-role="2"] { --i: 2; }
+.carousel__slot[data-role="3"] { --i: 3; }
+.carousel__slot[data-role="4"] { --i: 4; }
+.carousel__slot[data-role="5"] { --i: 5; }
+.carousel__slot[data-role="6"] { --i: 6; }
+.carousel__slot[data-role="7"] { --i: 7; }
+.carousel__slot[data-role="8"] { --i: 8; }
+body:has(#role-1:checked) .carousel { --n: 1; }
+body:has(#role-2:checked) .carousel { --n: 2; }
+body:has(#role-3:checked) .carousel { --n: 3; }
+body:has(#role-4:checked) .carousel { --n: 4; }
+body:has(#role-5:checked) .carousel { --n: 5; }
+body:has(#role-6:checked) .carousel { --n: 6; }
+body:has(#role-7:checked) .carousel { --n: 7; }
+body:has(#role-8:checked) .carousel { --n: 8; }
+/* One slot per role. Its bottom edge sits on the stage floor (the arrows sit
+   just below); it is pushed back by the ring radius, turned by its offset,
+   and brought forward again, so the front card lands at z = 0 and every
+   other card sits behind its plane -- none pokes out in front of it. */
 .carousel__slot {
   position: absolute;
-  left: 50%; top: 50%;
-  width: 50%;
+  left: 50%;
+  /* The component's own box runs 90 source px below its back card (B76's
+     plate inset); dropping it by that much puts the back card's foot on the
+     stage floor, so the arrows sit just under the front card. */
+  bottom: calc(var(--ring-w) * -90 / 830);
+  width: var(--ring-w);
   min-width: 0;
-  /* B95 (issue #250): the SLOT is the scale container — one uniform --u for
-     all 8 components (the B76 per-plate container query is superseded: it
-     sized each plate by its own fan position's rendered width, so the 8 came
-     out different sizes). Every slot is 50% of the carousel, so
-     1 source px = --u = own-slot-width/830 for every piece of every
-     component — the whole component scales together as one unit, and all 8
-     render at exactly the same standardized height and width. */
+  /* B95 (issue #250): the SLOT is the scale container -- one uniform --u for
+     all 8 components, 1 source px = own-slot-width/830, so every piece of
+     every component scales together and all 8 render at one size. */
   container-type: inline-size;
   --u: calc(100cqw / 830);
+  --ring-r: calc(var(--ring-w) * 1.6);           /* wide: dark gaps between cards */
+  --a: calc((var(--i) - var(--n)) * 45deg);
+  --c: calc((1 + cos(var(--a))) / 2);             /* 1 front .. 0 back */
   transform-origin: 50% 50%;
-  transform: translate(-50%, -50%) translateX(var(--tx, 0))
-             rotateY(var(--ry, 0deg)) translateZ(var(--tz, 0));
-  transition: transform 500ms var(--ease);   /* ruled ~500ms -- heavier feel */
+  transform: translateX(-50%) translateZ(calc(var(--ring-r) * -1))
+             rotateY(var(--a)) translateZ(var(--ring-r));
+  /* Darken with distance: full at the front, the rearmost near --deep. */
+  filter: brightness(calc(0.12 + 0.88 * var(--c) * var(--c) * var(--c) * var(--c)));
+  /* See-through backs: past edge-on the cards thin out so the mirrored fronts
+     read faintly through the gaps. */
+  opacity: clamp(0.4, calc(1 + 0.85 * cos(var(--a))), 1);
+  transition:
+    transform 500ms var(--ease),   /* ruled ~500ms */
+    filter 500ms var(--ease),
+    opacity 500ms var(--ease);
 }
-body:has(#role-1:checked) .carousel__slot[data-role="1"] { --ry:0deg; --tx:0; --tz:0; }
-body:has(#role-1:checked) .carousel__slot[data-role="2"] { --ry:45deg; --tx:-40%; --tz:-120px; }
-body:has(#role-1:checked) .carousel__slot[data-role="3"] { --ry:68deg; --tx:-60%; --tz:-240px; }
-body:has(#role-1:checked) .carousel__slot[data-role="4"] { --ry:76deg; --tx:-68%; --tz:-340px; }
-body:has(#role-1:checked) .carousel__slot[data-role="5"] { --ry:80deg; --tx:-72%; --tz:-420px; }
-body:has(#role-1:checked) .carousel__slot[data-role="6"] { --ry:-76deg; --tx:68%; --tz:-340px; }
-body:has(#role-1:checked) .carousel__slot[data-role="7"] { --ry:-68deg; --tx:60%; --tz:-240px; }
-body:has(#role-1:checked) .carousel__slot[data-role="8"] { --ry:-45deg; --tx:40%; --tz:-120px; }
-body:has(#role-2:checked) .carousel__slot[data-role="1"] { --ry:-45deg; --tx:40%; --tz:-120px; }
-body:has(#role-2:checked) .carousel__slot[data-role="2"] { --ry:0deg; --tx:0; --tz:0; }
-body:has(#role-2:checked) .carousel__slot[data-role="3"] { --ry:45deg; --tx:-40%; --tz:-120px; }
-body:has(#role-2:checked) .carousel__slot[data-role="4"] { --ry:68deg; --tx:-60%; --tz:-240px; }
-body:has(#role-2:checked) .carousel__slot[data-role="5"] { --ry:76deg; --tx:-68%; --tz:-340px; }
-body:has(#role-2:checked) .carousel__slot[data-role="6"] { --ry:80deg; --tx:-72%; --tz:-420px; }
-body:has(#role-2:checked) .carousel__slot[data-role="7"] { --ry:-76deg; --tx:68%; --tz:-340px; }
-body:has(#role-2:checked) .carousel__slot[data-role="8"] { --ry:-68deg; --tx:60%; --tz:-240px; }
-body:has(#role-3:checked) .carousel__slot[data-role="1"] { --ry:-68deg; --tx:60%; --tz:-240px; }
-body:has(#role-3:checked) .carousel__slot[data-role="2"] { --ry:-45deg; --tx:40%; --tz:-120px; }
-body:has(#role-3:checked) .carousel__slot[data-role="3"] { --ry:0deg; --tx:0; --tz:0; }
-body:has(#role-3:checked) .carousel__slot[data-role="4"] { --ry:45deg; --tx:-40%; --tz:-120px; }
-body:has(#role-3:checked) .carousel__slot[data-role="5"] { --ry:68deg; --tx:-60%; --tz:-240px; }
-body:has(#role-3:checked) .carousel__slot[data-role="6"] { --ry:76deg; --tx:-68%; --tz:-340px; }
-body:has(#role-3:checked) .carousel__slot[data-role="7"] { --ry:80deg; --tx:-72%; --tz:-420px; }
-body:has(#role-3:checked) .carousel__slot[data-role="8"] { --ry:-76deg; --tx:68%; --tz:-340px; }
-body:has(#role-4:checked) .carousel__slot[data-role="1"] { --ry:-76deg; --tx:68%; --tz:-340px; }
-body:has(#role-4:checked) .carousel__slot[data-role="2"] { --ry:-68deg; --tx:60%; --tz:-240px; }
-body:has(#role-4:checked) .carousel__slot[data-role="3"] { --ry:-45deg; --tx:40%; --tz:-120px; }
-body:has(#role-4:checked) .carousel__slot[data-role="4"] { --ry:0deg; --tx:0; --tz:0; }
-body:has(#role-4:checked) .carousel__slot[data-role="5"] { --ry:45deg; --tx:-40%; --tz:-120px; }
-body:has(#role-4:checked) .carousel__slot[data-role="6"] { --ry:68deg; --tx:-60%; --tz:-240px; }
-body:has(#role-4:checked) .carousel__slot[data-role="7"] { --ry:76deg; --tx:-68%; --tz:-340px; }
-body:has(#role-4:checked) .carousel__slot[data-role="8"] { --ry:80deg; --tx:-72%; --tz:-420px; }
-body:has(#role-5:checked) .carousel__slot[data-role="1"] { --ry:80deg; --tx:-72%; --tz:-420px; }
-body:has(#role-5:checked) .carousel__slot[data-role="2"] { --ry:-76deg; --tx:68%; --tz:-340px; }
-body:has(#role-5:checked) .carousel__slot[data-role="3"] { --ry:-68deg; --tx:60%; --tz:-240px; }
-body:has(#role-5:checked) .carousel__slot[data-role="4"] { --ry:-45deg; --tx:40%; --tz:-120px; }
-body:has(#role-5:checked) .carousel__slot[data-role="5"] { --ry:0deg; --tx:0; --tz:0; }
-body:has(#role-5:checked) .carousel__slot[data-role="6"] { --ry:45deg; --tx:-40%; --tz:-120px; }
-body:has(#role-5:checked) .carousel__slot[data-role="7"] { --ry:68deg; --tx:-60%; --tz:-240px; }
-body:has(#role-5:checked) .carousel__slot[data-role="8"] { --ry:76deg; --tx:-68%; --tz:-340px; }
-body:has(#role-6:checked) .carousel__slot[data-role="1"] { --ry:76deg; --tx:-68%; --tz:-340px; }
-body:has(#role-6:checked) .carousel__slot[data-role="2"] { --ry:80deg; --tx:-72%; --tz:-420px; }
-body:has(#role-6:checked) .carousel__slot[data-role="3"] { --ry:-76deg; --tx:68%; --tz:-340px; }
-body:has(#role-6:checked) .carousel__slot[data-role="4"] { --ry:-68deg; --tx:60%; --tz:-240px; }
-body:has(#role-6:checked) .carousel__slot[data-role="5"] { --ry:-45deg; --tx:40%; --tz:-120px; }
-body:has(#role-6:checked) .carousel__slot[data-role="6"] { --ry:0deg; --tx:0; --tz:0; }
-body:has(#role-6:checked) .carousel__slot[data-role="7"] { --ry:45deg; --tx:-40%; --tz:-120px; }
-body:has(#role-6:checked) .carousel__slot[data-role="8"] { --ry:68deg; --tx:-60%; --tz:-240px; }
-body:has(#role-7:checked) .carousel__slot[data-role="1"] { --ry:68deg; --tx:-60%; --tz:-240px; }
-body:has(#role-7:checked) .carousel__slot[data-role="2"] { --ry:76deg; --tx:-68%; --tz:-340px; }
-body:has(#role-7:checked) .carousel__slot[data-role="3"] { --ry:80deg; --tx:-72%; --tz:-420px; }
-body:has(#role-7:checked) .carousel__slot[data-role="4"] { --ry:-76deg; --tx:68%; --tz:-340px; }
-body:has(#role-7:checked) .carousel__slot[data-role="5"] { --ry:-68deg; --tx:60%; --tz:-240px; }
-body:has(#role-7:checked) .carousel__slot[data-role="6"] { --ry:-45deg; --tx:40%; --tz:-120px; }
-body:has(#role-7:checked) .carousel__slot[data-role="7"] { --ry:0deg; --tx:0; --tz:0; }
-body:has(#role-7:checked) .carousel__slot[data-role="8"] { --ry:45deg; --tx:-40%; --tz:-120px; }
-body:has(#role-8:checked) .carousel__slot[data-role="1"] { --ry:45deg; --tx:-40%; --tz:-120px; }
-body:has(#role-8:checked) .carousel__slot[data-role="2"] { --ry:68deg; --tx:-60%; --tz:-240px; }
-body:has(#role-8:checked) .carousel__slot[data-role="3"] { --ry:76deg; --tx:-68%; --tz:-340px; }
-body:has(#role-8:checked) .carousel__slot[data-role="4"] { --ry:80deg; --tx:-72%; --tz:-420px; }
-body:has(#role-8:checked) .carousel__slot[data-role="5"] { --ry:-76deg; --tx:68%; --tz:-340px; }
-body:has(#role-8:checked) .carousel__slot[data-role="6"] { --ry:-68deg; --tx:60%; --tz:-240px; }
-body:has(#role-8:checked) .carousel__slot[data-role="7"] { --ry:-45deg; --tx:40%; --tz:-120px; }
-body:has(#role-8:checked) .carousel__slot[data-role="8"] { --ry:0deg; --tx:0; --tz:0; }
 
-/* The arrows: two chevrons drawn in --note (brightest on the deep), each a
-   stack of per-state labels -- a pure-CSS "step one role with wrap" has no
-   native "next", so each state reveals the label that points at its successor
-   / predecessor via :has. No script. */
-.carousel__nav {
-  position: absolute; top: 50%;
-  width: 2.5rem; height: 2.5rem;
-  transform: translateY(-50%);
-  z-index: 3;
+/* The light pool: a soft, edgeless pool on the canvas behind the front card --
+   the scene's one light source (it replaces B94's card glow). It lives
+   outside the 3D context so it never sorts in front of a card. Subtle: the
+   existing --glow-gray channels at a low alpha. It dims mid-turn and
+   brightens as the new card lands: each role names its own copy of the
+   keyframes, so a change of role restarts the dip (CSS-only; the owner's
+   issue #257 exemption lets it run once on page load). */
+.carousel__pool {
+  position: absolute;
+  left: 50%; bottom: calc(var(--ring-w) * 0.5);
+  width: calc(var(--ring-w) * 2.4);
+  height: calc(var(--ring-w) * 1.7);
+  transform: translate(-50%, 50%);
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(closest-side,
+    rgb(var(--glow-gray-a) / 0.2) 0%,
+    rgb(var(--glow-gray-a) / 0.12) 30%,
+    rgb(var(--glow-gray-a) / 0.04) 60%,
+    rgb(var(--glow-gray-a) / 0) 90%);
 }
-.carousel__nav--next { right: 0; }
-.carousel__nav--prev { left: 0; }
+@keyframes pool-dip-1 { 50% { opacity: 0.45; } }
+@keyframes pool-dip-2 { 50% { opacity: 0.45; } }
+@keyframes pool-dip-3 { 50% { opacity: 0.45; } }
+@keyframes pool-dip-4 { 50% { opacity: 0.45; } }
+@keyframes pool-dip-5 { 50% { opacity: 0.45; } }
+@keyframes pool-dip-6 { 50% { opacity: 0.45; } }
+@keyframes pool-dip-7 { 50% { opacity: 0.45; } }
+@keyframes pool-dip-8 { 50% { opacity: 0.45; } }
+.carousel__pool { animation: 500ms var(--ease) both; }
+body:has(#role-1:checked) .carousel__pool { animation-name: pool-dip-1; }
+body:has(#role-2:checked) .carousel__pool { animation-name: pool-dip-2; }
+body:has(#role-3:checked) .carousel__pool { animation-name: pool-dip-3; }
+body:has(#role-4:checked) .carousel__pool { animation-name: pool-dip-4; }
+body:has(#role-5:checked) .carousel__pool { animation-name: pool-dip-5; }
+body:has(#role-6:checked) .carousel__pool { animation-name: pool-dip-6; }
+body:has(#role-7:checked) .carousel__pool { animation-name: pool-dip-7; }
+body:has(#role-8:checked) .carousel__pool { animation-name: pool-dip-8; }
+
+/* Side cards keep their titles; only the front card's description reads.
+   The text fades on the ring's own 500ms turn. */
+.carousel__slot .gm-desc { color: transparent; transition: color 500ms var(--ease); }
+body:has(#role-1:checked) .carousel__slot[data-role="1"] .gm-desc,
+body:has(#role-2:checked) .carousel__slot[data-role="2"] .gm-desc,
+body:has(#role-3:checked) .carousel__slot[data-role="3"] .gm-desc,
+body:has(#role-4:checked) .carousel__slot[data-role="4"] .gm-desc,
+body:has(#role-5:checked) .carousel__slot[data-role="5"] .gm-desc,
+body:has(#role-6:checked) .carousel__slot[data-role="6"] .gm-desc,
+body:has(#role-7:checked) .carousel__slot[data-role="7"] .gm-desc,
+body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-desc { color: var(--ink); }
+
+/* The arrows: a pair centred below the front card, OUTSIDE the 3D context
+   (inside it, the ring painted over them whatever their z-index). Two
+   chevrons drawn in --note, each a stack of per-state labels -- a pure-CSS
+   "step one role with wrap" has no native "next", so each state reveals the
+   label that points at its successor / predecessor via :has. No script. */
+.carousel__controls {
+  position: relative;
+  z-index: 2;               /* above the front component's own lower inset, which hangs past the stage floor */
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  padding-top: 0.75rem;
+}
+.carousel__nav {
+  position: relative;
+  order: 1;
+  width: 2.5rem; height: 2.5rem;
+}
+.carousel__nav--prev { order: 0; }   /* previous on the left, next on the right */
 .carousel__nav-hit {
   position: absolute; inset: 0;
   display: none;
@@ -521,27 +572,11 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
       var(--water-bot) 100%
     );
   box-shadow: var(--elevation);
-  transition: box-shadow 500ms var(--ease);   /* B94: the selected glow cross-fades with the carousel's 500ms rotation */
   overflow: hidden;
 }
-/* B94 (PR #236): the glow is re-homed. B81 shipped the breathing bloom on EVERY
-   back card; in the 8-card fan that bloom clipped at each component's boundary
-   (a visible rectangle), and on all cards at once it bled over its neighbours.
-   The owner ruled the glow is a SELECTED state: only the centred (checked)
-   role's back card carries it, and it cross-fades between cards on the
-   carousel's own 500ms rotation. The glow's own values are B81's verbatim
-   bloom, its rest state (0 0 60px 20px / 0 0 240px 120px gray channels) — no
-   new hex, token, size, or duration; only the anchor (the checked card) and
-   the motion (a box-shadow transition instead of the 10s breathe loop) change.
-   The gm-breathe keyframes and loop are removed. */
-body:has(#role-1:checked) .carousel__slot[data-role="1"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
-body:has(#role-2:checked) .carousel__slot[data-role="2"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
-body:has(#role-3:checked) .carousel__slot[data-role="3"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
-body:has(#role-4:checked) .carousel__slot[data-role="4"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
-body:has(#role-5:checked) .carousel__slot[data-role="5"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
-body:has(#role-6:checked) .carousel__slot[data-role="6"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
-body:has(#role-7:checked) .carousel__slot[data-role="7"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
-body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
+/* B97 (issue #257): B94's selected glow on the centred card's back card is
+   removed -- the light pool behind the ring (.carousel__pool) is the scene's
+   one light source, so no box edge can show. */
 .gm-back::after {
   content: "";
   position: absolute;
@@ -682,6 +717,21 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: 
    the owner ruled. Width is the B76 source ratio (600 of 830). */
 .gm-desc { flex: 0 1 calc(450 * var(--u)); }
 .gm-desc:empty { min-height: 0; }
+/* B97 (issue #257): a role whose copy is not written yet shows a quiet
+   placeholder instead of a blank slab -- the landing page's dim-italic
+   grammar, in the card's own ink at reduced strength (~5:1 on --note). It
+   fades with the description text on the side cards. The card stays
+   :empty, so the copy checks still read it as empty. */
+.gm-desc:empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gm-desc:empty::before {
+  content: "Description coming soon";
+  font-style: italic;
+  opacity: 0.6;
+}
 .gm-desc:not(:empty) { min-height: 0; overflow-y: scroll; }
 /* The bar is a real, visible, in-card scroll bar (B75, carried into B76):
    ::-webkit-scrollbar forces the classic (non-overlay) bar Chromium and
@@ -867,11 +917,11 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: 
   /* B81 (issue #212) supersedes B74's "half the left half" height cap for the
      row: the left half now fills its grid cell (the stage above, the band
      below). The stage's single component still caps at the stage height and
-     the description card remains the page's only scroll container. B94: the
-     component no longer clips (`visible`), so the re-homed selected glow on the
-     centred card blooms past the component instead of drawing its boundary. */
+     the description card remains the page's only scroll container. The
+     component does not clip (`visible`, B94) -- since B97 nothing blooms past
+     it, but a clip would cut the title card where it straddles the back card. */
   .gregorian-mode { max-height: 100%;               /* the component's own cap */
-                    overflow: visible; }            /* glow blooms; no clip */
+                    overflow: visible; }            /* no clip */
 }
 
 @media (max-width: 743px) {
@@ -896,6 +946,14 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: 
      would render ~5.4px) to a readable mobile size, the topband-card reset's
      own pattern. */
   .gregorian-mode { flex: 0 0 auto; max-height: none; overflow: visible; }
+  /* B97 (issue #257): the same ring, scaled down. The page scrolls here, so
+     the ring's size container takes a height from the width (a size container
+     cannot take it from its content), and the card takes a larger share of
+     the narrow body than on desktop. */
+  .split { padding-inline: 0; }
+  .clip { height: 96vw; }
+  .carousel__stage { --ring-w: min(48cqw, 70cqh); }
+  .carousel__slot { --ring-r: calc(var(--ring-w) * 1.25); }   /* still gapped (edge-to-edge is ~1.21) */
   .parking-lot { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .parking-lot__divider { width: auto; align-self: flex-start; }
   .parking-lot__divider::before { width: 75%; height: 1px; }
@@ -939,11 +997,13 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: 
 <main>
   <div class="split">
     <div class="clip">
+    <div class="carousel__stage">
+    <div class="carousel__pool" aria-hidden="true"></div>
     <section class="carousel" role="radiogroup" aria-label="Choose a role">
       <!-- B95 (issue #250): the carousel spans the whole body content area — the
            .split__rule divider and the empty .split__copy right half are gone.
            Each employer title card jumps to that employer's LAST role; the
-           carousel sets a selected glow on the title card whose employer owns
+           ring sets a selected glow on the title card whose employer owns
            the centred role. Still CSS :has only — no script. -->
       <input class="carousel__radio" type="radio" name="role" id="role-1" checked aria-label="Branch Sales &amp; Service Representative">
       <input class="carousel__radio" type="radio" name="role" id="role-2" aria-label="Branch Sales &amp; Service Associate">
@@ -953,27 +1013,6 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: 
       <input class="carousel__radio" type="radio" name="role" id="role-6" aria-label="Trader">
       <input class="carousel__radio" type="radio" name="role" id="role-7" aria-label="Portfolio Specialist">
       <input class="carousel__radio" type="radio" name="role" id="role-8" aria-label="Sr. Portfolio Specialist">
-
-      <div class="carousel__nav carousel__nav--next">
-        <label class="carousel__nav-hit" for="role-2" aria-label="Next role"></label>
-        <label class="carousel__nav-hit" for="role-3" aria-label="Next role"></label>
-        <label class="carousel__nav-hit" for="role-4" aria-label="Next role"></label>
-        <label class="carousel__nav-hit" for="role-5" aria-label="Next role"></label>
-        <label class="carousel__nav-hit" for="role-6" aria-label="Next role"></label>
-        <label class="carousel__nav-hit" for="role-7" aria-label="Next role"></label>
-        <label class="carousel__nav-hit" for="role-8" aria-label="Next role"></label>
-        <label class="carousel__nav-hit" for="role-1" aria-label="Next role"></label>
-      </div>
-      <div class="carousel__nav carousel__nav--prev">
-        <label class="carousel__nav-hit" for="role-8" aria-label="Previous role"></label>
-        <label class="carousel__nav-hit" for="role-1" aria-label="Previous role"></label>
-        <label class="carousel__nav-hit" for="role-2" aria-label="Previous role"></label>
-        <label class="carousel__nav-hit" for="role-3" aria-label="Previous role"></label>
-        <label class="carousel__nav-hit" for="role-4" aria-label="Previous role"></label>
-        <label class="carousel__nav-hit" for="role-5" aria-label="Previous role"></label>
-        <label class="carousel__nav-hit" for="role-6" aria-label="Previous role"></label>
-        <label class="carousel__nav-hit" for="role-7" aria-label="Previous role"></label>
-      </div>
 
       <div class="carousel__slot" data-role="1">
         <div class="gregorian-mode">
@@ -1032,6 +1071,31 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: 
         </div>
       </div>
     </section>
+    </div>
+    <!-- B97 (issue #257): the arrows sit below the front card, outside the
+         ring's 3D context. -->
+    <div class="carousel__controls">
+      <div class="carousel__nav carousel__nav--next">
+        <label class="carousel__nav-hit" for="role-2" aria-label="Next role"></label>
+        <label class="carousel__nav-hit" for="role-3" aria-label="Next role"></label>
+        <label class="carousel__nav-hit" for="role-4" aria-label="Next role"></label>
+        <label class="carousel__nav-hit" for="role-5" aria-label="Next role"></label>
+        <label class="carousel__nav-hit" for="role-6" aria-label="Next role"></label>
+        <label class="carousel__nav-hit" for="role-7" aria-label="Next role"></label>
+        <label class="carousel__nav-hit" for="role-8" aria-label="Next role"></label>
+        <label class="carousel__nav-hit" for="role-1" aria-label="Next role"></label>
+      </div>
+      <div class="carousel__nav carousel__nav--prev">
+        <label class="carousel__nav-hit" for="role-8" aria-label="Previous role"></label>
+        <label class="carousel__nav-hit" for="role-1" aria-label="Previous role"></label>
+        <label class="carousel__nav-hit" for="role-2" aria-label="Previous role"></label>
+        <label class="carousel__nav-hit" for="role-3" aria-label="Previous role"></label>
+        <label class="carousel__nav-hit" for="role-4" aria-label="Previous role"></label>
+        <label class="carousel__nav-hit" for="role-5" aria-label="Previous role"></label>
+        <label class="carousel__nav-hit" for="role-6" aria-label="Previous role"></label>
+        <label class="carousel__nav-hit" for="role-7" aria-label="Previous role"></label>
+      </div>
+    </div>
     </div>
   </div>
 </main>

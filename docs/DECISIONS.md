@@ -3123,3 +3123,60 @@ verbatim: "replace the 37-byte d09GMl5…QVQ== 800-weight stub in career.html
 (line 29) with the real ~29.5 KB 800 face that index.html ships, so heavy
 text renders with the actual font, and correct the font-weight: 800 comment
 (line 588) to match"
+
+### B97. The career carousel becomes a true 3D ring of all 8 roles, lit by a light pool on the dark canvas (issue #257)
+
+The `/career` body's role carousel is rebuilt from B92's left/right
+**coverflow fan** into a **closed ring**: all eight role components stand
+45° apart around a vertical axis, and the ring turns to bring the checked
+role to the front. The owner's correction: B92's fan "was never supposed to
+be left and right sided".
+
+- **The ring.** The checked role is the **front card**, the nearest object in
+  the scene — no other card pokes out in front of it. The ring is **wide,
+  with dark gaps between cards**; the back cards **face outward and are
+  see-through**, so their mirrored fronts show faintly; the camera sits
+  **slightly above**, looking down onto the ring; the 3D is **flatter** than
+  B92's 800px; cards **darken with distance** until the rearmost almost melt
+  into `--deep`; nothing leaves the page — the ring closes behind itself.
+- **Side-card text.** Titles stay on every card; the description fades out
+  everywhere except the front card.
+- **Motion — CSS-only.** The page's zero-JS law stands. The accepted
+  consequence: the wrap (role 8 → 1, 1 → 8) and some employer jumps turn the
+  ring the long way round. The ~500ms turn and the reduced-motion snap stand.
+- **Arrows** — a pair **below the front card**, outside the 3D context.
+- **Mobile** — the **same ring, scaled down** to fit the phone's width (the
+  B95 clip wrapper had collapsed to 0px tall there).
+- **Empty roles** — a role with no copy yet shows a quiet **"coming soon"
+  placeholder** instead of a blank slab.
+- **Light.** B94's selected glow on the centred card is **removed**; a
+  **subtle, soft, edgeless light pool** on the canvas behind the front card
+  replaces it. The pool stays **fixed** and **dims mid-turn**, brightening as
+  the new card lands; that dim may **run once on page load** — an owner
+  exemption to UIUX §5's "Nothing animates on load". B95's employer title-card
+  glow is **kept as is**.
+
+Supersedes B92's coverflow geometry (four left + three right, the ~45° →
+~80° compression, the 800px perspective, the centre card at 50% of the
+width), B94's centred-card glow, and B95 §1's clip-as-crop. UIUX §10.5
+records the ring and its values; UIUX §5 carries the exemption. The literals
+(ring radius, camera height, perspective, the darkening curve, the pool's
+size, alpha and dip) are agent-derived under the B33/B40 provenance pattern:
+the owner ruled the relationships above; the numbers implement them. No new
+hex or token: the darkening is a brightness filter, the pool is the existing
+`--glow-gray-a` channels. The ruling ships in the same PR as the build.
+
+**Source:** the owner's issue
+[#257](https://github.com/AlastairZeved/The-Portfolio/issues/257) and the
+owner's chat answers (2026-10-13), quoted verbatim — on the shape: "It was
+never supposed to be left and right sided - it was supposed to be circular
+and dimensional with all 8 in a circle shape, utilizing the background"; on
+the edges: "They aren't supposed to be able to go off the page, they're
+supposed to wrap around behind in a circle"; and, multiple choice as
+selected: "Pull centre forward", "Darken with distance", "Soft spotlight
+pool", "Titles only", "Slightly above", "Flatter", "Face outward,
+see-through", "Gaps between cards", "Stay CSS-only", "Smaller ring", "Below
+the centre card", "Placeholder state"; on the glow: "Pool replaces it",
+"Dims mid-turn", "Subtle", "Keep as is"; on load: "Allow CSS dim to run once
+upon page load as an exemption."; and on shipping: "In the same PR as the
+build" ([issue comment](https://github.com/AlastairZeved/The-Portfolio/issues/257#issuecomment-6156541948)).

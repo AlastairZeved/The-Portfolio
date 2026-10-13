@@ -21,8 +21,7 @@
      z = 1.3037 — 2560/z × 1440/z). The B43 authored geometry (left/top % and
      px width/height) is exact in THIS space, so rendering the scene here and
      scaling it uniformly reproduces the drawing at every viewport (issue
-     #121, B44). The old 1080×600 constants predate the #112 geometry rebuild
-     and clipped that geometry's spacing at widths the cap held the scale at. */
+     #121, B44). */
   var REF_W = 2560 / 1.3037;   // 1963.64 — the #112 drawing's own logical width
   var REF_H = 1440 / 1.3037;   // 1104.55 — the #112 drawing's own logical height
   function frame() {
@@ -191,12 +190,10 @@
   function toLogical(px) { return px / renderScale(); }
 
   /* ---- B45 (issue #126): TheBoards' note sizing + scale mechanics, ported ----
-     TheBoards state.js: NOTE_MIN_W = 132, MIN_SCALE = 0.5 (MAX_SCALE 2.0
-     superseded by B51 — see gestureScale).
+     TheBoards state.js: NOTE_MIN_W = 132, MIN_SCALE = 0.5.
      The card's own scale factor (a uniform transform: scale, origin top
      left) is the ONLY text/size scaling: the font is a fixed 17px/1.4 and
-     the transform scales the card. This replaces the old height-driven
-     --card-fs updater (B40, superseded by B45). */
+     the transform scales the card. */
   var MIN_SCALE = 0.5;                    // TheBoards state.js MIN_SCALE
   var NOTE_MIN_W = 132;                   // TheBoards state.js NOTE_MIN_W
 
@@ -344,14 +341,13 @@
   /* TheBoards interactions.js gestureScale: the clamp bounds admit the start
      value, so a scale outside [MIN_SCALE, ceiling] never snaps at gesture
      start — yet it can always be scaled back into the authored range.
-     issue #142 / B51: the fixed MAX_SCALE 2.0 ceiling is superseded by a
-     per-card ceiling derived from the 1/5-viewport bound — one uniform
-     scale, so the card stops at the FIRST axis reaching one fifth of the
-     viewport. The board's layout px ARE the logical px (B30), and a
-     transform's offsetWidth/offsetHeight read the UNSCALED content, so the
-     ceiling is min(0.2·boardW / unscaledW, 0.2·boardH / unscaledH). It is
-     computed fresh on every move: growing the card rewraps its unscaled
-     size, which moves the ceiling with it. */
+     issue #142 / B51: a per-card ceiling derived from the 1/5-viewport
+     bound — one uniform scale, so the card stops at the FIRST axis reaching
+     one fifth of the viewport. A transform's offsetWidth/offsetHeight read
+     the UNSCALED content (B30), so the ceiling is
+     min(0.2·boardW / unscaledW, 0.2·boardH / unscaledH). It is computed
+     fresh on every move: growing the card rewraps its unscaled size, which
+     moves the ceiling with it. */
   function gestureScale(start, f, ceiling) {
     return Math.min(Math.max(start * f, Math.min(MIN_SCALE, start)), Math.max(ceiling, start));
   }
@@ -368,9 +364,7 @@
       var rect = board.getBoundingClientRect();
       var d = Math.hypot(toLogical(e.clientX - rect.left) - r.originX,
                          toLogical(e.clientY - rect.top) - r.originY);
-      // issue #142 / B51: the ceiling is per-card and per-axis — see
-      // gestureScale. offsetWidth/offsetHeight read unscaled (B30: layout
-      // px are logical px; the scale is a transform).
+      // issue #142 / B51: the ceiling is per-card and per-axis — see gestureScale.
       var ceiling = Math.min(0.2 * board.offsetWidth / r.card.offsetWidth,
                              0.2 * board.offsetHeight / r.card.offsetHeight);
       // guard as in renderScale()/cardScale(): if the card measures 0 or

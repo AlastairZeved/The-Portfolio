@@ -161,13 +161,9 @@ body {
   position: absolute;
   left: 50%; transform: translateX(-50%);
   top: 0; min-height: calc(var(--rule-y) + 29px);
-  /* issue #128 (B46): the owner ruled B31 STANDS — this box (the +29px
-     overhang, the (band-top + 8px) 16px 16px padding, the 20px type) is
-     untouched. The band literals beneath it are rescaled and the height
-     grows around the box; the card itself keeps B31's law. Width still
-     hugs the title text (issue #59). */
-  /* issue #59: hug the title text — the borders close in instead of
-    spanning the full card width, staying centred and comfortably padded */
+  /* The title card: the +29px overhang, the (band-top + 8px) 16px 16px
+     padding and the 20px type stand per B31 (issue #128 / B46); width hugs
+     the title text, the borders closing in (issue #59). */
   width: max-content;
   max-width: calc(100% - 2 * var(--gutter));
   display: flex;
@@ -184,10 +180,7 @@ body {
   /* issue #170 / B61: the eyebrow renders on the reduced secondary rung of
      TheBoards' title-card convention (#anchor-title .title-date: 10px/400
      under a 15px/600 title — a 2/3 ratio), scaled to this page's 20px title
-     rung: 20 × 2/3 = 13.33px. The agent-derived arithmetic transcribes the
-     owner's convention per the B33 provenance pattern. Supersedes the
-     single-size clause of B19 for this line only (#59's history: B31 raised
-     both lines to 20px; B61 restores the two-rung render). */
+     rung: 20 × 2/3 = 13.33px (B33). */
   font-size: 13.33px; font-weight: 400; line-height: 1.2;
   color: var(--ink);
 }
@@ -203,24 +196,12 @@ body {
    state.js / styles.css .note-text, TheBoards' `UIUX §4.5` `B84`), height following the
    wrapped text — no authored px footprint. Its own scale factor — the var
    --card-scale, floored at MIN_SCALE 0.5 (TheBoards state.js) and ceilinged
-   at one fifth of the viewport (issue #142 / B51 — supersedes the old fixed
-   MAX_SCALE 2.0 wherever it binds first) — is the ONLY thing that sizes the
-   text: the font is
-   17px / line-height 1.4 (TheBoards .note-text) and the transform scales
-   the whole card uniformly, transform-origin top left (.note §4.1 — the
-   stored left/top stays truthful). This supersedes B40's height-driven
-   --card-fs law; the owner's authored left/top placements stand (B43).
-   The card's rest scale is the owner's drawing scale of record
-   (issue #138 / B52 — every card ships its own inline --card-scale).
-   B67 (issue #175) superseded B52's board/sub tier split at scale 1
-   and its list; B78 (issue #189) supersedes B67's list in turn —
-   2.33 community, 2.18 career, 1.86 writing, 1.78 software-ai, 2.26
-   plants-rocks, 1.70 music, 1.01 apple-music, 1.19 spotify, 1.06
-   linkedin, 1.24 zeved-boards, 1.19 agentic-plugins, 0.98
-   plants-poles, 1.02 plants-in-rocks — the owner's #189 drawing
-   sizes every card — plus 1.19 philly-plant-dads, the Spotify scale by
-   the owner's grill words (B80, issue #196). The gesture
-   still moves the scale from there (B45/B51 bounds unchanged). */
+   at one fifth of the viewport (issue #142 / B51) — is the ONLY thing that
+   sizes the text: the font is 17px / line-height 1.4 (TheBoards .note-text)
+   and the transform scales the whole card uniformly, transform-origin top
+   left (.note §4.1 — the stored left/top stays truthful). The owner's
+   authored left/top placements stand (B43). The rest scales are inline per
+   card (B52, B78, B80). The gesture moves the scale from there (B45/B51). */
 .door-card {
   position: absolute;
   width: max-content;
@@ -240,8 +221,7 @@ body {
   padding: 10px 12px;
   /* B45: 17px / 1.4 like TheBoards' .note-text, fixed — the card's own
      scale factor (below) is the only text scaling; no --card-fs.
-     Weight: 400 per B60 (issue #167) — no note card renders bold;
-     supersedes B53's "six door-cards keep 600" clause. */
+     Weight: 400 per B60 (issue #167) — no note card renders bold. */
   font-size: 17px; font-weight: 400; line-height: 1.4;
   text-align: center;
   overflow-wrap: break-word;
@@ -285,12 +265,9 @@ body {
   /* issue #108: this box is the GRAB AREA, not the glyph. It is anchored
      2px OUTSIDE the card's outer corner — a 2px padding ring around the
      corner, half of it off the note — so the whole bottom-right corner plus
-     a 2px margin beyond it resizes. (The old 4px inset left the outer 6px
-     ungrabbable, and flush-at-the-corner still left nothing to grab outside
-     the note.) The grip lines are pinned 9px inside the box's bottom-right
-     corner, which is exactly where they already sat, so the visible grip
-     does not move. 28x28 sits inside the 132px min-width card (B45/TheBoards
-     NOTE_MIN_W). Agent-derived (B42). */
+     a 2px margin beyond it resizes. The grip lines are pinned 9px inside the
+     box's bottom-right corner. 28x28 sits inside the 132px min-width card
+     (B45/TheBoards NOTE_MIN_W). Agent-derived (B42). */
   right: -4px; bottom: -4px;
   width: 28px; height: 28px;
   cursor: nwse-resize;
@@ -401,9 +378,7 @@ body {
    page's own To-Do blue tokens (color-mix --frame 45%, the same mix the
    #lot-rule and career's bars already render). Both halves are flex 1 1 0
    over the same 50% share; the form's tracks are fr units so everything
-   scales with any viewport, per the issue. Issue #174/B68 amends the COPY'S
-   TEXT only: the left half carries the issue-#174 edited version, verbatim;
-   layout, split and divider stand unchanged. */
+   scales with any viewport. */
 .lot-split {
   display: flex;
   align-items: center;
@@ -553,13 +528,9 @@ Planned future work: Add landing pages</div>
        (B28), so both ends of every link are greppable and readable. B45
        (issue #126): the authored inline geometry is the owner's left/top
        placement only (B43) — the cards are content-sized with their own
-       scale factor, TheBoards' note mechanics. B52 (issue #138): each
-       card also carries its drawing scale of record inline (--card-scale).
-       B67 (issue #175) re-sized and re-placed nine cards from the owner's
-       #175 drawing and superseded the old board/sub tier split at scale 1.
-       B78 (issue #189): the sizes and placements are the owner's #189
-       drawing — seven cards re-placed and nine re-sized; LinkedIn and
-       Plants on Poles are untouched. -->
+       scale factor, TheBoards' note mechanics. B52 (issue #138): each card
+       carries its drawing scale of record inline (--card-scale); sizes and
+       placements are inline per card (B78). -->
   <a class="door-card" data-id="community" style="--card-scale: 2.33; left:13.6%; top:18.3%" href="https://earp-street-park.netlify.app" target="_blank" rel="noopener noreferrer">
     Community
     <span class="resize-handle" aria-hidden="true"></span>
@@ -599,10 +570,8 @@ Planned future work: Add landing pages</div>
 
   <!-- B55 (issue #146): four linked sub cards. They are NOTE cards,
        not doors — the owner ruled no links, like the Music note — so they
-       take the note-card rest-only class and no href. B67 (issue #175)
-       drew their sizes and placements from the owner's #175 drawing;
-       B78 (issue #189) supersedes it with the owner's #189 drawing,
-       like every other card on the board. -->
+       take the note-card rest-only class and no href. Sizes and placements
+       are inline per card (B78). -->
   <div class="door-card note-card sub-card" data-id="zeved-boards" style="--card-scale: 1.24; left:81%; top:26.7%">
     Zeved Boards
     <span class="resize-handle" aria-hidden="true"></span>
@@ -638,19 +607,15 @@ Planned future work: Add landing pages</div>
     <div id="lot-rule"></div>
     <div id="lot-header">Parking Lot</div>
     <div id="lot-items">
-      <!-- issue #174/B68: the Components line is removed entirely (the zone
-           keeps its label); the garden copy stays in the LEFT half — its
-           text is the issue-#174 edited version, verbatim — the Formspree
-           form keeps the right half, split and divider per B62. -->
+      <!-- issue #174/B68: the garden copy stays in the LEFT half; the
+           Formspree form keeps the right half, split and divider per B62. -->
       <div class="lot-split">
         <div class="lot-copy">
-          <!-- issue #209 / B86: the footer's copy of record, two lines (line
-               1 replaced, line 2 kept verbatim), no gap — .lot-copy p
-               { margin: 0 }. The closing phrase renders italic (B68's
-               italic phrase stands), spelled "curiouser" per the owner's
-               correction. The copy scales up to the 16.57px band-anchor
-               rung (15 × 1.10455, B46); weight 400, no bold; footer bar
-               size and height unchanged. -->
+          <!-- issue #209 / B86: the footer's copy of record — two lines, no
+               gap (.lot-copy p { margin: 0 }). The closing phrase renders
+               italic (B68), spelled "curiouser" per the owner's correction.
+               The copy scales to the 16.57px band-anchor rung (15 × 1.10455,
+               B46); weight 400, no bold. -->
           <p>Welcome to Rob's digital garden.</p>
           <p>All it takes to flex one's curiosity is to ask a question, then keep asking questions and always strive to be <em>curiouser and curiouser.</em></p>
         </div>

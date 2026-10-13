@@ -470,13 +470,9 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
    the plates READ LEFT TO RIGHT in one row — the owner: "These components
    will never fit in a top to bottom layout once description text is added.
    They need to read left to right" — equally sized (equal flex cells),
-   evenly spaced (the page's gutter), contained in the half; the half
-   scrolls vertically when the row needs more height (owner grill answer,
-   2026-10-08); B74 (issue #186) supersedes that half-scroll clause above the
-   breakpoint — there the left half is no longer a scroll container and the
-   description card scrolls instead (see the >743px block). The shipped
-   ≤743px readable reflow stacks them again below the breakpoint (owner
-   grill answer, 2026-10-08).
+   evenly spaced (the page's gutter), contained in the half. Above the
+   breakpoint the description card scrolls (B74, see the >743px block); below
+   it the readable reflow stacks them (B74).
    B76 (issue #194): the component renders the agentic-plugins SOURCE
    geometry at the source's exact proportions, scaled uniformly by the
    plate's own width — the owner: "Uniform by plate width — component keeps
@@ -510,23 +506,19 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   position: relative;
   box-sizing: border-box;
   /* B64 (issue #176): the plates size to their content (the filled desc
-     cards) and share the half's leftover space equally — the B56 equal
-     flex cells (1 1 0) clamped every plate to the empty state's height and
-     the filled card overflowed the cell onto the footer. Spacing stands:
-     the 1.25rem gutter keeps the row evenly spaced. In B66's row the equal
+     cards) and share the half's leftover space equally. Spacing stands: the
+     1.25rem gutter keeps the row evenly spaced. In B66's row the equal
      cells equalize the plates' WIDTHS (flex-basis 0); the vertical size is
-     the content. B74 (issue #186) supersedes B66's half-scroll clause above
-     the breakpoint: the plate caps at half the left half's own height and
-     the description card carries the scroll (see the >743px block). */
+     the content. Above the breakpoint the plate caps at half the left
+     half's own height and the description card carries the scroll (B74, see
+     the >743px block). */
   flex: 1 1 0;
   min-height: 0;
   min-width: 0;
   width: 100%;
   /* B95 (issue #250): the component's pieces all scale by the ONE uniform
-     --u inherited from its .carousel__slot (the B76 per-plate container
-     query is superseded — it sized each plate by its own fan position's
-     rendered width, so the 8 came out different sizes). The component
-     scales together as a whole; no piece sizes itself. */
+     --u inherited from its .carousel__slot. The component scales together
+     as a whole; no piece sizes itself. */
   display: flex;
   flex-direction: column;       /* title → year → desc, the reflow's flow */
   /* B93 (PR #236): no base fill — the component's own `--deep` ("black back
@@ -703,18 +695,12 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   box-shadow: var(--elevation);
 }
 /* B95 (issue #250): the 8 description cards are UNIFORM — one standardized
-   height and width (the user's issue #250 answers: "the description card of
-   each component should be uniform in height and width, enabling an always
-   visible vertical scroll bar where text exceeds space. No piece of the
-   component should be individually scaling based on any viewport size. The
-   component as a whole should scale larger and smaller 1:1 for different
-   viewport sizes."). The uniform height is sized from the longest copies:
-   roles 3 and 5 fit inside it without scrolling; role 8 (the longest, the
-   issue's stated exception) scrolls — the FILLED card's styled in-card bar
-   stays ALWAYS visible (B76), the thumb rendering when the content
-   overflows. The empty card keeps the same uniform box as the filled ones
-   (the B56 116u placeholder is superseded), bare of the scroll region, as
-   the owner ruled. Width is the B76 source ratio (600 of 830). */
+   height and width. The uniform height is sized from the longest copies:
+   roles 3 and 5 fit inside it without scrolling; role 8 (the longest)
+   scrolls — the FILLED card's styled in-card bar stays ALWAYS visible (B76),
+   the thumb rendering when the content overflows. The empty card keeps the
+   same uniform box as the filled ones, bare of the scroll region. Width is
+   the B76 source ratio (600 of 830). */
 .gm-desc { flex: 0 1 calc(450 * var(--u)); }
 .gm-desc:empty { min-height: 0; }
 /* B98 (issue #257): a role whose copy is not written yet shows a quiet
@@ -809,17 +795,11 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
 .parking-lot__facts p:last-child { margin-bottom: 0; }
 .parking-lot__facts--contact { flex: 1 1 0; display: flex; justify-content: center; }
 
-/* B65 (issue #177), carried by B77 (issue #193): the owner's footer copy
-   lines — the tools line and the education line beneath it — their straight
-   slashes rendered as short divider bars — 1px wide, the footer divider's own
-   --frame-mix color, but 0.875em tall (agent-derived under the B33/B40
-   pattern: the owner ruled "even shorter and the footer's divider bar ...
-   visually distinct ... without changing the color palette"; the value
-   implements the relationship). The line renders on one line wherever the
-   bar's width allows and wraps to a second row rather than overflowing
-   where it doesn't (the 744px–~1000px band) — wrap-only-when-needed
-   implements the owner's one-line rule without breaking the no-overlap
-   law (a nowrap line pushed the CTA past the lot's edge at 800px). */
+/* B65 (issue #177), carried by B77 (issue #193): the footer copy lines — the
+   tools line and the education line beneath it — their straight slashes
+   rendered as short divider bars (1px wide, the footer divider's own
+   --frame-mix color, 0.875em tall). The line renders on one line where the
+   width allows and wraps to a second row where it doesn't. */
 .parking-lot__tools {
   display: flex;
   flex-wrap: wrap;
@@ -878,34 +858,20 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   box-shadow: var(--elevation), 0 0 12px 2px var(--frame), 0 0 0 4px var(--deep);
 }
 
-/* ---- B74 (issue #186): above the breakpoint the page is one viewport and the
-   components are bounded. The owner's issue #186: the role components "are NOT
-   to be sized from header to footer's entire length. Half of that length in
-   height for the components is more than enough with a scroll bar inside of
-   the description of the component for overflow" — and "the page does not
-   scroll and it fits on one viewport without a scroll". The cap binds the
-   whole component at half the left half's own height, the row is vertically
-   centred in the half, and the description card is the page's only scroll
-   container (the owner's four grill answers, 2026-10-09). B74 supersedes B66's
-   half-scroll clause; the ≤743px block below stands unchanged (mobile keeps
-   scrolling, owner grill answer).
+/* ---- B74 (issue #186): above the breakpoint the page is one viewport and
+   the components are bounded — the cap binds the whole component at half the
+   left half's own height, the row is vertically centred in the half, and the
+   description card is the page's only scroll container. B76 (issue #194):
+   the component's proportions and type scale uniformly by its own plate
+   width at the source's exact ratios, floored at 11px — a FILLED description
+   card always shows the styled in-card bar; empty cards stay bare.
 
-   B75's viewport type scaling (--c1) is SUPERSEDED by B76 (issue #194): the
-   component's proportions AND type now scale uniformly by its own plate
-   width at the source's exact ratios, floored at 11px (see the base block —
-   no viewport-scale rules remain here). B76 also amends B75's "a card that
-   does not overflow shows none": a FILLED description card always shows the
-   styled in-card bar (overflow-y: scroll in the base block); empty cards
-   stay bare.
-
-   Mechanism: body holds the viewport's height and main is allowed to shrink
-   (min-height 0 — without it the flex chain is content-driven and the page
-   scrolls, the #186 defect), so .split, .employer and its 1fr row are all
-   definite and the gallery's 50% resolves against the grid area; the plates
-   cap at 100% of that box, and the desc card shrinks under the cap and
-   scrolls its own text. The 11px floor can hold the title and year above
-   the cap in an extremely short viewport; the plate's own overflow: hidden
-   then bounds it — the page still never scrolls (measured in the suite). ---- */
+   Mechanism: body holds the viewport's height and main may shrink
+   (min-height 0) so the flex chain is definite and the plates cap at 100% of
+   that box; the desc card shrinks under the cap and scrolls its own text.
+   The 11px floor holds the title and year above the cap in an extremely
+   short viewport; the plate's own overflow: hidden bounds it — the page
+   never scrolls. ---- */
 @media (min-width: 744px) {
   html, body { height: 100vh;         /* the no-dvh fallback, as --rs above */
                height: 100dvh; }
@@ -914,12 +880,11 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
      CTA (50px min-height) overflowed a shrunken lot by 3–4px and scrolled the
      page in ≥744px-wide windows under ~470px tall (measured 844×390, 745×400). */
   .topband, .parking-lot { flex: 0 0 auto; }
-  /* B81 (issue #212) supersedes B74's "half the left half" height cap for the
-     row: the left half now fills its grid cell (the stage above, the band
-     below). The stage's single component still caps at the stage height and
-     the description card remains the page's only scroll container. The
-     component does not clip (`visible`, B94) -- since B98 nothing blooms past
-     it, but a clip would cut the title card where it straddles the back card. */
+  /* B81 (issue #212): the left half fills its grid cell (the stage above, the
+     band below); the stage's single component caps at the stage height and
+     the description card is the page's only scroll container. The component
+     does not clip (`visible`, B94): since B98 nothing blooms past it, but a
+     clip would cut the title card where it straddles the back card. */
   .gregorian-mode { max-height: 100%;               /* the component's own cap */
                     overflow: visible; }            /* no clip */
 }
@@ -940,11 +905,9 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   .topband__wordmark { font-size: 1.1rem; }
   .topband__oneliner { font-size: 0.8rem; }
   /* B81 (issue #212): on mobile the stage shows the one component at its
-     natural size (the page scrolls, B74's grill answer) and the role band
-     sits beneath it; the cap and the internal desc scroll are lifted. The
-     band's type resets from the 20 × --rs desktop rung (--rs ≈ 0.27 at 390px
-     would render ~5.4px) to a readable mobile size, the topband-card reset's
-     own pattern. */
+     natural size (the page scrolls) and the role band sits beneath it; the
+     cap and the internal desc scroll are lifted. The band's type resets to a
+     readable mobile size. */
   .gregorian-mode { flex: 0 0 auto; max-height: none; overflow: visible; }
   /* B98 (issue #257): the same ring, scaled down. The page scrolls here, so
      the ring's size container takes a height from the width (a size container
@@ -1104,15 +1067,11 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   <div class="parking-lot__facts">
     <!-- SLOT (blank #7): professional blurb — owner fills in; per B47 the
          block ships as this comment only until content exists. -->
-    <!-- B65 (issue #177): the owner's one-line tools list. The copy's
-         straight slashes render as short divider bars (1px, the divider's
-         own --frame-mix color, 0.875em tall), visually distinct from the
-         footer's full divider bar, same palette. -->
+    <!-- B65 (issue #177): the owner's one-line tools list, its straight
+         slashes rendered as the short divider bars (see the CSS). -->
     <p class="parking-lot__tools">Orion Technology<span class="parking-lot__tools-bar" aria-hidden="true"></span>Factset<span class="parking-lot__tools-bar" aria-hidden="true"></span>Morningstar<span class="parking-lot__tools-bar" aria-hidden="true"></span>Docupace<span class="parking-lot__tools-bar" aria-hidden="true"></span>BPM<span class="parking-lot__tools-bar" aria-hidden="true"></span>Salesforce</p>
-    <!-- B77 (issue #193): the owner's second line, directly beneath the
-         tools line, its straight bars rendered as the SAME short divider
-         bars as the top line (same width, color, height, gap — no new
-         values). -->
+    <!-- B77 (issue #193): the owner's second line, beneath the tools line,
+         its bars the same short divider bars as the top line. -->
     <p class="parking-lot__tools">Maryville University of St. Louis<span class="parking-lot__tools-bar" aria-hidden="true"></span>B.S. Accounting<span class="parking-lot__tools-bar" aria-hidden="true"></span>2021<span class="parking-lot__tools-bar" aria-hidden="true"></span>Magna cum laude</p>
   </div>
   <div class="parking-lot__divider" aria-hidden="true"></div>

@@ -51,7 +51,7 @@
                                       every re-hued value is an existing token) */
   --elevation: 0 2px 8px rgb(0 0 0 / 0.45);
   --ease:      cubic-bezier(0.22, 0.61, 0.36, 1);
-  /* Issue #261: the scene's one light is cool moonlight -- a blue-silver cast
+  /* B99 (issue #261): the scene's one light is cool moonlight -- a blue-silver cast
      carried ONLY by the light pool and the edge it catches on the glass
      description card; every other value on the page stays zero-hue (B73).
      Near --frame's luminance (0.36 vs 0.26), so the light reads as light,
@@ -390,7 +390,7 @@ body:has(#role-8:checked) .carousel { --n: 8; }
     opacity 500ms var(--ease);
 }
 
-/* Issue #261: the arrival. On load the ring makes ONE full turn and settles
+/* B101 (issue #261): the arrival. On load the ring makes ONE full turn and settles
    on role 1 -- the same direction as "next", over ~2s on the page's own
    --ease, so it slows into place. --spin is a registered angle so the
    browser can animate it; every slot reads it through --a, so position,
@@ -465,7 +465,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .carousel__slot-hit { d
   transform: translate(-50%, 50%);
   z-index: 0;
   pointer-events: none;
-  /* Issue #261: the light is cool moonlight (--moon-a), at alphas lowered so
+  /* B99 (issue #261): the light is cool moonlight (--moon-a), at alphas lowered so
      its luminance matches B98's grey pool -- a cast, not a colour. A second,
      flat ellipse lights the floor at the front card's foot (79% down the
      pool box: the stage floor), so the contact shadows have light to fall
@@ -781,7 +781,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
 .gm-title::after,
 .gm-back::after {
   animation: gm-marquee 6s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
-  /* Issue #261: the glimmer runs on the FRONT card only -- motion where the
+  /* B102 (issue #261): the glimmer runs on the FRONT card only -- motion where the
      visitor is looking, none in the dark around it (the other 14 sweeps
      stop). The front card's sweep restarts as each new card lands. */
   animation-name: none;
@@ -829,7 +829,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
   max-width: 100%;
   margin: calc(13 * var(--u)) auto calc(202 * var(--u));  /* top 180u (source); bottom = the source's desc→plate distance */
   padding: calc(10 * var(--u)) calc(18 * var(--u));
-  /* Issue #261: SMOKED GLASS replaces the --note slab, which was the
+  /* B100 (issue #261): SMOKED GLASS replaces the --note slab, which was the
      brightest object on screen. A dark translucent card (--card at 78%; no
      backdrop-filter -- translucency alone), light ink, a quiet --frame rim,
      and a thin bright top edge where the pool's moonlight catches it; the

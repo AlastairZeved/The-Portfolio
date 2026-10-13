@@ -6,7 +6,7 @@
    Download PDF anchor (live on poles, inert on rocks) plus a live
    "Back to the Garden" anchor, and the literal TheBoards
    idea-board green palette (byte-exact, NOT a re-hue). Single file, zero
-   script on plantsandrocks.html itself, zero <link>.
+   script on plantsandrocks.html itself; only the B63 favicon links.
    Black-box Playwright, career.js's harness.
    Run: node test/plantsandrocks.js   (PORTFOLIO_URL default http://localhost:8000/plantsandrocks.html) */
 

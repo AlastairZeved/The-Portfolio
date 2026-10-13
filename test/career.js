@@ -12,7 +12,7 @@
    snap under reduced motion. B74 still bounds the page to one viewport with
    the description card as the only scroll container; B76 still renders the
    agentic-plugins source geometry scaled uniformly by the plate's own width.
-   Single file, zero script, zero <link>. Black-box Playwright.
+   Single file, zero script; only the B63 favicon links. Black-box Playwright.
    Run: node test/career.js   (PORTFOLIO_URL default http://localhost:8000/career.html)
    Viewport note: the desktop run is at the page's own design canvas
    (REF_H ≈ 1104.55 → rs ≈ 1), because the band's literals render at the B46

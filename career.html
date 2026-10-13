@@ -495,31 +495,27 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
       var(--water-bot) 100%
     );
   box-shadow: var(--elevation);
+  transition: box-shadow 500ms var(--ease);   /* B94: the selected glow cross-fades with the carousel's 500ms rotation */
   overflow: hidden;
 }
-/* B81 (issue #212): the presented component's back card carries the source's
-   breathing presentation bloom — issue #111 / DECISIONS B28 of the source —
-   re-tokened: the rose triplet (--glow-rose) re-points at this page's
-   existing --glow-gray channels (--glow-gray-a), the geometry and alphas
-   ported verbatim (0 0 60px 20px / 0 0 240px 120px, 0.25/0.35/0.12/0.18,
-   10s ease-in-out). No hex is invented (B56's re-hue rule, B73's ladder). */
-@keyframes gm-breathe {
-  0%, 100% {
-    box-shadow:
-      var(--elevation),
-      0 0 60px 20px rgb(var(--glow-gray-a) / 0.25),
-      0 0 240px 120px rgb(var(--glow-gray-a) / 0.12);
-  }
-  50% {
-    box-shadow:
-      var(--elevation),
-      0 0 60px 20px rgb(var(--glow-gray-a) / 0.35),
-      0 0 240px 120px rgb(var(--glow-gray-a) / 0.18);
-  }
-}
-.gm-back {
-  animation: gm-breathe 10s ease-in-out infinite;
-}
+/* B94 (PR #236): the glow is re-homed. B81 shipped the breathing bloom on EVERY
+   back card; in the 8-card fan that bloom clipped at each component's boundary
+   (a visible rectangle), and on all cards at once it bled over its neighbours.
+   The owner ruled the glow is a SELECTED state: only the centred (checked)
+   role's back card carries it, and it cross-fades between cards on the
+   carousel's own 500ms rotation. The glow's own values are B81's verbatim
+   bloom, its rest state (0 0 60px 20px / 0 0 240px 120px gray channels) — no
+   new hex, token, size, or duration; only the anchor (the checked card) and
+   the motion (a box-shadow transition instead of the 10s breathe loop) change.
+   The gm-breathe keyframes and loop are removed. */
+body:has(#role-1:checked) .carousel__slot[data-role="1"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
+body:has(#role-2:checked) .carousel__slot[data-role="2"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
+body:has(#role-3:checked) .carousel__slot[data-role="3"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
+body:has(#role-4:checked) .carousel__slot[data-role="4"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
+body:has(#role-5:checked) .carousel__slot[data-role="5"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
+body:has(#role-6:checked) .carousel__slot[data-role="6"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
+body:has(#role-7:checked) .carousel__slot[data-role="7"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
+body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: var(--elevation), 0 0 60px 20px rgb(var(--glow-gray-a) / 0.25), 0 0 240px 120px rgb(var(--glow-gray-a) / 0.12); }
 .gm-back::after {
   content: "";
   position: absolute;
@@ -828,12 +824,14 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
      CTA (50px min-height) overflowed a shrunken lot by 3–4px and scrolled the
      page in ≥744px-wide windows under ~470px tall (measured 844×390, 745×400). */
   .topband, .parking-lot { flex: 0 0 auto; }
-  /* B81 (issue #212) supersedes B74's \"half the left half\" height cap for the
+  /* B81 (issue #212) supersedes B74's "half the left half" height cap for the
      row: the left half now fills its grid cell (the stage above, the band
      below). The stage's single component still caps at the stage height and
-     the description card remains the page's only scroll container. */
+     the description card remains the page's only scroll container. B94: the
+     component no longer clips (`visible`), so the re-homed selected glow on the
+     centred card blooms past the component instead of drawing its boundary. */
   .gregorian-mode { max-height: 100%;               /* the component's own cap */
-                    overflow: hidden; }             /* clip past the cap, never the page */
+                    overflow: visible; }            /* glow blooms; no clip */
 }
 
 @media (max-width: 743px) {

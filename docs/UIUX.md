@@ -967,6 +967,13 @@ back plate") is removed: each `.gregorian-mode` is **transparent** and its
 `.gm-back` water card sits directly on the page's `--deep` canvas. The three
 cards and the `gm-breathe` glow are untouched.)*
 
+*(Amended by B94, PR #236 — the glow is **re-homed**. The per-card breathing
+bloom (`gm-breathe` on every `.gm-back`) is removed; the glow is now a
+**selected** state carried only by the centred (checked) role's `.gm-back`, and
+it **cross-fades** between cards on the carousel's 500ms rotation
+(`transition: box-shadow 500ms`). The component renders `overflow: visible` so
+the centred glow blooms past it without drawing the component's boundary.)*
+
 ---
 
 ## §11 The Plants & Rocks page (issue #134, B48; conventions fixed by B50)

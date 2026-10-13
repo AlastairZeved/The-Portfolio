@@ -3020,3 +3020,31 @@ removed. Do not remove the background card, description card, or title card -
 only the black background back plate that the glow extends towards. Do not
 remove the glow."
 
+### B94. The glow is re-homed from every back card to the centred card as a selected state (PR #236)
+
+B81 shipped the breathing bloom (`gm-breathe`) on **every** `.gm-back`; in the
+8-card fan that bloom clipped at each component's own boundary and, on all
+eight at once, bled over its neighbours. The owner ruled the glow is a
+**selected** state: only the centred (checked) role's back card carries it,
+and it **cross-fades between cards** on the carousel's own 500ms rotation. The
+`gm-breathe` keyframes and its 10s loop are removed; the glow's own values are
+B81's verbatim bloom in its rest state (`0 0 60px 20px` / `0 0 240px 120px`
+gray channels — no new hex, token, size, or duration), applied to the checked
+card's `.gm-back` via the existing `body:has(#role-N:checked)` ring and
+transitioned with `transition: box-shadow 500ms var(--ease)`. The component's
+`overflow` is now `visible` so the centred glow blooms past the component
+instead of drawing its boundary as a visible line (which B93's transparent
+base had exposed). Supersedes B81's "every back card breathes" clause; B81's
+glimmer (`.gm-back::after` / `.gm-title::after` `gm-marquee`) and B74/B76's cap
+and in-card scroll stand.
+
+**Source:** the owner's clarify answers (owner chat, 2026-10-13), quoted
+verbatim — "Remove the glow entirely from every component in the component but
+rehome the state to whichever component is currently being viewed in the
+carousel. ensure that the glow transitions smoothly between cards as they
+transition when clicked through" — and, on what the shape was, "No, it
+surrounds all three. It glows and then suddenly turns black and where it's
+suddenly turning back looks like a border in the shape of a rectangle all the
+way ALL THREE cards in the component. It's like the border radius of the
+component as a whole."
+

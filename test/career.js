@@ -277,7 +277,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         backPast: r(k).bottom - r(d).bottom,
         gap: r(d).top > r(t2).bottom,
         overflowY: getComputedStyle(d).overflowY,
-        backAnim: getComputedStyle(k).animationName,
+        backShadow: getComputedStyle(k).boxShadow,
         pageScrolls: de.scrollHeight > de.clientHeight + 1,
       };
     });
@@ -293,7 +293,9 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     Math.abs(b76.backPast - 112 * b76.plateW / 830) < 3);
   ok('B76 — a filled desc card always shows the styled in-card bar (overflow-y: scroll)',
     b76.overflowY === 'scroll');
-  ok('B81 — the component\'s back card carries the breathing bloom (gm-breathe)', b76.backAnim === 'gm-breathe');
+  ok('B94 — only the centred (checked) card carries the selected glow',
+    b76.backShadow.includes('103, 103, 103') &&
+    !(await page.evaluate(() => getComputedStyle(document.querySelector('.carousel__slot[data-role="1"] .gm-back')).boxShadow)).includes('103, 103, 103'));
   ok('B93 — the component base is transparent (the --deep back plate is gone)',
     await page.evaluate(() =>
       getComputedStyle(document.querySelector('.carousel__slot[data-role="8"] .gregorian-mode')).backgroundColor === 'rgba(0, 0, 0, 0)'));

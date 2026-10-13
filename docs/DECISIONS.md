@@ -3108,3 +3108,18 @@ whole should scale larger and smaller 1:1 for different viewport sizes." —
 and, choosing the footprint to size against, "Match the longest description
 card (role 8, ~3 short paragraphs) with no scroll — the size every card
 copies" and "~480px — a middle ground, still readable, tighter fan".
+
+### B96. The career page ships the real 800-weight Montserrat Alternates face (issue #238)
+
+The heavy (800-weight) `@font-face` on `career.html` shipped a 37-byte
+`data:` stub, so the browser synthesized the heavy weight instead of
+rendering the self-hosted 800 face. The page now embeds the same 800 face
+`index.html` ships — heavy text renders with the actual font, not
+synthesized bold — and the `font-weight: 800` comment on the title card now
+matches the shipped face.
+
+**Source:** the owner's ruling in the Hermes chat, 2026-10-13 — quoted
+verbatim: "replace the 37-byte d09GMl5…QVQ== 800-weight stub in career.html
+(line 29) with the real ~29.5 KB 800 face that index.html ships, so heavy
+text renders with the actual font, and correct the font-weight: 800 comment
+(line 588) to match"

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <!-- razgregory.com/career — the employer-selector career page (issue #133,
-     DECISIONS.md B47). Structure reuses the razgregory.com landing page's
-     grammar: header.topband with title cards over the water band, .split with
+     DECISIONS.md B47). Structure:
+     header.topband with title cards over the water band, .split with
      a ruled bar, footer .parking-lot with a .cta. The palette is TheBoards'
-     token ladder re-hued to sand + deep brown (B47; owner signs off on the
+     token ladder re-hued to monochrome (B73; owner signs off on the
      final hexes — blank slot 9). Selection is a three-way radio group driven
-     by CSS :has — no script, per the site's single-file, zero-JS law. -->
+     by CSS :has — this page needs no script. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -57,7 +57,7 @@
      logical height); portrait: B30's min(vw/REF_W, vh/REF_H) down-scale —
      ported so every band literal below renders at L × --rs and the career
      header matches razgregory.com's render exactly at every viewport, with
-     zero script (the site's no-JS law). */
+     zero script (this page needs no script). */
   --rs: min(calc(100vh / 1104.55), calc(100vw / 1440));   /* vh fallback — dvh below wins where supported */
   --rs: min(calc(100dvh / 1104.55), calc(100vw / 1440));
   --band-top: calc(15.46 * var(--rs));   /* TheBoards' 14 × 1.10455 (B46) */
@@ -97,7 +97,7 @@ body {
    landing page's render, issue #139). The landing's band grammar: the water
    gradient (radial foot + three-stop ladder + 0.05 dither) over the deep,
    closed by the 1px --frame rule at --rule-y — the B46 height-anchored render,
-   re-hued to sand/brown. Three title cards, one per employer, left→right in
+   re-hued to monochrome (B73). Three title cards, one per employer, left→right in
    chronological order. ---- */
 .topband {
   box-sizing: border-box;
@@ -229,7 +229,7 @@ main { flex: 1 1 auto; display: flex; }
 }
 
 /* ---- Body — per-employer detail (issue #133 §2). B95 (issue #250): the
-   body is a single full-width cell — the landing page's .split .split__rule
+   body is a single full-width cell — the .split__rule
    divider and the empty .split__copy right half are removed; the carousel
    spans the entire body content area. ---- */
 .split {
@@ -453,7 +453,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
    implement them. ---- */
 
 .gregorian-mode {
-  --ink: var(--deep);           /* desc ink on the sand note: the deep itself */
+  --ink: var(--deep);           /* desc ink on the monochrome note: the deep itself */
   --elevation-inset: inset -3px 0 8px rgb(0 0 0 / 0.16),
     inset 0 2px 4px rgb(0 0 0 / 0.1);   /* the inset press value, verbatim */
   position: relative;
@@ -714,7 +714,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: 
   color: var(--note);
 }
 
-/* ---- Footer — three sections (issue #133 §3). The landing page's
+/* ---- Footer — three sections (issue #133 §3). The
    .parking-lot, same height/formatting/borders, split three ways with
    divider bars of 3/4 section length between sections. ---- */
 .parking-lot {
@@ -735,9 +735,9 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: 
   border-top: 1px solid color-mix(in srgb, var(--frame) 45%, transparent);
 }
 /* The divider bars: 1px wide, 3/4 of the section length (the lot's inner
-   height), anchored to the band's vertical middle. */
-/* The stretched item's cross size is definite (CSS Flexbox §9.6), so the
-   bar's 75% height resolves against the section's inner length. */
+   height), anchored to the band's vertical middle. The bar's 75% height
+   resolves because the stretched item's cross size is definite (CSS
+   Flexbox §9.6). */
 .parking-lot__divider {
   align-self: stretch;
   display: flex;
@@ -784,7 +784,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-back { box-shadow: 
   background: color-mix(in srgb, var(--frame) 45%, transparent);
 }
 
-/* The CTA, verbatim from the landing page's .cta grammar (issue #133 §3). */
+/* The CTA (issue #133 §3). */
 .cta {
   display: flex;
   width: fit-content;

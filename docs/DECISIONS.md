@@ -2936,3 +2936,115 @@ your next new rule becomes number 133, skipping 90–132."
 **Ruling (owner, verbatim):** "Public pages in the site tree: `index.html`, `career.html`, `plantsandrocks.html`, `monstera-storybook.html`." "Add `sitemap.xml` listing the public pages above (canonical `https://razgregory.com/...` URLs)." "Add `robots.txt` that allows crawling and points to the sitemap:" `User-agent: *` / `Allow: /` / `Sitemap: https://razgregory.com/sitemap.xml`. "Confirm both files are served with `text/xml` / `text/plain` and don't trip the CSP."
 
 **Source:** the owner's issue [#229](https://github.com/AlastairZeved/The-Portfolio/issues/229) — quoted verbatim.
+
+### B92. The career body's left half is a 3D coverflow carousel of all eight role components (issue #230)
+
+The `/career` page's left half is rebuilt as a single **3D coverflow carousel**
+presenting **all eight role components** — PNC Bank's three, PNC Private Bank's
+two, Brinker's three — in one fan, replacing the B81 `.plugins__stage` +
+`.plugins__pane` item-selector band (which it does **not** sit alongside).
+
+- **One carousel of all 8 roles.** The **centred card** is the **checked role
+  radio**; the other seven fan out around it — **four left, three right** — each
+  rotated around the Y axis in perspective and **progressively narrower toward
+  the edges** (tight overlap, thin slivers at the far edges). The card internals
+  are the existing `.gregorian-mode` component (`.gm-back`/`.gm-title`/`.gm-uc`/
+  `.gm-desc`), carried over **verbatim** — this ruling repackages them, it does
+  not rebuild them.
+- **Selection is a single radio group of eight** (`name="role"`,
+  `role="radiogroup"` `aria-label="Choose a role"`), driven by CSS `:has` — the
+  page's zero-JS law. The `←` / `→` labels step **one role per click** with
+  **wrap-around** at both ends; each arrow is a stack of per-state `<label>`s
+  revealed by `:has` (a pure-CSS "step ±1 with wrap" has no native "next"), the
+  one agent-built mechanism this ruling requires beyond the existing selector.
+- **The three employer header cards stop being radios.** They become labels
+  that jump the carousel to each employer's first role (PNC Bank → role 1, PNC
+  Private Bank → role 4, Brinker → role 6). This supersedes B47/B79/B81's
+  employer-radiogroup and its selected-card glow — the owner ruled the glow
+  **out** ("lose the glow state") rather than re-derive it.
+- **The ruled 3D values** (UIUX §10.4): **perspective 800px**; **~45° per step**
+  for the near cards, compressing toward **~80°** at the far edge so the rearmost
+  cards read as thin slivers instead of flipping past edge-on; the **centre card
+  ~half the left half's width (50%)**; **all eight visible** (centre + four left
+  + three right); a **~500ms** rotation; **snap** (no animation) under
+  `prefers-reduced-motion`. The recession (`translateZ`) and spread
+  (`translateX`) literals and the angle-compression curve are **agent-derived
+  under the B33/B40 provenance pattern** — the owner ruled the steep / tight /
+  sliver relationship and the centre size; the numbers implement it.
+
+**Carried over unchanged:** the `.gm-*` component internals, B76's source
+geometry and `--u` plate-width scale with the 11px readable floor (now re-anchored
+to the slot's 50%-of-the-left-half width), B74's one-viewport /
+description-card-scrolls law, B73's monochrome tokens, B64's three filled desc
+cards, and the `prefers-reduced-motion` collapse. No new hex, no new token, no
+script.
+
+**Source:** the owner's issue [#230](https://github.com/AlastairZeved/The-Portfolio/issues/230), quoted
+verbatim — "All 8 components containing individual roles needs to be pulled
+from their pages and put in one large 3D carousel. The attached image is the UI
+we're after for this new carousel." and "This carousel is being placed in the
+left 50% of the body section of the page, replacing the components currently
+there." — and the owner's twelve planning answers (owner chat, 2026-10-12,
+multiple choice, quoted verbatim as selected): (1) one carousel holds all 8
+roles fanned together; (2) employer cards stay — picking one spins the carousel
+to that employer's roles; (3) `←`/`→` arrow buttons wired to the hidden radios,
+CSS-only; (4) all 8 visible — centre + four left + three right; (5) steep, ~45°
+tilt per step; (6) one card per click; (7) wrap around both ends; (8) ~500ms
+rotation; (9) reduced motion: snap instantly; (10) perspective ~800px
+(dramatic); (11) centre card ~half the left half's width; (12) tight pack —
+thin slivers at the edges. — and the owner's direction on the employer glow,
+quoted verbatim: "lose the glow state … if you can figure out how to keep the
+glow, then keep it. otherwise lose it."
+
+### B93. The carousel's 8 components drop their own base fill — the "black back plate" is removed (PR #236)
+
+The `.gregorian-mode` component's own `background: var(--deep)` — a solid
+`#080808` rectangle filling each of the 8 fanned components behind the three
+cards — is **removed**. At the 3D fan's 45–80° angles the near-black rectangle
+reads as a heavy slab the owner ruled too visible, so each component's base is
+now **transparent**: the `.gm-back` water card sits directly on the page's own
+`--deep` canvas (`body { background: var(--deep); }` is unchanged). The
+component's three cards and its glow are untouched: the **background card**
+(`.gm-back`, the water-ladder fill), the **title card** (`.gm-title`, with the
+nested `.gm-uc` year), the **description card** (`.gm-desc`), and the
+`gm-breathe` presentation bloom (B81) all stand as shipped — the glow is a
+`box-shadow` on `.gm-back`, independent of the removed fill. This amends B92's
+"carried over verbatim" clause for the component base only; no new hex, token,
+size, or duration is introduced.
+
+**Source:** the owner's comment on PR
+[#236](https://github.com/AlastairZeved/The-Portfolio/pull/236#issuecomment-6137314104),
+quoted verbatim — "Remove the back plate from each of the 8 components - the
+black back plate is too visible when used in the carousel and needs to be
+removed. Do not remove the background card, description card, or title card -
+only the black background back plate that the glow extends towards. Do not
+remove the glow."
+
+### B94. The glow is re-homed from every back card to the centred card as a selected state (PR #236)
+
+B81 shipped the breathing bloom (`gm-breathe`) on **every** `.gm-back`; in the
+8-card fan that bloom clipped at each component's own boundary and, on all
+eight at once, bled over its neighbours. The owner ruled the glow is a
+**selected** state: only the centred (checked) role's back card carries it,
+and it **cross-fades between cards** on the carousel's own 500ms rotation. The
+`gm-breathe` keyframes and its 10s loop are removed; the glow's own values are
+B81's verbatim bloom in its rest state (`0 0 60px 20px` / `0 0 240px 120px`
+gray channels — no new hex, token, size, or duration), applied to the checked
+card's `.gm-back` via the existing `body:has(#role-N:checked)` ring and
+transitioned with `transition: box-shadow 500ms var(--ease)`. The component's
+`overflow` is now `visible` so the centred glow blooms past the component
+instead of drawing its boundary as a visible line (which B93's transparent
+base had exposed). Supersedes B81's "every back card breathes" clause; B81's
+glimmer (`.gm-back::after` / `.gm-title::after` `gm-marquee`) and B74/B76's cap
+and in-card scroll stand.
+
+**Source:** the owner's clarify answers (owner chat, 2026-10-13), quoted
+verbatim — "Remove the glow entirely from every component in the component but
+rehome the state to whichever component is currently being viewed in the
+carousel. ensure that the glow transitions smoothly between cards as they
+transition when clicked through" — and, on what the shape was, "No, it
+surrounds all three. It glows and then suddenly turns black and where it's
+suddenly turning back looks like a border in the shape of a rectangle all the
+way ALL THREE cards in the component. It's like the border radius of the
+component as a whole."
+

@@ -84,8 +84,10 @@
           if (dLeft <= 0) continue;
           var aTop = (A.tp / 100) * lh, bTop = (B.tp / 100) * lh;   // top is authored in % (B45)
           if (aTop + A.h <= bTop || bTop + B.h <= aTop) continue;   // vertically clear
-          /* +4: the resize-handle ring sits 4px past the card's right border
-             (issue #108's grab area) and must not reach the neighbour either */
+          /* +4: the resize-handle ring's grab box sits 4px past the card's
+             padding-box right edge (right: -4px, inside the 2px border) —
+             2px past the card's outer right border (issue #108's grab area) —
+             and must not reach the neighbour either */
           var w = (A.w + 4) / dLeft;
           if (w > need) need = w;
         }
@@ -174,7 +176,7 @@
    toLogical() before it touches card geometry — the same rule TheBoards states
    for itself (TheBoards AGENTS.md architecture point 1; geometry.js toLogical
    divides by the render scale: never read clientX/clientY directly against
-   note geometry). At desktop widths the scale is 1 and nothing changes. */
+   note geometry). */
 (function () {
   var board = document.getElementById('board');
   var cards = Array.prototype.slice.call(document.querySelectorAll('.door-card'));

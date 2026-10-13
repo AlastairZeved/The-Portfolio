@@ -452,7 +452,9 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   --u: calc(100cqw / 830);
   display: flex;
   flex-direction: column;       /* title → year → desc, the reflow's flow */
-  background: var(--deep);
+  /* B93 (PR #236): no base fill — the component's own `--deep` ("black back
+     plate") is ruled out; the component is transparent and the .gm-back water
+     card sits directly on the page's `--deep` canvas (body, line 86). */
   font-family: "Montserrat Alternates", system-ui, sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

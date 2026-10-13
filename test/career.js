@@ -294,6 +294,9 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('B76 — a filled desc card always shows the styled in-card bar (overflow-y: scroll)',
     b76.overflowY === 'scroll');
   ok('B81 — the component\'s back card carries the breathing bloom (gm-breathe)', b76.backAnim === 'gm-breathe');
+  ok('B93 — the component base is transparent (the --deep back plate is gone)',
+    await page.evaluate(() =>
+      getComputedStyle(document.querySelector('.carousel__slot[data-role="8"] .gregorian-mode')).backgroundColor === 'rgba(0, 0, 0, 0)'));
   ok('B74 — the page fits one viewport (no page scroll)', !b76.pageScrolls);
   ok('no .gm-cta anywhere', await page.locator('.gm-cta').count() === 0);
 

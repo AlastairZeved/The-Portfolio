@@ -2996,3 +2996,27 @@ thin slivers at the edges. — and the owner's direction on the employer glow,
 quoted verbatim: "lose the glow state … if you can figure out how to keep the
 glow, then keep it. otherwise lose it."
 
+### B93. The carousel's 8 components drop their own base fill — the "black back plate" is removed (PR #236)
+
+The `.gregorian-mode` component's own `background: var(--deep)` — a solid
+`#080808` rectangle filling each of the 8 fanned components behind the three
+cards — is **removed**. At the 3D fan's 45–80° angles the near-black rectangle
+reads as a heavy slab the owner ruled too visible, so each component's base is
+now **transparent**: the `.gm-back` water card sits directly on the page's own
+`--deep` canvas (`body { background: var(--deep); }` is unchanged). The
+component's three cards and its glow are untouched: the **background card**
+(`.gm-back`, the water-ladder fill), the **title card** (`.gm-title`, with the
+nested `.gm-uc` year), the **description card** (`.gm-desc`), and the
+`gm-breathe` presentation bloom (B81) all stand as shipped — the glow is a
+`box-shadow` on `.gm-back`, independent of the removed fill. This amends B92's
+"carried over verbatim" clause for the component base only; no new hex, token,
+size, or duration is introduced.
+
+**Source:** the owner's comment on PR
+[#236](https://github.com/AlastairZeved/The-Portfolio/pull/236#issuecomment-6137314104),
+quoted verbatim — "Remove the back plate from each of the 8 components - the
+black back plate is too visible when used in the carousel and needs to be
+removed. Do not remove the background card, description card, or title card -
+only the black background back plate that the glow extends towards. Do not
+remove the glow."
+

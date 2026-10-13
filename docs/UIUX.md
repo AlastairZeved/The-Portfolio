@@ -962,6 +962,11 @@ spread (`translateX`) per step, and the angle-compression curve, are
 **agent-derived** under the B33/B40 provenance pattern — the owner ruled the
 steep/tight/sliver relationship and the centre size; the literals implement it.
 
+*(Amended by B93, PR #236 — the component's own `--deep` base fill (the "black
+back plate") is removed: each `.gregorian-mode` is **transparent** and its
+`.gm-back` water card sits directly on the page's `--deep` canvas. The three
+cards and the `gm-breathe` glow are untouched.)*
+
 ---
 
 ## §11 The Plants & Rocks page (issue #134, B48; conventions fixed by B50)

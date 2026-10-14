@@ -543,6 +543,11 @@ new motion cannot name its job in one sentence it is costume and comes out.
 the role ring turns, and that dim may run once on page load. The owner:
 "Allow CSS dim to run once upon page load as an exemption." Nothing else
 animates on load.)*
+
+*(Exemption, B101, issue #261 — the career page's role ring makes one full turn
+over ~2s on load and settles on role 1 (§10.6). It runs once, and never under
+`prefers-reduced-motion`. The pool dim and this turn are the only motions on
+load.)*
 ---
 
 ## §6 The contact form (Parking Lot)
@@ -1046,6 +1051,31 @@ sorts in front of a card: a `radial-gradient` of the existing
 0.45` at 50% of a 500ms dip; each role names its own copy of the keyframes
 (`pool-dip-1` … `pool-dip-8`), so a change of role restarts the dip. The dip
 runs once on load (the §5 exemption). B95's employer title-card glow stands.
+*(Amended by issue #261 — the pool's light is cool moonlight, and the
+description card is smoked glass; see §10.6.)*
+
+### §10.6 Quiet wonder (B99–B102, issue #261)
+
+The ring answers the visitor: one lit object in a dark gallery, things that
+respond gently when touched. The owner ruled the relationships (issue #261,
+multiple choice); the literals are agent-derived under the B33/B40 pattern.
+
+| Area | Ruling (owner) | Literal (agent-derived, B33/B40) |
+|---|---|---|
+| Arrival (B101) | one full turn on load, ~2s, settles on role 1 | `--spin` (registered `<angle>`) 360° → 0 over 2000ms on `--ease`, once, animated on each slot (an inherited value would drag the 500ms turn transition behind it) |
+| Click any card | a click on a visible side card turns the ring to it | a `label.carousel__slot-hit` per slot for its own radio, over the drawn card (inset `55u 115u 90u`); the front card's is `display: none`; `.carousel` takes no pointer events (its own plane sits in front of the side cards) |
+| Hover: side card | lifts slightly out of the dark | `--lift: 1` → brightness `+0.2`, a world-Y rise of `0.025 × --ring-w` made before the Z placement (depth unchanged: never in front of the front card) |
+| Hover: employer card | soft bloom, like the landing door-cards | `0 0 32px 4px` × `--rs` in `--glow-gray-a` at 0.9, border `--frame` |
+| Arrows | brighten, nudge their way; press inset | `--ink-light` + `drop-shadow(0 0 4px)` glow, 3px nudge; pressed `scale(0.85)` on 80ms |
+| Grounding | soft contact shadows on an invisible floor | per slot `::before`: `640 × 56u` radial black (0.85 → 0.45 → 0) centred on the back card's foot |
+| Light (B99) | faint cool moonlight in the pool | `--moon-a: 148 163 189` (luminance 0.36); pool alphas `0.15 / 0.09 / 0.03 / 0` at `0 / 30 / 60 / 90%`; floor ellipse `46% × 7%` at 79%, `0.12 → 0.04 → 0`. The only hue on the page |
+| Description card (B100) | smoked glass, light ink, a lit edge, translucency not `backdrop-filter` | fill `--card` at 78%, ink `--ink-light`, rim `--frame` at 35%, top edge `--moon-a` at 0.6 + inset 0.22, thumb `--frame`; placeholder at 0.6. Legibility is asserted by the suite (text over the glass over `--water-top`, the brightest thing behind it, at least 7 to 1; measured near 14) |
+| Glimmer (B102) | front card only | `gm-marquee` named only on the checked slot's `.gm-title` / `.gm-back` `::after` (2 of 16 sweeps) |
+| Ambient | fine static film grain | body `feTurbulence` (0.9, 3 octaves) desaturated, rect opacity 0.03 (mean lift ~3 levels over `--deep`); never moves |
+| Footer | the CTA gets the light; tools and education quieter | CTA resting bloom `0 0 18px 2px` in the glow rung at 0.55, hover lift 2px; `.parking-lot__tools` in `--ink-dim` (still above the 4.5 reading floor on the lot) |
+| Header | unchanged | — |
+| Reduced motion | drops motion only | no arrival, glimmer, rise, nudge or CTA lift; light, glass, shadows, grain and hover brightening stay |
+| Phones | everything except hover | every hover rule sits under `@media (hover: hover)`; a tap turns the ring |
 
 ## §11 The Plants & Rocks page (issue #134, B48; conventions fixed by B50)
 

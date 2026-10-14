@@ -10,7 +10,12 @@
    card inside the body (the ring closes behind itself), darker with
    distance, side cards showing titles only, a light pool in place of B94's
    card glow, the arrows below the front card, ~500ms rotation, snap under
-   reduced motion. B74 still bounds the page to one viewport with
+   reduced motion. Issue #261 polishes it for quiet wonder: a one-turn
+   arrival on load, click any visible card to turn to it, hover answers on
+   side cards / employer cards / arrows / CTA, contact shadows, a cool
+   moonlit pool, a smoked-glass description card, the glimmer on the front
+   card only, a static film grain, and reduced motion that drops motion but
+   keeps the light. B74 still bounds the page to one viewport with
    the description card as the only scroll container; B76 still renders the
    agentic-plugins source geometry scaled uniformly by the plate's own width.
    Single file, zero script; only the B63 favicon links. Black-box Playwright.
@@ -31,6 +36,16 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1440, height: 1110 } });
   await page.goto(URL, { waitUntil: 'networkidle' });
+  // Issue #261: the ring makes one full turn on load. Read the arrival while
+  // it runs, then let it land before any geometry is measured.
+  const arrival = await page.evaluate(() => document.getAnimations()
+    .filter(a => a.animationName === 'ring-arrive')
+    .map(a => ({ dur: a.effect.getTiming().duration, iter: a.effect.getTiming().iterations,
+                 target: a.effect.target.className })));
+  const arrived = pg => pg.waitForFunction(() => document.getAnimations()
+    .filter(a => a.animationName === 'ring-arrive').every(a => a.playState === 'finished'),
+    null, { timeout: 8000 });
+  await arrived(page);
 
   // Single-file law: no scripts, no stylesheets, no deps
   ok('no <script> elements', await page.locator('script').count() === 0);
@@ -237,6 +252,136 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     }));
   ok('B98 — the pool dips on each turn: every role names its own copy of the dip',
     await page.evaluate(() => getComputedStyle(document.querySelector('.carousel__pool')).animationName === 'pool-dip-1'));
+
+  // Issue #261: quiet wonder.
+  ok('#261 — on load the ring makes ONE turn (~2s, once, every card together) and settles on role 1',
+    arrival.length === 8 && arrival.every(a => a.dur === 2000 && a.iter === 1 && a.target === 'carousel__slot') &&
+    await page.evaluate(() => [...document.querySelectorAll('.carousel__slot')]
+      .every(s => getComputedStyle(s).getPropertyValue('--spin').trim() === '0deg')));
+  ok('#261 — the light pool is faint cool moonlight; the ladder tokens stay zero-hue',
+    await page.evaluate(() => {
+      const bg = getComputedStyle(document.querySelector('.carousel__pool')).backgroundImage;
+      const moon = getComputedStyle(document.documentElement).getPropertyValue('--moon-a').trim();
+      return moon === '148 163 189' && bg.includes('rgba(148, 163, 189') && !bg.includes('103, 103, 103');
+    }));
+  const glass = await page.evaluate(() => {
+    const d = document.querySelector('.carousel__slot[data-role="1"] .gm-desc');
+    const cs = getComputedStyle(d);
+    const root = getComputedStyle(document.documentElement);
+    return { bg: cs.backgroundColor, color: cs.color, top: cs.borderTopColor,
+             water: root.getPropertyValue('--water-top').trim(), filter: cs.backdropFilter };
+  });
+  const rgba = c => { const n = c.match(/[\d.]+/g).map(Number);
+    // color(srgb r g b / a) is 0..1; rgb()/rgba() is 0..255
+    return c.startsWith('color(') ? { r: n[0] * 255, g: n[1] * 255, b: n[2] * 255, a: n[3] ?? 1 }
+                                  : { r: n[0], g: n[1], b: n[2], a: n[3] ?? 1 }; };
+  const relLum = ({ r, g, b }) => [r, g, b].map(v => v / 255)
+    .map(c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4))
+    .reduce((s, c, i) => s + c * [0.2126, 0.7152, 0.0722][i], 0);
+  {
+    const bg = rgba(glass.bg), ink = rgba(glass.color);
+    const under = { r: parseInt(glass.water.slice(1, 3), 16), g: parseInt(glass.water.slice(3, 5), 16), b: parseInt(glass.water.slice(5, 7), 16) };
+    const over = k => bg[k] * bg.a + under[k] * (1 - bg.a);   // the glass over the brightest thing behind it
+    const comp = { r: over('r'), g: over('g'), b: over('b') };
+    const ratio = (relLum(ink) + 0.05) / (relLum(comp) + 0.05);
+    ok('#261 — the front card is smoked glass: translucent, no backdrop-filter, light ink, a lit top edge',
+      bg.a > 0.5 && bg.a < 0.95 && relLum(bg) < 0.02 && relLum(ink) > 0.8 &&
+      (glass.filter === 'none' || !glass.filter) && rgba(glass.top).b > rgba(glass.top).r);
+    ok(`#261 — glass legibility: light text over the glass over --water-top holds ≥ 7:1 (${ratio.toFixed(1)}:1)`,
+      ratio >= 7);
+  }
+  ok('#261 — the glimmer runs on the front card only (2 sweeps: its title and back card)',
+    await page.evaluate(() => {
+      const on = [...document.querySelectorAll('.gm-title, .gm-back')]
+        .filter(e => getComputedStyle(e, '::after').animationName === 'gm-marquee');
+      return on.length === 2 && on.every(e => e.closest('.carousel__slot').dataset.role === '1');
+    }));
+  ok('#261 — contact shadows: every card casts a soft shadow on the floor',
+    await page.evaluate(() => [...document.querySelectorAll('.carousel__slot')].every(s => {
+      const b = getComputedStyle(s, '::before');
+      return b.content === '""' && b.backgroundImage.startsWith('radial-gradient') && b.backgroundImage.includes('rgba(0, 0, 0');
+    })));
+  ok('#261 — a fine, static, desaturated film grain sits over the black',
+    await page.evaluate(() => {
+      const bi = getComputedStyle(document.body).backgroundImage;
+      return bi.includes('feTurbulence') && bi.includes('saturate') &&
+        getComputedStyle(document.body).backgroundColor === 'rgb(8, 8, 8)' &&
+        !document.getAnimations().some(a => a.effect.target === document.body);
+    }));
+  ok('#261 — every card carries a label for its own role; the front card\'s is removed',
+    await page.evaluate(() => [...document.querySelectorAll('.carousel__slot')].every(s => {
+      const l = s.querySelector(':scope > .carousel__slot-hit');
+      return l && l.htmlFor === `role-${s.dataset.role}` &&
+        (getComputedStyle(l).display === 'none') === (s.dataset.role === '1');
+    })));
+
+  // Hover answers (a pointer that can hover), then a real click on a side card.
+  const hitCenter = r => page.evaluate(n => {
+    const b = document.querySelector(`.carousel__slot[data-role="${n}"] .carousel__slot-hit`).getBoundingClientRect();
+    return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+  }, r);
+  const slotState = r => page.evaluate(n => {
+    const s = document.querySelector(`.carousel__slot[data-role="${n}"]`);
+    const m = new DOMMatrix(getComputedStyle(s).transform); const w = s.offsetWidth / 2;
+    return { bright: parseFloat(getComputedStyle(s).filter.replace(/[^\d.]/g, '')),
+             nearZ: Math.max(m.transformPoint(new DOMPoint(-w, 0, 0)).z, m.transformPoint(new DOMPoint(w, 0, 0)).z),
+             y: m.m42 };
+  }, r);
+  const rest2 = await slotState('2');
+  const p2 = await hitCenter('2');
+  await page.mouse.move(p2.x, p2.y);
+  await page.waitForTimeout(650);
+  const hov2 = await slotState('2');
+  ok('#261 — a pointed-at side card lifts out of the dark (brighter, risen) and stays behind the front card',
+    hov2.bright > rest2.bright + 0.15 && hov2.y < rest2.y - 1 &&
+    Math.abs(hov2.nearZ - rest2.nearZ) < 1 && hov2.nearZ < -1);
+  await page.mouse.click(p2.x, p2.y);
+  await page.waitForTimeout(650);
+  ok('#261 — clicking a visible side card turns the ring to it (no script)',
+    await page.locator('#role-2').isChecked() && (await centered()).role === '2');
+  const p1 = await hitCenter('1');
+  await page.mouse.click(p1.x, p1.y);
+  await page.waitForTimeout(650);
+  ok('#261 — clicking the card on the other side turns back to it', await page.locator('#role-1').isChecked());
+  await page.mouse.move(5, 5);
+
+  const emp = await page.evaluate(() => {
+    const c = document.querySelector('.topband__card[data-employer="brinker-capital"]').getBoundingClientRect();
+    return { x: c.x + c.width / 2, y: c.y + c.height / 2 };
+  });
+  await page.mouse.move(emp.x, emp.y);
+  await page.waitForTimeout(350);
+  ok('#261 — an unselected employer card answers hover with a soft bloom (the door-card geometry)',
+    await page.evaluate(() => {
+      const sh = getComputedStyle(document.querySelector('.topband__card[data-employer="brinker-capital"]')).boxShadow;
+      const blur = parseFloat((sh.match(/\)\s+[-\d.]+px\s+[-\d.]+px\s+([\d.]+)px/) || [])[1]);
+      return sh.includes('103, 103, 103') && blur > 20;
+    }));
+  const nextBox = await page.evaluate(() => {
+    const l = [...document.querySelectorAll('.carousel__nav--next .carousel__nav-hit')].find(e => getComputedStyle(e).display !== 'none');
+    const b = l.getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+  });
+  const chev = () => page.evaluate(() => {
+    const l = [...document.querySelectorAll('.carousel__nav--next .carousel__nav-hit')].find(e => getComputedStyle(e).display !== 'none');
+    const cs = getComputedStyle(l, '::before'); return { color: cs.borderTopColor, x: new DOMMatrix(cs.transform).m41 };
+  });
+  const chevRest = await chev();
+  await page.mouse.move(nextBox.x, nextBox.y);
+  await page.waitForTimeout(300);
+  const chevHov = await chev();
+  ok('#261 — the next arrow brightens and nudges the way it points on hover',
+    chevHov.color === 'rgb(244, 245, 241)' && chevHov.x > chevRest.x + 2);
+  const cta = await page.locator('.parking-lot .cta').boundingBox();
+  const ctaRest = await page.evaluate(() => getComputedStyle(document.querySelector('.cta')).boxShadow);
+  await page.mouse.move(cta.x + cta.width / 2, cta.y + cta.height / 2);
+  await page.waitForTimeout(300);
+  ok('#261 — the CTA holds the light at rest and lifts on hover',
+    ctaRest.includes('103, 103, 103') &&
+    await page.evaluate(() => new DOMMatrix(getComputedStyle(document.querySelector('.cta')).transform).m42 < -1));
+  ok('#261 — the tools and education lines sit a step quieter than the facts (--ink-dim)',
+    await page.evaluate(() => [...document.querySelectorAll('.parking-lot__tools')]
+      .every(t => getComputedStyle(t).color === 'rgba(244, 245, 241, 0.55)')));
+  await page.mouse.move(5, 5);
 
   // Navigation: the ← / → labels step one role per click with wrap-around.
   const clickNav = dir => page.evaluate(d => {
@@ -512,6 +657,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   // the B95 clip wrapper collapsed to 0px tall here before.
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await phone.goto(URL, { waitUntil: 'networkidle' });
+  await arrived(phone);
   ok('B98 — at 390px the ring renders (non-zero height) and every card stays on the page',
     await phone.evaluate(() => {
       const c = document.querySelector('.clip').getBoundingClientRect();
@@ -528,6 +674,50 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         .find(l => getComputedStyle(l).display !== 'none').getBoundingClientRect();
       return n.top >= back.bottom - 1 && n.height > 0;
     }));
+
+  // Issue #261: reduced motion drops motion only -- no arrival, no glimmer,
+  // no hover rise -- while the light, glass, shadows and grain stay.
+  const still = await browser.newPage({ viewport: { width: 1440, height: 1110 }, reducedMotion: 'reduce' });
+  await still.goto(URL, { waitUntil: 'networkidle' });
+  const rm = await still.evaluate(() => ({
+    arrive: document.getAnimations().filter(a => a.animationName === 'ring-arrive').length,
+    glimmer: [...document.querySelectorAll('.gm-title, .gm-back')].filter(e => getComputedStyle(e, '::after').content !== 'none').length,
+    glass: getComputedStyle(document.querySelector('.gm-desc')).backgroundColor,
+    grain: getComputedStyle(document.body).backgroundImage.includes('feTurbulence'),
+    pool: getComputedStyle(document.querySelector('.carousel__pool')).backgroundImage.includes('148, 163, 189'),
+    frontM11: new DOMMatrix(getComputedStyle(document.querySelector('.carousel__slot[data-role="1"]')).transform).m11,
+  }));
+  ok('#261 — reduced motion: no arrival turn and no glimmer; the ring is settled at once',
+    rm.arrive === 0 && rm.glimmer === 0 && Math.abs(rm.frontM11 - 1) < 1e-3);
+  ok('#261 — reduced motion keeps the light, the glass and the grain',
+    rm.grain && rm.pool && !rm.glass.includes('203'));
+  const s3 = await still.evaluate(() => {
+    const b = document.querySelector('.carousel__slot[data-role="2"] .carousel__slot-hit').getBoundingClientRect();
+    return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+  });
+  const y0 = await still.evaluate(() => new DOMMatrix(getComputedStyle(document.querySelector('.carousel__slot[data-role="2"]')).transform).m42);
+  await still.mouse.move(s3.x, s3.y);
+  await still.waitForTimeout(100);
+  ok('#261 — reduced motion: a hovered side card brightens but does not rise',
+    await still.evaluate(y => {
+      const s = document.querySelector('.carousel__slot[data-role="2"]');
+      return Math.abs(new DOMMatrix(getComputedStyle(s).transform).m42 - y) < 0.5 &&
+        getComputedStyle(s).getPropertyValue('--lift').trim() === '1';
+    }, y0));
+
+  // Issue #261: phones get everything except hover; a tap turns the ring.
+  const touch = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const tp = await touch.newPage();
+  await tp.goto(URL, { waitUntil: 'networkidle' });
+  await arrived(tp);
+  const t2 = await tp.evaluate(() => {
+    const b = document.querySelector('.carousel__slot[data-role="2"] .carousel__slot-hit').getBoundingClientRect();
+    return { x: b.x + b.width / 2, y: b.y + b.height / 2, hover: matchMedia('(hover: hover)').matches };
+  });
+  await tp.tap('body', { position: { x: t2.x, y: t2.y } });
+  await tp.waitForTimeout(650);
+  ok('#261 — on a phone (no hover) tapping a side card turns the ring to it',
+    !t2.hover && await tp.locator('#role-2').isChecked());
 
   await browser.close();
   console.log(failures === 0 ? '\nAll career checks passed.' : `\n${failures} failure(s).`);

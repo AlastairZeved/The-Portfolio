@@ -3193,3 +3193,51 @@ Scale: holds at every viewport width; above 743px the page stays one viewport (B
 Number: one unit, the card width (--ring-w = min(40cqw, 70cqh) above 743px, min(48cqw, 70cqh) at and below), carries the ring: radius 1.6 card widths (1.25 at and below 743px; edge-to-edge is ~1.21), perspective 3.6 card widths, eye at 50% -12%, brightness 0.12 + 0.88·c⁴ with c = (1 + cos a)/2 (1, 0.59, 0.18, 0.12, 0.12 front to back), back-card opacity floor 0.4, pool dip to 0.45 at mid-turn. Measured by test/career.js at 1440 × 1110 and 390 × 844: every card's nearest edge sits behind the front card's plane, and the ring's projected span stays inside the body. The literals are agent-derived under the B33/B40 provenance pattern; UIUX §10.5 records them.
 
 Source: the owner's issue [#257](https://github.com/AlastairZeved/The-Portfolio/issues/257) and the owner's chat answers (2026-10-13), quoted verbatim — "It was never supposed to be left and right sided - it was supposed to be circular and dimensional with all 8 in a circle shape, utilizing the background"; "They aren't supposed to be able to go off the page, they're supposed to wrap around behind in a circle"; multiple choice as selected: "Pull centre forward", "Darken with distance", "Soft spotlight pool", "Titles only", "Slightly above", "Flatter", "Face outward, see-through", "Gaps between cards", "Stay CSS-only", "Smaller ring", "Below the centre card", "Placeholder state", "Pool replaces it", "Dims mid-turn", "Subtle", "Keep as is"; and "Allow CSS dim to run once upon page load as an exemption."; the /rule intake answers (Q1 "Rebuilt as a 3D ring", Q3 "One page, one scene", Q4 "Supersede 92, 94, part 95") and the owner's "Confirm".
+
+### B99. The career page's light pool carries a faint cool moonlight; every other value stays zero-hue (issue #261; refines B73; refines B98)
+Principle: Zero cognitive tax.
+The scene's one light source — the light pool behind the front card, and the thin edge it catches on the glass description card — carries a faint cool, blue-silver cast (--moon-a, 148 163 189). Every other value on the page stays on B73's zero-hue gray ladder: the band, the cards, the glow token, the film grain and the CTA's bloom. The pool keeps B98's shape, size and mid-turn dip; a flat ellipse added at the front card's foot lights the floor, so the cards' contact shadows have light to fall on.
+
+Reason: in an all-gray scene nothing tells the eye where the light is, so it lands on whatever is brightest; a faint cool cast in the one light marks the front card as the lit object without the visitor having to look for it, and keeping the cast out of every other value keeps it a light rather than a palette.
+
+Scale: holds at every viewport width.
+
+Number: --moon-a = 148 163 189 (relative luminance 0.36, near --frame's 0.26); the pool's alphas 0.15 / 0.09 / 0.03 / 0 at 0 / 30 / 60 / 90% (lowered from B98's 0.2 / 0.12 / 0.04 so its luminance matches the gray pool); the floor ellipse 46% × 7% of the pool box at its 79% line, alpha 0.12 → 0.04 → 0; the glass card's lit edge at alpha 0.6 (border) and 0.22 (inset line). The literals are agent-derived under the B33/B40 provenance pattern; UIUX §10.6 records them.
+
+Source: the owner's issue [#261](https://github.com/AlastairZeved/The-Portfolio/issues/261) and the owner's chat answers (2026-10-13), multiple choice as selected — "Stay grey, add warmth in light", "A whisper of warm tint", then "Cool moonlight" (the later, more specific answer, followed); the /rule intake answer (Q3 "Zero cognitive tax") and the owner's confirm.
+
+### B100. The career role component's description card becomes smoked glass with light ink (issue #261; revises B56; keeps B76; refines B98)
+Principle: Zero cognitive tax.
+Every role component's description card is smoked glass in place of B56's light --note card with dark ink: a dark translucent fill (--card at 78% — translucency only, no backdrop-filter), light ink (--ink-light), a quiet --frame rim at 35%, and a thin bright top edge where the pool's moonlight catches it. The back card shows faintly through. The scroll bar's thumb moves to --frame so it reads on the glass, and the "Description coming soon" placeholder takes the light ink at 0.6. B76's geometry, type ratios and 11px floor stand unchanged, as do B95's uniform size and B98's titles-only side cards.
+
+Reason: the --note card was the brightest object on the page, so the eye landed on a blank sheet before it found the role; dark glass with light ink makes the words the brightest thing on the card and lets the lit title lead.
+
+Scale: holds at every viewport width.
+
+Number: the fill is --card at 78%; the text's contrast against the glass over the brightest thing that can sit behind it (--water-top #636363) is ~14:1, asserted ≥ 7:1 by test/career.js; the placeholder at 0.6 holds ~6:1 there. The literals are agent-derived under the B33/B40 provenance pattern; UIUX §10.6 records them.
+
+Source: the owner's issue [#261](https://github.com/AlastairZeved/The-Portfolio/issues/261) and the owner's chat answers (2026-10-13), multiple choice as selected — "Darker glass card", "Smoked glass, light text"; the /rule intake answer (Q3 "Zero cognitive tax") and the owner's confirm.
+
+### B101. On load the career role ring makes one full turn over ~2s and settles on role 1 (issue #261; extends B98)
+Principle: Play is permitted; work is not faked.
+When the page loads, the role ring makes one full turn, in the same direction as "next", over about two seconds on the page's --ease, and settles with role 1 at the front. It runs once per load, is CSS-only (a registered --spin angle animated on each card), and is a second exemption to UIUX §5's "Nothing animates on load", beside B98's pool dim. The ring answers clicks while it turns. Under prefers-reduced-motion it does not run: the ring is simply there, settled.
+
+Reason: a ring that is already still reads as a row of cards; one turn on arrival shows the visitor the shape of the scene — every role on one ring — once, asks nothing of them, and gets out of the way.
+
+Scale: holds at every viewport width, once per page load.
+
+Number: 360° over 2000ms, one iteration, timing --ease (cubic-bezier(0.22, 0.61, 0.36, 1)); measured by test/career.js — eight animations, one per card, 2000ms, one iteration, and none under reduced motion. The literals are agent-derived under the B33/B40 provenance pattern; UIUX §5 and §10.6 record them.
+
+Source: the owner's issue [#261](https://github.com/AlastairZeved/The-Portfolio/issues/261) and the owner's chat answers (2026-10-13), multiple choice as selected — "Ring spins in", "Full turn, ~2s", "Reduced motion drops motion only"; the /rule intake answer (Q3 "Play is permitted") and the owner's confirm.
+
+### B102. The career components' glimmer runs on the front card only (issue #261; refines B56; refines B81)
+Principle: Zero cognitive tax.
+The gm-marquee glimmer — the 6s sweep across the title card, the back card's 0.3s behind it — runs only on the ring's front card; the other seven components' fourteen sweeps stop. The front card's sweep restarts each time a new card comes to the front. Under prefers-reduced-motion the glimmer is still removed outright (B56, B81).
+
+Reason: sixteen sweeps looping on cards the visitor is not reading spend motion in the corner of their eye; one sweep, on the card in front, puts the page's only standing motion where they are already looking.
+
+Scale: holds at every viewport width.
+
+Number: 2 of 16 sweeps animate at any time (the front card's title card and back card), on the unchanged 6s clock and 0.3s offset; asserted by test/career.js.
+
+Source: the owner's issue [#261](https://github.com/AlastairZeved/The-Portfolio/issues/261) and the owner's chat answers (2026-10-13), multiple choice as selected — "Front card only"; the /rule intake answer (Q3 "Zero cognitive tax") and the owner's confirm.

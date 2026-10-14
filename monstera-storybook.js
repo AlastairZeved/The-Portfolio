@@ -29,21 +29,29 @@ var stage = document.getElementById('stage');
 var btnPrev = document.getElementById('prev');
 var btnNext = document.getElementById('next');
 var NONE = -1;
-var spreads = [], idx = 0, busy = false, cur = null;
+var spreads = [], idx = 0, busy = false, cur = null, flipId = 0;
 var mq = window.matchMedia('(min-width: 768px)');
 /* hidden tabs throttle page timers; a Worker timer keeps the flip's
    cleanup deadline honest even when the tab is in the background */
-var pendingDrop = null, ticker = null;
+var pendingDrops = Object.create(null), dropId = 0, ticker = null;
 try {
   ticker = new Worker(URL.createObjectURL(new Blob(
-    ['onmessage=function(e){setTimeout(function(){postMessage(1)},e.data.ms)}'],
+    ['onmessage=function(e){var id=e.data.id;setTimeout(function(){postMessage(id)},e.data.ms)}'],
     { type: 'text/javascript' })));
-  ticker.onmessage = function () { var f = pendingDrop; pendingDrop = null; if (f) f(); };
+  ticker.onmessage = function (e) {
+    var f = pendingDrops[e.data];
+    delete pendingDrops[e.data];
+    if (f) f();
+  };
 } catch (e) { ticker = null; }
 function armDrop(fn, ms) {
-  pendingDrop = fn;
-  if (ticker) ticker.postMessage({ ms: ms });
-  setTimeout(fn, ms + 1000); // last resort if workers are unavailable
+  if (ticker) {
+    var id = ++dropId;
+    pendingDrops[id] = fn;
+    ticker.postMessage({ id: id, ms: ms });
+    return null;
+  }
+  return setTimeout(fn, ms + 1000); // fallback when workers are unavailable
 }
 
 /* book model (1-indexed pages p1..p24 = PAGES[0..23]):
@@ -90,6 +98,7 @@ function flip(dir) {
   var n = idx + dir;
   if (n < 0 || n >= spreads.length) return;
   busy = true;
+  var ownFlip = ++flipId;
   var from = spreads[idx], to = spreads[n];
   idx = n;
   var top = cur;                                        // the settled spread plays the upper layer
@@ -113,13 +122,17 @@ function flip(dir) {
   turn.appendChild(document.createElement('div')).className = 'curl';
   stage.appendChild(turn);
   srcImg.style.visibility = 'hidden';                           // the sheet replaces it
+  var ended = false, fallback;
   function cleanup() {
+    if (ended || ownFlip !== flipId) return;
+    ended = true;
+    clearTimeout(fallback);
     if (turn.parentNode) stage.removeChild(turn);
     if (top.parentNode) stage.removeChild(top);
     busy = false; cur = base;
   }
   turn.addEventListener('animationend', cleanup, { once: true });
-  armDrop(cleanup, 900); // worker-driven: unthrottled in hidden tabs
+  fallback = armDrop(cleanup, 900); // worker-driven: unthrottled in hidden tabs
   btnPrev.disabled = idx === 0;
   btnNext.disabled = idx === spreads.length - 1;
 }

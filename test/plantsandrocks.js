@@ -126,6 +126,24 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     await page.evaluate(() =>
       document.querySelector('.reader--poles iframe').contentDocument &&
       document.querySelector('.reader--poles iframe').contentDocument.body.scrollHeight > 0));
+  // Issue #274: a stale fallback from one flip must not corrupt the next
+  // spread after two turns roughly one second apart.
+  const storybook = page.frameLocator('.reader--poles iframe');
+  await storybook.locator('#next').click();
+  await page.waitForTimeout(850);
+  await storybook.locator('#next').click();
+  await page.waitForTimeout(1100);
+  await storybook.locator('#next').click();
+  ok('the storybook still starts a third page turn after two turns one second apart',
+    await storybook.locator('.turn').count() === 1);
+  await page.waitForTimeout(900);
+  ok('the third page turn settles to one spread',
+    await storybook.locator('#stage > .spread').count() === 1 &&
+    await storybook.locator('.turn').count() === 0);
+  await storybook.locator('#next').click();
+  ok('the storybook pager remains usable after the third page turn',
+    await storybook.locator('.turn').count() === 1);
+  await page.waitForTimeout(900);
   ok('the storybook document wears Montserrat Alternates (issue #160, UIUX §2.9)',
     await page.evaluate(() => {
       const doc = document.querySelector('.reader--poles iframe').contentDocument;

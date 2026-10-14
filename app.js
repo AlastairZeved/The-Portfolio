@@ -72,7 +72,7 @@
       document.querySelectorAll('.door-card').forEach(function (card) {
         var lp = parseFloat(card.style.left) || 0, tp = parseFloat(card.style.top) || 0;
         var s = parseFloat(card.style.getPropertyValue('--card-scale')) || 1;
-        geo.push({ lp: lp, tp: tp, w: card.offsetWidth * s, h: card.offsetHeight * s });
+        geo.push({ lp: lp, tp: tp, s: s, w: card.offsetWidth * s, h: card.offsetHeight * s });
       });
       for (var pass = 0; pass < 60; pass++) {
         var lh = vh / rs;
@@ -84,11 +84,12 @@
           if (dLeft <= 0) continue;
           var aTop = (A.tp / 100) * lh, bTop = (B.tp / 100) * lh;   // top is authored in % (B45)
           if (aTop + A.h <= bTop || bTop + B.h <= aTop) continue;   // vertically clear
-          /* +4: the resize-handle ring's grab box sits 4px past the card's
-             padding-box right edge (right: -4px, inside the 2px border) —
-             2px past the card's outer right border (issue #108's grab area) —
-             and must not reach the neighbour either */
-          var w = (A.w + 4) / dLeft;
+          /* The resize-handle ring's grab box extends 4px past the card's
+             padding-box right edge (right: -4px, inside the 2px border). It is
+             a child of the scaled card, so its board-logical overhang is
+             4 × that card's --card-scale; keep the whole grab area clear of
+             the neighbour too (issue #253, preserving B44's no-overlap law). */
+          var w = (A.w + 4 * A.s) / dLeft;
           if (w > need) need = w;
         }
         if (need <= lwMin + 0.5) break;

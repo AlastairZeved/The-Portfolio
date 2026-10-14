@@ -96,11 +96,11 @@ async function runScenario(page, tag, width, height) {
       return rightLogical / (1 - left / 100);
     }));
     let lwMin = lwMin0;
-    const geo = [...document.querySelectorAll('.door-card')].map(c => ({
-      lp: parseFloat(c.style.left) || 0, tp: parseFloat(c.style.top) || 0,
-      w: c.offsetWidth * (parseFloat(c.style.getPropertyValue('--card-scale')) || 1),
-      h: c.offsetHeight * (parseFloat(c.style.getPropertyValue('--card-scale')) || 1)
-    }));
+    const geo = [...document.querySelectorAll('.door-card')].map(c => {
+      const s = parseFloat(c.style.getPropertyValue('--card-scale')) || 1;
+      return { lp: parseFloat(c.style.left) || 0, tp: parseFloat(c.style.top) || 0,
+        s, w: c.offsetWidth * s, h: c.offsetHeight * s };
+    });
     for (let pass = 0; pass < 60; pass++) {
       const rs = innerWidth >= innerHeight
         ? Math.min(innerHeight / REF.REF_H, innerWidth / lwMin)
@@ -115,7 +115,7 @@ async function runScenario(page, tag, width, height) {
           if (dLeft <= 0) continue;
           const aTop = (A.tp / 100) * lh, bTop = (B.tp / 100) * lh;
           if (aTop + A.h <= bTop || bTop + B.h <= aTop) continue;
-          need = Math.max(need, (A.w + 4) / dLeft);
+          need = Math.max(need, (A.w + 4 * A.s) / dLeft);
         }
       if (need <= lwMin + 0.5) break;
       lwMin = need;

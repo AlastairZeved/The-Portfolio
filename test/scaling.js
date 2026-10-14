@@ -143,10 +143,11 @@ function ok(label, cond, details = '') {
          square-ish landscape aspects the width floor also carries the
          pairwise gap term (B44's no-overlap law; same agent-derived
          provenance as B46's lw_min): for every pair whose vertical ranges
-         overlap, the left card's right edge must clear the right card's
-         left edge — lw >= (aW + handle ring) / (bLeft% − aLeft%). The
-         logical height (vh/rs) grows with the floor, spreading the % tops,
-         so the page re-measures until stable; re-derive the same way here. */
+         overlap, the left card's right edge AND scaled resize-handle overhang
+         must clear the right card's left edge — lw >= (aW + 4 × aScale) /
+         (bLeft% − aLeft%). The logical height (vh/rs) grows with the floor,
+         spreading the % tops, so the page re-measures until stable; re-derive
+         the same way here. Issue #253 pins the handle's child scale. */
       const geo = [...document.querySelectorAll('.door-card')].map(c => ({
         lp: parseFloat(c.style.left) || 0, tp: parseFloat(c.style.top) || 0,
         s: parseFloat(c.style.getPropertyValue('--card-scale')) || 1,
@@ -166,7 +167,7 @@ function ok(label, cond, details = '') {
             if (dLeft <= 0) continue;
             const aTop = (A.tp / 100) * lh, bTop = (B.tp / 100) * lh;
             if (aTop + A.h <= bTop || bTop + B.h <= aTop) continue;
-            need = Math.max(need, (A.w + 4) / dLeft);
+            need = Math.max(need, (A.w + 4 * A.s) / dLeft);
           }
         if (need <= lwMin + 0.5) break;
         lwMin = need;
@@ -190,8 +191,9 @@ function ok(label, cond, details = '') {
       r.scrollW <= r.vw + 1 && r.scrollH <= r.vh + 1);
     ok(`${tag}: the scale is height-anchored on landscape (rs = min(vh/REF_H, vw/lw_min)), min() in portrait (B46, issue #128)`,
       Math.abs(r.rs - (r.vw >= r.vh ? Math.min(r.vh / REF_H, r.vw / r.lwMin)
-                                    : Math.min(r.vw / REF_W, r.vh / REF_H))) < 1e-6);
-    ok(`${tag}: no overlapping note cards`, r.overlaps.length === 0);
+                                    : Math.min(r.vw / REF_W, r.vh / REF_H))) < 1e-6,
+      JSON.stringify({ rs: r.rs, lwMin: r.lwMin, viewport: [r.vw, r.vh] }));
+    ok(`${tag}: no overlapping note cards`, r.overlaps.length === 0, JSON.stringify(r.overlaps));
     ok(`${tag}: no link line obscured behind a card (bar B78's owner-ruled pair)`, r.obscured.length === 0);
     ok(`${tag}: every link endpoint on its card centre (≤0.6 logical px)`, r.lineMaxDev < 0.6);
     ok(`${tag}: cards render content-sized × own scale × rs (uniform, no reflow)`,

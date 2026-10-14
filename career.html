@@ -50,6 +50,8 @@
                                       breathing presentation bloom re-tokened (B56:
                                       every re-hued value is an existing token) */
   --elevation: 0 2px 8px rgb(0 0 0 / 0.45);
+  --elevation-inset: inset -3px 0 8px rgb(0 0 0 / 0.16),
+    inset 0 2px 4px rgb(0 0 0 / 0.1);
   --ease:      cubic-bezier(0.22, 0.61, 0.36, 1);
   /* B99 (issue #261): the scene's one light is cool moonlight -- a blue-silver cast
      carried ONLY by the light pool and the edge it catches on the glass
@@ -625,8 +627,6 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
 .gregorian-mode {
   --ink: var(--deep);           /* desc ink on the monochrome note: the deep itself */
   --glass-ink: var(--ink-light); /* issue #261: the smoked-glass desc card's light ink */
-  --elevation-inset: inset -3px 0 8px rgb(0 0 0 / 0.16),
-    inset 0 2px 4px rgb(0 0 0 / 0.1);   /* the inset press value, verbatim */
   position: relative;
   box-sizing: border-box;
   /* B64 (issue #176): the plates size to their content (the filled desc
@@ -651,13 +651,6 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   font-family: "Montserrat Alternates", system-ui, sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-}
-.gregorian-mode::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0.055;
-  pointer-events: none;
 }
 .gm-card {
   box-sizing: border-box;
@@ -707,15 +700,6 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   background-size: 250% 100%;
   background-position: 130% 0;
 }
-.gm-back::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0.05;
-  pointer-events: none;
-  border-radius: 1px;
-}
-
 /* Card 1 — the title card. In flow (career titles wrap to two lines per the
    owner's ruling; the year now nests inside this card, B87); its top offset
    (55u) is the source's own absolute top — under the back card's 90u top
@@ -723,9 +707,6 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
 .gm-title {
   position: relative;
   z-index: 1;
-  top: auto;
-  left: auto;
-  transform: none;
   flex: 0 0 auto;
   width: calc(427 * var(--u));     /* the source's fixed title-card width */
   max-width: 100%;
@@ -772,13 +753,12 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
    first, background card 0.3s behind it. */
 .gm-title::after,
 .gm-back::after {
-  animation: gm-marquee 6s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+  animation: gm-marquee 6s var(--ease) infinite;
   /* B102 (issue #261): the glimmer runs on the FRONT card only -- motion where the
      visitor is looking, none in the dark around it (the other 14 sweeps
      stop). The front card's sweep restarts as each new card lands. */
   animation-name: none;
 }
-.gm-title::after { animation-delay: 0s; }
 .gm-back::after { animation-delay: 0.3s; }
 body:has(#role-1:checked) .carousel__slot[data-role="1"] :is(.gm-title, .gm-back)::after,
 body:has(#role-2:checked) .carousel__slot[data-role="2"] :is(.gm-title, .gm-back)::after,
@@ -997,9 +977,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
 .cta:active {
   filter: brightness(0.92);
   transform: translateY(2px);
-  box-shadow:
-    inset -3px 0 8px rgb(0 0 0 / 0.16),
-    inset 0 2px 4px rgb(0 0 0 / 0.1);
+  box-shadow: var(--elevation-inset);
   transition-duration: 80ms;
 }
 .cta:focus-visible {

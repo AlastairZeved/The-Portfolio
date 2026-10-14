@@ -50,6 +50,8 @@
   --ink:       var(--ink-light);   /* TheBoards :root, verbatim */
   --ink-dim:   rgb(244 245 241 / 0.55);   /* career.html's shipped dim value */
   --elevation: 0 2px 8px rgb(0 0 0 / 0.45);  /* career.html's value, verbatim */
+  --elevation-inset: inset -3px 0 8px rgb(0 0 0 / 0.16),
+    inset 0 2px 4px rgb(0 0 0 / 0.1);
   --ease:      cubic-bezier(0.22, 0.61, 0.36, 1);  /* career.html's value, verbatim */
 
   /* The render scale, in pure CSS (B49, extended to this page by issue #140 /
@@ -88,7 +90,7 @@ body {
   font: 400 1rem/1.6 "Montserrat Alternates", system-ui, sans-serif;
 }
 
-:is(a, button, label:has(input:focus-visible)):focus-visible {
+a:focus-visible {
   outline: 2px solid var(--ink-light);
   outline-offset: 2px;
 }
@@ -152,7 +154,6 @@ body {
    token (B48, see :root note): border-color + a single soft 0 0 8px 0 bloom,
    one token, no other states. */
 .topband__card:has(.topband__tab:checked) {
-  border-color: var(--frame);
   box-shadow: 0 0 8px 0 var(--frame);
 }
 .topband__card:active {
@@ -195,7 +196,6 @@ body {
   margin: 0;
   font-weight: 400;
   font-size: calc(20 * var(--rs));
-  color: var(--ink-light);
   line-height: 1.2;
 }
 /* Unselected: career.html's dim-italic state. */
@@ -323,12 +323,10 @@ body:has(#page-rocks:checked) .cta[download] {
     box-shadow: var(--elevation), 0 0 12px 2px var(--frame), 0 0 24px 4px var(--frame);
   }
 }
-.cta:not([disabled]):active {
+.cta:active {
   filter: brightness(0.92);
   transform: translateY(2px);
-  box-shadow:
-    inset -3px 0 8px rgb(0 0 0 / 0.16),
-    inset 0 2px 4px rgb(0 0 0 / 0.1);
+  box-shadow: var(--elevation-inset);
   transition-duration: 80ms;
 }
 .cta:focus-visible {

@@ -4,7 +4,6 @@
    Run: node test/mobile.js   (PORTFOLIO_URL default http://localhost:8000/index.html) */
 
 const { chromium } = require('playwright');
-const fs = require('fs');
 const path = require('path');
 
 const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/index.html';

@@ -43,6 +43,8 @@
   --water-mid: #4d4d4d;
   --water-bot: #333333;
   --water-bot-a: 51 51 51;      /* --water-bot's channels, the band's radial foot */
+  --water: radial-gradient(118% 76% at 50% 24%, rgb(0 0 0 / 0) 32%, rgb(var(--water-bot-a) / 0.72) 128%),
+    linear-gradient(180deg, var(--water-top) 0%, var(--water-mid) 46%, var(--water-bot) 100%);
   --ink-light: #f4f5f1;
   --ink-dim:   rgb(244 245 241 / 0.55);
   --glow-gray: #676767;            /* selected-card bloom: --frame one rung down (TheBoards' `B132`) */
@@ -121,11 +123,7 @@ body {
   justify-items: center;
   align-items: start;
   height: var(--rule-y);
-  background:
-    radial-gradient(118% 76% at 50% 24%, rgb(0 0 0 / 0) 32%,
-                    rgb(var(--water-bot-a) / 0.72) 128%),
-    linear-gradient(180deg, var(--water-top) 0%, var(--water-mid) 46%,
-                    var(--water-bot) 100%);
+  background: var(--water);
   border-bottom: 1px solid var(--frame);
 }
 .topband::after {           /* the water's dither, at 0.05 (the landing's band-fill) */
@@ -158,6 +156,10 @@ body {
   border-radius: 0 0 calc(3 * var(--rs)) calc(3 * var(--rs));   /* only the corners that exist */
   background: var(--card);
   text-align: center;
+}
+
+.topband__card,
+.cta {
   transition:
     box-shadow 200ms var(--ease),
     filter 200ms var(--ease),
@@ -167,11 +169,13 @@ body {
 /* Selection: the radio is checked (default PNC Bank). The selected card wears
    TheBoards' `B132` glow verbatim — border-color + a single soft 0 0 8px 0 bloom, one
    token, no other states (issue #133 §1). */
-.topband__card:active {
+.topband__card:active,
+.cta:active {
   filter: brightness(0.92);
   transform: translateY(2px);
   transition-duration: 80ms;
 }
+.cta:active { box-shadow: var(--elevation-inset); }
 .topband__card-hit {
   position: absolute;
   inset: calc(-2 * var(--rs));
@@ -582,14 +586,17 @@ body:has(#role-7:checked) .carousel__nav--prev .carousel__nav-hit[for="role-6"] 
 body:has(#role-8:checked) .carousel__nav--next .carousel__nav-hit[for="role-1"] { display:block; }
 body:has(#role-8:checked) .carousel__nav--prev .carousel__nav-hit[for="role-7"] { display:block; }
 
-body:has(#role-1:focus-visible) .carousel__slot[data-role="1"] .gregorian-mode { outline: 2px solid var(--ink-light); outline-offset: 2px; }
-body:has(#role-2:focus-visible) .carousel__slot[data-role="2"] .gregorian-mode { outline: 2px solid var(--ink-light); outline-offset: 2px; }
-body:has(#role-3:focus-visible) .carousel__slot[data-role="3"] .gregorian-mode { outline: 2px solid var(--ink-light); outline-offset: 2px; }
-body:has(#role-4:focus-visible) .carousel__slot[data-role="4"] .gregorian-mode { outline: 2px solid var(--ink-light); outline-offset: 2px; }
-body:has(#role-5:focus-visible) .carousel__slot[data-role="5"] .gregorian-mode { outline: 2px solid var(--ink-light); outline-offset: 2px; }
-body:has(#role-6:focus-visible) .carousel__slot[data-role="6"] .gregorian-mode { outline: 2px solid var(--ink-light); outline-offset: 2px; }
-body:has(#role-7:focus-visible) .carousel__slot[data-role="7"] .gregorian-mode { outline: 2px solid var(--ink-light); outline-offset: 2px; }
-body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode { outline: 2px solid var(--ink-light); outline-offset: 2px; }
+body:has(#role-1:focus-visible) .carousel__slot[data-role="1"] .gregorian-mode,
+body:has(#role-2:focus-visible) .carousel__slot[data-role="2"] .gregorian-mode,
+body:has(#role-3:focus-visible) .carousel__slot[data-role="3"] .gregorian-mode,
+body:has(#role-4:focus-visible) .carousel__slot[data-role="4"] .gregorian-mode,
+body:has(#role-5:focus-visible) .carousel__slot[data-role="5"] .gregorian-mode,
+body:has(#role-6:focus-visible) .carousel__slot[data-role="6"] .gregorian-mode,
+body:has(#role-7:focus-visible) .carousel__slot[data-role="7"] .gregorian-mode,
+body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
+  outline: 2px solid var(--ink-light);
+  outline-offset: 2px;
+}
 /* ---- B56 (issue #154): the career body's left half carries the Agentic
    Plugins page's plugin component — one per role. B66 (issue #173) rules
    the plates READ LEFT TO RIGHT in one row — the owner: "These components
@@ -669,24 +676,15 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   position: absolute;
   inset: calc(90 * var(--u)) calc(165 * var(--u)) calc(90 * var(--u));
   z-index: 0;
-  background: radial-gradient(
-      118% 76% at 50% 24%,
-      rgb(0 0 0 / 0) 32%,
-      rgb(var(--water-bot-a) / 0.72) 128%
-    ),
-    linear-gradient(
-      180deg,
-      var(--water-top) 0%,
-      var(--water-mid) 46%,
-      var(--water-bot) 100%
-    );
+  background: var(--water);
   box-shadow: var(--elevation);
   overflow: hidden;
 }
 /* B98 (issue #257): B94's selected glow on the centred card's back card is
    removed -- the light pool behind the ring (.carousel__pool) is the scene's
    one light source, so no box edge can show. */
-.gm-back::after {
+.gm-back::after,
+.gm-title::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -729,20 +727,6 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   flex: 0 1 calc(180 * var(--u));
   box-shadow: var(--elevation);
   overflow: hidden;
-}
-.gm-title::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    105deg,
-    transparent 32%,
-    color-mix(in srgb, var(--frame) 70%, transparent) 50%,
-    transparent 68%
-  );
-  background-size: 250% 100%;
-  background-position: 130% 0;
 }
 @keyframes gm-marquee {
   0%   { background-position: 130% 0; }
@@ -962,10 +946,6 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
      rung (zero hue: only the pool carries the moonlight), and it lifts 2px
      toward the pointer on hover. */
   box-shadow: var(--elevation), 0 0 6px 0 var(--frame), 0 0 18px 2px rgb(var(--glow-gray-a) / 0.55);
-  transition:
-    box-shadow 200ms var(--ease),
-    filter 200ms var(--ease),
-    transform 200ms var(--ease);
 }
 @media (hover: hover) {
   .cta:hover {
@@ -973,12 +953,6 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
     filter: brightness(1.1);
     box-shadow: var(--elevation), 0 0 12px 2px var(--frame), 0 0 24px 4px var(--frame);
   }
-}
-.cta:active {
-  filter: brightness(0.92);
-  transform: translateY(2px);
-  box-shadow: var(--elevation-inset);
-  transition-duration: 80ms;
 }
 .cta:focus-visible {
   outline: 2px solid var(--ink-light);

@@ -78,26 +78,35 @@ body {
 }
 
 /* ---- The band: water closing the top (UIUX §3.2, TheBoards `B58`) ---- */
-#band-fill {
+#band-fill, #lot {
   position: absolute;
-  left: 0; right: 0; top: 0;
-  height: var(--rule-y);
+  left: 0; right: 0;
   background:
     radial-gradient(118% 76% at 50% 24%, rgb(0 0 0 / 0) 32%, rgb(var(--water-bot-a) / 0.72) 128%),
     linear-gradient(180deg, var(--water-top) 0%, var(--water-mid) 46%, var(--water-bot) 100%);
+}
+#band-fill {
+  top: 0;
+  height: var(--rule-y);
   z-index: 0;
 }
-#band-fill::after {           /* the water's dither, at 0.05 */
+#lot {
+  z-index: 1;
+  bottom: 0;
+  height: var(--lot-h);
+}
+#band-fill::after, #lot::after { /* the water's dither, at 0.05 */
   content: "";
   position: absolute; inset: 0; z-index: 0;
   opacity: 0.05; pointer-events: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='4' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
 }
-#band-rule {
+#band-rule, #lot-rule {
   position: absolute; left: 0; right: 0; top: var(--rule-y);
   height: 1px; background: var(--frame);
   z-index: 1;
 }
+#lot-rule { top: 0; }
 
 /* ---- The two zones: furniture present, contents absent (PRD §2.6) ---- */
 .band-zone {
@@ -334,26 +343,6 @@ body {
 }
 
 /* ---- The Parking Lot: water closing the foot (UIUX §6) ---- */
-#lot {
-  position: absolute;
-  z-index: 1;
-  left: 0; right: 0; bottom: 0;
-  height: var(--lot-h);
-  background:
-    radial-gradient(118% 76% at 50% 24%, rgb(0 0 0 / 0) 32%, rgb(var(--water-bot-a) / 0.72) 128%),
-    linear-gradient(180deg, var(--water-top) 0%, var(--water-mid) 46%, var(--water-bot) 100%);
-}
-#lot::after {
-  content: "";
-  position: absolute; inset: 0; z-index: 0;
-  opacity: 0.05; pointer-events: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='4' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
-}
-#lot-rule {
-  position: absolute; left: 0; right: 0; top: 0;
-  height: 1px; background: var(--frame);
-  z-index: 1;
-}
 #lot-header {
   position: absolute; left: var(--gutter); top: 8px;
   font-size: 16.57px; font-weight: 600; color: var(--ink);   /* 15 × 1.10455 (#128/B46) — same rescaled rung as the band anchors */

@@ -11,7 +11,8 @@
 
 const { chromium } = require('playwright');
 
-const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/index.html';
+const BASE_URL = process.env.PORTFOLIO_BASE_URL || 'http://localhost:8000/';
+const URL = new globalThis.URL('index.html', BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/').href;
 const Z = 1.3037;
 const REF_W = 2560 / Z, REF_H = 1440 / Z;
 

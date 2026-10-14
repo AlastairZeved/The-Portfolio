@@ -110,7 +110,7 @@ function ok(label, cond, details = '') {
         let lines = 2;
         for (const n of document.querySelectorAll('.band-zone .anchor'))
           lines = Math.max(lines, Math.round(n.scrollHeight / (19.5 * k)));
-        return Math.round(14 * k + lines * 19.5 * k + 8 * k);
+        return 15.46 + lines * 21.54 + 8.84;
       };
       const ruleY = parseFloat(getComputedStyle(board).getPropertyValue('--rule-y'));
       const bandTop = getComputedStyle(document.getElementById('band-fill')).getPropertyValue('--band-top');
@@ -202,7 +202,7 @@ function ok(label, cond, details = '') {
       r.dims.every(d => d.logicalW >= 132 * d.s - 0.5));
     // issue #128 (B46): the band / title card / lot follow TheBoards' laws
     ok(`${tag}: band rule-y = 15.46 + max(2, lines) × 21.54 + 8.84 (TheBoards B47/B76 × 1.10455)`,
-      Math.abs(r.band.ruleY - r.band.expectedRuleY) < 0.5, JSON.stringify(r.band));
+      Math.abs(r.band.ruleY - r.band.expectedRuleY) < 0.001, JSON.stringify(r.band));
     ok(`${tag}: band-top is 15.46 = 14 × 1.10455 (TheBoards state.js × k)`, r.band.bandTop.trim() === '15.46px');
     ok(`${tag}: title card min-height = rule-y + 29 (B31 STANDS — B46, owner ruling 3)`,
       Math.abs(r.band.cardMinH - (r.band.ruleY + 29)) < 0.5);

@@ -3241,3 +3241,41 @@ Scale: holds at every viewport width.
 Number: 2 of 16 sweeps animate at any time (the front card's title card and back card), on the unchanged 6s clock and 0.3s offset; asserted by test/career.js.
 
 Source: the owner's issue [#261](https://github.com/AlastairZeved/The-Portfolio/issues/261) and the owner's chat answers (2026-10-13), multiple choice as selected — "Front card only"; the /rule intake answer (Q3 "Zero cognitive tax") and the owner's confirm.
+
+### B103. The eight UIUX §10.6 values named by issue #272 remain as shipped
+
+The values for **Click any card**, **Hover: side card**, **Hover: employer card**, **Arrows**, **Grounding**, **Ambient**, **Footer**, and **Phones** in `UIUX §10.6` are affirmed as shipped. Their current values stand unchanged.
+
+**Source:** the owner's chat answer (2026-10-14), quoted verbatim and preserved in [issue #272](https://github.com/AlastairZeved/The-Portfolio/issues/272#issuecomment-6177703861) — "Ruled shipped as-is for each."
+
+### B104. P1 allows bounded sub-pages but no nested pages (issue #272)
+
+The **One page, one scene** principle permits sub-pages. Each page is a single bounded sheet; pages stand alone and do not nest. The bolded principle name stands unchanged. This is the P1 text and violation boundary of `PRD §1` and `PRD §1.2`.
+
+**Source:** the owner's chat answer (2026-10-14), quoted verbatim and preserved in [issue #272](https://github.com/AlastairZeved/The-Portfolio/issues/272#issuecomment-6177703861) — "Allow sub-pages. The intent is that each page is bounded without nested pages within them. There is no razgregory.com/career/ABC, only razgregory.com/career or any other landing page for something we may make. But they won't have nested pages." The owner confirmed the proposed PRD wording with "Aligned."
+
+### B105. The career UIUX record follows the owner's specified code/spec direction (issue #272)
+
+- The unselected employer cards render dim and italic in `--ink-dim`; the selected card remains regular.
+- The employer header has no `role="radiogroup"`; the `.carousel` is the radio group labelled `Choose a role`.
+- B98's "Description coming soon" placeholder applies to empty role-description cards; B47's no-marker rule stands for the other blank slots.
+- The `.cta` retains its shipped 50px `min-height`, `2px 21px` padding, 14px/600 type, 3px radius, and resting, hover, and focus shadows. The `.gm-card` retains its 2.1px `--ink` border under B56's source-component port.
+- The footer facts remain 0.85rem; the section gap remains 2rem above 743px and 1rem at or below 743px. The `.split` retains `padding: 1.5rem clamp(1.5rem, 5vw, 4rem)`, with zero inline padding at or below 743px.
+- The arrows retain a 2.5rem square box, a 0.85rem square chevron with 3px top/left strokes, 200ms hover transitions, a 3px hover nudge, and an 0.85 press scale over 80ms. The contact shadow remains at `bottom: 62u`.
+- Under reduced motion, the arrow press scale is removed but its hover nudge remains. The CTA's 2px `:active` translation remains for keyboard activation; while hovered, the reduced-motion hover reset keeps it still.
+
+`UIUX §10.2`, `UIUX §10.3`, `UIUX §10.5`, and `UIUX §10.6` carry the rendering record.
+
+**Source:** the owner's chat answer (2026-10-14), quoted verbatim and preserved in [issue #272](https://github.com/AlastairZeved/The-Portfolio/issues/272#issuecomment-6177703861) — "The code should follow the existing spec ruling for (a), th docs should follow the shipped code for (b), the code should follow existing spec/ruling for (c), the docs should follow the code for (d), the code should follow the existing ruling/spec for (e), the code should follow the docs for (f), the docs should follow the code for (g), the docs should follow the shipped code for (h), (i), (j), (k), and (l)"; "Retain the shipped values for now."
+
+### B106. The landing band and contact-note values match the UIUX record (issue #272)
+
+`app.js` computes `--rule-y` without rounding: `15.46 + max(2, lines) × 21.54 + 8.84`, yielding `67.38px` at two lines and `88.92px` at three, matching the no-JS and `UIUX` values. The contact-form note reads **"✱ required — protected by reCAPTCHA"** as specified in `UIUX §6.1`.
+
+**Source:** the owner's chat answer (2026-10-14), quoted verbatim and preserved in [issue #272](https://github.com/AlastairZeved/The-Portfolio/issues/272#issuecomment-6177703861) — "(a) the values need to be updates to UIUX/no-JS values. (b)Yes the form note should change to include it."
+
+### B107. Reduced-motion arrow hover removes both the nudge and the press scale (issue #272)
+
+Under reduced motion, the arrows' 3px hover nudge and 0.85 press scale are both removed. This supersedes only B105's clause that the arrow hover nudge stays; its press-scale clause stands. `UIUX §10.6` records both behaviors.
+
+**Source:** the owner's R3 chat answer (2026-10-14), quoted verbatim and preserved in [issue #272](https://github.com/AlastairZeved/The-Portfolio/issues/272#issuecomment-6177703861) — "the docs should follow the shipped code for (h), (i), (j), (k), and (l)".

@@ -764,11 +764,12 @@ renders as `L × --rs`.)*
   and no other state. *(B95, issue #250: the glow — removed by B92 — is
   REINTRODUCED as a two-way state: the card whose employer owns the centred
   carousel role is the selected one, the values unchanged.)* Default
-  selection: PNC Bank. The header is the
-  selector's `role="radiogroup"` (`aria-label="Choose an employer"`); the
-  page's one `h1` ("Career") is visually hidden so no wordmark encodes
+  selection: PNC Bank. *(Amended by B105, issue #272: the employer header
+  has no `role="radiogroup"`; its cards contain labels that select a role.
+  The `.carousel` is the radio group, labelled `Choose a role`, as shipped.)*
+  The page's one `h1` ("Career") is visually hidden so no wordmark encodes
   selection state in the heading outline.
-- **Body (per-employer detail):** *(amended by B95, issue #250 — the split is
+- **Body (per-employer detail):** *(B105, issue #272: `.split` uses `padding: 1.5rem clamp(1.5rem, 5vw, 4rem)`; at ≤743px its inline padding is zero.)* *(amended by B95, issue #250 — the split is
   gone: no `1fr 1px 1fr` grid, no `.split__rule` divider, no `.split__copy`
   right half; the body is ONE full-width cell and the carousel spans the
   entire body content area, bounded by an `overflow: clip` wrapper so the
@@ -906,7 +907,15 @@ renders as `L × --rs`.)*
   the empty slots render nothing (B47). Each line renders on one line
   wherever the bar's width allows and wraps rather than overflows where it
   doesn't (B65, wrap-only-when-needed — no-overlap law; B77 carries it to
-  the education line).
+  the education line). *(B105, issue #272: the footer facts render at
+  `0.85rem`; the section gap is `2rem` above 743px and `1rem` at or below
+  743px. These shipped values remain.)* The `.cta` keeps its shipped
+  `min-height: 50px`, `padding: 2px 21px`, `font-size: 14px`,
+  `font-weight: 600`, and `border-radius: 3px`. Its shadows are:
+  resting `var(--elevation), 0 0 6px 0 var(--frame), 0 0 18px 2px
+  rgb(var(--glow-gray-a) / 0.55)`; hover `var(--elevation), 0 0 12px 2px
+  var(--frame), 0 0 24px 4px var(--frame)`; focus `var(--elevation), 0 0
+  12px 2px var(--frame), 0 0 0 4px var(--deep)` (B105, issue #272).
 
 ### §10.3 Blank slots
 
@@ -916,8 +925,10 @@ dates, exact role titles, role blurbs, role notes, accomplishments, learnings
 the final palette hexes. **Owner ruling (2026-10-05): empty blocks are
 omitted from the rendered page entirely until content exists** — no empty
 styled container, no section heading, no filler text, no "coming soon"
-marker. The slot structure lives in the markup as non-rendering `SLOT`
-comments (and the footer's two-way frame, whose empty `<p>` slots
+marker for slots governed by B47. *(Amended by B105, issue #272: B98's
+later ruling supplies "Description coming soon" on empty `.gm-desc` role
+cards only; it does not change the no-marker rule for other blank slots.)*
+The slot structure lives in the markup as non-rendering `SLOT` comments (and the footer's two-way frame, whose empty `<p>` slots
 measure zero height and carry no text) so a targeted fill makes each block
 appear; until then the page invents no copy.
 
@@ -925,7 +936,8 @@ appear; until then the page invents no copy.
 ship as the components' `.gm-title` and `.gm-uc` year subscript, with the
 exact strings the owner's issue #154 lists; the blurb/notes slot structure
 is carried by the components' empty `.gm-desc` cards, which render empty
-per B56's explicit override. The omit-empty rule stands unchanged for the
+per B56's explicit override. The `.gm-card` border remains `2.1px solid
+var(--ink)` as shipped (B105). The omit-empty rule stands unchanged for the
 right half and the footer.)*
 
 *(Amended by B64, issue #176: three desc cards — Sr. Portfolio
@@ -949,8 +961,8 @@ source-geometry render (the plate-relative uniform scale, the title card
 straddling the back card's top edge with a gap to the desc card, the wider
 desc card with the back card extending vertically past it, the source-ratio
 type with its 11px floor, long titles wrapping, and the always-visible
-styled bar on filled desc cards with the empty placeholder bare), the
-`gm-back` breathing bloom, and — B92 (issue #230) — the 3D coverflow
+styled bar on filled desc cards; empty role descriptions display B98's
+"Description coming soon" placeholder), the `gm-back` breathing bloom, and — B92 (issue #230) — the 3D coverflow
 carousel: the 8-role radio ring, the centred card, perspective 800px,
 ~45°/step fan, centre card ~50% width, one-card-per-click `←`/`→` with
 wrap-around, ~500ms rotation, and the employer cards as role-jump labels.
@@ -1059,22 +1071,23 @@ description card is smoked glass; see §10.6.)*
 The ring answers the visitor: one lit object in a dark gallery, things that
 respond gently when touched. The owner ruled the relationships (issue #261,
 multiple choice); the literals are agent-derived under the B33/B40 pattern.
+The eight §10.6 values raised in issue #272 are affirmed as shipped (B103).
 
 | Area | Ruling (owner) | Literal (agent-derived, B33/B40) |
 |---|---|---|
 | Arrival (B101) | one full turn on load, ~2s, settles on role 1 | `--spin` (registered `<angle>`) 360° → 0 over 2000ms on `--ease`, once, animated on each slot (an inherited value would drag the 500ms turn transition behind it) |
 | Click any card | a click on a visible side card turns the ring to it | a `label.carousel__slot-hit` per slot for its own radio, over the drawn card (inset `55u 115u 90u`); the front card's is `display: none`; `.carousel` takes no pointer events (its own plane sits in front of the side cards) |
 | Hover: side card | lifts slightly out of the dark | `--lift: 1` → brightness `+0.2`, a world-Y rise of `0.025 × --ring-w` made before the Z placement (depth unchanged: never in front of the front card) |
-| Hover: employer card | soft bloom, like the landing door-cards | `0 0 32px 4px` × `--rs` in `--glow-gray-a` at 0.9, border `--frame` |
-| Arrows | brighten, nudge their way; press inset | `--ink-light` + `drop-shadow(0 0 4px)` glow, 3px nudge; pressed `scale(0.85)` on 80ms |
-| Grounding | soft contact shadows on an invisible floor | per slot `::before`: `640 × 56u` radial black (0.85 → 0.45 → 0) centred on the back card's foot |
+| Hover: employer card | soft bloom, like the landing door-cards | `0 0 32px 4px` × `--rs` in `--glow-gray-a` at 0.9, border `--frame`; 200ms box-shadow/filter/transform transitions (B105) |
+| Arrows | brighten, nudge their way; press inset | `.carousel__nav` box `2.5rem × 2.5rem`; chevron `0.85rem × 0.85rem`, 3px top/left borders; `--ink-light` + `drop-shadow(0 0 4px)`; 3px hover nudge and 200ms hover transitions; active `scale(0.85)` on 80ms. Reduced-motion behavior is below (B105). |
+| Grounding | soft contact shadows on an invisible floor | per slot `::before`: positioned `bottom: 62u`; `640 × 56u` radial black (0.85 → 0.45 → 0), centred on the back card's foot (B105) |
 | Light (B99) | faint cool moonlight in the pool | `--moon-a: 148 163 189` (luminance 0.36); pool alphas `0.15 / 0.09 / 0.03 / 0` at `0 / 30 / 60 / 90%`; floor ellipse `46% × 7%` at 79%, `0.12 → 0.04 → 0`. The only hue on the page |
 | Description card (B100) | smoked glass, light ink, a lit edge, translucency not `backdrop-filter` | fill `--card` at 78%, ink `--ink-light`, rim `--frame` at 35%, top edge `--moon-a` at 0.6 + inset 0.22, thumb `--frame`; placeholder at 0.6. Legibility is asserted by the suite (text over the glass over `--water-top`, the brightest thing behind it, at least 7 to 1; measured near 14) |
 | Glimmer (B102) | front card only | `gm-marquee` named only on the checked slot's `.gm-title` / `.gm-back` `::after` (2 of 16 sweeps) |
 | Ambient | fine static film grain | body `feTurbulence` (0.9, 3 octaves) desaturated, rect opacity 0.03 (mean lift ~3 levels over `--deep`); never moves |
-| Footer | the CTA gets the light; tools and education quieter | CTA resting bloom `0 0 18px 2px` in the glow rung at 0.55, hover lift 2px; `.parking-lot__tools` in `--ink-dim` (still above the 4.5 reading floor on the lot) |
+| Footer | the CTA gets the light; tools and education quieter | CTA resting bloom `0 0 18px 2px` in the glow rung at 0.55, hover lift 2px; 200ms box-shadow/filter/transform transitions (B105); `.parking-lot__tools` in `--ink-dim` (still above the 4.5 reading floor on the lot) |
 | Header | unchanged | — |
-| Reduced motion | drops motion only | no arrival, glimmer, rise, nudge or CTA lift; light, glass, shadows, grain and hover brightening stay |
+| Reduced motion | drops motion only | no arrival, glimmer, side-card rise or CTA hover lift; both the arrow press scale and hover nudge are removed (B107). The CTA's 2px `:active` translation remains for keyboard activation; when hovered, the reduced-motion `:hover` reset keeps it still. Light, glass, shadows, grain and hover brightening stay (B105) |
 | Phones | everything except hover | every hover rule sits under `@media (hover: hover)`; a tap turns the ring |
 
 ## §11 The Plants & Rocks page (issue #134, B48; conventions fixed by B50)

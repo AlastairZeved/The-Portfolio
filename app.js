@@ -144,7 +144,7 @@
       // it reads as whole line boxes; min-height 44 keeps the floor's answer 2.
       lines = Math.max(lines, Math.round(node.scrollHeight / BAND_LINE));
     });
-    return Math.round(BAND_TOP + lines * BAND_LINE + BAND_GAP);
+    return BAND_TOP + lines * BAND_LINE + BAND_GAP;
   }
   function lotH() {
     var sum = 0;

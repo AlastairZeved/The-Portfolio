@@ -234,8 +234,11 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   });
   ok('CSS rules for focus ring + motion present', css.hasFocusRing && css.hasTransition);
 
-  // no service worker script in the page
-  ok('no service worker', await page.evaluate(() => !('serviceWorker' in navigator) || navigator.serviceWorker === undefined || !('getRegistrations' in navigator.serviceWorker) || true));
+  // no service worker registrations (B13)
+  ok('no service worker', await page.evaluate(async () => {
+    if (!('serviceWorker' in navigator) || !navigator.serviceWorker || typeof navigator.serviceWorker.getRegistrations !== 'function') return true;
+    return (await navigator.serviceWorker.getRegistrations()).length === 0;
+  }));
 
   if (OUT) await page.screenshot({ path: OUT });
   await browser.close();

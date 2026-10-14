@@ -3279,3 +3279,15 @@ The **One page, one scene** principle permits sub-pages. Each page is a single b
 Under reduced motion, the arrows' 3px hover nudge and 0.85 press scale are both removed. This supersedes only B105's clause that the arrow hover nudge stays; its press-scale clause stands. `UIUX §10.6` records both behaviors.
 
 **Source:** the owner's R3 chat answer (2026-10-14), quoted verbatim and preserved in [issue #272](https://github.com/AlastairZeved/The-Portfolio/issues/272#issuecomment-6177703861) — "the docs should follow the shipped code for (h), (i), (j), (k), and (l)".
+
+### B108. The ledger retires B97 and corrects B46's Parking Lot reference (issue #273; retires B97; corrects B46)
+Principle: Zero cognitive tax.
+B97 is retired. B98 is the confirmed successor; its edge predates B97's unconfirmed addendum, so this later entry retires B97.
+
+For B46's reference to the fixed `180px` `--lot-h` ruling, the intended ruling is B20 (Parking Lot), not B18 (All Boards rail). This clarifies the reference without editing B46.
+
+Scale: This entry applies only to B97's pending addendum and B46's fixed `180px` `--lot-h` reference.
+Number: The relevant rulings are B97, B98, B46, B20 and B18; B46's cited value is `180px`. No new measurement is introduced.
+Reason: B98's "`replaces B97`" was committed 3 minutes before the addendum, so it doesn't count. When B46 was written, the Parking Lot ruling was numbered B18. After the 2026-10-06 renumber it is B20, and B18 is now the All Boards rail.
+
+**Source:** the owner's issue [#273](https://github.com/AlastairZeved/The-Portfolio/issues/273), quoted verbatim — "Only an entry that retires B97 clears it."; "B98's `replaces B97` was committed 3 minutes before the addendum, so it doesn't count."; "When B46 was written, the Parking Lot ruling was numbered B18. After the 2026-10-06 renumber it is B20, and B18 is now the All Boards rail."

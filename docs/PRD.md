@@ -24,9 +24,9 @@ Sections are numbered so decisions can cite `PRD §x`.
 Five product principles. Every ruling in `DECISIONS.md` resolves against
 these.
 
-1. **One page, one scene.** The site is a single bounded sheet — an HTML page
-   like TheBoards, with no calendar rail. Everything reachable lives on that
-   one sheet; there is nothing behind it.
+1. **One page, one scene.** Each page is a single bounded sheet. The site may
+   have sub-pages, but each page stands alone; pages do not nest
+   (`DECISIONS.md` B104).
 2. **A card is a door.** Every door-card is a real link that opens in a new
    tab. Nothing that looks actionable is inert, and the one inert element
    (the title card) does not look actionable: it is the same title card as
@@ -70,7 +70,7 @@ violation that would break it:
 
 | # | Principle | Example violation |
 |---|---|---|
-| P1 | **One page, one scene** | A second page, a calendar rail, a hero, a scroll-driven narrative, routing |
+| P1 | **One page, one scene** | A nested page, a calendar rail, a hero, a scroll-driven narrative, routing (B104) |
 | P2 | **A card is a door** | A card that is not a link; a card that navigates the same tab; an inert element styled like a card |
 | P3 | **The medium is the message** | A new token, new component, or stylization that TheBoards does not have — absent an owner ruling |
 | P4 | **Zero cognitive tax** | Settings, menus, onboarding, a theme switch, an empty state that asks to be interpreted |

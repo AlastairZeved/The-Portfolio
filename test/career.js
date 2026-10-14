@@ -648,6 +648,14 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       document.querySelector('h1').classList.contains('visually-hidden') &&
       document.querySelectorAll('h2.topband__wordmark').length === 3 &&
       document.querySelector('.carousel[role="radiogroup"]')?.getAttribute('aria-label') === 'Choose a role'));
+  await page.locator('#role-1').check({ force: true });
+  ok('unselected employer cards use dim italic ink while the selected card stays regular',
+    await page.evaluate(() => {
+      const selected = getComputedStyle(document.querySelector('.topband__card[data-employer="pnc-bank"]'));
+      const unselected = getComputedStyle(document.querySelector('.topband__card[data-employer="pnc-private-bank"]'));
+      return selected.fontStyle === 'normal' && selected.color === 'rgb(244, 245, 241)' &&
+        unselected.fontStyle === 'italic' && unselected.color === 'rgba(244, 245, 241, 0.55)';
+    }));
   const normalCarouselMotion = await page.evaluate(() =>
     getComputedStyle(document.querySelector('.carousel__slot')).transitionDuration);
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -713,6 +721,30 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       return Math.abs(new DOMMatrix(getComputedStyle(s).transform).m42 - y) < 0.5 &&
         getComputedStyle(s).getPropertyValue('--lift').trim() === '1';
     }, y0));
+  const nextHit = await still.evaluate(() => {
+    const el = [...document.querySelectorAll('.carousel__nav--next .carousel__nav-hit')]
+      .find(node => getComputedStyle(node).display !== 'none');
+    const rect = el.getBoundingClientRect();
+    return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+  });
+  const nextArrow = () => still.evaluate(() => {
+    const el = [...document.querySelectorAll('.carousel__nav--next .carousel__nav-hit')]
+      .find(node => getComputedStyle(node).display !== 'none');
+    const css = getComputedStyle(el, '::before');
+    return { color: css.borderTopColor, transform: css.transform };
+  });
+  const arrowRest = await nextArrow();
+  await still.mouse.move(nextHit.x, nextHit.y);
+  await still.waitForTimeout(50);
+  const arrowHover = await nextArrow();
+  ok('#261 — reduced motion: the arrow brightens but its 3px hover nudge is removed',
+    arrowHover.color === 'rgb(244, 245, 241)' && arrowHover.transform === arrowRest.transform);
+  await still.mouse.down();
+  const arrowPressed = await nextArrow();
+  ok('#261 — reduced motion removes the arrow press scale',
+    arrowPressed.transform === arrowHover.transform);
+  await still.mouse.up();
+
 
   // Issue #261: phones get everything except hover; a tap turns the ring.
   const touch = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });

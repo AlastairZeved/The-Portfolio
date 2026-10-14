@@ -205,6 +205,8 @@ body:has(#role-6:checked, #role-7:checked, #role-8:checked)
   .topband__card[data-employer="brinker-capital"] {
   border-color: var(--glow-gray);
   box-shadow: 0 0 8px 0 var(--glow-gray);
+  color: var(--ink-light);
+  font-style: normal;
 }
 
 /* The B31 type: both lines at 20px logical, single size in the card — the
@@ -222,7 +224,7 @@ body:has(#role-6:checked, #role-7:checked, #role-8:checked)
   font-weight: 400;
   font-style: italic;            /* the date subscript: italic, at B61's 2/3 reduced rung (20 x 2/3) */
   font-size: calc(13.33 * var(--rs));
-  color: var(--ink-light);
+  color: inherit;
   line-height: 1.2;
 }
 /* issue #195 (B79): all three selector cards render at one shared size —
@@ -241,7 +243,8 @@ body:has(#role-6:checked, #role-7:checked, #role-8:checked)
   overflow: hidden;
   visibility: hidden;
 }
-/* Unselected: the landing page's dim-italic state (faded, italicized). */
+/* B105: unselected employers take the landing page's dim-italic state. */
+.topband__card { color: var(--ink-dim); font-style: italic; }
 
 main { flex: 1 1 auto; display: flex; }
 

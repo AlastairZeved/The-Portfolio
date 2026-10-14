@@ -71,6 +71,8 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   ok('Components zone label', (await page.locator('#zone-components .band-label').innerText()) === 'Components');
   ok('Requirements zone label', (await page.locator('#zone-requirements .band-label').innerText()) === 'Requirements');
   ok('Parking Lot header', (await page.locator('#lot-header').innerText()) === 'Parking Lot');
+  ok('contact-form note includes the required indicator and reCAPTCHA copy',
+    (await page.locator('#form-note').innerText()) === '✱ required — protected by reCAPTCHA');
 
   // the Components zone renders its two-line copy (issue #208/B85); the
   // Requirements anchor renders its copy (issue #183/B71).

@@ -54,7 +54,6 @@
 }
 
 /* ---- Ink poles (UIUX §2.3): flip at the surface boundary ---- */
-.on-dark  { --ink: var(--ink-light); --ink-a: 244 245 241; }
 .on-light { --ink: var(--ink-dark);  --ink-a: 3 16 25; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -417,7 +416,7 @@ body {
    ≤743px breakpoint is the repo's own (career.html's mobile block). */
 @media (max-width: 743px) {
   .lot-split { flex-direction: column; align-items: stretch; gap: 12px; }
-  .lot-divider { width: auto; flex: 0 0 1px; align-self: stretch; }
+  .lot-divider { width: auto; }
   .lot-divider::before { width: 75%; height: 1px; }
 }
 #contact-form {

@@ -87,12 +87,17 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   const glow = await page.evaluate(() => {
     const card = document.querySelector('.topband__card');
     const s = getComputedStyle(card);
-    return { borderColor: s.borderColor, shadow: s.boxShadow };
+    return {
+      borderWidths: [s.borderTopWidth, s.borderRightWidth, s.borderBottomWidth, s.borderLeftWidth],
+      borderColors: [s.borderRightColor, s.borderBottomColor, s.borderLeftColor],
+      shadow: s.boxShadow,
+    };
   });
   ok('default selection is Plants on Poles',
     await page.locator('#page-poles').isChecked());
   ok('selected card glows: border-color + 0 0 8px 0 bloom, one token (--frame #52997f)',
-    glow.borderColor === 'rgb(82, 153, 127)' &&
+    glow.borderWidths[0] === '0px' &&
+    glow.borderColors.every(color => color === 'rgb(82, 153, 127)') &&
     glow.shadow === 'rgb(82, 153, 127) 0px 0px 8px 0px');
 
   // Unselected cards carry no glow

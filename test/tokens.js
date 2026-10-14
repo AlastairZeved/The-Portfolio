@@ -66,7 +66,7 @@ else console.log('PASS: css inline (B12)');
 if (/<script(?![^>]*\bsrc=)[^>]*>[^\S<]*\S/.test(html)) { failures++; console.log('FAIL: inline script block (B59 forbids)'); }
 else console.log('PASS: no inline script blocks (B59)');
 const scriptSrcs = [...html.matchAll(/<script[^>]+src=(?:"([^"]+)"|'([^']+)'|([^\s>"']+))/g)].map(m => m[1] || m[2] || m[3]);
-const ALLOWED_JS = new Set(['app.js', 'monstera-storybook.js']);
+const ALLOWED_JS = new Set(['app.js']);
 const bad = scriptSrcs.filter(s => !ALLOWED_JS.has(s));
 if (bad.length) { failures++; console.log('FAIL: unruled external js file: ' + bad.join(', ')); }
 else console.log('PASS: external js files are the ruled set (B59)');

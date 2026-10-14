@@ -215,6 +215,6 @@ function ok(label, cond, details = '') {
     ok(`${tag}: #lot-items clips past the lot ceiling`, r.band.lotItemsClip === 'hidden');
   }
   await browser.close();
-  console.log(`\nSCALING PASS=${pass} FAIL=${fail}`);
+  console.log(fail === 0 ? '\nSCALING PASS' : `\nSCALING FAIL: ${fail}`);
   process.exit(fail ? 1 : 0);
-})();
+})().catch(e => { console.error('ERROR', e); process.exit(2); });

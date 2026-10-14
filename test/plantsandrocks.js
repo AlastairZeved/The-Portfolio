@@ -313,6 +313,6 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     `normal=${normalFooterMotion}; reduced=${reducedFooterMotion}`);
 
   await browser.close();
-  console.log(failures === 0 ? '\nAll plantsandrocks checks passed.' : `\n${failures} failure(s).`);
+  console.log(failures === 0 ? '\nPLANTSANDROCKS PASS' : `\nPLANTSANDROCKS FAIL: ${failures}`);
   process.exit(failures === 0 ? 0 : 1);
-})();
+})().catch(e => { console.error('ERROR', e); process.exit(2); });

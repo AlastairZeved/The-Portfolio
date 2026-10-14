@@ -36,8 +36,9 @@
        branch's own edge-probe finding). lw_min = max(cardW / (1 − left%)) is
        the narrowest logical width at which no door-card overflows; it only
        binds at square-ish aspects and leaves every ordinary screen untouched. */
-    var rs = (vw >= vh) ? (vh / REF_H) : Math.min(vw / REF_W, vh / REF_H);
-    if (vw >= vh) {
+    var landscape = vw >= vh;
+    var rs = landscape ? (vh / REF_H) : Math.min(vw / REF_W, vh / REF_H);
+    if (landscape) {
       var rsPrev = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
       var lwMin = 0;
       document.querySelectorAll('.door-card').forEach(function (card) {
@@ -67,15 +68,15 @@
          height (vh/rs) grows as the floor widens the sheet, so the % tops
          spread and vertical overlaps only shrink: re-measure until the floor
          is stable (it converges monotonically). */
+      var geo = [];
+      document.querySelectorAll('.door-card').forEach(function (card) {
+        var lp = parseFloat(card.style.left) || 0, tp = parseFloat(card.style.top) || 0;
+        var s = parseFloat(card.style.getPropertyValue('--card-scale')) || 1;
+        geo.push({ lp: lp, tp: tp, w: card.offsetWidth * s, h: card.offsetHeight * s });
+      });
       for (var pass = 0; pass < 60; pass++) {
         var lh = vh / rs;
         var need = lwMin;
-        var geo = [];
-        document.querySelectorAll('.door-card').forEach(function (card) {
-          var lp = parseFloat(card.style.left) || 0, tp = parseFloat(card.style.top) || 0;
-          var s = parseFloat(card.style.getPropertyValue('--card-scale')) || 1;
-          geo.push({ lp: lp, tp: tp, w: card.offsetWidth * s, h: card.offsetHeight * s });
-        });
         for (var i = 0; i < geo.length; i++) for (var j = i + 1; j < geo.length; j++) {
           var A = geo[i], B = geo[j];
           if (A.lp > B.lp) { var T = A; A = B; B = T; }
@@ -196,6 +197,8 @@
      the transform scales the card. */
   var MIN_SCALE = 0.5;                    // TheBoards state.js MIN_SCALE
   var NOTE_MIN_W = 132;                   // TheBoards state.js NOTE_MIN_W
+  var MOVE_THRESHOLD = 4;                 // B41: physical px before a gesture moves
+  var MAX_VIEW_FRAC = 0.2;                // issue #142 / B51: one fifth of the viewport
 
   function cardScale(card) {
     var s = parseFloat(card.style.getPropertyValue('--card-scale'));
@@ -332,7 +335,7 @@
         startScale: cardScale(card),
         moved: false
       };
-    } else if (e.target === card || card.contains(e.target)) {
+    } else {
       // don't hijack the link's own click; only move on real drag
       drag = { card: card, startX: e.clientX, startY: e.clientY, left: toLogical(cr.left - rect.left), top: toLogical(cr.top - rect.top), moved: false };
     }
@@ -358,31 +361,32 @@
     if (resizing) {
       var r = resizing;
       var radx = e.clientX - r.startX, rady = e.clientY - r.startY;   // physical
-      if (Math.abs(radx) + Math.abs(rady) > 4) r.moved = true;       // 4 physical px — same gesture as the drag (B41)
+      if (Math.abs(radx) + Math.abs(rady) > MOVE_THRESHOLD) r.moved = true;
       // TheBoards updateResize: scale from the pointer's distance to the
       // card's top-left origin, in the board's logical space (÷ rs, B30).
       var rect = board.getBoundingClientRect();
-      var d = Math.hypot(toLogical(e.clientX - rect.left) - r.originX,
-                         toLogical(e.clientY - rect.top) - r.originY);
+      var distance = Math.hypot(toLogical(e.clientX - rect.left) - r.originX,
+                                toLogical(e.clientY - rect.top) - r.originY);
       // issue #142 / B51: the ceiling is per-card and per-axis — see gestureScale.
-      var ceiling = Math.min(0.2 * board.offsetWidth / r.card.offsetWidth,
-                             0.2 * board.offsetHeight / r.card.offsetHeight);
+      var widthCeiling = MAX_VIEW_FRAC * board.offsetWidth / r.card.offsetWidth;
+      var heightCeiling = MAX_VIEW_FRAC * board.offsetHeight / r.card.offsetHeight;
       // guard as in renderScale()/cardScale(): if the card measures 0 or
       // non-finite on an axis, don't let that axis' ratio poison the min —
       // fall back to the other axis so the ceiling is never Infinity.
-      if (!(r.card.offsetWidth > 0)) ceiling = 0.2 * board.offsetHeight / r.card.offsetHeight;
-      if (!(r.card.offsetHeight > 0)) ceiling = 0.2 * board.offsetWidth / r.card.offsetWidth;
-      applyCardScale(r.card, gestureScale(r.startScale, d / r.grabDist, ceiling));
+      if (!(r.card.offsetWidth > 0)) widthCeiling = heightCeiling;
+      if (!(r.card.offsetHeight > 0)) heightCeiling = widthCeiling;
+      var ceiling = Math.min(widthCeiling, heightCeiling);
+      applyCardScale(r.card, gestureScale(r.startScale, distance / r.grabDist, ceiling));
       // drawLinks is applyCardScale's own tail — no second call here.
     } else {
-      var d = drag;
-      var adx = e.clientX - d.startX, ady = e.clientY - d.startY;   // physical
-      if (Math.abs(adx) + Math.abs(ady) > 4) d.moved = true;        // 4 physical px — the same gesture as before the scale
-      if (d.moved) {
+      var dragState = drag;
+      var adx = e.clientX - dragState.startX, ady = e.clientY - dragState.startY;   // physical
+      if (Math.abs(adx) + Math.abs(ady) > MOVE_THRESHOLD) dragState.moved = true;
+      if (dragState.moved) {
         // the card tracks the pointer 1:1 on screen: logical + physical/scale
-        d.card.style.left = (d.left + adx / rs) + 'px';
-        d.card.style.top = (d.top + ady / rs) + 'px';
-        applyCardMaxW(d.card);   // B45: the cap follows the card's new left edge
+        dragState.card.style.left = (dragState.left + adx / rs) + 'px';
+        dragState.card.style.top = (dragState.top + ady / rs) + 'px';
+        applyCardMaxW(dragState.card);   // B45: the cap follows the card's new left edge
         // the moved card drags its links with it (UIUX §4.3)
         drawLinks();
       }

@@ -79,11 +79,11 @@ Verified contrast, each at the worst extreme of its range:
 
 | Ground | Ink | Ratio | Level |
 |---|---|---|---|
-| `--deep` `#020812` | light | **18.33:1** | AAA |
-| `--card` `#08152c` | light | **16.62:1** | AAA |
-| `--water`, lightest stop `#34697f` | light | **5.52:1** | AA |
-| `--water`, darkest stop `#163646` | light | **11.62:1** | AAA |
-| `--note` `#a0d4da` | dark | **11.84:1** | AAA |
+| `--deep` `#020812` | `--ink-light` | **18.33:1** | AAA |
+| `--card` `#08152c` | `--ink-light` | **16.62:1** | AAA |
+| water, lightest stop `--water-top` `#34697f` | `--ink-light` | **5.52:1** | AA |
+| water, darkest stop `--water-bot` `#163646` | `--ink-light` | **11.62:1** | AAA |
+| `--note` `#a0d4da` | `--ink-dark` | **11.84:1** | AAA |
 
 **The crossover and the forbidden band carry from TheBoards, verbatim:**
 
@@ -257,7 +257,7 @@ rule-y = 15.46 + max(2, lines) × 21.54 + 8.84
 `lines` is the tallest band zone's line count at 16.57px/1.3 (`band-top`
 15.46, line 21.54, gap 8.84 — TheBoards `state.js` 14/19.5/8 × k). The label
 term is gone from the budget: the header hangs below the rule as a tab
-(`.band-label` 14.36px — TheBoards B54's 13px × k), so it reserves no height
+(`.band-label` 14.36px — TheBoards `B54`'s 13px × k), so it reserves no height
 above it.
 
 **The title compartment is untouched: B31 stands** (`B46`, owner ruling 3).
@@ -538,6 +538,16 @@ glow ~120–200ms ease-out; pressed inset ~80ms; no keyframes that loop, no
 entrance animations, no staggered reveals. **Nothing animates on load.** If a
 new motion cannot name its job in one sentence it is costume and comes out.
 
+
+*(Exemption, B98, issue #257 — the career page's light pool dims mid-turn as
+the role ring turns, and that dim may run once on page load. The owner:
+"Allow CSS dim to run once upon page load as an exemption." Nothing else
+animates on load.)*
+
+*(Exemption, B101, issue #261 — the career page's role ring makes one full turn
+over ~2s on load and settles on role 1 (§10.6). It runs once, and never under
+`prefers-reduced-motion`. The pool dim and this turn are the only motions on
+load.)*
 ---
 
 ## §6 The contact form (Parking Lot)
@@ -655,7 +665,7 @@ The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 | card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B78 drawing rest scales and placements per card (B80 for philly-plant-dads, seated by the owner's words), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
-| the career page (B47): employer selector, B132 glow, split body, two-way lot (B65), monochrome ladder (B73), empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
+| the career page (B47): employer selector, TheBoards' `B132` glow, split body, two-way lot (B65), monochrome ladder (B73), empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
 | the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, the B58 Download (PDF anchor) and the B82 Back-to-the-Garden .cta, literal idea-green ladder, the B50 landing-convention band/card/lot render | `test/plantsandrocks.js` |
 
 ---
@@ -704,7 +714,7 @@ unchanged:
 | `--water-bot` | `#333333` | gradient ladder foot | 0.0325 |
 | `--ink-light` | `#f4f5f1` | light ink pole | — |
 | `--ink-dim` | `rgb(244 245 241 / 0.55)` | unselected-card ink | — |
-| `--glow-gray` | `#676767` | selected-card bloom — `--frame` one rung down (B132's rung rule) | 0.1364 |
+| `--glow-gray` | `#676767` | selected-card bloom — `--frame` one rung down (TheBoards' `B132` rung rule) | 0.1364 |
 
 The final hexes are the owner's sign-off (issue #190, owner chat 2026-10-09:
 "confirmed and approved for use"); the **relationships** above — card above
@@ -749,18 +759,29 @@ renders as `L × --rs`.)*
   at the 13.33px/400 italic reduced rung (B61, carried by B87, issue #218),
   `min-height: rule-y + 29px` hanging over the
   rule. Unselected cards are dim + italic (§4's unselected grammar); the
-  selected card wears the B132 glow verbatim:
+  selected card wears TheBoards' `B132` glow verbatim:
   `border-color: var(--glow-gray); box-shadow: 0 0 8px 0 var(--glow-gray);`
-  and no other state. Default selection: PNC Bank. The header is the
+  and no other state. *(B95, issue #250: the glow — removed by B92 — is
+  REINTRODUCED as a two-way state: the card whose employer owns the centred
+  carousel role is the selected one, the values unchanged.)* Default
+  selection: PNC Bank. The header is the
   selector's `role="radiogroup"` (`aria-label="Choose an employer"`); the
   page's one `h1` ("Career") is visually hidden so no wordmark encodes
   selection state in the heading outline.
-- **Body (per-employer detail):** the shown employer is the split grid —
+- **Body (per-employer detail):** *(amended by B95, issue #250 — the split is
+  gone: no `1fr 1px 1fr` grid, no `.split__rule` divider, no `.split__copy`
+  right half; the body is ONE full-width cell and the carousel spans the
+  entire body content area, bounded by an `overflow: clip` wrapper so the
+  fanned plates' projected corners cannot scroll the page.)* the shown
+  employer is the split grid —
   `1fr 1px 1fr` with a 2rem gutter, the ruled bar `--frame` at 33.333% of a
   definite row track, the landing page's `.split`/`.split__rule` verbatim.
   At ≤743px the shown employer stacks (`flex-direction: column`), the rule
   running horizontal at 33.333% width. Transitions collapse under
   `prefers-reduced-motion: reduce`.
+  *(Amended by B92, issue #230 — supersedes the B81 stage + band: the left
+  half is now a single 3D coverflow carousel of all eight role components;
+  the ruled 3D values are in §10.4.)*
   *(Amended by B81, issue #212 — supersedes the row description below for the
   left half.)* The left half is now the Agentic Plugins page's **stage +
   item-selector band** (repo AlastairZeved/AlastairZeved,
@@ -919,25 +940,142 @@ the employment-dates slot (#1) is filled — the three employer title cards
 carry their tenure in an italic subscript oneliner, and the eight role years
 nest inside their title cards.)*
 
-**Pinned by:** `test/career.js` — the B79 selector-card shared size and
-equal gaps, selector mechanics, the B132 glow, the
-split, the two-way lot (B65, with B77's second line and its bars matched
-to the top line's), the ladder tokens, the omit-empty-block
-discipline, B74's one-viewport render (the description card as
-the page's only scroll container), B76's source-geometry render (the
-plate-relative uniform scale, the title card straddling the back card's top
-edge with a gap to the desc card, the wider desc card with the back card
-extending vertically past it, the source-ratio type with its 11px floor,
-long titles wrapping,
-and the always-visible styled bar on filled desc cards with the empty
-placeholder bare), and B81's stage + item-selector band (one role presented
-at a time through the `.plugins__stage`, the `.plugins__pane` band of role
-title cards with the glimmer sheen, hover glow, press inset and
-checked/dim-italic states, the `+`-combinator radio wiring, and the
-`.gm-back` breathing bloom — the old B66 row assertions rewritten
-deliberately).
+**Pinned by:** `test/career.js` — the B79 employer-card shared size and
+equal gaps, the B87 in-card subscript dates, the two-way lot (B65, with
+B77's second line and its bars matched to the top line's), the ladder
+tokens (B73), the omit-empty-block discipline, B74's one-viewport render
+(the description card as the page's only scroll container), B76's
+source-geometry render (the plate-relative uniform scale, the title card
+straddling the back card's top edge with a gap to the desc card, the wider
+desc card with the back card extending vertically past it, the source-ratio
+type with its 11px floor, long titles wrapping, and the always-visible
+styled bar on filled desc cards with the empty placeholder bare), the
+`gm-back` breathing bloom, and — B92 (issue #230) — the 3D coverflow
+carousel: the 8-role radio ring, the centred card, perspective 800px,
+~45°/step fan, centre card ~50% width, one-card-per-click `←`/`→` with
+wrap-around, ~500ms rotation, and the employer cards as role-jump labels.
+
+
+### §10.4 The role coverflow carousel (B92, issue #230)
+
+*(Superseded by §10.5, B98, issue #257 — the fan is rebuilt as a closed
+ring. The table below is kept as the record of what B92 ruled.)*
+
+The career body's left half is the **coverflow carousel** of all eight role
+components (superseding B81's stage + selector band; since B95, issue #250,
+the carousel spans the ENTIRE body content area). The ruled 3D values:
+
+| Value | Ruling |
+|---|---|
+| Perspective distance | **800px** on the `.carousel` container |
+| Per-step rotation | **~45°** for the two near cards, compressing toward **~80°** at the far edge (rearmost cards read as thin slivers; none rotates past edge-on) |
+| Cards visible | **all 8** — one flat centre + **four left + three right** |
+| Centre card | **~50%** of the left half's width |
+| Rotation tick | **one card per click** (`←`/`→`), **wrap-around** at both ends |
+| Rotation duration | **~500ms**, the page's `--ease` curve |
+| `prefers-reduced-motion` | **snap** — the rotation collapses to an instant step |
+
+Selection is a single `name="role"` radio group driven by CSS `:has`; the
+`←`/`→` labels are per-state `<label>` stacks revealed by `:has` (no script).
+The employer header cards are labels that jump the carousel to each employer's
+first role (PNC Bank → role 1, PNC Private Bank → role 4, Brinker → role 6);
+their former selected glow is removed (B92). The recession (`translateZ`) and
+spread (`translateX`) per step, and the angle-compression curve, are
+**agent-derived** under the B33/B40 provenance pattern — the owner ruled the
+steep/tight/sliver relationship and the centre size; the literals implement it.
+
+*(Amended by B95, issue #250 — the employer cards now jump to each employer's
+LAST role: PNC Bank → role 3 "Branch Banker", PNC Private Bank → role 5
+"Portfolio & Trust Administrator", Brinker Capital → role 8 "Sr. Portfolio
+Specialist". The selected glow is REINTRODUCED, now two-way: the title card
+whose employer owns the centred role (roles 1–3 → PNC Bank, 4–5 → PNC Private
+Bank, 6–8 → Brinker Capital) carries TheBoards' `B132` glow verbatim
+(`border-color` + a single soft `0 0 8px 0` bloom, the existing `--glow-gray`
+token), driven by the carousel's checked role through `body:has(...)`. — and
+the 8 components render at ONE standardized size: one uniform `--u` on the
+`.carousel__slot` container query scales every piece of every component
+together (the B76 per-plate container query is superseded — it sized each
+plate by its own fan position's rendered width, so the 8 came out different
+sizes); the description card is uniform in height and width with an always
+visible scroll bar where the text exceeds the space (roles 3 and 5 fit
+without scrolling; role 8, the longest, scrolls — the issue's stated
+exception); the title card renders at the tallest natural wrap (3 title lines
++ the year) so all 8 components are the same height; no piece individually
+scales on viewport size — the component as a whole scales 1:1 for different
+viewport sizes.)*
+
+*(Amended by B93, PR #236 — the component's own `--deep` base fill (the "black
+back plate") is removed: each `.gregorian-mode` is **transparent** and its
+`.gm-back` water card sits directly on the page's `--deep` canvas. The three
+cards and the `gm-breathe` glow are untouched.)*
+
+*(Amended by B94, PR #236 — the glow is **re-homed**. The per-card breathing
+bloom (`gm-breathe` on every `.gm-back`) is removed; the glow is now a
+**selected** state carried only by the centred (checked) role's `.gm-back`, and
+it **cross-fades** between cards on the carousel's 500ms rotation
+(`transition: box-shadow 500ms`). The component renders `overflow: visible` so
+the centred glow blooms past it without drawing the component's boundary.)*
 
 ---
+
+### §10.5 The role ring (B98, issue #257)
+
+The 8 role components stand in **one closed ring**, 45° apart, turning
+around a vertical axis; the checked role is the front card. One unit carries
+every value: `--ring-w`, the card width, sized against the `.clip` container
+so the whole ring scales 1:1 with the body.
+
+| Value | Ruling (owner) | Literal (agent-derived, B33/B40) |
+|---|---|---|
+| Shape | closed ring of all 8, 45° apart | `--a = (i − n) × 45deg`, not normalized: the ring turns rigidly |
+| Front card | the nearest object; no card pokes out in front | at z = 0; every other card's nearest edge at z < 0 |
+| Card width | — | `min(40cqw, 70cqh)` desktop · `min(48cqw, 70cqh)` ≤743px |
+| Ring radius | wide, dark gaps between cards | `1.6 × --ring-w` desktop · `1.25 ×` ≤743px (edge-to-edge is ~1.21) |
+| Perspective | flatter than B92's 800px | `3.6 × --ring-w` (~1690px at 1440 × 900) |
+| Camera | slightly above, looking down | `perspective-origin: 50% -12%` |
+| Depth falloff | darken with distance; rearmost near `--deep` | `brightness(0.12 + 0.88·c⁴)`, `c = (1 + cos a) / 2` → 1, 0.59, 0.18, 0.12, 0.12 |
+| Back cards | face outward, see-through | `opacity: clamp(0.4, 1 + 0.85·cos a, 1)` — 1 to edge-on, 0.4 behind |
+| Side-card text | titles only | `.gm-desc` text `transparent` except on the front card, faded on the turn |
+| Edges | nothing leaves the page | the ring's projected span fits the body at every width |
+| Turn | one card per click, wrap at both ends, ~500ms, `--ease` | CSS-only: the wrap and some employer jumps turn the long way round |
+| Reduced motion | snap | the page's global collapse |
+| Arrows | below the front card | `.carousel__controls`, outside the 3D context, previous left of next |
+| Mobile | the same ring, scaled down | full-bleed body, `.clip` height `96vw` |
+| Empty roles | quiet placeholder | "Description coming soon", italic, the card's own ink at `opacity: 0.6` |
+
+**Light.** B94's centred-card glow is removed. A **soft, edgeless light pool**
+sits on the canvas behind the front card, outside the 3D context, so it never
+sorts in front of a card: a `radial-gradient` of the existing
+`--glow-gray-a` channels (alpha 0.2 → 0.12 → 0.04 → 0 at 0 / 30 / 60 / 90%),
+`2.4 × 1.7` card widths. It stays fixed and **dims mid-turn** to `opacity:
+0.45` at 50% of a 500ms dip; each role names its own copy of the keyframes
+(`pool-dip-1` … `pool-dip-8`), so a change of role restarts the dip. The dip
+runs once on load (the §5 exemption). B95's employer title-card glow stands.
+*(Amended by issue #261 — the pool's light is cool moonlight, and the
+description card is smoked glass; see §10.6.)*
+
+### §10.6 Quiet wonder (B99–B102, issue #261)
+
+The ring answers the visitor: one lit object in a dark gallery, things that
+respond gently when touched. The owner ruled the relationships (issue #261,
+multiple choice); the literals are agent-derived under the B33/B40 pattern.
+
+| Area | Ruling (owner) | Literal (agent-derived, B33/B40) |
+|---|---|---|
+| Arrival (B101) | one full turn on load, ~2s, settles on role 1 | `--spin` (registered `<angle>`) 360° → 0 over 2000ms on `--ease`, once, animated on each slot (an inherited value would drag the 500ms turn transition behind it) |
+| Click any card | a click on a visible side card turns the ring to it | a `label.carousel__slot-hit` per slot for its own radio, over the drawn card (inset `55u 115u 90u`); the front card's is `display: none`; `.carousel` takes no pointer events (its own plane sits in front of the side cards) |
+| Hover: side card | lifts slightly out of the dark | `--lift: 1` → brightness `+0.2`, a world-Y rise of `0.025 × --ring-w` made before the Z placement (depth unchanged: never in front of the front card) |
+| Hover: employer card | soft bloom, like the landing door-cards | `0 0 32px 4px` × `--rs` in `--glow-gray-a` at 0.9, border `--frame` |
+| Arrows | brighten, nudge their way; press inset | `--ink-light` + `drop-shadow(0 0 4px)` glow, 3px nudge; pressed `scale(0.85)` on 80ms |
+| Grounding | soft contact shadows on an invisible floor | per slot `::before`: `640 × 56u` radial black (0.85 → 0.45 → 0) centred on the back card's foot |
+| Light (B99) | faint cool moonlight in the pool | `--moon-a: 148 163 189` (luminance 0.36); pool alphas `0.15 / 0.09 / 0.03 / 0` at `0 / 30 / 60 / 90%`; floor ellipse `46% × 7%` at 79%, `0.12 → 0.04 → 0`. The only hue on the page |
+| Description card (B100) | smoked glass, light ink, a lit edge, translucency not `backdrop-filter` | fill `--card` at 78%, ink `--ink-light`, rim `--frame` at 35%, top edge `--moon-a` at 0.6 + inset 0.22, thumb `--frame`; placeholder at 0.6. Legibility is asserted by the suite (text over the glass over `--water-top`, the brightest thing behind it, at least 7 to 1; measured near 14) |
+| Glimmer (B102) | front card only | `gm-marquee` named only on the checked slot's `.gm-title` / `.gm-back` `::after` (2 of 16 sweeps) |
+| Ambient | fine static film grain | body `feTurbulence` (0.9, 3 octaves) desaturated, rect opacity 0.03 (mean lift ~3 levels over `--deep`); never moves |
+| Footer | the CTA gets the light; tools and education quieter | CTA resting bloom `0 0 18px 2px` in the glow rung at 0.55, hover lift 2px; `.parking-lot__tools` in `--ink-dim` (still above the 4.5 reading floor on the lot) |
+| Header | unchanged | — |
+| Reduced motion | drops motion only | no arrival, glimmer, rise, nudge or CTA lift; light, glass, shadows, grain and hover brightening stay |
+| Phones | everything except hover | every hover rule sits under `@media (hover: hover)`; a tap turns the ring |
 
 ## §11 The Plants & Rocks page (issue #134, B48; conventions fixed by B50)
 

@@ -7,9 +7,9 @@
    Since issue #87 (B30) the sheet renders through ONE uniform scale, so this
    scenario runs at two widths in one pass:
      desktop 1440x900 — scale = vh/REF_H, height-anchored (issue #121/B44:
-     uncapped; issue #128/B46: height-anchored on landscape) < 1 on this
-                        the drawing's own space is 2560/z × 1440/z, z = 1.3037,
-                        so 1440×900 renders scaled, un-capped), and
+         uncapped; issue #128/B46: height-anchored on landscape) < 1 on this viewport:
+                            the drawing's own space is 2560/z × 1440/z, z = 1.3037,
+                            so 1440×900 renders scaled, un-capped), and
      narrow  390x844  — scale < 1: every pointer reading must be converted into
                         the board's LOGICAL space. A dragged card tracks the
                         pointer 1:1 on screen (physical dx/dy unchanged), the
@@ -354,7 +354,7 @@ async function runScenario(page, tag, width, height) {
   const context = await browser.newContext();
   const page = await context.newPage({ viewport: { width: 1440, height: 900 }, hasTouch: false });
 
-  await runScenario(page, 'desktop', 1440, 900);   // rs = 1 — the desktop pin
+  await runScenario(page, 'desktop', 1440, 900);   // rs ≈ 0.815 — the desktop pin
   await runScenario(page, 'mobile', 390, 844);     // rs < 1 — the issue #87 scale
 
   if (OUT) await page.screenshot({ path: OUT });

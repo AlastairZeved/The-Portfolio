@@ -9,8 +9,7 @@
      document in an iframe (issue #156, B57); the Plants in Rocks reader stays
      a bare empty container. The footer Download is an anchor serving the
      shipped Flattened-Monstera-Division.pdf (issue #157, B58), live only on
-     the Plants on Poles tab. No script, single file, zero <link>, per the
-     site's law. -->
+     the Plants on Poles tab. No script, single file; only the B63 favicon links. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -64,7 +63,7 @@
   --band-top: calc(15.46 * var(--rs));   /* TheBoards' 14 × 1.10455 (B46) */
   --rule-y:   calc(67.38 * var(--rs));   /* the rescaled two-line floor (B46): wordmark + oneliner */
   --card-pad: calc(16 * var(--rs));      /* the B31 card's 16px logical padding */
-  --lot-floor: calc(134.76 * var(--rs)); /* the rescaled two-row shelf (B46/TheBoards B73) */
+  --lot-floor: calc(134.76 * var(--rs)); /* the rescaled two-row shelf (B46/TheBoards `B73`) */
 }
 @media (min-aspect-ratio: 1) {
   :root { --rs: calc(100vh / 1104.55);   /* vh fallback */
@@ -246,7 +245,7 @@ body:has(#page-rocks:checked) .reader--rocks {
   align-items: center;
   gap: 2rem;
   /* The landing lot's floor (B49/B50): the rescaled two-row shelf
-     (TheBoards' 122-shelf × k = 134.76 logical, B46/TheBoards B73), rendered
+     (TheBoards' 122-shelf × k = 134.76 logical, B46/TheBoards `B73`), rendered
      at B46's scale. Content grows past the floor; the padding stands. */
   min-height: var(--lot-floor);
   padding: 0.75rem clamp(1.5rem, 5vw, 4rem);

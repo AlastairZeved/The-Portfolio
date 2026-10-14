@@ -1,7 +1,7 @@
 /* test/mobile.js — mobile render + nine new-tab door-cards + form + the one
    render scale (no clip, no overflow, link endpoints under the scale) and the
    fourteen note links (B28, B55, B80) (black-box, Playwright).
-   Run: node test/mobile.js   (BOARDS_URL default http://localhost:8000/index.html) */
+   Run: node test/mobile.js   (PORTFOLIO_URL default http://localhost:8000/index.html) */
 
 const { chromium } = require('playwright');
 const fs = require('fs');
@@ -141,7 +141,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('Message required', await page.locator('#cf-message').evaluate(el => el.required));
   ok('_gotcha honeypot present', await page.locator('input[name="_gotcha"]').count() === 1);
 
-  // empty regions: furniture only (band labels), no content
+  // regions: furniture only (band labels); Components has text (B85)
   ok('Components zone label', (await page.locator('#zone-components .band-label').innerText()) === 'Components');
   ok('Requirements zone label', (await page.locator('#zone-requirements .band-label').innerText()) === 'Requirements');
 

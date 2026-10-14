@@ -6,7 +6,8 @@
 <title>The Portfolio of Robert Alastair Zeved Gregory</title>
 <style>
 /* ============================================================
-   The-Portfolio — single-file landing page (B12, B16, B17)
+   The-Portfolio — landing page, CSS inline (B12, B16, B17);
+   JS external in app.js (issue #151, B59)
    Rendering authority: docs/UIUX.md. One binding: To-Do blue.
    ============================================================ */
 
@@ -65,15 +66,8 @@ body {
 }
 
 /* ---- The page: one bounded sheet (PRD §3.1) ---- */
-/* One logical page, one render scale (issue #87, B30). The sheet is a fixed
-   reference-width scene (REF_W×REF_H, the widths at which the B2 authored
-   geometry fills without clipping) rendered through a single uniform
-   transform: scale(). On narrow viewports the sheet shrinks as a whole — the
-   authored left/top % and px width/height stand untouched, every card scales
-   with the scene, nothing reflows and nothing clips. Width/height are set in
-   JS to the logical size (vw/scale, vh/scale) so the scaled sheet always
-   fills the viewport exactly, edge to edge. transform-origin 0 0 keeps the
-   top-left coordinate truthful (TheBoards AGENTS.md architecture point 1). */
+/* One logical page, one render scale — the scale law lives in the scale
+   block in app.js (issue #87, B30; #121, B44; #128, B46). */
 #board {
   position: absolute;
   left: 0; top: 0;
@@ -84,7 +78,7 @@ body {
   background: var(--deep);
 }
 
-/* ---- The band: water closing the top (UIUX §3.2, TheBoards B58) ---- */
+/* ---- The band: water closing the top (UIUX §3.2, TheBoards `B58`) ---- */
 #band-fill {
   position: absolute;
   left: 0; right: 0; top: 0;
@@ -116,10 +110,11 @@ body {
 #zone-components   { left: var(--gutter);
                      right: calc(100% - var(--card-l) + var(--card-gap)); }
 /* issue #107: the Requirements zone anchors to the TITLE CARD's rendered right
-   border (see the scale block) — the door-column calc below assumes the card
-   spans the whole --card-w slot, but the card hugs its text (B19), so the calc
-   strand leaves a dead gap between the border and the line. Kept as the
-   no-JS fallback; the scale block overrides --req-left from the rendered card. */
+   border (see the scale block in app.js, issue #151, B59) — the door-column
+   calc below assumes the card spans the whole --card-w slot, but the card
+   hugs its text (B19), so the calc strand leaves a dead gap between the
+   border and the line. Kept as the no-JS fallback; app.js's scale block
+   overrides --req-left from the rendered card. */
 #zone-requirements { left: var(--req-left, calc(var(--card-l) + var(--card-w) + var(--card-gap)));
                      right: var(--gutter); }
 .band-label {
@@ -205,7 +200,7 @@ body {
 /* Sizing per B45 (issue #126): TheBoards' own note mechanics, ported whole
    (TheBoards styles.css §4 .note/.note-text). A card is CONTENT-SIZED:
    width: max-content floored at min-width 132px (= TheBoards' NOTE_MIN_W,
-   state.js / styles.css .note-text, UIUX §4.5 B84), height following the
+   state.js / styles.css .note-text, TheBoards' `UIUX §4.5` `B84`), height following the
    wrapped text — no authored px footprint. Its own scale factor — the var
    --card-scale, floored at MIN_SCALE 0.5 (TheBoards state.js) and ceilinged
    at one fifth of the viewport (issue #142 / B51 — supersedes the old fixed
@@ -229,7 +224,7 @@ body {
 .door-card {
   position: absolute;
   width: max-content;
-  min-width: 132px;                 /* = NOTE_MIN_W (TheBoards UIUX §4.5) */
+  min-width: 132px;                 /* = NOTE_MIN_W (TheBoards' `UIUX §4.5`) */
   max-width: var(--card-max-w, none); /* set per card in JS: the distance
      from the card's left edge to the sheet's right edge, divided by the
      card's own scale — TheBoards geometry.js noteMaxW, issue #53 / B39 */
@@ -339,7 +334,7 @@ body {
 .door-card.fit-to-spotify { font-size: 11.4px; line-height: 23.8px; }
 
 /* ---- The link layer (UIUX §4.3): the lines that join the note cards ----
-   TheBoards' link idiom ported verbatim (TheBoards' UIUX §4.6 / B91): a thin
+   TheBoards' link idiom ported verbatim (TheBoards' `UIUX §4.6` / `B91`): a thin
    straight 1px line between two cards' centres, in --frame — this page's own
    linework blue (§2.2) — with no fill, no cap decoration and no marker, held
    to a crisp 1px at any render scale by non-scaling-stroke. It draws BELOW
@@ -460,9 +455,6 @@ body {
   align-items: start;
   justify-content: start;           /* anchored left; right side of the pane stays free */
   width: 100%;
-
-  /* Name (top) + Email (bottom) stack in the left 15% column; Message takes the 30% track,
-     single full width, its size unchanged from the pre-fix three-equal-fields layout. */
 }
 #contact-form .left-column {
   display: flex; flex-direction: column; gap: 12px;
@@ -695,11 +687,11 @@ Planned future work: Add landing pages</div>
   <!-- The link layer (UIUX §4.3, B28): the fourteen straight 1px --frame
        lines that join the note cards, one `<line>` per pair the owner names
        in issue #75, #72, #74, #146 and #196. TheBoards' link idiom ported verbatim
-       (TheBoards' UIUX §4.6 / B91) — a line between two cards' centres,
+       (TheBoards' `UIUX §4.6` / `B91`) — a line between two cards' centres,
        below the notes,
        never a hit target. Endpoints are computed from live card geometry
-       in the script below, so a line follows a card that is dragged or
-       resized; only the pairing is authored here. -->
+       in app.js (issue #151, B59), so a line follows a card that is dragged
+       or resized; only the pairing is authored here. -->
   <svg id="link-layer" aria-hidden="true" focusable="false">
     <line data-link="1" data-from="music" data-to="writing"></line>
     <line data-link="2" data-from="software-ai" data-to="community"></line>

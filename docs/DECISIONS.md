@@ -456,7 +456,7 @@ no card is added.
 **No invented design value.** The owner's statement names the six pairs and
 nothing else; every rendered value this entry binds is either a token already
 printed in `UIUX §2.2` (`--frame`) or the reference implementation's own ruled
-value, transcribed from TheBoards' `UIUX §4.6` (B91) — "1px `--frame`" between
+value, transcribed from TheBoards' `UIUX §4.6` (`B91`) — "1px `--frame`" between
 note centres, `pointer-events: none`, `z-index: 1` under the notes,
 `non-scaling-stroke`, "no fill, no cap decoration, no marker". `UIUX §4.3`
 carries the rendering; `test/desktop.js` pins the six pairs.
@@ -925,7 +925,7 @@ notes. The mechanism of record:
   (`17 × clamp(h/96, 0.5, 2.0)`).
 - **Sizing:** cards are **content-sized**, as TheBoards sizes notes —
   `width: max-content` capped at the sheet's edge, floored at **min-width
-  132** (TheBoards' `NOTE_MIN_W`, TheBoards `UIUX §4.5`, B84), height
+  132** (TheBoards' `NOTE_MIN_W`, TheBoards `UIUX §4.5`, `B84`), height
   following the wrapped text. This **supersedes B43's authored fixed
   boxes** (`left/top %` + `px width/height`) as a sizing mechanism; the
   placements remain the owner's drawing authority.
@@ -977,11 +977,11 @@ second-round confirmation). The ruling:
   the pure height anchor would compress the sheet below the cards' right
   edges and clip it). **This
   supersedes B44's scale-formula clause for landscape viewports only.** The
-  band literals follow TheBoards' B37/B47 chain through k: `rule-y =
+  band literals follow TheBoards' `B37`/`B47` chain through k: `rule-y =
   15.46 + max(2, lines) × 21.54 + 8.84` (67.38 at the two-line floor), the
   band label 14.36px, the band anchors 16.57px. The numbers are agent-derived
   (per the `B33` precedent: the owner ruled the behaviour, not the digits).
-- **The Parking Lot sizes by TheBoards' B73 measured-content law:** measure
+- **The Parking Lot sizes by TheBoards' `B73` measured-content law:** measure
   the rendered rows, floor at the rescaled two-row shelf (TheBoards' 122-shelf
   × k = 134.76px, header included), cap at half the logical sheet,
   bottom-anchored, content clipped past the ceiling. This supersedes B18's
@@ -1004,7 +1004,7 @@ quoted verbatim —
    61→67.4): every landscape screen then renders the band exactly at
    TheBoards' size (54.9px rule at 1440×900, 6.1% of viewport height) — full
    match, and the title card/labels also match exactly."
-2. "Port TheBoards B73's law: measure the rendered form, floor at the
+2. "Port TheBoards `B73`'s law: measure the rendered form, floor at the
    rescaled two-row shelf, cap at half the logical sheet."
 3. "Keep 20px (B31 stands); the rescaled box grows around it."
 
@@ -1024,7 +1024,7 @@ title cards in the landing page's top-band grammar (**PNC Bank**, **PNC
 Private Bank**, **Brinker Capital**, left→right chronological), each hanging
 over the header line exactly as the landing page's title card does; selecting
 a card swaps the body to that employer (a selector, not a carousel), the
-default state being **PNC Bank**. The selected card wears the B132 glow
+default state being **PNC Bank**. The selected card wears TheBoards' `B132` glow
 verbatim — `border-color: <glow token>; box-shadow: 0 0 8px 0 <glow token>` —
 one glow token, a soft bloom, no other states.
 
@@ -1042,7 +1042,7 @@ ladder's structure, luminance relationships and role assignments are
 preserved (`--deep` near-black canvas, `--card` one step above, `--frame` the
 lifted rule hue, `--note` the brightest ink on the deep, the same
 three-stop water mix), and the glow sits **one rung below its base** per the
-B132 rung rule. The page stays a static single file with all CSS inline and
+TheBoards' `B132` rung rule. The page stays a static single file with all CSS inline and
 **no script** — the selector is a three-way radio group driven by CSS
 `:has`, exactly the landing reference's own mechanism. Nine content slots
 (dates, role titles, blurbs, notes, accomplishments, learnings, footer
@@ -1061,7 +1061,7 @@ verbatim: "The page presents Robert Gregory's banking career as an employer
 selector with a per-employer detail body."; "selecting a title card switches
 the body content below to that employer (wireframe shows PNC Bank selected).
 There is no scrolling carousel — it's a selector."; "the selected card gets a
-soft bloom exactly like TheBoards' card glow (B132 mechanism):
+soft bloom exactly like TheBoards' card glow (`B132` mechanism):
 `border-color: <glow token>; box-shadow: 0 0 8px 0 <glow token>;` — one glow
 token, soft bloom, no other states."; "Use TheBoards' default blue palette
 (`styles.css` root tokens) **as the structural template** — same token
@@ -1180,7 +1180,7 @@ the landing page's conventions, re-tokened to the B47 sand/brown binding:
   employer name the pinned 600 line, the oneliner slot the eyebrow 400
   line), `min-height: rule-y + 29px` hanging each card over the header
   line — all rendered at `--rs`. B47's selection mechanics stand unchanged:
-  the B132 glow verbatim, unselected cards dim + italic, default PNC Bank.
+  TheBoards' `B132` glow verbatim, unselected cards dim + italic, default PNC Bank.
 - **The footer takes the landing lot's floor statically**: the rescaled
   two-row shelf (TheBoards' 122-shelf × k = 134.76 logical, B46/TheBoards
   B73) rendered at `--rs` as a `min-height`; content grows past the floor.
@@ -2111,7 +2111,7 @@ TheBoards' ladder:
 `--water-top` `#636363` (0.1237) · `--water-mid` `#4d4d4d` (0.0737) ·
 `--water-bot` `#333333` (0.0325) · `--frame` `#8c8c8c` (0.2611) ·
 `--note` `#cbcbcb` (0.5962) · `--glow-gray` `#676767` (0.1364 — one rung
-below `--frame`, B132's rung rule) · `--water-bot-a` `51 51 51`.
+below `--frame`, TheBoards' `B132` rung rule) · `--water-bot-a` `51 51 51`.
 
 The ladder's relationships stand unchanged (card above deep, note brightest
 on the deep, glow one rung below frame), and because every rung sits at the
@@ -2905,3 +2905,339 @@ within it's right side of the footer section."
 **Ruling (owner, verbatim):** "Fold the parity pins into scaling.js/tokens.js and delete parity_boards.js"
 
 **Source:** the owner's reply in the Hermes chat, 2026-10-11, to the agent's question on [issue #221](https://github.com/AlastairZeved/The-Portfolio/issues/221) — quoted verbatim: "Fold the parity pins into scaling.js/tokens.js and delete parity_boards.js"
+
+### B90. TheBoards' rule numbers in this ledger are labelled and quoted; the label is not an amendment (owner chat, 2026-10-12)
+
+**Ruling (owner, verbatim):** "A"
+
+The owner ruled that the bare TheBoards rule numbers already inside this
+ledger's entries — `B37`, `B47`, `B73`, `B84`, `B91` and `B132`, written
+where TheBoards' record was meant — are labelled as TheBoards' and put in a
+code span, in place, as the rest of the repository already does
+(`AGENTS.md`, "Quote TheBoards' numbers; never cite them bare"). This is the
+one sanctioned edit to existing entries: it changes no ruling's wording,
+value or meaning, only marks whose numbering a cite belongs to. Every other
+entry stays append-only. Lines touched: the bodies of B28 (`B91`), B45
+(`B84`), B46 (`B37`/`B47`, `B73`, and backticks only inside the owner's
+verbatim quote of `B73`), B47 (`B132` ×3), B49 (`B132`) and B73 (`B132`).
+Reason: TheBoards' record shares this ledger's `B` numbering, so a bare
+TheBoards number here resolves to this ledger's ruling of the same number —
+`B37`, `B47`, `B73` and `B84` already pointed at the wrong ruling, and `B91`
+would have at the next-but-one ruling.
+
+**Source:** the owner's reply in the Claude Code chat, 2026-10-12, quoted
+verbatim: "A" — answering the question: "(A) Allow a small exception. I add
+the "TheBoards'" label to those 10 places in the rulebook, and the wording of
+your rules stays exactly the same. (B) Don't touch the rulebook. Instead,
+your next new rule becomes number 133, skipping 90–132."
+
+### B91. Add sitemap.xml (and reference it from robots.txt)
+
+**Ruling (owner, verbatim):** "Public pages in the site tree: `index.html`, `career.html`, `plantsandrocks.html`, `monstera-storybook.html`." "Add `sitemap.xml` listing the public pages above (canonical `https://razgregory.com/...` URLs)." "Add `robots.txt` that allows crawling and points to the sitemap:" `User-agent: *` / `Allow: /` / `Sitemap: https://razgregory.com/sitemap.xml`. "Confirm both files are served with `text/xml` / `text/plain` and don't trip the CSP."
+
+**Source:** the owner's issue [#229](https://github.com/AlastairZeved/The-Portfolio/issues/229) — quoted verbatim.
+
+### B92. The career body's left half is a 3D coverflow carousel of all eight role components (issue #230)
+
+The `/career` page's left half is rebuilt as a single **3D coverflow carousel**
+presenting **all eight role components** — PNC Bank's three, PNC Private Bank's
+two, Brinker's three — in one fan, replacing the B81 `.plugins__stage` +
+`.plugins__pane` item-selector band (which it does **not** sit alongside).
+
+- **One carousel of all 8 roles.** The **centred card** is the **checked role
+  radio**; the other seven fan out around it — **four left, three right** — each
+  rotated around the Y axis in perspective and **progressively narrower toward
+  the edges** (tight overlap, thin slivers at the far edges). The card internals
+  are the existing `.gregorian-mode` component (`.gm-back`/`.gm-title`/`.gm-uc`/
+  `.gm-desc`), carried over **verbatim** — this ruling repackages them, it does
+  not rebuild them.
+- **Selection is a single radio group of eight** (`name="role"`,
+  `role="radiogroup"` `aria-label="Choose a role"`), driven by CSS `:has` — the
+  page's zero-JS law. The `←` / `→` labels step **one role per click** with
+  **wrap-around** at both ends; each arrow is a stack of per-state `<label>`s
+  revealed by `:has` (a pure-CSS "step ±1 with wrap" has no native "next"), the
+  one agent-built mechanism this ruling requires beyond the existing selector.
+- **The three employer header cards stop being radios.** They become labels
+  that jump the carousel to each employer's first role (PNC Bank → role 1, PNC
+  Private Bank → role 4, Brinker → role 6). This supersedes B47/B79/B81's
+  employer-radiogroup and its selected-card glow — the owner ruled the glow
+  **out** ("lose the glow state") rather than re-derive it.
+- **The ruled 3D values** (UIUX §10.4): **perspective 800px**; **~45° per step**
+  for the near cards, compressing toward **~80°** at the far edge so the rearmost
+  cards read as thin slivers instead of flipping past edge-on; the **centre card
+  ~half the left half's width (50%)**; **all eight visible** (centre + four left
+  + three right); a **~500ms** rotation; **snap** (no animation) under
+  `prefers-reduced-motion`. The recession (`translateZ`) and spread
+  (`translateX`) literals and the angle-compression curve are **agent-derived
+  under the B33/B40 provenance pattern** — the owner ruled the steep / tight /
+  sliver relationship and the centre size; the numbers implement it.
+
+**Carried over unchanged:** the `.gm-*` component internals, B76's source
+geometry and `--u` plate-width scale with the 11px readable floor (now re-anchored
+to the slot's 50%-of-the-left-half width), B74's one-viewport /
+description-card-scrolls law, B73's monochrome tokens, B64's three filled desc
+cards, and the `prefers-reduced-motion` collapse. No new hex, no new token, no
+script.
+
+**Source:** the owner's issue [#230](https://github.com/AlastairZeved/The-Portfolio/issues/230), quoted
+verbatim — "All 8 components containing individual roles needs to be pulled
+from their pages and put in one large 3D carousel. The attached image is the UI
+we're after for this new carousel." and "This carousel is being placed in the
+left 50% of the body section of the page, replacing the components currently
+there." — and the owner's twelve planning answers (owner chat, 2026-10-12,
+multiple choice, quoted verbatim as selected): (1) one carousel holds all 8
+roles fanned together; (2) employer cards stay — picking one spins the carousel
+to that employer's roles; (3) `←`/`→` arrow buttons wired to the hidden radios,
+CSS-only; (4) all 8 visible — centre + four left + three right; (5) steep, ~45°
+tilt per step; (6) one card per click; (7) wrap around both ends; (8) ~500ms
+rotation; (9) reduced motion: snap instantly; (10) perspective ~800px
+(dramatic); (11) centre card ~half the left half's width; (12) tight pack —
+thin slivers at the edges. — and the owner's direction on the employer glow,
+quoted verbatim: "lose the glow state … if you can figure out how to keep the
+glow, then keep it. otherwise lose it."
+
+### B93. The carousel's 8 components drop their own base fill — the "black back plate" is removed (PR #236)
+
+The `.gregorian-mode` component's own `background: var(--deep)` — a solid
+`#080808` rectangle filling each of the 8 fanned components behind the three
+cards — is **removed**. At the 3D fan's 45–80° angles the near-black rectangle
+reads as a heavy slab the owner ruled too visible, so each component's base is
+now **transparent**: the `.gm-back` water card sits directly on the page's own
+`--deep` canvas (`body { background: var(--deep); }` is unchanged). The
+component's three cards and its glow are untouched: the **background card**
+(`.gm-back`, the water-ladder fill), the **title card** (`.gm-title`, with the
+nested `.gm-uc` year), the **description card** (`.gm-desc`), and the
+`gm-breathe` presentation bloom (B81) all stand as shipped — the glow is a
+`box-shadow` on `.gm-back`, independent of the removed fill. This amends B92's
+"carried over verbatim" clause for the component base only; no new hex, token,
+size, or duration is introduced.
+
+**Source:** the owner's comment on PR
+[#236](https://github.com/AlastairZeved/The-Portfolio/pull/236#issuecomment-6137314104),
+quoted verbatim — "Remove the back plate from each of the 8 components - the
+black back plate is too visible when used in the carousel and needs to be
+removed. Do not remove the background card, description card, or title card -
+only the black background back plate that the glow extends towards. Do not
+remove the glow."
+
+### B94. The glow is re-homed from every back card to the centred card as a selected state (PR #236)
+
+B81 shipped the breathing bloom (`gm-breathe`) on **every** `.gm-back`; in the
+8-card fan that bloom clipped at each component's own boundary and, on all
+eight at once, bled over its neighbours. The owner ruled the glow is a
+**selected** state: only the centred (checked) role's back card carries it,
+and it **cross-fades between cards** on the carousel's own 500ms rotation. The
+`gm-breathe` keyframes and its 10s loop are removed; the glow's own values are
+B81's verbatim bloom in its rest state (`0 0 60px 20px` / `0 0 240px 120px`
+gray channels — no new hex, token, size, or duration), applied to the checked
+card's `.gm-back` via the existing `body:has(#role-N:checked)` ring and
+transitioned with `transition: box-shadow 500ms var(--ease)`. The component's
+`overflow` is now `visible` so the centred glow blooms past the component
+instead of drawing its boundary as a visible line (which B93's transparent
+base had exposed). Supersedes B81's "every back card breathes" clause; B81's
+glimmer (`.gm-back::after` / `.gm-title::after` `gm-marquee`) and B74/B76's cap
+and in-card scroll stand.
+
+**Source:** the owner's clarify answers (owner chat, 2026-10-13), quoted
+verbatim — "Remove the glow entirely from every component in the component but
+rehome the state to whichever component is currently being viewed in the
+carousel. ensure that the glow transitions smoothly between cards as they
+transition when clicked through" — and, on what the shape was, "No, it
+surrounds all three. It glows and then suddenly turns black and where it's
+suddenly turning back looks like a border in the shape of a rectangle all the
+way ALL THREE cards in the component. It's like the border radius of the
+component as a whole."
+
+
+### B95. The carousel spans the full body; the 8 components render at one standardized size; the employer title cards jump to the last role and glow two-way with the carousel (issue #250)
+
+Three changes to the `/career` body, superseding the named clauses of B92
+and B76 below:
+
+1. **Full-width carousel, no divider.** The `.split` body's `1fr 1px 1fr`
+   grid, its `.split__rule` divider bar and the empty `.split__copy` right
+   half are removed; the carousel spans the entire body content area as one
+   full-width cell. A `overflow: clip` wrapper bounds the fanned plates'
+   projected corners (they reach past the viewport at the full width and
+   scrolled the page) without touching the carousel's own 3D context.
+
+2. **Uniform component size.** All 8 role components render at one
+   standardized height and width, each piece scaled by ONE uniform `--u`
+   carried on the `.carousel__slot` container query (the B76 per-plate
+   container query is superseded — it sized each plate by its own fan
+   position's rendered width, so the 8 came out different sizes). The
+   description card is uniform in height and width, with an always visible
+   vertical scroll bar where the text exceeds the space; the longest copies
+   (roles 3 and 5) fit without scrolling and the longest (role 8, the issue's
+   stated exception) scrolls. The title card renders at the tallest natural
+   wrap (3 title lines + the year) so all 8 are the same height whatever
+   their title's line count. No piece of the component individually scales
+   on any viewport size — the component as a whole scales 1:1 for different
+   viewport sizes.
+
+3. **Two-way employer title-card navigation.** Selecting a title card swipes
+   the carousel to that employer's LAST role (PNC Bank → role 3 "Branch
+   Banker", PNC Private Bank → role 5 "Portfolio & Trust Administrator",
+   Brinker Capital → role 8 "Sr. Portfolio Specialist"), superseding B92's
+   first-role jumps. Clicking through the carousel sets the selected glow on
+   the title card whose employer owns the centred role (roles 1–3 → PNC
+   Bank, 4–5 → PNC Private Bank, 6–8 → Brinker Capital) — the pre-B92
+   employer-glow mechanism reintroduced, now driven by the carousel: the
+   `B132` glow verbatim (border-color + a single soft 0 0 8px 0 bloom, the
+   existing `--glow-gray` token; no new value).
+
+**Source:** the owner's issue
+[#250](https://github.com/AlastairZeved/The-Portfolio/issues/250), quoted
+verbatim — "Full-width carousel, no divider. The `/career` body currently
+splits into a left half (the carousel), a 1px `.split__rule` divider, and an
+empty right half (`.split__copy`). The carousel should span the entire body
+content area; remove the divider bar (and the now-empty right half).";
+"Each role component should render at a standardized height and width so all
+8 are the same size. Aim to fit every description card's copy without a
+vertical scroll bar, but allow exceptions (e.g. the longest descriptions)
+where a scroll is unavoidable."; and the two-way navigation with its exact
+role mappings ("PNC Bank → Branch Banker (role 3)", "PNC Private Bank →
+Portfolio & Trust Administrator (role 5)", "Brinker Capital → Sr. Portfolio
+Specialist (role 8)"; "roles 1–3 → PNC Bank", "roles 4–5 → PNC Private Bank",
+"roles 6–8 → Brinker Capital"). — and the owner's clarify answers on the
+uniform sizing (2026-10-13), quoted verbatim — "the description card of each
+component should be uniform in height and width, enabling an always visible
+vertical scroll bar where text exceeds space. No piece of the component
+should be individually scaling based on any viewport size. The component as a
+whole should scale larger and smaller 1:1 for different viewport sizes." —
+and, choosing the footprint to size against, "Match the longest description
+card (role 8, ~3 short paragraphs) with no scroll — the size every card
+copies" and "~480px — a middle ground, still readable, tighter fan".
+
+### B96. The career page ships the real 800-weight Montserrat Alternates face (issue #238)
+
+The heavy (800-weight) `@font-face` on `career.html` shipped a 37-byte
+`data:` stub, so the browser synthesized the heavy weight instead of
+rendering the self-hosted 800 face. The page now embeds the same 800 face
+`index.html` ships — heavy text renders with the actual font, not
+synthesized bold — and the `font-weight: 800` comment on the title card now
+matches the shipped face.
+
+**Source:** the owner's ruling in the Hermes chat, 2026-10-13 — quoted
+verbatim: "replace the 37-byte d09GMl5…QVQ== 800-weight stub in career.html
+(line 29) with the real ~29.5 KB 800 face that index.html ships, so heavy
+text renders with the actual font, and correct the font-weight: 800 comment
+(line 588) to match"
+
+### B97. The career carousel becomes a true 3D ring of all 8 roles, lit by a light pool on the dark canvas (issue #257)
+
+The `/career` body's role carousel is rebuilt from B92's left/right
+**coverflow fan** into a **closed ring**: all eight role components stand
+45° apart around a vertical axis, and the ring turns to bring the checked
+role to the front. The owner's correction: B92's fan "was never supposed to
+be left and right sided".
+
+- **The ring.** The checked role is the **front card**, the nearest object in
+  the scene — no other card pokes out in front of it. The ring is **wide,
+  with dark gaps between cards**; the back cards **face outward and are
+  see-through**, so their mirrored fronts show faintly; the camera sits
+  **slightly above**, looking down onto the ring; the 3D is **flatter** than
+  B92's 800px; cards **darken with distance** until the rearmost almost melt
+  into `--deep`; nothing leaves the page — the ring closes behind itself.
+- **Side-card text.** Titles stay on every card; the description fades out
+  everywhere except the front card.
+- **Motion — CSS-only.** The page's zero-JS law stands. The accepted
+  consequence: the wrap (role 8 → 1, 1 → 8) and some employer jumps turn the
+  ring the long way round. The ~500ms turn and the reduced-motion snap stand.
+- **Arrows** — a pair **below the front card**, outside the 3D context.
+- **Mobile** — the **same ring, scaled down** to fit the phone's width (the
+  B95 clip wrapper had collapsed to 0px tall there).
+- **Empty roles** — a role with no copy yet shows a quiet **"coming soon"
+  placeholder** instead of a blank slab.
+- **Light.** B94's selected glow on the centred card is **removed**; a
+  **subtle, soft, edgeless light pool** on the canvas behind the front card
+  replaces it. The pool stays **fixed** and **dims mid-turn**, brightening as
+  the new card lands; that dim may **run once on page load** — an owner
+  exemption to UIUX §5's "Nothing animates on load". B95's employer title-card
+  glow is **kept as is**.
+
+Supersedes B92's coverflow geometry (four left + three right, the ~45° →
+~80° compression, the 800px perspective, the centre card at 50% of the
+width), B94's centred-card glow, and B95 §1's clip-as-crop. UIUX §10.5
+records the ring and its values; UIUX §5 carries the exemption. The literals
+(ring radius, camera height, perspective, the darkening curve, the pool's
+size, alpha and dip) are agent-derived under the B33/B40 provenance pattern:
+the owner ruled the relationships above; the numbers implement them. No new
+hex or token: the darkening is a brightness filter, the pool is the existing
+`--glow-gray-a` channels. The ruling ships in the same PR as the build.
+
+**Source:** the owner's issue
+[#257](https://github.com/AlastairZeved/The-Portfolio/issues/257) and the
+owner's chat answers (2026-10-13), quoted verbatim — on the shape: "It was
+never supposed to be left and right sided - it was supposed to be circular
+and dimensional with all 8 in a circle shape, utilizing the background"; on
+the edges: "They aren't supposed to be able to go off the page, they're
+supposed to wrap around behind in a circle"; and, multiple choice as
+selected: "Pull centre forward", "Darken with distance", "Soft spotlight
+pool", "Titles only", "Slightly above", "Flatter", "Face outward,
+see-through", "Gaps between cards", "Stay CSS-only", "Smaller ring", "Below
+the centre card", "Placeholder state"; on the glow: "Pool replaces it",
+"Dims mid-turn", "Subtle", "Keep as is"; on load: "Allow CSS dim to run once
+upon page load as an exemption."; and on shipping: "In the same PR as the
+build" ([issue comment](https://github.com/AlastairZeved/The-Portfolio/issues/257#issuecomment-6156541948)).
+> Addendum 2026-10-13: This entry was appended by the agent without a RULING — PLEASE CONFIRM block or the owner's confirm, so it was never law; B98, put to the owner through /rule and confirmed, replaces it, and every cite now names B98.
+
+### B98. The career page's role carousel is rebuilt from a left/right coverflow fan into a closed 3D ring of all 8 roles, lit by a light pool on the dark canvas (issue #257; replaces B97; supersedes B92; supersedes B94; partially supersedes B95; keeps B93; keeps B76; keeps B74)
+Principle: One page, one scene.
+The eight role components stand in one closed ring, 45° apart around a vertical axis, and the ring turns to bring the checked role to the front. The front card is the nearest object in the scene; the ring is wide, with dark gaps between cards; the back cards face outward and are see-through, so their mirrored fronts show faintly; the camera sits slightly above, looking down onto the ring; the 3D is flatter than B92's 800px; cards darken with distance until the rearmost almost melt into --deep; nothing leaves the page — the ring closes behind itself. Side cards keep their titles; only the front card's description reads. The turn is CSS-only: the wrap (role 8 → 1, 1 → 8) and some employer jumps turn the long way round. The arrows sit below the front card, outside the 3D context. Phones get the same ring, scaled down. A role with no copy yet shows a quiet "Description coming soon" placeholder. B94's centred-card glow is removed: a subtle, soft, edgeless light pool on the canvas behind the front card replaces it, stays fixed, and dims mid-turn — a dim that may run once on page load, an exemption to UIUX §5's "Nothing animates on load". B95's employer title-card glow, uniform component size and two-way navigation stand; B95 §1's clip stays only as a bound, never a crop. B97, written without the owner's confirm, is replaced by this entry.
+
+Reason: the page's dark canvas is the one sheet's depth, and a fan that runs off both edges and turns its neighbours toward the camera spends that depth on cards the visitor is not reading; a ring keeps every role on the sheet and makes the one being read the nearest and brightest thing on it.
+
+Scale: holds at every viewport width; above 743px the page stays one viewport (B74), and at 743px and below the ring keeps its proportions scaled down.
+
+Number: one unit, the card width (--ring-w = min(40cqw, 70cqh) above 743px, min(48cqw, 70cqh) at and below), carries the ring: radius 1.6 card widths (1.25 at and below 743px; edge-to-edge is ~1.21), perspective 3.6 card widths, eye at 50% -12%, brightness 0.12 + 0.88·c⁴ with c = (1 + cos a)/2 (1, 0.59, 0.18, 0.12, 0.12 front to back), back-card opacity floor 0.4, pool dip to 0.45 at mid-turn. Measured by test/career.js at 1440 × 1110 and 390 × 844: every card's nearest edge sits behind the front card's plane, and the ring's projected span stays inside the body. The literals are agent-derived under the B33/B40 provenance pattern; UIUX §10.5 records them.
+
+Source: the owner's issue [#257](https://github.com/AlastairZeved/The-Portfolio/issues/257) and the owner's chat answers (2026-10-13), quoted verbatim — "It was never supposed to be left and right sided - it was supposed to be circular and dimensional with all 8 in a circle shape, utilizing the background"; "They aren't supposed to be able to go off the page, they're supposed to wrap around behind in a circle"; multiple choice as selected: "Pull centre forward", "Darken with distance", "Soft spotlight pool", "Titles only", "Slightly above", "Flatter", "Face outward, see-through", "Gaps between cards", "Stay CSS-only", "Smaller ring", "Below the centre card", "Placeholder state", "Pool replaces it", "Dims mid-turn", "Subtle", "Keep as is"; and "Allow CSS dim to run once upon page load as an exemption."; the /rule intake answers (Q1 "Rebuilt as a 3D ring", Q3 "One page, one scene", Q4 "Supersede 92, 94, part 95") and the owner's "Confirm".
+
+### B99. The career page's light pool carries a faint cool moonlight; every other value stays zero-hue (issue #261; refines B73; refines B98)
+Principle: Zero cognitive tax.
+The scene's one light source — the light pool behind the front card, and the thin edge it catches on the glass description card — carries a faint cool, blue-silver cast (--moon-a, 148 163 189). Every other value on the page stays on B73's zero-hue gray ladder: the band, the cards, the glow token, the film grain and the CTA's bloom. The pool keeps B98's shape, size and mid-turn dip; a flat ellipse added at the front card's foot lights the floor, so the cards' contact shadows have light to fall on.
+
+Reason: in an all-gray scene nothing tells the eye where the light is, so it lands on whatever is brightest; a faint cool cast in the one light marks the front card as the lit object without the visitor having to look for it, and keeping the cast out of every other value keeps it a light rather than a palette.
+
+Scale: holds at every viewport width.
+
+Number: --moon-a = 148 163 189 (relative luminance 0.36, near --frame's 0.26); the pool's alphas 0.15 / 0.09 / 0.03 / 0 at 0 / 30 / 60 / 90% (lowered from B98's 0.2 / 0.12 / 0.04 so its luminance matches the gray pool); the floor ellipse 46% × 7% of the pool box at its 79% line, alpha 0.12 → 0.04 → 0; the glass card's lit edge at alpha 0.6 (border) and 0.22 (inset line). The literals are agent-derived under the B33/B40 provenance pattern; UIUX §10.6 records them.
+
+Source: the owner's issue [#261](https://github.com/AlastairZeved/The-Portfolio/issues/261) and the owner's chat answers (2026-10-13), multiple choice as selected — "Stay grey, add warmth in light", "A whisper of warm tint", then "Cool moonlight" (the later, more specific answer, followed); the /rule intake answer (Q3 "Zero cognitive tax") and the owner's confirm.
+
+### B100. The career role component's description card becomes smoked glass with light ink (issue #261; revises B56; keeps B76; refines B98)
+Principle: Zero cognitive tax.
+Every role component's description card is smoked glass in place of B56's light --note card with dark ink: a dark translucent fill (--card at 78% — translucency only, no backdrop-filter), light ink (--ink-light), a quiet --frame rim at 35%, and a thin bright top edge where the pool's moonlight catches it. The back card shows faintly through. The scroll bar's thumb moves to --frame so it reads on the glass, and the "Description coming soon" placeholder takes the light ink at 0.6. B76's geometry, type ratios and 11px floor stand unchanged, as do B95's uniform size and B98's titles-only side cards.
+
+Reason: the --note card was the brightest object on the page, so the eye landed on a blank sheet before it found the role; dark glass with light ink makes the words the brightest thing on the card and lets the lit title lead.
+
+Scale: holds at every viewport width.
+
+Number: the fill is --card at 78%; the text's contrast against the glass over the brightest thing that can sit behind it (--water-top #636363) is ~14:1, asserted ≥ 7:1 by test/career.js; the placeholder at 0.6 holds ~6:1 there. The literals are agent-derived under the B33/B40 provenance pattern; UIUX §10.6 records them.
+
+Source: the owner's issue [#261](https://github.com/AlastairZeved/The-Portfolio/issues/261) and the owner's chat answers (2026-10-13), multiple choice as selected — "Darker glass card", "Smoked glass, light text"; the /rule intake answer (Q3 "Zero cognitive tax") and the owner's confirm.
+
+### B101. On load the career role ring makes one full turn over ~2s and settles on role 1 (issue #261; extends B98)
+Principle: Play is permitted; work is not faked.
+When the page loads, the role ring makes one full turn, in the same direction as "next", over about two seconds on the page's --ease, and settles with role 1 at the front. It runs once per load, is CSS-only (a registered --spin angle animated on each card), and is a second exemption to UIUX §5's "Nothing animates on load", beside B98's pool dim. The ring answers clicks while it turns. Under prefers-reduced-motion it does not run: the ring is simply there, settled.
+
+Reason: a ring that is already still reads as a row of cards; one turn on arrival shows the visitor the shape of the scene — every role on one ring — once, asks nothing of them, and gets out of the way.
+
+Scale: holds at every viewport width, once per page load.
+
+Number: 360° over 2000ms, one iteration, timing --ease (cubic-bezier(0.22, 0.61, 0.36, 1)); measured by test/career.js — eight animations, one per card, 2000ms, one iteration, and none under reduced motion. The literals are agent-derived under the B33/B40 provenance pattern; UIUX §5 and §10.6 record them.
+
+Source: the owner's issue [#261](https://github.com/AlastairZeved/The-Portfolio/issues/261) and the owner's chat answers (2026-10-13), multiple choice as selected — "Ring spins in", "Full turn, ~2s", "Reduced motion drops motion only"; the /rule intake answer (Q3 "Play is permitted") and the owner's confirm.
+
+### B102. The career components' glimmer runs on the front card only (issue #261; refines B56; refines B81)
+Principle: Zero cognitive tax.
+The gm-marquee glimmer — the 6s sweep across the title card, the back card's 0.3s behind it — runs only on the ring's front card; the other seven components' fourteen sweeps stop. The front card's sweep restarts each time a new card comes to the front. Under prefers-reduced-motion the glimmer is still removed outright (B56, B81).
+
+Reason: sixteen sweeps looping on cards the visitor is not reading spend motion in the corner of their eye; one sweep, on the card in front, puts the page's only standing motion where they are already looking.
+
+Scale: holds at every viewport width.
+
+Number: 2 of 16 sweeps animate at any time (the front card's title card and back card), on the unchanged 6s clock and 0.3s offset; asserted by test/career.js.
+
+Source: the owner's issue [#261](https://github.com/AlastairZeved/The-Portfolio/issues/261) and the owner's chat answers (2026-10-13), multiple choice as selected — "Front card only"; the /rule intake answer (Q3 "Zero cognitive tax") and the owner's confirm.

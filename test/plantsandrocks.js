@@ -1,12 +1,12 @@
 /* test/plantsandrocks.js — the Plants & Rocks page (issue #134, B48):
-   two-page selector over the band rule, B132 glow mechanism on the selected
+   two-page selector over the band rule, TheBoards' `B132` glow mechanism on the selected
    card, the poles reader rendering the shipped monstera-storybook.html
    iframe (issue #156, B57 — deliberate rewrite of the blank-body pin) while
    the rocks reader stays empty, two-section parking lot with one divider, a
    Download PDF anchor (live on poles, inert on rocks) plus a live
    "Back to the Garden" anchor, and the literal TheBoards
    idea-board green palette (byte-exact, NOT a re-hue). Single file, zero
-   script on plantsandrocks.html itself, zero <link>.
+   script on plantsandrocks.html itself; only the B63 favicon links.
    Black-box Playwright, career.js's harness.
    Run: node test/plantsandrocks.js   (PORTFOLIO_URL default http://localhost:8000/plantsandrocks.html) */
 

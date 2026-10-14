@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://razgregory.com/sitemap.xml

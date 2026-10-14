@@ -1,0 +1,3186 @@
+#!/usr/bin/env node
+'use strict';
+// docket.js — the core of The Docket. One dependency-free file (D13): it speaks
+// stdin JSON, stdout text, exit codes and markdown, and names no host, model or
+// vendor. Vendored as test/docket.js it is the witness (D9): run with no
+// subcommand it checks the ledger and the spec and exits non-zero on a failure.
+// SPDX-License-Identifier: MIT
+//
+// Sections
+// 0  utilities            shell, files, git
+// 1  discovery            the nearest ledger, the spec documents (D5)
+// 2  parse                entries, titles, meta, edges, addenda, sections, spec headings
+// 3  cites                ruling cites, spec cites, bare cites
+// 4  context              every tracked text file resolved to its own ledger
+// 5  near                 the pre-edit window (D1, D2, D7)
+// 6  index/query/governs/principles
+// 7  check                the seven checks
+// 8  spec-check           token rows and contrast rows
+// 9  append               entry, addendum, baseline (D4, D8)
+// 10  status               the docket
+// 11  cli
+// 12  diff                 what changed in the law between two readings
+// 13  vendor               the witness copied to where the law lives (D9)
+// 14  constitute           a spine before the first line (D9, D13)
+// 15  intake               an intake file, printed for a skill to splice
+// 16  gate/verdict/stop    the mechanical gate, the verdict file, the stop that refuses silence (D10, D11)
+// 17  protocol/pack/transcript   what the judge reads, printed by the core
+//
+// Exit codes: 0 success · 1 a failed check · 2 usage error.
+
+const fs = require('fs');
+const path = require('path');
+const cp = require('child_process');
+const crypto = require('crypto');
+const os = require('os');
+
+// ─── 0. utilities ───────────────────────────────────────────────────────────
+
+// D14: each number below preserves a stated property; a change to one is a new ruling, never an edit here.
+const WINDOW = 20;        // D2: ±20 lines; D16: two to five rulings is what this yields, measured
+const CAP = 8;            // D2: at most eight rulings listed; D16: the fixture never reaches it, a denser window would
+const TITLE_MAX = 72;     // D7: the title rule's cut
+const BLOCK_CAP = 5;      // D11: five blocks per session since its last PASS
+const THIRD_CYCLE = 3;    // D11: after the third block, failures must decrease
+// A judge run by hand records under one session, the one agents/docket-judge.md names, and the gate it runs never surfaces it
+// (D11's addendum): the surfacing breaks the stop's loop, which asks again with no person present, while a run by hand is the
+// person's own question each time, and a surfaced session's SKIP, which the protocol reads as the stop standing, told the person
+// who asked that a diff no judge read stands. The stop's own reading keeps D11 whatever its session is called.
+const HAND_SESSION = 'manual';
+const STOP_WAIT = 700;    // D14, logged in D19 and D37: the seconds `stop` gives the judge it starts before it stops it — more than twice the longest judge measured at a stop (330, D37's addendum)
+const SNIFF_BYTES = 8000;   // git's own binary sniff: a file with a NUL in its first 8000 bytes is not text
+const REFUSALS_MIN = 3;   // a constitution names at least three refusals: one is a mood, two a pair, three a boundary
+const GLANCE = 100;       // D14: one glance — governs cuts a cited line here, and status each pending addendum; the ledger holds the rest
+
+const VERBS = ['supersedes', 'overrides', 'retires', 'reverses', 'waives', 'extends',
+  'keeps', 're-tunes', 'refines', 'replaces', 'corrects', 'revises'];
+const ADVERBS = ['partially', 'partly', 'in part'];
+// Word boundaries for cites, edges and spec cites are letters, digits and underscore in any script
+// (FORMAT.md 8): `styléR9` is one word and not a cite; `saveRéR6` does not cite R6. \b knows ASCII only.
+const NOT_WORD_BEFORE = '(?<![\\p{L}\\p{N}_])', NOT_WORD_AFTER = '(?![\\p{L}\\p{N}_])';
+const INVALID_ROLES = ['general audience', 'everyone', 'anyone', 'non-technical', 'users', 'people', 'the public', 'all users', 'someone curious'];
+
+// Every reader-facing byte leaves through here and through die(), and neither carries a character
+// that reorders what a terminal shows. A ledger may hold one — check 2 names it — but the text a
+// maker is shown still reads straight, which is the whole of that guarantee (FORMAT.md 13).
+function out(s) { if (stdoutGone) return; const t = plain(s); process.stdout.write(t.endsWith('\n') ? t : t + '\n'); }
+// A reader that stops reading (`docket check | head -1`) takes no more lines, quietly, and the exit is the command's own: a
+// failing check exits 1 whoever stopped reading it (FORMAT.md 13, D6's addendum)
+let stdoutGone = false;
+process.stdout.on('error', e => { if (e && e.code === 'EPIPE') { stdoutGone = true; return; } throw e; });
+let TRAIL = null;                                                      // the trail this run wrote to, when DOCKET_TRAIL is set (D25)
+function die(msg, code) {
+  if (TRAIL) { try { fs.appendFileSync(TRAIL, '  refused (exit ' + (code === undefined ? 2 : code) + '): ' + trailCut(plain(msg).replace(/\s+/g, ' '), 400 /* a refusal's first sentence: the line and the rule (D14's addendum) */) + '\n'); } catch (e) { /* the measurement's, not the command's */ } }
+  process.stderr.write(plain(msg) + '\n'); process.exit(code === undefined ? 2 : code);
+}
+function readStdin() { try { return fs.readFileSync(0, 'utf8'); } catch (e) { return ''; } }
+function readText(p) { return fs.readFileSync(p, 'utf8'); }
+// The first byte of `buf` that begins no UTF-8 character, as { byte, line } (1-based), or null when all of it is UTF-8: a walk of
+// the encoding's grammar. A lead byte says how many continuation bytes follow it and what the first may be, so an overlong form
+// (C0, C1, E0 80, F0 80), a surrogate (ED A0 to ED BF), a point past U+10FFFF (F4 90, F5 and up), a continuation byte standing
+// alone, and a sequence the file ends inside or a byte outside 80–BF interrupts each begin no character, named at their first
+// byte. Read lossily such a sequence is U+FFFD, whose own bytes EF BF BD share a prefix with a sequence led by EF, which is why
+// the first byte is found by the grammar and not by where a read-back differs (FORMAT.md 1, D45's addendum)
+function badUtf8(buf) {
+  let i = 0, line = 1;
+  while (i < buf.length) {
+    const b = buf[i]; let n, lo = 0x80, hi = 0xBF;
+    if (b < 0x80) { if (b === 0x0A) line++; i++; continue; }
+    else if (b >= 0xC2 && b <= 0xDF) n = 1;
+    else if (b >= 0xE0 && b <= 0xEF) { n = 2; if (b === 0xE0) lo = 0xA0; else if (b === 0xED) hi = 0x9F; }
+    else if (b >= 0xF0 && b <= 0xF4) { n = 3; if (b === 0xF0) lo = 0x90; else if (b === 0xF4) hi = 0x8F; }
+    else return { byte: i + 1, line };
+    if (i + n >= buf.length || buf[i + 1] < lo || buf[i + 1] > hi) return { byte: i + 1, line };
+    for (let k = 2; k <= n; k++) if (buf[i + k] < 0x80 || buf[i + k] > 0xBF) return { byte: i + 1, line };
+    i += n + 1;
+  }
+  return null;
+}
+function exists(p) { try { fs.accessSync(p); return true; } catch (e) { return false; } }
+function isFile(p) { try { return fs.statSync(p).isFile(); } catch (e) { return false; } }
+function isDir(p) { try { return fs.statSync(p).isDirectory(); } catch (e) { return false; } }
+// A day of the calendar, written YYYY-MM-DD: a month and a day the year has (FORMAT.md 6)
+function calendarDay(v) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+  if (!m) return false;
+  const y = Number(m[1]), mo = Number(m[2]) - 1, d = Number(m[3]), t = new Date(0);
+  t.setUTCFullYear(y, mo, d);                                          // a year below 100 is that year, not 1900 and more
+  return t.getUTCFullYear() === y && t.getUTCMonth() === mo && t.getUTCDate() === d;
+}
+// The day an addendum is dated (FORMAT.md 6): the clock's day in UTC, one zone for every author, or DOCKET_TODAY's when the
+// environment names one — a day the calendar has, from the year 1000 on, or refused before anything is written: a value not of
+// the form is no addendum line, and one of it that names no day would order the ledger by its digits alone (D4's addendum)
+function today() {
+  const v = process.env.DOCKET_TODAY;
+  if (v === undefined || v === '') return new Date().toISOString().slice(0, 10);
+  if (!calendarDay(v) || Number(v.slice(0, 4)) < 1000) die('DOCKET_TODAY is ' + JSON.stringify(v) + ', which names no day it takes: an addendum is dated YYYY-MM-DD, a day the calendar has, from the year 1000 on; nothing is written (FORMAT.md 6)', 2);
+  return v;
+}
+// git as the repository holds its files, whatever the person's configuration says (D40's addendum): a diff with no external
+// program, no text conversion and no colour, and the a/ b/ prefixes; GIT_DIFF_OPTS, which overrides a diff's -U, and
+// GIT_EXTERNAL_DIFF set aside; every path a literal path, so a file named with a * names itself and no other. What changes
+// only how git prints a diff is pinned as well — the full blob names on the index line (core.abbrev), the default algorithm
+// and indent heuristic, no hunks joined, git's own order of files, paths quoted as git quotes them, a blank context line
+// kept — while how this checkout holds its files, its line endings and the filters its attributes name, is read as set:
+// read past it, a clean file would show as changed. Every file is diffed as text (--text): a governed file is one — it
+// carries a cite, and a NUL in its first 8000 bytes ungoverns it (FORMAT.md 1) — so an attribute that calls it binary
+// (-diff) hid a hunk and nothing else, and the judge, shown "Binary files differ", scored no line of it (D40's addendum)
+const GIT_DIFF_PIN = ['--no-ext-diff', '--no-textconv', '--no-color', '--text', '--src-prefix=a/', '--dst-prefix=b/', '--full-index', '--diff-algorithm=myers', '--indent-heuristic', '--inter-hunk-context=0', '-O/dev/null'];
+const GIT_DIFF = ['-c', 'core.quotePath=true', '-c', 'diff.suppressBlankEmpty=false', 'diff'].concat(GIT_DIFF_PIN);
+function gitEnv(base) { const e = Object.assign({}, base || process.env, { GIT_LITERAL_PATHSPECS: '1' }); delete e.GIT_DIFF_OPTS; delete e.GIT_EXTERNAL_DIFF; return e; }
+function sh(cmd, args, cwd) {
+  const r = cp.spawnSync(cmd, args, { cwd, encoding: 'utf8', maxBuffer: 1 << 28, env: cmd === 'git' ? gitEnv() : process.env });   // 256 MiB: past any diff, blame or listing a session makes (D14's addendum)
+  return { status: r.status === null ? 1 : r.status, stdout: r.stdout || '', stderr: r.stderr || '', error: r.error ? (r.error.code || r.error.message) : null };   // error: the command never ran
+}
+function gitRoot(dir) {
+  const r = sh('git', ['rev-parse', '--show-toplevel'], dir);
+  return r.status === 0 ? r.stdout.trim() : null;
+}
+function trackedFiles(root) {
+  const r = sh('git', ['ls-files', '-z'], root);
+  if (r.status !== 0) return null;
+  return r.stdout.split('\0').filter(Boolean).map(f => path.join(root, f));
+}
+function untrackedFiles(root) {
+  const r = sh('git', ['ls-files', '-z', '--others', '--exclude-standard'], root);
+  if (r.status !== 0) return [];
+  return r.stdout.split('\0').filter(Boolean).map(f => path.join(root, f));
+}
+// The ledgers git does not track under root — untracked, or ignored: a DECISIONS.md the hook's walk reaches and check reads
+// nothing of (D54)
+function looseLedgers(root) {
+  const seen = new Set(), found = [];
+  for (const flags of [['--others', '--exclude-standard'], ['--others', '--ignored', '--exclude-standard']]) {
+    const r = sh('git', ['ls-files', '-z'].concat(flags), root);
+    if (r.status !== 0) continue;
+    for (const f of r.stdout.split('\0')) if (f && /(^|\/)DECISIONS\.md$/.test(f) && !seen.has(f)) { seen.add(f); found.push(path.join(root, f)); }
+  }
+  return found;
+}
+// The DECISIONS.md paths a commit removed and the working tree lacks since, each with the commit that removed it, newest first.
+// A rename is one change to git, not a removal, and a path added back is not gone. The history is read whole and the names
+// kept here, since git runs with literal pathspecs (D54)
+function removedLedgers(root) {
+  const r = sh('git', ['log', '--diff-filter=D', '--format=\x01%h', '--name-only'], root);   // the commit line marked, so a path spelt like a hash is a path
+  if (r.status !== 0) return [];
+  const found = [], seen = new Set(); let sha = '';
+  for (const line of r.stdout.split('\n')) {
+    if (line.charCodeAt(0) === 1) { sha = line.slice(1); continue; }
+    if (!/(^|\/)DECISIONS\.md$/.test(line) || seen.has(line) || isFile(path.join(root, line))) continue;
+    seen.add(line); found.push({ path: line, sha });
+  }
+  return found;
+}
+function isTextFile(p) {
+  let fd;
+  try {
+    fd = fs.openSync(p, 'r');
+    const buf = Buffer.alloc(SNIFF_BYTES);                           // git's own binary sniff
+    const n = fs.readSync(fd, buf, 0, SNIFF_BYTES, 0);
+    for (let i = 0; i < n; i++) if (buf[i] === 0) return false;
+    return true;
+  } catch (e) { return false; } finally { if (fd !== undefined) fs.closeSync(fd); }
+}
+function rel(from, to) { const r = path.relative(from, to); return r === '' ? '.' : r.split(path.sep).join('/'); }
+// One trailing newline ends the last line; it does not open another. A file of 260 lines that
+// ends as files do read as 260 here, which is what the ledger says the witness counts and what
+// every window bound and every line number is measured against (FORMAT.md 1).
+function splitLines(text) { return text.replace(/\r?\n$/, '').split(/\r?\n/); }
+// A leading U+FEFF is the byte order mark an editor may write: an encoding mark, not text, so a heading on a ledger's or a spec
+// document's first line is read past it (FORMAT.md 1); the ledger's writer keeps it
+function unBom(s) { return s.charCodeAt(0) === 0xFEFF ? s.slice(1) : s; }
+function sha256(s) { return crypto.createHash('sha256').update(s).digest('hex'); }
+function uniq(arr) { return Array.from(new Set(arr)); }
+function stripMarks(s) { return s.replace(/`/g, '').replace(/\*\*/g, ''); }
+// One glance (D14): a text of more than GLANCE characters — code points (FORMAT.md 3), so no character is split — keeps
+// GLANCE - 1 of them and a mark, so the cut is never silent; governs cuts a cited line and status a pending addendum by it
+function glance(s) { const t = Array.from(s); return t.length > GLANCE ? t.slice(0, GLANCE - 1).join('').trimEnd() + '\u2026' : s; }
+// A cut in the trail (D14's addendum): over n characters — code points, so no character is split — a text keeps n in all,
+// the mark among them, as the transcript's cut counts its mark (D42); never silent
+function trailCut(s, n) { const t = Array.from(s); return t.length > n ? t.slice(0, n - 1).join('') + '\u2026' : s; }
+
+// ─── 1. discovery (D5) ──────────────────────────────────────────────────────
+
+// The project root of `dir` (D44): the git root of `dir`, whatever project directory the host names, so every command
+// reads the tree the stop judges, and the maker is shown at the edit the law it is judged by (D1, D28); outside a
+// repository, CLAUDE_PROJECT_DIR when set and `dir` lies under it; else null. Zero config: nothing else is consulted.
+// The host's variable bounds only the tree it holds — a value naming some other directory neither redirects a walk nor
+// empties an enumeration (a check run under it would pass with nothing to check). Discovery walks up to the root, or
+// to the filesystem root when there is none; file enumeration never does — see enumerationRoot.
+function projectRoot(dir) {
+  const g = gitRoot(dir);
+  if (g) return g;
+  const v = process.env.CLAUDE_PROJECT_DIR;                            // outside a repository, the host's project directory, when it names one
+  if (v && isDir(v) && isWithin(path.resolve(dir), path.resolve(v))) return path.resolve(v);   // a value that is not a directory names no tree
+  return null;
+}
+// True when `p` is `ancestor` or lies below it — path arithmetic; no symlink is followed.
+function isWithin(p, ancestor) { const r = path.relative(ancestor, p); return r === '' || (r !== '..' && !r.startsWith('..' + path.sep) && !path.isAbsolute(r)); }
+// The root that files are enumerated under: the project root, else the home of the nearest
+// ledger above `cwd`, else `cwd` itself — never the filesystem root.
+function enumerationRoot(cwd) {
+  const r = projectRoot(cwd);
+  if (r) return r;
+  const lp = findLedger(path.join(cwd, 'x'), path.parse(path.resolve(cwd)).root);
+  return lp ? ledgerHome(lp) : path.resolve(cwd);
+}
+// The root the stop's commands share — gate, verdict and stop, and the state, log and trail under its .docket/ (D28,
+// D44): the git root of `cwd`, as every command's; outside a repository, the root the stop passed to the judge it
+// started, DOCKET_ROOT, when `cwd` lies under it, else the enumeration root. The host names its project directory to its
+// command hooks and none to the judge's shell, so the stop hands its root down, and its two halves read one state.
+function stopRoot(cwd) {
+  const g = gitRoot(cwd);
+  if (g) return g;
+  const v = process.env.DOCKET_ROOT;
+  if (v && isDir(v) && isWithin(path.resolve(cwd), path.resolve(v))) return path.resolve(v);
+  return enumerationRoot(cwd);
+}
+// git's own line when `dir` lies in a repository git will not read — its ownership, its config — else null: none there, one it
+// reads, or a git that cannot be run (the gate names that itself). git is asked in its own words, whatever the locale, so "not a
+// git repository" is read as written (FORMAT.md 16)
+function unreadRepo(dir) {
+  const gd = cp.spawnSync('git', ['rev-parse', '--git-dir'], { cwd: dir, encoding: 'utf8', env: gitEnv(Object.assign({}, process.env, { LC_ALL: 'C', LANGUAGE: '' })) });
+  if (gd.error || gd.status === 0 || /not a git repository/i.test(gd.stderr || '')) return null;
+  return String(gd.stderr || '').trim().split('\n')[0] || 'git rev-parse --git-dir failed';
+}
+// The stop's root for the commands that read the diff — gate, verdict, stop (D28's addendum): a working directory in a repository
+// git will not read, beneath a ledger, is refused with git's own line before any root is taken. Read past, discovery took the home
+// of the ledger above it for the root, and the gate judged that tree, another repository's, while this one's edits went unseen; with
+// no ledger above it the tree is one the docket does not govern, and is read as before (FORMAT.md 16)
+function diffRoot(cwd) {
+  const why = unreadRepo(cwd);
+  if (why && findLedger(path.join(path.resolve(cwd), 'x'), path.parse(path.resolve(cwd)).root)) throw Object.assign(new Error('git will not read the repository at ' + path.resolve(cwd) + ' — ' + why + '; the gate reads no diff it cannot read whole (FORMAT.md 16)'), { refusal: true });
+  return stopRoot(cwd);
+}
+
+// The nearest DECISIONS.md or docs/DECISIONS.md walking up from `filePath`'s
+// directory to `root` inclusive; null when there is none (the file is ungoverned). With `memo`, a map kept for one root, every
+// directory the walk passes is given its answer, which depends on the directory and the root alone: a walk over many files
+// looks at each directory once (D14's addendum).
+function findLedger(filePath, root, memo) {
+  const raw = path.dirname(filePath);
+  if (memo && memo.has(raw)) return memo.get(raw);                    // the directory as given, before it is resolved: one resolution per directory, not one per file (D14's addendum)
+  let dir = path.resolve(raw), found = null;
+  const stop = path.resolve(root), passed = [raw];
+  for (;;) {
+    if (memo && memo.has(dir)) { found = memo.get(dir); break; }
+    passed.push(dir);
+    const cand = [path.join(dir, 'DECISIONS.md'), path.join(dir, 'docs', 'DECISIONS.md')].find(isFile);
+    if (cand) { found = cand; break; }
+    if (dir === stop || dir === path.parse(dir).root) break;
+    const up = path.dirname(dir);
+    if (up === dir) break;
+    dir = up;
+  }
+  if (memo) for (const d of passed) memo.set(d, found);
+  return found;
+}
+
+// The ledger's home: the directory that holds it, or that holds the docs/ holding it. Paths in the
+// pre-edit window's header and in the bare-cite baseline are relative to it.
+function ledgerHome(ledgerPath) {
+  const dir = path.dirname(ledgerPath);
+  return path.basename(dir) === 'docs' ? path.dirname(dir) : dir;
+}
+// The spec documents sit beside the ledger and nowhere else.
+function specDocs(ledgerPath) {
+  const dir = path.dirname(ledgerPath);
+  const u = path.join(dir, 'UIUX.md'), p = path.join(dir, 'PRD.md');
+  return { uiux: isFile(u) ? u : null, prd: isFile(p) ? p : null };
+}
+
+// ─── 2. parse ───────────────────────────────────────────────────────────────
+
+const NUMERAL_MAX_DIGITS = 15;                                        // FORMAT.md 2: fifteen keeps the number exact
+const HEADING_RE = /^### ([A-Za-z]+)([1-9]\d{0,14})\.[ \t]+((?:.*[^ \t])?)[ \t]*$/s;   // the title to its last non-blank character, read in one pass: a long run of spaces inside it costs no backtracking   // s: a U+2028/U+2029 inside a heading is content to this reader, as it is to splitLines   // a heading ends at spaces and tabs: a bare CR is content, not the end of a line (1)   // ASCII prefix, no leading zero, at most fifteen digits so n is exact (FORMAT.md 2)
+// An entry heading written in another form — another number of #, no space after them, bold, or the id alone at a line's
+// start — read only to name it in an entry-less ledger (D45): it opens no entry (FORMAT.md 2)
+const OTHER_HEADING_RE = /^(?:#{1,6}[ \t]*|\*\*)?[A-Za-z]+[1-9][0-9]*\.(?:\*\*)?(?:[ \t]|$)/;
+const SECTION_RE = /^## ([A-Za-z]+)\.\s+((?:.*\S)?)\s*$/;
+const ADDENDUM_RE = /^> Addendum (\d{4}-\d{2}-\d{2}): ((?:.*\S)?)\s*$/;
+const SPEC_HEADING_RE = /^#{1,6}\s+§(\d+(?:\.\d+){0,2})\s+((?:.*\S)?)\s*$/;   // three levels at most (FORMAT.md 7): `§4.5.1.1` is no spec heading
+// One verb may name several targets joined by "/" ("keeps R1/R2"): one edge per target, the same clause.
+// A verb or adverb may open a sentence with a capital — "Supersedes R1", "In part reverses R6" — and is recorded in
+// lowercase; any other casing is no edge (FORMAT.md 5).
+function caseHead(words) { return words.map(w => '[' + w[0] + w[0].toUpperCase() + ']' + w.slice(1)); }
+const EDGE_RE = new RegExp('(?:' + NOT_WORD_BEFORE + '(' + caseHead(ADVERBS).join('|') + ')\\s+)?' + NOT_WORD_BEFORE + '(' + caseHead(VERBS).join('|') + ')\\s+([A-Za-z]+)([1-9]\\d{0,14})((?:/[A-Za-z]+[1-9]\\d{0,14})*)' + NOT_WORD_AFTER + '(?:\\s*\\(([^()]*)\\))?', 'gu');
+
+// The index of the "(" that opens the meta: the first one outside a backtick span that begins the heading or follows
+// a space (FORMAT.md 3, 4). A parenthesis inside inline code is code, not the meta, a code span read as maskCode reads it;
+// a heading that is only its parenthetical has an empty title and a meta.
+function metaStart(s) {
+  const m = maskCode(s);                                              // the code spans blanked, positions kept: the one reader of a span
+  for (let i = 0; i < s.length; i++) if (m[i] === '(' && (i === 0 || s[i - 1] === ' ')) return i;
+  return -1;
+}
+// Text inside backticks is quoted, not asserted (FORMAT.md 5): blank every code span, keeping positions.
+// A code span is a run of backticks closed by the next run of as many on its line, as Markdown reads one: `x`, ``a `b` c``,
+// ```x```; a run that finds none is literal text and opens no span (FORMAT.md 3, 5, 8)
+function maskCode(s) {
+  let out = '', i = 0;
+  while (i < s.length) {
+    if (s[i] !== '`') { out += s[i++]; continue; }
+    let j = i; while (j < s.length && s[j] === '`') j++;
+    const run = j - i; let k = j, close = -1;
+    while (k < s.length && s[k] !== '\n') {
+      if (s[k] !== '`') { k++; continue; }
+      let e = k; while (e < s.length && s[e] === '`') e++;
+      if (e - k === run) { close = k; break; }
+      k = e;
+    }
+    if (close < 0) { out += s.slice(i, j); i = j; continue; }
+    out += ' '.repeat(close + run - i); i = close + run;
+  }
+  return out;
+}
+
+// D7 (2): cut at the first " (" outside code, strip marks, then cut at the last word boundary before 72 with "…".
+function titleOf(heading) {
+  let t = heading;
+  const i = metaStart(t);
+  if (i >= 0) t = t.slice(0, i);
+  t = stripMarks(t).trim();
+  const cps = Array.from(t);                                          // code points, not UTF-16 units
+  if (cps.length > TITLE_MAX) {
+    const head = cps.slice(0, TITLE_MAX);
+    const sp = head.lastIndexOf(' ');
+    t = (sp > 0 ? head.slice(0, sp) : head.slice(0, TITLE_MAX - 1)).join('').trim() + '…';
+  }
+  return t;
+}
+
+// The first parenthetical of a heading, matched by depth: text and the index it starts at.
+function metaOf(heading) {
+  const i = metaStart(heading);
+  if (i < 0) return { meta: '', start: -1, end: -1 };
+  let depth = 0;
+  for (let j = i; j < heading.length; j++) {
+    if (heading[j] === '(') depth++;
+    else if (heading[j] === ')') { depth--; if (depth === 0) return { meta: heading.slice(i + 1, j), start: i, end: j }; }
+  }
+  return { meta: heading.slice(i + 1), start: i, end: heading.length };
+}
+
+function clausesOf(meta) { return meta.split(';').map(s => s.trim()).filter(Boolean); }
+// An entry's principle line, as append's guard, the index and check 6 all read it: a body line beginning `Principle:`, a space
+// after it or not, outside fenced blocks (FORMAT.md 5, 11); a second is check 6's failure, since two leave the reader to guess.
+const PRINCIPLE_LINE_RE = /^Principle:(.*)$/;
+// The body states its reason in a sentence that begins `Reason:` — at a line's start, a list marker or emphasis aside, or after a
+// sentence's end — and says something after it, a letter or a digit on its line; outside code spans and fenced blocks (FORMAT.md
+// 5, 11). `The Reason: ok.`, `UnReason: ok.` and a bare `Reason:` state none. Answers where it starts in a line with its code
+// masked, or -1.
+const REASON_RE = /(?:^\s*(?:(?:[-*+>]|\d{1,9}[.)])\s+)*|[.!?]["'\u201d\u2019)\]*_]*\s+)[*_]*Reason:/g;
+function reasonAt(masked) {
+  for (const m of masked.matchAll(REASON_RE)) { const at = m.index + m[0].length - 'Reason:'.length; if (/[\p{L}\p{N}]/u.test(masked.slice(at + 'Reason:'.length))) return at; }
+  return -1;
+}
+function assertsReason(lines) {
+  const fenced = fencedLines(lines);
+  return lines.some((l, k) => !fenced[k] && reasonAt(maskCode(l)) >= 0);
+}
+// A `Reason:` outside code that states no reason is named as such by check 6, apart from a body with none at all
+function mentionsReason(lines) {
+  const fenced = fencedLines(lines);
+  return lines.some((l, k) => !fenced[k] && /Reason:/.test(maskCode(l)));
+}
+
+// Every edge in `text`, with its clause. `sentences` splits body text; a meta clause is its own sentence.
+function edgesIn(text, sourceId, line, asMeta) {
+  const found = [];
+  const units = asMeta ? clausesOf(text) : text.split(/(?<=[.;])\s+|\n/).map(s => s.trim()).filter(Boolean);
+  for (const unit of units) {
+    EDGE_RE.lastIndex = 0;
+    let m;
+    const scan = maskCode(unit);                                     // an edge inside a code span is quoted, not made
+    while ((m = EDGE_RE.exec(scan)) !== null) {
+      // A capital opens a sentence and nowhere else (FORMAT.md 5): a capitalised verb or adverb is an edge only as its unit's first
+      // word — the meta clause, the title's sentence, the body's — and one inside a sentence ("The Lot Keeps R5") is a word of it.
+      // The scan goes on from the next character, so a lowercase edge after a capitalised adverb is still read, without it.
+      const first = m[1] || m[2];
+      if ((m[1] && /^\p{Lu}/u.test(m[2])) || (/^\p{Lu}/u.test(first) && /[\p{L}\p{N}]/u.test(scan.slice(0, m.index)))) { EDGE_RE.lastIndex = m.index + 1; continue; }
+      const targets = [m[3] + m[4]].concat((m[5] || '').split('/').filter(Boolean));
+      for (const t of targets) {
+        const tm = /^([A-Za-z]+)(\d+)$/.exec(t);
+        found.push({ from: sourceId, adverb: (m[1] || '').toLowerCase(), verb: m[2].toLowerCase(), to: t, toPrefix: tm[1], toN: Number(tm[2]), qualifier: m[6] || '', clause: unit, line });
+      }
+    }
+  }
+  return found;
+}
+function isEdgeClause(clause) {
+  const re = new RegExp('^(?:(?:' + caseHead(ADVERBS).join('|') + ')\\s+)?(?:' + caseHead(VERBS).join('|') + ')\\s+[A-Za-z]+\\d+(?:/[A-Za-z]+\\d+)*(?:\\s*\\([^()]*\\))?$');
+  return re.test(clause.trim());
+}
+function renderEdge(e) { return e.from + ' ' + (e.adverb ? e.adverb + ' ' : '') + e.verb + ' ' + e.to + (e.qualifier ? ' (' + e.qualifier + ')' : ''); }
+function edgeKey(e) { return e.from + '|' + e.adverb + '|' + e.verb + '|' + e.to + '|' + e.qualifier; }
+
+// The principles list: the list, bulleted or numbered, under the first section of PRD.md when it exists, else the
+// preamble's list after a line containing "Principles". Items begin with a bold phrase.
+// A list item as Markdown reads its marker — `-`, `*` or `+`, or one to nine digits and `.` or `)` — that opens with a bold
+// phrase, the principle's name (FORMAT.md 10): a list written numbered is the same list, and ten digits make no item (D14's addendum)
+const LIST_ITEM_RE = /^\s*(?:[-*+]|\d{1,9}[.)])\s+\*\*([^*]+?)\*\*/;
+function principlesFromList(lines, startIdx, endIdx) {
+  const names = [], skipped = [];
+  let started = false;
+  for (let i = startIdx; i < (endIdx === undefined ? lines.length : endIdx); i++) {
+    const m = LIST_ITEM_RE.exec(lines[i]);
+    if (m) { names.push({ name: m[1].trim().replace(/\.$/, ''), text: lines[i].trim(), line: i + 1 }); started = true; }
+    else if (started && lines[i].trim() === '') continue;              // a blank line between items ends nothing: a loose list is one list, as a renderer shows it
+    else if (started && /^\s+\S/.test(lines[i])) names[names.length - 1].text += ' ' + lines[i].trim();   // a wrapped bullet: the indented line continues it
+    else if (started && /^\s*(?:[-*+]|\d{1,9}[.)])\s/.test(lines[i])) skipped.push(i + 1);   // an item with no bolded name: no principle to cite, and the list goes on
+    else if (started) break;
+  }
+  names.skipped = skipped;
+  return names;
+}
+function principlesOf(ledger) {
+  const docs = specDocs(ledger.path);
+  if (docs.prd) {
+    const lines = splitLines(readText(docs.prd));
+    for (let i = 0; i < lines.length; i++) {
+      const m = SPEC_HEADING_RE.exec(lines[i]);
+      if (m && m[1] === '1') {
+        // the list under the first section: looked for up to the next heading of its level or above, where the section ends —
+        // a first section of prose names no principle, and a list in the second is the second's (FORMAT.md 10)
+        const level = /^#+/.exec(lines[i])[0].length, next = new RegExp('^#{1,' + level + '}\\s');
+        let end = i + 1; while (end < lines.length && !next.test(lines[end])) end++;
+        const list = principlesFromList(lines, i + 1, end);
+        if (list.length) return { source: docs.prd, list, skipped: list.skipped || [] };
+      }
+    }
+  }
+  const lines = ledger.preambleLines;
+  const found = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (!/Principles/.test(lines[i])) continue;
+    const list = principlesFromList(lines, i + 1);
+    if (list.length) found.push({ at: i + 1, list });
+  }
+  if (found.length > 1 && found[0].list[0].line !== found[1].list[0].line) {
+    return { source: ledger.path, list: found[0].list, skipped: found[0].list.skipped || [], ambiguous: found.map(f => f.at) };
+  }
+  if (found.length) return { source: ledger.path, list: found[0].list, skipped: found[0].list.skipped || [] };
+  return { source: null, list: [] };
+}
+function principleNamed(list, name) {
+  const norm = s => s.trim().replace(/\.$/, '').toLowerCase();
+  return list.find(p => norm(p.name) === norm(name)) || null;
+}
+
+// A line that ends an entry: the next entry heading, or a section heading. A `### ` line that is not an entry
+// heading, or a `## ` line that is not a section heading, ends nothing and is read as body text (FORMAT.md 2, 7).
+function isBoundary(line) { return HEADING_RE.test(line) || SECTION_RE.test(line); }
+function parseLedger(text, ledgerPath) {
+  const lines = splitLines(unBom(text));
+  const rulings = [], sections = [];
+  // Keyed by the ledger's own text, a prefix or a path: a map with no prototype, where `constructor` or `__proto__` is a
+  // key like any other and not a property every object already has (D1).
+  const contractFrom = Object.create(null), baseline = Object.create(null);
+  let hasBaseline = false;
+  let firstHeading = lines.length;
+  for (let i = 0; i < lines.length; i++) {
+    if (isBoundary(lines[i])) { firstHeading = i; break; }
+  }
+  const preambleLines = lines.slice(0, firstHeading);
+  const directiveFaults = [];                                          // {k, line, message}: check reports them, parse reads the first directive
+  const contractFromLine = Object.create(null);                        // where each contract line sits, so check can name it
+  const firstAt = Object.create(null);                                 // the line of each prefix's first contract line
+  let firstBareCites = 0;                                              // and of the first bare-cites comment: a prefix may be any letters
+  for (let li = 0; li < preambleLines.length; li++) {
+    const l = preambleLines[li];
+    let m = /<!--\s*docket:\s*contract from ([A-Za-z]+)([1-9]\d{0,14})\s*-->/.exec(l);   // a ruling number (2): a zero names no entry, so it binds none
+    if (m) {
+      if (contractFrom[m[1]] !== undefined) directiveFaults.push({ k: 6, line: li + 1, message: 'a second contract line for prefix ' + m[1] + ' (line ' + firstAt[m[1]] + ' binds); the preamble carries one per prefix (FORMAT.md 11)' });
+      else { contractFrom[m[1]] = Number(m[2]); firstAt[m[1]] = li + 1; contractFromLine[m[1]] = li + 1; }
+    }
+    m = /<!--\s*docket:\s*bare-cites([^>]*)-->/.exec(l);
+    if (m) {
+      if (hasBaseline) { directiveFaults.push({ k: 4, line: li + 1, message: 'a second bare-cites comment (line ' + firstBareCites + ' is the baseline); the preamble carries one (FORMAT.md 9)' }); continue; }
+      hasBaseline = true; firstBareCites = li + 1;
+      for (const kv of m[1].trim().match(/"(?:[^"\\]|\\.)*"=\S*|\S+/g) || []) {
+        // a path holding a space, a quote, a backslash or ">" is a JSON string, "Design Notes.md"=1 (FORMAT.md 9)
+        const q = /^("(?:[^"\\]|\\.)*")=(\S*)$/.exec(kv), eq = q ? -1 : kv.lastIndexOf('=');
+        let key = null; try { key = q ? JSON.parse(q[1]) : eq > 0 ? kv.slice(0, eq) : null; } catch (e) { key = null; }
+        const count = q ? q[2] : kv.slice(eq + 1);
+        // A key is a path as check writes it, relative to the ledger's home: an unquoted one holding "=" or "," is pairs run
+        // together, app.js=5,other.js=1, and "./app.js", "a/../app.js", "../up.js" or "/abs.js" names a file no count is kept
+        // under — each a fault at the comment, as a pair that is not a count is (FORMAT.md 9).
+        const norm = key === null ? null : path.posix.normalize(key), outside = norm !== null && (norm === '..' || norm.startsWith('../') || path.posix.isAbsolute(norm));
+        const misread = key === null ? null
+          : !q && /[=,]/.test(key) ? 'is pairs run together: pairs are separated by spaces, and a path holding "=" or "," is written as a JSON string'
+          : norm !== key || outside ? 'names its file as check does not: a path relative to the ledger\'s home, as check writes it' + (outside ? '' : ', ' + norm)
+          : null;
+        // One file, one allowance: a repeated key would let the later number raise a reviewed allowance
+        // in silence, as a second baseline comment or a second contract line would (FORMAT.md 9, 11).
+        if (misread) directiveFaults.push({ k: 4, line: li + 1, message: 'bare-cites baseline: "' + kv + '" ' + misread + ' (FORMAT.md 9)' });
+        else if (key && Object.prototype.hasOwnProperty.call(baseline, key)) directiveFaults.push({ k: 4, line: li + 1, message: 'bare-cites baseline: ' + key + ' is listed twice; a file carries one allowance (FORMAT.md 9)' });
+        else if (key && /^\d+$/.test(count)) baseline[key] = Number(count);
+        else directiveFaults.push({ k: 4, line: li + 1, message: 'bare-cites baseline: "' + kv + '" is not <file>=<count> (FORMAT.md 9)' });   // a pair that is not a count is no allowance, and check says so
+      }
+    }
+  }
+  // entries and sections
+  let i = 0;
+  while (i < lines.length) {
+    const sm = SECTION_RE.exec(lines[i]);
+    const hm = HEADING_RE.exec(lines[i]);
+    if (sm) { sections.push({ letter: sm[1], title: stripMarks(sm[2]), line: i + 1 }); i++; continue; }
+    if (hm) {
+      const start = i;
+      let j = i + 1;
+      while (j < lines.length && !isBoundary(lines[j])) j++;
+      const bodyLines = lines.slice(i + 1, j);
+      const heading = hm[3];
+      const mo = metaOf(heading), meta = mo.meta;
+      const titleText = mo.start >= 0 ? heading.slice(0, mo.start) : heading;   // FORMAT.md 5: an edge anywhere in the heading, the title included
+      const afterMeta = mo.start >= 0 ? heading.slice(mo.end + 1) : '';         // neither title nor meta, and still the heading: an edge there is read (FORMAT.md 4)
+      const id = hm[1] + hm[2];
+      const issueM = /issue #(\d+)/.exec(meta);
+      const addenda = [];
+      bodyLines.forEach((l, k) => { const am = ADDENDUM_RE.exec(l); if (am) addenda.push({ date: am[1], text: am[2], line: start + 2 + k }); });
+      const rawEdges = edgesIn(meta, id, start + 1, true).concat(edgesIn(titleText, id, start + 1, false), edgesIn(afterMeta, id, start + 1, false));
+      bodyLines.forEach((l, k) => { if (!ADDENDUM_RE.test(l)) rawEdges.push(...edgesIn(l, id, start + 2 + k, false)); });
+      const seenE = new Set(), edges = [];
+      for (const e of rawEdges) { const k = edgeKey(e); if (!seenE.has(k)) { seenE.add(k); edges.push(e); } }
+      const clauses = clausesOf(meta);
+      const grounding = clauses.find(c => !isEdgeClause(c)) || '';
+      const bodyFenced = fencedLines(bodyLines);                       // FORMAT.md 5: a Principle: line inside a fence is quoted
+      const pls = [];
+      bodyLines.forEach((l, k) => { const m = bodyFenced[k] ? null : PRINCIPLE_LINE_RE.exec(l); if (m) pls.push({ line: start + 2 + k, name: m[1].trim().replace(/\.$/, '') }); });
+      rulings.push({
+        id, prefix: hm[1], n: Number(hm[2]), line: start + 1, heading, title: titleOf(heading), meta, grounding,
+        issue: issueM ? issueM[1] : null, edges, addenda, body: bodyLines.join('\n'), bodyLines,
+        principle: pls.length && pls[0].name ? pls[0].name : null, principleLines: pls.map(p => p.line), endLine: j,
+        hasReason: assertsReason(bodyLines), mentionsReason: mentionsReason(bodyLines),
+      });
+      i = j; continue;
+    }
+    i++;
+  }
+  const prefixes = uniq(rulings.map(r => r.prefix));
+  // an edge's target is a cite and shares its rule (FORMAT.md 8, D3's addendum): an id whose prefix is none of this ledger's
+  // names no ruling here, and is no edge — "replaces H1 tags" in a ledger of R entries
+  for (const r of rulings) r.edges = r.edges.filter(e => prefixes.includes(e.toPrefix));
+  const byId = new Map();
+  for (const r of rulings) if (!byId.has(r.id)) byId.set(r.id, r);     // FORMAT.md 12: a repeated id resolves to its first entry, the one at its position; the later one is check 2's failure
+  return { path: ledgerPath, dir: path.dirname(ledgerPath), home: ledgerHome(ledgerPath), text, lines, preambleLines, prefixes, rulings, sections, byId, contractFrom, contractFromLine, baseline, hasBaseline, baselineLine: firstBareCites, directiveFaults };
+}
+// A pair of the bare-cites comment as it is written and read (FORMAT.md 9): a path holding a space, a quote, a backslash or ">"
+// is a JSON string, so the writer, the reader and check 7's record of a rise agree on one spelling
+function baselinePair(p, n) { return (/[\s"\\>=,]/.test(p) ? JSON.stringify(p).replace(/>/g, '\\u003e') : p) + '=' + n; }
+function parseSpec(text) {
+  const heads = [];
+  splitLines(unBom(text)).forEach((l, i) => { const m = SPEC_HEADING_RE.exec(l); if (m) heads.push({ num: m[1], title: stripMarks(m[2]), line: i + 1 }); });
+  return heads;
+}
+function loadLedger(ledgerPath) { return parseLedger(readText(ledgerPath), ledgerPath); }
+function ledgerSpecs(ledger) {
+  const docs = specDocs(ledger.path);
+  return {
+    UIUX: docs.uiux ? { path: docs.uiux, heads: parseSpec(readText(docs.uiux)) } : null,
+    PRD: docs.prd ? { path: docs.prd, heads: parseSpec(readText(docs.prd)) } : null,
+  };
+}
+
+// ─── 3. cites ───────────────────────────────────────────────────────────────
+
+function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+// The ledger's cite pattern — its prefixes on word boundaries, a numeral with no leading zero and fifteen digits at most
+// (FORMAT.md 2, 8) — built once per ledger and not once per line read (D14's addendum). Global: each call runs it to its end.
+function citeRe(ledger) {
+  if (!ledger.prefixes.length) return null;
+  if (!ledger.citeRe) ledger.citeRe = new RegExp(NOT_WORD_BEFORE + '(' + ledger.prefixes.map(escapeRe).join('|') + ')([1-9]\\d{0,14})' + NOT_WORD_AFTER, 'gu');
+  ledger.citeRe.lastIndex = 0;
+  return ledger.citeRe;
+}
+// The lines of a text that can hold a cite — a prefix of the ledger's and a numeral on word boundaries, or a spec document's
+// name before § — found by one pass of one pattern over the whole text, each match's line counted forward from the last, so a
+// file of a million lines costs one scan and not a pattern run per line (D14's addendum). A superset of the lines with a cite:
+// each is then read as every line was, its code spans masked and a fenced block left out. Ascending, each line once.
+function citeLines(text, ledger) {
+  if (!ledger.lineRe) {
+    const alts = ledger.prefixes.length ? ['(?:' + ledger.prefixes.map(escapeRe).join('|') + ')[1-9]\\d{0,14}' + NOT_WORD_AFTER] : [];
+    alts.push('(?:UIUX|PRD) ?§\\d');
+    ledger.lineRe = new RegExp(NOT_WORD_BEFORE + '(?:' + alts.join('|') + ')', 'gu');
+  }
+  const re = ledger.lineRe; re.lastIndex = 0;
+  const at = []; let from = 0, line = 1, m;
+  while ((m = re.exec(text)) !== null) {
+    for (let k = from; k < m.index; k++) if (text.charCodeAt(k) === 10) line++;
+    from = m.index;
+    if (at.length === 0 || at[at.length - 1] !== line) at.push(line);
+  }
+  return at;
+}
+// Ruling cites: an id on word boundaries whose prefix is one of the ledger's; `exists` says whether the number is defined.
+function citesInLine(line, ledger) {
+  const re = citeRe(ledger);
+  if (!re) return [];
+  const found = [];
+  let m;
+  const scan = maskCode(line);                                        // FORMAT.md 8: an id in a code span is quoted, not cited
+  while ((m = re.exec(scan)) !== null) found.push({ id: m[1] + m[2], prefix: m[1], n: Number(m[2]), col: m.index, exists: ledger.byId.has(m[1] + m[2]) });
+  return found;
+}
+// A fenced code block — a line beginning ``` opens it, the next such line closes it — is quoted like a code span
+// (FORMAT.md 8): nothing inside it is a cite. fencedLines marks each line that lies inside one (the fence lines too).
+function fencedLines(lines) {
+  const out = new Array(lines.length); let inFence = false;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\s*```/.test(lines[i])) { inFence = !inFence; out[i] = true; continue; }
+    out[i] = inFence;
+  }
+  return out;
+}
+// Every cite of a text, in order: the candidate lines of one pass (citeLines), each read as every line was. `lines` and `fenced`,
+// when the caller has split the text already, are its own and not split again.
+function citesIn(text, ledger, lines, fenced) {
+  inTime();                                                           // the bound within one file (D14's addendum)
+  const at = citeLines(text, ledger);
+  if (!at.length) return [];
+  const all = []; let n = 0;
+  lines = lines || splitLines(text); fenced = fenced || fencedLines(lines);
+  for (const ln of at) { if ((++n & 4095) === 4095) inTime(); if (ln > lines.length || fenced[ln - 1]) continue; for (const c of citesInLine(lines[ln - 1], ledger)) all.push(Object.assign({ line: ln, text: lines[ln - 1] }, c)); }
+  return all;
+}
+const SPEC_CITE_RE = /(?<![\p{L}\p{N}_])(UIUX|PRD) §(\d+(?:\.\d+){0,2})/gu;   // the heading's depth (FORMAT.md 8): `UIUX §4.5.1.1` cites `UIUX §4.5.1`
+function specCitesIn(text) {
+  const all = [], lines = splitLines(text), fenced = fencedLines(lines);
+  lines.forEach((l, i) => { if ((i & 4095) === 4095) inTime(); if (fenced[i]) return; SPEC_CITE_RE.lastIndex = 0; let m; while ((m = SPEC_CITE_RE.exec(maskCode(l))) !== null) all.push({ doc: m[1], num: m[2], line: i + 1 }); });
+  return all;
+}
+const BARE_CITE_RE = /(?<!(?<![\p{L}\p{N}_])(?:UIUX|PRD) )(?<!(?<![\p{L}\p{N}_])(?:UIUX|PRD))§\d/gu;
+const GLUED_CITE_RE = /(?<![\p{L}\p{N}_])(UIUX|PRD)§(\d+(?:\.\d+){0,2})/gu;   // the document's name against the mark, with the space missing
+function bareCitesIn(text) {
+  const lines = splitLines(text), fenced = fencedLines(lines); let n = 0;
+  lines.forEach((l, i) => { if ((i & 4095) === 4095) inTime(); if (fenced[i]) return; const m = maskCode(l).match(BARE_CITE_RE); if (m) n += m.length; });
+  return n;
+}
+
+// ─── 4. context: every tracked text file resolved to its own ledger ─────────
+
+const WALK_MAX = 20000;                                                // entries read, not files kept: the bound is on the work, not the answer
+function walkFiles(dir, acc, root, seen) {
+  seen = seen || { n: 0 };
+  let ents;
+  try { ents = fs.readdirSync(dir, { withFileTypes: true }); } catch (e) { return acc; }
+  for (const ent of ents) {
+    // thrown, not died on: the command refuses at its top, exit 2, unless it reads a tree past the bound as ungoverned (FORMAT.md 1)
+    if (++seen.n > WALK_MAX) throw Object.assign(new Error('the tree under ' + (root || dir) + ' holds more than ' + WALK_MAX + ' entries and is not a git repository, so there is no tracked set to enumerate; run the docket inside the repository, or set the project directory to it (FORMAT.md 1)'), { walkBound: true });
+    if (ent.name === '.git' || ent.name === 'node_modules' || ent.name === '.docket') continue;
+    const p = path.join(dir, ent.name);
+    if (ent.isSymbolicLink()) {                                        // git lists a tracked symlink and near reads through one: the walk agrees with both
+      let real = null;
+      try { real = fs.realpathSync(p); } catch (e) { continue; }       // broken, or a loop
+      if (!isWithin(real, root || dir)) continue;                      // a link out of the tree is not the tree's file
+      if (isFile(p)) acc.push(p);
+      continue;
+    }
+    if (ent.isDirectory()) walkFiles(p, acc, root || dir, seen); else if (ent.isFile()) acc.push(p);
+  }
+  return acc;
+}
+function loadContext(root, opts) {
+  opts = opts || {};
+  let files = trackedFiles(root);
+  const fromGit = files !== null;                                     // git's list, or the walk's: the cite files are asked of git only for its own
+  if (files === null) files = walkFiles(root, [], root);
+  if (opts.includeUntracked) files = files.concat(untrackedFiles(root));
+  // The judge's own state is never a governed file, whatever the project's .gitignore says: its verdicts and its trail
+  // name rulings, and read as governed they would move the diff the judge is judging with every command it runs (D26).
+  files = files.filter(f => !rel(root, f).split(path.sep).includes('.docket'));
+  const ledgers = new Map();
+  const entries = [];
+  const vendored = [];
+  const ledgerOf = new Map();                                         // directory -> its ledger, looked at once (findLedger)
+  for (const f of uniq(files)) {
+    inTime();                                                         // a session's start reads within its bound (D14's addendum)
+    const lp = findLedger(f, root, ledgerOf);
+    // A file under no ledger is skipped by every subcommand (1), and so before it is opened: a tree the docket does not govern
+    // costs the listing of its names, not a read of each file (D14's addendum). One named docket.js is read wherever it lies,
+    // to tell the vendored witness (D9).
+    if (!lp && path.basename(f) !== 'docket.js') continue;
+    let st; try { st = fs.lstatSync(f); } catch (e) { continue; }   // one stat per file; a link is read through, and marked, since git grep skips it
+    const link = st.isSymbolicLink();
+    if (link ? !isFile(f) : !st.isFile()) continue;
+    // A ledger saved as UTF-16, or holding a NUL byte, is no text file, and alone in its tree no text file leads to it: it is
+    // read as a ledger where it stands, so that check 2 names it and the tree does not read as governed by none (D45's addendum)
+    if (!isTextFile(f)) { if (lp === path.resolve(f) && !ledgers.has(lp)) ledgers.set(lp, loadLedger(lp)); continue; }
+    if (isSelfCopy(f)) { vendored.push(rel(root, f)); continue; }      // D9: the vendored witness is not a governed file
+    if (!lp) continue;
+    if (!ledgers.has(lp)) ledgers.set(lp, loadLedger(lp));
+    entries.push({ path: f, ledger: lp, rel: rel(root, f), link, drifted: isCoreCopy(f) });
+  }
+  seedLedgerText(entries, ledgers);                                   // one read per file, so one version per run
+  return { root, ledgers, files: entries, vendored, fromGit, untracked: !!opts.includeUntracked };
+}
+// A file whose text is this program's own, at another path, is the witness `vendor` copied there (D9). Its
+// comments cite this plugin's rulings and the fixture's examples, which resolve to nothing under the ledger it
+// serves, so it is not read as a governed file: not for cites, not for the bare-§ count, not by near. Identity
+// is the text itself, line endings normalised, which a marker line could not forge; a copy that has drifted
+// from the running core is not exempt, and its cites failing is the sign to vendor again.
+let selfText = null;
+function isSelfCopy(filePath) {
+  if (path.basename(filePath) !== 'docket.js') return false;
+  // The program itself: governed when it is the core at bin/docket.js, which its own repository's ledger
+  // governs (D6); the witness when it runs from anywhere else, which is where vendor put it.
+  if (path.resolve(filePath) === path.resolve(__filename)) return path.basename(path.dirname(__filename)) !== 'bin';
+  if (selfText === null) selfText = normEol(readText(__filename));
+  try { return normEol(readText(filePath)) === selfText; } catch (e) { return false; }
+}
+// A docket core of some version opens as this file opens: its first three lines this file's, the third naming the program.
+function coreOpening(t) { return t.split('\n', 3).join('\n'); }
+// A docket.js outside bin/ that opens as this program opens and differs after it is a copy of another version of the core — a
+// witness vendored before the plugin moved on. It is governed like any file, so its cites fail, and each failure line names it
+// and the command that vendors again (FORMAT.md 8). A core at bin/ is its own repository's, which its own ledger governs (D6).
+function isCoreCopy(filePath) {
+  if (path.basename(filePath) !== 'docket.js' || path.basename(path.dirname(filePath)) === 'bin' || path.resolve(filePath) === path.resolve(__filename)) return false;
+  if (selfText === null) selfText = normEol(readText(__filename));
+  try { const t = normEol(readText(filePath)); return t !== selfText && coreOpening(t) === coreOpening(selfText); } catch (e) { return false; }
+}
+function vendorAgain(root, file) {
+  const at = path.basename(path.dirname(file)) === 'test' ? rel(root, path.dirname(path.dirname(file))) || '.' : null;
+  return ' — ' + rel(root, file) + ' is a copy of another version of the docket\'s core: vendor again' + (at ? ' (docket vendor ' + at + ')' : '');
+}
+// the session start's bound is read at every pass over a file, not at its first read alone (D14's addendum)
+function fileText(entry) { inTime(); if (entry.text === undefined) entry.text = readText(entry.path); return entry.text; }
+// A ledger is read once, as the ledger. Where it is also one of the files a check walks, it carries that same text, so
+// a run never holds a parse from one version of a ledger and a text from another (a write can land between two reads).
+function seedLedgerText(entries, ledgers) {
+  for (const e of entries) if (e.text === undefined && ledgers.has(e.path)) e.text = ledgers.get(e.path).text;
+}
+function isSpecDoc(entry, ledger) { return entry.path === path.join(ledger.dir, 'UIUX.md') || entry.path === path.join(ledger.dir, 'PRD.md'); }
+// A ledger document is checked for its cites but is never governed code: its cites are references between rulings, not
+// implementation. It is a ledger or a copy of one (FORMAT.md 8, D5's addendum): named DECISIONS.md, as discovery names a
+// ledger, or named DECISIONS*.md in any case and holding an entry heading. `text` is the file's text, or a function that
+// reads it, asked only when the name leaves the question open.
+function isLedgerDoc(p, text) {
+  const b = path.basename(p);
+  if (b === 'DECISIONS.md') return true;
+  if (!/^DECISIONS.*\.md$/i.test(b)) return false;
+  let t = text;
+  try { if (typeof t === 'function') t = t(); } catch (e) { t = null; }
+  return typeof t === 'string' && splitLines(t).some(l => HEADING_RE.test(l));
+}
+// The files a ledger's cites can lie in, asked of git in one pass — `git grep -l -w -E` for a prefix and a numeral on word
+// boundaries over the tracked files and, with the context's untracked ones, those too — so that the files that can hold a cite
+// are read and no other (D14's addendum). git's word is the ASCII one, narrower than a cite's [\p{L}\p{N}_], and every file is
+// read as text (-a, as the gate diffs them), so the list is a superset of the files with a cite. git grep reads no symbolic
+// link: a link is read whatever the list says. A context from a walk and not from git, a ledger with no prefix, or a git that
+// answers with neither a list nor an empty one leaves every file read, as before.
+function citeFiles(ctx, ledger) {
+  if (!ctx.fromGit || !ledger.prefixes.length || ledger.prefixes.some(p => !/^[A-Za-z]+$/.test(p))) return null;
+  if (!ctx.citeFiles) ctx.citeFiles = new Map();
+  if (ctx.citeFiles.has(ledger.path)) return ctx.citeFiles.get(ledger.path);
+  const args = ['-c', 'grep.fullName=false', 'grep', '-l', '-z', '-w', '-E', '-a', '--no-color', '--no-textconv', '--no-recurse-submodules']
+    .concat(ctx.untracked ? ['--untracked'] : [], ['-e', '(' + ledger.prefixes.join('|') + ')[1-9][0-9]*']);
+  const r = sh('git', args, ctx.root);
+  const set = r.status === 0 ? new Set(r.stdout.split('\0').filter(Boolean)) : r.status === 1 && !r.stderr ? new Set() : null;
+  ctx.citeFiles.set(ledger.path, set);
+  return set;
+}
+// Code cites: resolving cites in every governed file of a ledger except the ledger itself.
+function codeCites(ctx, ledger) {
+  const cites = [], cand = citeFiles(ctx, ledger);                   // the files that can hold a cite, or null for every file
+  for (const e of ctx.files) {
+    if (e.ledger !== ledger.path || (cand && !e.link && !cand.has(e.rel)) || isLedgerDoc(e.path, () => fileText(e))) continue;
+    // One line, one cite, HERE: the same id twice on a line is one reliance for the code-cite
+    // lists — what governs prints and what "cited nowhere" counts. near does not share this
+    // rule: its count is per occurrence and is the first key of two of its three orders
+    // (FORMAT.md 15, which says two matches on one line are one anchor, and says nothing
+    // about two cites on one line). The two readings differ on purpose; neither speaks for
+    // the other.
+    const seen = new Set();
+    for (const c of citesIn(fileText(e), ledger)) if (c.exists && !seen.has(c.id + ':' + c.line)) { seen.add(c.id + ':' + c.line); cites.push(Object.assign({ file: e.path, rel: e.rel }, c)); }
+  }
+  return cites;
+}
+function governedFiles(ctx, ledger) {
+  const set = new Set();
+  for (const c of codeCites(ctx, ledger)) set.add(c.file);
+  return Array.from(set);
+}
+// The scope of a ledger command: with --ledger the named ledger, and the root is the ledger's own (its project
+// root, else its git root, else its home), so the check that follows a write covers the tree the ledger governs and
+// not the working directory's; without it the working directory's root and the nearest ledger above it, or null.
+function scope(argv) {
+  const cwd = process.cwd();
+  const given = flag(argv, '--ledger');
+  if (given !== null) {
+    const lp = path.resolve(cwd, given);
+    if (!isFile(lp)) die('no ledger: --ledger ' + given + ' is not a file', 2);
+    return { cwd, root: enumerationRoot(path.dirname(lp)), ledger: lp };
+  }
+  const root = enumerationRoot(cwd);
+  return { cwd, root, ledger: findLedger(path.join(cwd, 'x'), root) };
+}
+function ledgerFromCwd(argv) {
+  const s = scope(argv);
+  if (!s.ledger) die(noLedgerMessage(s.cwd, s.root), 2);
+  return { root: s.root, ledger: loadLedger(s.ledger) };
+}
+// The ledgers under `dir` (paths relative to it): what a walk up from `dir` cannot see (FORMAT.md 1). Only a tree
+// the host names or git tracks is enumerated for them; a bare directory is not searched, nor a tree past the walk's bound.
+function ledgersBelow(dir, root) {
+  if (!projectRoot(dir)) return [];
+  let ctx;
+  try { ctx = loadContext(root); } catch (e) { if (e && e.walkBound) return []; throw e; }
+  return Array.from(ctx.ledgers.keys()).filter(lp => isWithin(path.dirname(lp), dir)).map(lp => rel(dir, lp)).sort();
+}
+function noLedgerMessage(cwd, root) {
+  const below = ledgersBelow(cwd, root);
+  return 'no ledger: no DECISIONS.md or docs/DECISIONS.md between ' + cwd + ' and ' + root
+    + (below.length ? '; below the working directory: ' + below.join(', ') + ' — pass --ledger <path>, or run from inside' : '');
+}
+
+// ─── 5. near: the pre-edit window (D1, D2, D7) ──────────────────────────────
+
+// Each match's line, counted forward from the last match: the matches come in order, so the file is read once however
+// many there are — a replace_all over a long file stays inside the pre-edit call's five seconds (D14's addendum)
+function findAll(text, needle) {
+  const at = [];
+  let i = 0, from = 0, line = 1;
+  for (;;) {
+    const j = text.indexOf(needle, i); if (j < 0) break;
+    for (let k = from; k < j; k++) if (text.charCodeAt(k) === 10) line++;
+    from = j; at.push(line); i = j + needle.length;
+  }
+  return at;
+}
+function near(argv) {
+  const raw = readStdin();
+  let input;
+  try { input = JSON.parse(raw); } catch (e) { return 0; }            // D1: never a blocking exit
+  if (!input || typeof input !== 'object') return 0;
+  const tool = input.tool_name, ti = input.tool_input || {};
+  // a NUL names no file and no directory: a path that holds one is an input near cannot use, silence (D1), and a directory that
+  // holds one is no directory, read as a missing one is
+  if (typeof ti.file_path !== 'string' || !ti.file_path || ti.file_path.includes('\0')) return 0;
+  const cwd = typeof input.cwd === 'string' && input.cwd && !input.cwd.includes('\0') ? input.cwd : process.cwd();
+  // the file's directory as the filesystem resolves it: a path through a symbolic link walks from where the link leads, and
+  // so meets the project root, which git names by its real path (FORMAT.md 1, D44's addendum)
+  const given = path.resolve(cwd, ti.file_path);
+  const file = exists(path.dirname(given)) ? path.join(realOr(path.dirname(given)), path.basename(given)) : given;
+  const startDir = exists(path.dirname(file)) ? path.dirname(file) : cwd;
+  const pr = projectRoot(startDir);
+  const lp = findLedger(file, pr || path.parse(path.resolve(startDir)).root);
+  if (!lp) return 0;                                                   // ungoverned tree: silent
+  recordCore(pr || ledgerHome(lp));                                    // the judge finds the core through this file (16)
+  if (pr && typeof input.session_id === 'string' && input.session_id) ensureSessionBase(pr, sessionKey(input.session_id));   // the session's first call records its base (D40's addendum)
+  if (isLedgerDoc(file, () => readText(file))) return 0;               // FORMAT.md 8: the ledger, or a copy of one, is amended through append; a direct edit is check 7's business
+  if (isSelfCopy(file)) return 0;                                      // D9: the vendored witness cites another ledger; a list from it would be wrong, so there is none
+  if (rel(pr || ledgerHome(lp), file).split('/').includes('.docket')) return 0;   // D26: the judge's state is outside the governed set, the window's as the walk's
+  if (!isFile(file)) return 0;                                         // D7: a Write of a new file is silent
+  if (!isTextFile(file)) return 0;                                     // FORMAT.md 1, 15: a governed file is a text file; a binary one check never sees is never reported as governed
+  const ledger = loadLedger(lp);
+  const text = normEol(readText(file)), lines = splitLines(text), N = lines.length, fenced = fencedLines(lines);   // one reading for the match and the lines (1)
+  const fileRel = rel(ledger.home, file), ledgerRel = ledgerLabel(pr, lp);
+  let windows, anchors, mode, span = 0;                                 // span: the lines an old_string covers beyond its first
+  if (tool === 'Write') { windows = [[1, N]]; anchors = []; mode = 'whole'; }
+  else if (tool === 'Edit') {
+    const needle = ti.old_string;
+    if (typeof needle !== 'string' || needle === '') return 0;          // zero matches: silent
+    const matches = findAll(text, normEol(needle));                   // the edit's text is normalised too: a host joins lines with the newline it writes
+    if (matches.length === 0) return 0;                                 // zero: silent
+    if (matches.length > 1 && ti.replace_all !== true) return 0;        // D7 (1): the tool will reject; silent
+    anchors = uniq(matches);                                            // two matches on one line are one anchor: the line is named once
+    span = normEol(needle).replace(/\n$/, '').split('\n').length - 1;   // the edit covers these lines too; the window is ±WINDOW around the whole of it;
+                                                                       // a final newline ends the last line and opens none, as splitLines reads a file
+    windows = anchors.map(l => [Math.max(1, l - WINDOW), Math.min(N, l + span + WINDOW)]);
+    mode = matches.length === 1 ? 'one' : 'many';
+  } else return 0;
+  // collect
+  const byId = new Map();
+  const specs = [];
+  // The union of the windows (D7): a line inside two overlapping windows is read once, at its distance to the
+  // nearest anchor — a union, not a sum, so a cite counts once however many windows hold it. The lines read are the ones
+  // that can hold a cite (citeLines), each at its distance to the nearest anchor, found among the ascending anchors by
+  // halving: a Write of a long file is one scan of its text, not a pattern run per line and a map of every line (D14's addendum)
+  const distTo = ln => {                                               // a whole file's distance is the line itself (no anchor)
+    if (!anchors.length) return ln;
+    let lo = 0, hi = anchors.length - 1;                               // the last anchor at or before the line, or the first
+    while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (anchors[mid] <= ln) lo = mid; else hi = mid - 1; }
+    const dOf = a => ln < a ? a - ln : ln > a + span ? ln - (a + span) : 0;   // inside the edited span, distance is 0
+    return lo + 1 < anchors.length ? Math.min(dOf(anchors[lo]), dOf(anchors[lo + 1])) : dOf(anchors[lo]);
+  };
+  for (const ln of citeLines(text, ledger)) {
+    const d = distTo(ln);
+    if (anchors.length && d > WINDOW) continue;                        // outside every window; a whole file has no anchor and no edge
+    if (fenced[ln - 1]) continue;                                      // FORMAT.md 8: a fenced block is quoted
+    const l = lines[ln - 1];
+    for (const c of citesInLine(l, ledger)) {
+      if (!c.exists) continue;
+      const d0 = anchors.length ? (ln < anchors[0] ? anchors[0] - ln : ln > anchors[0] + span ? ln - (anchors[0] + span) : 0) : ln;
+      const cur = byId.get(c.id);
+      // Each ruling keeps its ranked cites — the nearest to any match (nl, nc) and the nearest to the first (nl0, nc0), the
+      // earlier line and then the earlier column among equals, since FORMAT.md 15 breaks a tie by that cite's line and not by
+      // the ruling's earliest cite in the window — and first, its earliest cite, for the whole file's order.
+      const closer = (dd, l0, c0, bd, bl, bc) => dd < bd || (dd === bd && (l0 < bl || (l0 === bl && c0 < bc)));
+      if (!cur) byId.set(c.id, { id: c.id, count: 1, dist: d, nl: ln, nc: c.col, dist0: d0, nl0: ln, nc0: c.col, first: ln, col: c.col });
+      else {
+        cur.count++;
+        if (closer(d, ln, c.col, cur.dist, cur.nl, cur.nc)) { cur.dist = d; cur.nl = ln; cur.nc = c.col; }
+        if (closer(d0, ln, c.col, cur.dist0, cur.nl0, cur.nc0)) { cur.dist0 = d0; cur.nl0 = ln; cur.nc0 = c.col; }
+        if (ln < cur.first || (ln === cur.first && c.col < cur.col)) { cur.first = ln; cur.col = c.col; }
+      }
+    }
+    SPEC_CITE_RE.lastIndex = 0; let m;
+    while ((m = SPEC_CITE_RE.exec(maskCode(l))) !== null) specs.push({ doc: m[1], num: m[2], line: ln });
+  }
+  const where = mode === 'whole' ? 'whole file ' + fileRel
+    : '±' + WINDOW + ' lines of ' + fileRel + ':' + (anchors.length <= CAP ? anchors.map(a => span ? a + '–' + (a + span) : a).join(', ') : anchors.slice(0, CAP).map(a => span ? a + '–' + (a + span) : a).join(', ') + ' +' + (anchors.length - CAP) + ' more');
+  const outLines = [];
+  const obj = { ledger: ledgerRel, file: fileRel, mode, anchors, region: where, rulings: [], more: 0, edges: [], addenda: [], specCites: [], notice: null };
+  if (byId.size === 0) {
+    const governed = citesIn(text, ledger, lines, fenced).some(c => c.exists);
+    if (!governed) return 0;                                            // not governed: silent
+    obj.notice = 'no ruling is cited in this window; run docket governs <id> for the one you rely on.';
+    outLines.push('Governed here (' + shown(ledgerRel) + ', ' + shown(where) + '): ' + obj.notice);   // one line, as D7's addendum and FORMAT.md 15 say
+    return emitNear(input, argv, outLines.join('\n'), obj);
+  }
+  let list = Array.from(byId.values());
+  // Every level FORMAT.md 15 names is a key. Count is NOT a key of the single-match order: a ruling
+  // cited many times but never near the edit does not outrank one cited once beside it (D2, nearest first).
+  if (mode === 'one') list.sort((a, b) => a.dist - b.dist || a.nl - b.nl || a.nc - b.nc);
+  else if (mode === 'many') list.sort((a, b) => b.count - a.count || a.dist0 - b.dist0 || a.nl0 - b.nl0 || a.nc0 - b.nc0); // D7
+  else list.sort((a, b) => b.count - a.count || a.first - b.first || a.col - b.col);           // whole file: by count
+  const total = list.length;
+  list = list.slice(0, CAP);
+  const listed = new Set(list.map(x => x.id));
+  outLines.push('Governed here (' + shown(ledgerRel) + ', ' + shown(where) + '):');
+  for (const x of list) {
+    const r = ledger.byId.get(x.id);
+    outLines.push('  ' + named(r) + (r.issue !== null ? '  · issue #' + r.issue : ''));
+    obj.rulings.push({ id: r.id, title: r.title, issue: r.issue, count: x.count, line: x.first });
+  }
+  obj.more = Math.max(0, total - CAP);
+  if (total > CAP) outLines.push('  +' + (total - CAP) + ' more');                        // FORMAT.md 15; D14
+  const edges = [];
+  const seen = new Set();
+  const push = e => { const k = edgeKey(e); if (!seen.has(k)) { seen.add(k); edges.push(renderEdge(e)); } };
+  for (const x of list) {
+    const r = ledger.byId.get(x.id);
+    for (const e of r.edges) push(e);
+    for (const other of ledger.rulings) for (const e of other.edges) if (e.to === r.id) push(e);
+  }
+  // Each line beneath the list stops where the list does, for its reason — the hook's text is read at every edit — and names
+  // what it left out, as the list does (FORMAT.md 15, D2); --json carries every one
+  const capped = (items, sep) => items.length > CAP ? items.slice(0, CAP).join(sep) + sep + '+' + (items.length - CAP) + ' more' : items.join(sep);
+  if (edges.length) outLines.push('Edges among these: ' + capped(edges, '; ') + '.');
+  obj.edges = edges;
+  const withAdd = list.map(x => ledger.byId.get(x.id)).filter(r => r.addenda.length);
+  const datesOf = r => { const ds = r.addenda.map(a => a.date); return ds.length > CAP ? '+' + (ds.length - CAP) + ' earlier, ' + ds.slice(-CAP).join(', ') : ds.join(', '); };
+  const add = withAdd.map(r => r.id + ' (' + datesOf(r) + ')');
+  obj.addenda = withAdd.map(r => ({ id: r.id, dates: r.addenda.map(a => a.date) }));
+  if (add.length) outLines.push('Addenda: ' + add.join(', ') + '.');
+  if (specs.length) {
+    const sp = ledgerSpecs(ledger);
+    const seenS = new Set(), items = [];
+    for (const s of specs) {
+      const k = s.doc + ' §' + s.num;
+      if (seenS.has(k)) continue; seenS.add(k);
+      const doc = sp[s.doc];
+      const h = doc ? doc.heads.find(x => x.num === s.num) : null;
+      items.push(k + (h ? ' ' + h.title : ''));
+      obj.specCites.push({ doc: s.doc, num: s.num, title: h ? h.title : null });
+    }
+    outLines.push('Also cited: ' + capped(items, '; ') + '.');
+  }
+  outLines.push('Name the ruling you rely on before you edit.');
+  void listed;
+  return emitNear(input, argv, outLines.join('\n'), obj);
+}
+// The header names the ledger relative to the project root, which holds every ledger the walk finds (D44); with no
+// project root, relative to the ledger's git root, and absolute when there is none.
+function ledgerLabel(pr, lp) {
+  if (pr && !rel(pr, lp).startsWith('..')) return rel(pr, lp);
+  const g = gitRoot(path.dirname(lp));
+  return g ? rel(g, lp) : lp;
+}
+// --json prints the window as an object; when the input carries a hook event name, the text is wrapped in the
+// hook's dialect; otherwise plain text. Silence is silence in every dialect.
+function emitNear(input, argv, text, obj) {
+  if (argv.json) { out(JSON.stringify(obj, null, 2)); return 0; }
+  if (typeof input.hook_event_name === 'string' && input.hook_event_name) {
+    out(JSON.stringify({ hookSpecificOutput: { hookEventName: input.hook_event_name, additionalContext: text } }));
+  } else out(text);
+  return 0;
+}
+
+// ─── 6. index / query / governs / principles ────────────────────────────────
+
+function rulingJson(r) {
+  return { id: r.id, prefix: r.prefix, n: r.n, line: r.line, heading: r.heading, title: r.title, meta: r.meta, grounding: r.grounding,
+    issue: r.issue, principle: r.principle, edges: r.edges.map(e => ({ from: e.from, adverb: e.adverb, verb: e.verb, to: e.to, qualifier: e.qualifier, clause: e.clause, line: e.line })),
+    addenda: r.addenda, body: r.body };
+}
+function indexOf_(argv) {
+  const { root, ledger } = ledgerFromCwd(argv);
+  const sp = ledgerSpecs(ledger);
+  const obj = { ledger: rel(root, ledger.path), prefixes: ledger.prefixes, contractFrom: ledger.contractFrom, baseline: ledger.hasBaseline ? ledger.baseline : null,
+    rulings: ledger.rulings.map(rulingJson), sections: ledger.sections,
+    specs: ['UIUX', 'PRD'].flatMap(doc => sp[doc] ? sp[doc].heads.map(h => ({ doc, num: h.num, title: h.title, line: h.line })) : []) };
+  out(JSON.stringify(obj, null, 2));
+  return 0;
+}
+// A ruling as a line names it: its id and its title, or its id alone when its heading is only its parenthetical (FORMAT.md 3)
+function named(r) { return r.id + (r.title ? '  ' + r.title : ''); }
+function inEdges(ledger, id) { const r = []; for (const o of ledger.rulings) for (const e of o.edges) if (e.to === id) r.push(e); return r; }
+// D3: the edges with their clauses, in and out; no status is computed for any ruling.
+function printRuling(ledger, r, lines) {
+  lines.push(named(r) + (r.issue !== null ? '  · issue #' + r.issue : '') + '  (' + path.basename(ledger.path) + ':' + r.line + ')');
+  for (const e of r.edges) lines.push('  → ' + renderEdge(e) + '  — "' + e.clause + '"');
+  for (const e of inEdges(ledger, r.id)) lines.push('  ← ' + renderEdge(e) + '  — "' + e.clause + '"');
+  for (const a of r.addenda) lines.push('  > Addendum ' + a.date + ': ' + a.text);
+}
+// Every ruling any term matches — its id, or a substring of its heading or body, case folded, canonically equivalent text read
+// as one text (NFC: é as one code point and as e with a combining acute are one word) — once each, in the ledger's order: the
+// intake runs it with the nouns of an answer (RULE.md 4, D4's addendum)
+function query(argv) {
+  const terms = argv._.slice(1);
+  if (!terms.length) die('usage: docket query <term>…', 2);
+  if (terms.some(t => !t.trim())) die('query: a term is empty or blank, and would match every ruling; name a word', 2);
+  const { ledger } = ledgerFromCwd(argv);
+  const fold = s => s.normalize('NFC').toLowerCase();
+  const ts = terms.map(fold);
+  const hits = ledger.rulings.filter(r => ts.some(t => fold(r.id) === t || fold(r.heading).includes(t) || fold(r.body).includes(t)));
+  if (argv.json) { out(JSON.stringify(hits.map(r => Object.assign(rulingJson(r), { inEdges: inEdges(ledger, r.id).map(e => ({ from: e.from, verb: e.verb, adverb: e.adverb, to: e.to, qualifier: e.qualifier, clause: e.clause })) })), null, 2)); return 0; }
+  const lines = [];
+  if (!hits.length) lines.push('no ruling matches ' + terms.map(t => '"' + t + '"').join(', ') + ' in ' + path.basename(ledger.path));
+  for (const r of hits) printRuling(ledger, r, lines);
+  out(lines.join('\n'));
+  return 0;
+}
+// FORMAT.md 12: an id resolves exactly; failing that, whatever its case, when that is unambiguous.
+function resolveRuling(ledger, id) {
+  const exact = ledger.byId.get(id);
+  if (exact) return { r: exact };
+  const same = ledger.rulings.filter(x => x.id.toLowerCase() === String(id).toLowerCase());
+  if (same.length === 1) return { r: same[0] };
+  if (same.length > 1) return { r: null, ambiguous: same.map(x => x.id) };
+  return { r: null };
+}
+// A ruling's reason as the judge's step 4 reads it (D24): from the `Reason:` that begins its sentence, as check 6 reads it, to
+// the end of its line, outside code spans and fenced blocks, and outside addenda; null for an entry that states none.
+function reasonOf(r) {
+  const fenced = fencedLines(r.bodyLines);
+  for (let k = 0; k < r.bodyLines.length; k++) {
+    const l = r.bodyLines[k];
+    if (fenced[k] || ADDENDUM_RE.test(l)) continue;
+    const at = reasonAt(maskCode(l));
+    if (at >= 0) return l.slice(at).trim();
+  }
+  return null;
+}
+// Several ids print several blocks, each as one id prints it, a blank line between (D30): a judge whose turns a host
+// caps reads every ruling the touched regions cite in one command.
+function governs(argv) {
+  const ids = argv._.slice(1);
+  if (!ids.length) die('usage: docket governs <id> [<id>…]', 2);
+  const { root, ledger } = ledgerFromCwd(argv);
+  const rs = ids.map(id => {
+    const res = resolveRuling(ledger, id);                              // an id is a name, and a name is read whatever its case, as query reads one
+    if (res.ambiguous) die('no ruling ' + id + ' in ' + rel(root, ledger.path) + '; ' + res.ambiguous.join(' and ') + ' differ only in case — name one exactly', 2);
+    if (!res.r) die('no ruling ' + id + ' in ' + rel(root, ledger.path), 2);
+    return res.r;
+  });
+  const ctx = loadContext(root);
+  const all = codeCites(ctx, ledger);
+  if (argv.json) {
+    const objs = rs.map(r => { const cites = all.filter(c => c.id === r.id); return { ruling: rulingJson(r), reason: reasonOf(r), outEdges: r.edges, inEdges: inEdges(ledger, r.id), addenda: r.addenda, cites: cites.map(c => ({ file: c.rel, line: c.line, text: c.text.trim() })) }; });
+    out(JSON.stringify(objs.length === 1 ? objs[0] : objs, null, 2));
+    return 0;
+  }
+  out(rs.map(r => governsBlock(root, ledger, r, all.filter(c => c.id === r.id))).join('\n\n'));
+  return 0;
+}
+function governsBlock(root, ledger, r, cites) {
+  const ins = inEdges(ledger, r.id);
+  const lines = [];                                                    // D3: an edge list, never a status
+  lines.push(named(r) + (r.issue !== null ? '  · issue #' + r.issue : '') + '  (' + rel(root, ledger.path) + ':' + r.line + ')');
+  const why = reasonOf(r);
+  if (why) lines.push(why);                                            // the premise the judge's step 4 asks after
+  lines.push('Out-edges (what ' + r.id + ' does to earlier rulings):');
+  if (!r.edges.length) lines.push('  none'); for (const e of r.edges) lines.push('  ' + renderEdge(e) + '  — "' + e.clause + '"');
+  lines.push('In-edges (what later rulings do to ' + r.id + '):');
+  if (!ins.length) lines.push('  none'); for (const e of ins) lines.push('  ' + renderEdge(e) + '  — "' + e.clause + '"');
+  lines.push('Addenda:');
+  if (!r.addenda.length) lines.push('  none'); for (const a of r.addenda) lines.push('  ' + a.date + ': ' + a.text);
+  lines.push('Code cites:');
+  if (!cites.length) lines.push('  none'); for (const c of cites) lines.push('  ' + shown(c.rel) + ':' + c.line + '  ' + glance(c.text.trim()));
+  return lines.join('\n');
+}
+function principles(argv) {
+  const { root, ledger } = ledgerFromCwd(argv);
+  const p = principlesOf(ledger);
+  if (argv.json) { out(JSON.stringify({ source: p.source ? rel(root, p.source) : null, list: p.list, skipped: p.skipped || [] }, null, 2)); return p.list.length ? 0 : 1; }   // one exit code for both branches (FORMAT.md 10)   // paths in JSON are root-relative, as everywhere else
+  if (!p.list.length) { out('no principles list found (the first section of PRD.md, or the ledger preamble)'); return 1; }
+  out(p.list.map(x => x.text).join('\n'));
+  for (const li of (p.skipped || [])) out('info  ' + (p.source ? rel(root, p.source) : 'the preamble') + ':' + li + ': an item with no bolded name — no principle to cite (FORMAT.md 10)');
+  return 0;
+}
+
+// ─── 7. check: the seven checks ─────────────────────────────────────────────
+
+function flag(argv, name) { const i = argv.raw.indexOf(name); return i >= 0 && i + 1 < argv.raw.length ? argv.raw[i + 1] : null; }
+function has(argv, name) { return argv.raw.includes(name); }
+
+// The success line (FORMAT.md 8): the governed tree counts every file that resolves to a ledger, an entry-less ledger's among
+// them, and those are said apart in the same line, so the count never calls governed what the info line above it calls ungoverned.
+function checkOk(ctx) {
+  const nl = ctx.ledgers.size, nf = ctx.files.length;
+  const empty = [...ctx.ledgers].filter(([, l]) => !l.rulings.length).map(([lp]) => lp);
+  const idle = ctx.files.filter(e => empty.includes(e.ledger) && e.path !== e.ledger).length;
+  return 'check: ok (' + nl + ' ledger' + (nl === 1 ? '' : 's') + ', ' + nf + ' governed-tree file' + (nf === 1 ? '' : 's')
+    + (empty.length ? '; ' + empty.length + ' with no entries, ' + idle + ' file' + (idle === 1 ? '' : 's') + ' under ' + (empty.length === 1 ? 'it' : 'them') + ' ungoverned' : '') + ')';
+}
+// Returns { failures: [{file, line, k, message}], info: [string] } for every ledger under root.
+function runCheck(root, opts) {
+  opts = opts || {};
+  const ctx = opts.ctx || loadContext(root);
+  const failures = [], info = [];
+  const drifted = new Set((ctx.files || []).filter(e => e.drifted).map(e => e.path));
+  const fail = (file, line, k, message) => failures.push({ file: rel(root, file), line, k, message: drifted.has(file) ? message + vendorAgain(root, file) : message });
+  for (const v of ctx.vendored || []) info.push(v + ': the vendored witness, a copy of this program — not read as a governed file (D9)');
+  for (const [lp, ledger] of ctx.ledgers) {
+    const files = ctx.files.filter(e => e.ledger === lp);
+    const sp = ledgerSpecs(ledger);
+    // FORMAT.md 1: a ledger with no entries governs nothing — its subtree is ungoverned, none of the seven checks runs
+    // on its files, and the docket says so. Check 7 still reads the ledger itself: emptying a committed ledger removes entries.
+    const empty = ledger.rulings.length === 0;
+    const under = files.filter(e => e.path !== lp).length;             // the subtree's files, the ledger itself aside
+    if (empty) info.push(rel(root, lp) + ': no entries; its subtree is ungoverned and no check runs on its ' + under + ' file' + (under === 1 ? '' : 's'));
+    // what the grammar reads where a reader might not, said and never failed: each is the grammar's own reading, and a committed
+    // ledger could not mend it (D3's addendum)
+    const fencedAll = fencedLines(ledger.lines);
+    for (const r of ledger.rulings) {
+      if (fencedAll[r.line - 1]) info.push(rel(root, lp) + ':' + r.line + ': ' + r.id + '\'s heading lies inside a fenced block and opens an entry all the same — a fence quotes cites, not headings; a heading shown as an example is indented four spaces (FORMAT.md 8)');
+      if (!r.title && !(ledger.contractFrom[r.prefix] !== undefined && r.n >= ledger.contractFrom[r.prefix])) info.push(rel(root, lp) + ':' + r.line + ': ' + r.id + '\'s heading has no title before its parenthetical, so it is named by its id alone (FORMAT.md 3)');
+      for (const a of r.addenda) if (!calendarDay(a.date)) info.push(rel(root, lp) + ':' + a.line + ': ' + r.id + '\'s addendum is dated ' + a.date + ', which names no day of the calendar; it is read as written, its place among the ledger\'s dates that of its digits (FORMAT.md 6)');
+      r.bodyLines.forEach((l, k) => { if (!fencedAll[r.line + k] && /^#{2,3} /.test(l)) info.push(rel(root, lp) + ':' + (r.line + 1 + k) + ': "' + glance(plain(l.trim())) + '" is no section and no entry heading, so it ends nothing: it and the lines below it, to the next entry heading or section, are ' + r.id + '\'s body (FORMAT.md 2, 7)'); });
+    }
+    // 1. every cite names a ruling that exists
+    for (const e of empty ? [] : files) {
+      const t = fileText(e);
+      // the contract line's number is the directive's own: the first entry it binds, which may not be written yet (FORMAT.md 11)
+      const own = c => e.path === lp && ledger.contractFromLine[c.prefix] === c.line && ledger.contractFrom[c.prefix] === c.n;
+      for (const c of citesIn(t, ledger)) if (!c.exists && !own(c)) fail(e.path, c.line, 1, 'cite ' + c.id + ' names no ruling in ' + rel(root, lp));
+      // a fence never closed quotes every line after it, cites included (FORMAT.md 8): in the ledger check 2 fails it; in any
+      // other file the rule reads it so, and the line that opened it is named, so what it quotes is never quoted unseen
+      if (e.path !== lp) {
+        const fl = splitLines(t).map((l, i) => (/^\s*```/.test(l) ? i + 1 : 0)).filter(Boolean);
+        if (fl.length % 2 === 1) info.push(rel(root, e.path) + ':' + fl[fl.length - 1] + ': a fence opened here is never closed; every line after it is quoted, cites included (FORMAT.md 8)');
+      }
+    }
+    // 2. numbering contiguous per prefix, in order of appearance
+    const seenN = Object.create(null);                                 // keyed by prefix, which may be any letters
+    for (const r of ledger.rulings) {
+      const expect = (seenN[r.prefix] || 0) + 1;                       // FORMAT.md 12: each number is its position
+      if (r.n !== expect) fail(lp, r.line, 2, 'numbering: ' + r.id + ' is entry ' + expect + ' of the ' + r.prefix + ' entries; expected ' + r.prefix + expect);
+      seenN[r.prefix] = expect;                                        // the position advances, whatever the number said
+    }
+    for (const r of ledger.rulings) {                                  // FORMAT.md 2: an entry is read, so it carries nothing that changes what a reader sees
+      for (const [li, text] of [[r.line, r.heading]].concat(r.bodyLines.map((b, k) => [r.line + 1 + k, b]))) {
+        const m = UNSAFE_RE.exec(text);
+        if (m) { fail(lp, li, 2, r.id + ': the text carries ' + unsafeName(m[0]) + ', which changes what a reader is shown without changing what is written (FORMAT.md 2)'); break; }
+      }
+    }
+    // D39: a ledger with no entries holds no line that begins "### ", fenced or not — a fence quotes cites, not headings, and
+    // a fenced entry heading still opens an entry (FORMAT.md 8). One that does reads as though it rules and rules nothing: its
+    // headings fail the grammar (FORMAT.md 2), or a bare CR began them, and a bare CR ends no line here (FORMAT.md 1). For this
+    // one question its lines are read as its author ended them, a bare CR ending one; a ledger meant to govern nothing holds
+    // no such line, and keeps its info line.
+    if (empty) {
+      const starts = [0]; for (const m of ledger.text.matchAll(/\r\n|\n|\r/g)) starts.push(m.index + m[0].length);
+      const seen = ledger.text.split(/\r\n|\n|\r/);
+      const at = seen.map((l, i) => (l.startsWith('### ') ? i : -1)).filter(i => i >= 0);
+      if (at.length) {
+        const s0 = starts[at[0]], viaCr = s0 > 0 && ledger.text[s0 - 1] === '\r';
+        const line = (ledger.text.slice(0, s0).match(/\n/g) || []).length + 1;   // the line this reader numbers it on
+        fail(lp, line, 2, 'no entries, yet ' + at.length + (at.length === 1 ? ' line begins' : ' lines begin') + ' "### ", the first "### ' + seen[at[0]].slice(4).split(/[ \t]/)[0] + '"' +
+          (viaCr ? ' after a bare CR, which ends no line here (FORMAT.md 1)' : ', not an entry heading (FORMAT.md 2)') +
+          ': a ledger with no entries governs nothing, and one meant to govern nothing holds no such line (D39)');
+      } else {
+        const other = seen.map((l, i) => (OTHER_HEADING_RE.test(l) ? i : -1)).filter(i => i >= 0);
+        if (other.length) {
+          const line = (ledger.text.slice(0, starts[other[0]]).match(/\n/g) || []).length + 1;
+          fail(lp, line, 2, 'no entries, yet ' + other.length + (other.length === 1 ? ' line reads' : ' lines read') + ' as an entry heading in another form, the first "' + glance(seen[other[0]].trim()) + '"; an entry heading is "### <P><n>. <title>" (FORMAT.md 2): a ledger with no entries governs nothing, and one meant to govern nothing holds no such line (D39, D45)');
+        }
+      }
+    }
+    // D45: a ledger is UTF-8 text; one saved as UTF-16, or holding a NUL byte, reads as no entries at all and would pass as
+    // ungoverned — it fails here, at its first line, named
+    { let b = null; try { b = fs.readFileSync(lp); } catch (e) { b = null; }
+      if (b && ((b[0] === 0xFF && b[1] === 0xFE) || (b[0] === 0xFE && b[1] === 0xFF) || b.includes(0))) fail(lp, 1, 2, 'the ledger is not UTF-8 text' + ((b[0] === 0xFF && b[1] === 0xFE) || (b[0] === 0xFE && b[1] === 0xFF) ? ' — a UTF-16 byte order mark opens it' : ' — it holds a NUL byte') + '; save it as UTF-8 (FORMAT.md 1, D45)');
+      else { const bad = b && badUtf8(b);                               // a byte that begins no UTF-8 character: read as U+FFFD, where it stands (D45's addendum)
+        if (bad) fail(lp, bad.line, 2, 'the ledger is not UTF-8 text — byte ' + bad.byte + ' begins no UTF-8 character; save it as UTF-8 (FORMAT.md 1, D45)'); } }
+    for (const e of empty ? [] : files) {                              // a spec cite with its space missing is a typo named, not a bare cite counted (FORMAT.md 8)
+      const ls = splitLines(fileText(e)), fenced = fencedLines(ls);
+      ls.forEach((l, i) => {
+        if (fenced[i]) return;
+        for (const g of maskCode(l).matchAll(GLUED_CITE_RE)) fail(e.path, i + 1, 3, g[1] + '\u00a7' + g[2] + ' is written without the space the grammar reads; a spec cite is "' + g[1] + ' \u00a7' + g[2] + '"');
+      });
+    }
+    // 3. every UIUX §x / PRD §x cite resolves
+    for (const e of empty ? [] : files) {
+      for (const c of specCitesIn(fileText(e))) {
+        const doc = sp[c.doc];
+        if (!doc) fail(e.path, c.line, 3, c.doc + ' §' + c.num + ' cited but no ' + c.doc + '.md sits beside ' + rel(root, lp));
+        else if (!doc.heads.some(h => h.num === c.num)) fail(e.path, c.line, 3, c.doc + ' §' + c.num + ' names no heading in ' + rel(root, doc.path));
+      }
+    }
+    // 4. bare-§ ratchet — its baseline first: a second comment or a malformed pair (FORMAT.md 9)
+    for (const f of ledger.directiveFaults) if (f.k === 4) fail(lp, f.line, 4, f.message);
+    if (ledger.hasBaseline && !empty) {                                // a key naming no file this ledger governs counts nothing: said, not failed
+      const named = new Set(files.map(e => rel(ledger.home, e.path)));
+      for (const k of Object.keys(ledger.baseline)) if (!named.has(k)) info.push(rel(root, lp) + ':' + ledger.baselineLine + ': the bare-cites baseline lists ' + k + ', which is no file this ledger governs; its allowance counts nothing (FORMAT.md 9)');
+    }
+    for (const e of empty ? [] : files) {
+      if (isSpecDoc(e, ledger)) continue;
+      const n = bareCitesIn(fileText(e));
+      if (n === 0) continue;
+      const key = rel(ledger.home, e.path);
+      if (ledger.hasBaseline) {
+        const allow = ledger.baseline[key] || 0;
+        if (n > allow) fail(e.path, firstBareLine(fileText(e)), 4, 'bare-§ cites: ' + n + ' > allowance ' + allow + ' for ' + key);
+      } else info.push(rel(root, e.path) + ': ' + n + ' bare-§ cites (no baseline in ' + rel(root, lp) + '; reported, not failed)');
+    }
+    // 5. edges target earlier rulings, never the source itself
+    for (const r of ledger.rulings) {
+      for (const ed of r.edges) {
+        const t = ledger.byId.get(ed.to);
+        if (!t) fail(lp, ed.line, 5, 'edge ' + renderEdge(ed) + ': ' + ed.to + ' does not exist');
+        else if (!(t.line < r.line)) fail(lp, ed.line, 5, 'edge ' + renderEdge(ed) + ': ' + (t.id === r.id ? 'a ruling may not name itself' : ed.to + ' is defined later (line ' + t.line + ') than ' + r.id + ' (line ' + r.line + ')'));   // strictly earlier: a self-edge is not earlier
+      }
+    }
+    // 6. header contract for entries bound by the contract line — the line itself first (FORMAT.md 11)
+    for (const f of ledger.directiveFaults) if (f.k === 6) fail(lp, f.line, 6, f.message);
+    for (const pfx of empty ? [] : Object.keys(ledger.contractFrom)) { // a contract for a prefix no entry uses binds nothing, and a typo is exactly that (FORMAT.md 11, 12)
+      if (!ledger.prefixes.includes(pfx)) fail(lp, ledger.contractFromLine[pfx] || 1, 6, 'the contract line names prefix ' + pfx + ', which no entry uses' + (ledger.prefixes.length ? ' — this ledger\'s prefixes are ' + ledger.prefixes.join(', ') : '') + '; it binds nothing');
+    }
+    const prin = principlesOf(ledger);
+    for (const li of (prin.skipped || [])) info.push(rel(root, prin.source || lp) + ':' + li + ': an item with no bolded name in the principles list — no principle to cite (FORMAT.md 10)');
+    if (prin.ambiguous) fail(lp, prin.ambiguous[1], 6, 'two lines name Principles and each is followed by a list (lines ' + prin.ambiguous.join(' and ') + '); the preamble carries one principles list (FORMAT.md 10)');
+    for (const r of ledger.rulings) {
+      const from = ledger.contractFrom[r.prefix];
+      if (from === undefined || r.n < from) continue;
+      const { meta, end } = metaOf(r.heading);
+      if (!r.title) fail(lp, r.line, 6, r.id + ': title is empty — a bound entry is named in words (FORMAT.md 3, 11)');
+      if (!meta || end !== r.heading.length - 1) fail(lp, r.line, 6, r.id + ': heading does not end with a parenthetical meta');
+      const clauses = meta && end === r.heading.length - 1 ? clausesOf(meta) : [];
+      if (meta && end === r.heading.length - 1) {
+        if (!clauses.length || isEdgeClause(clauses[0])) fail(lp, r.line, 6, r.id + ': meta must open with a grounding (issue #n or a context), not an edge');
+        for (const c of clauses.slice(1)) if (!isEdgeClause(c)) fail(lp, r.line, 6, r.id + ': meta clause is not an edge: "' + c + '"');
+      }
+      if (r.principleLines.length > 1) fail(lp, r.line, 6, r.id + ': ' + r.principleLines.length + ' "Principle:" lines (' + r.principleLines.map(n => 'line ' + n).join(', ') + '): an entry names one principle, and two leave the reader to guess (FORMAT.md 11)');
+      else if (!r.principle) fail(lp, r.line, 6, r.id + (r.principleLines.length ? ': its "Principle:" line names no principle' : ': no "Principle:" line'));
+      else if (!prin.list.length) fail(lp, r.line, 6, r.id + ': names a principle but no principles list was found');
+      else if (!principleNamed(prin.list, r.principle)) fail(lp, r.line, 6, r.id + ': principle "' + r.principle + '" is not in the list (' + prin.list.map(p => p.name).join(' · ') + ')');
+      if (!r.hasReason) fail(lp, r.line, 6, r.id + (r.mentionsReason ? ': body states no reason: its "Reason:" begins no sentence, or nothing follows it (FORMAT.md 11)' : ': body has no "Reason:"'));   // quoted in code, it is not stated (FORMAT.md 5)
+    }
+    // 7. append only: existing headings and bodies unchanged vs the committed ledger
+    // FORMAT.md 8: a fence quotes everything to the next fence line; one never closed quotes the rest of the ledger,
+    // cites included, and check 1, 3 and 4 would read none of it. The fault is the fence, and it is named.
+    const fenceAt = ledger.lines.map((l, i) => (/^\s*```/.test(l) ? i + 1 : 0)).filter(Boolean);
+    if (fenceAt.length % 2 === 1) fail(lp, fenceAt[fenceAt.length - 1], 2, 'a fence opened here is never closed; every line after it is read as code, cites included (FORMAT.md 8)');
+    let skipSaid = false;                                              // a skip committedText names itself is not said twice
+    const committed = committedText(root, lp, ledger.text, (m, skip) => { skipSaid = skipSaid || !!skip; info.push(rel(root, lp) + ': check 7 ' + m); });
+    if (committed === null && !skipSaid) info.push(rel(root, lp) + ': check 7 skipped — no earlier version to compare (the ledger is not yet committed, or the revision compared with has no such file: a first commit, or the commit that added it)');   // FORMAT.md 13: the skip is said, not silent
+    if (committed !== null) {
+      const old = parseLedger(committed, lp);
+      for (const o of old.rulings) {
+        const cur = ledger.byId.get(o.id);
+        if (!cur) { fail(lp, o.line, 7, o.id + ' was removed (append only)'); continue; }
+        if (cur.heading !== o.heading) fail(lp, cur.line, 7, o.id + ': heading changed (append only): "' + o.heading + '" → "' + cur.heading + '"');
+        if (!bodyOnlyAppended(o.bodyLines, cur.bodyLines)) fail(lp, cur.line, 7, o.id + ': body changed other than by appended addendum lines (append only)');
+      }
+      // The preamble's directives are held as the entries are (D41): a contract line binds from where it was written, and does
+      // not move or go; the bare-cites comment, once committed, does not go, and an allowance may fall but rises only when an
+      // entry written since carries its new pair — the ratchet is loosened on the record, with its reason, or not at all
+      for (const p of Object.keys(old.contractFrom)) {
+        const was = p + old.contractFrom[p], now = ledger.contractFrom[p] === undefined ? null : p + ledger.contractFrom[p];
+        if (now === null) fail(lp, 1, 7, 'the contract line for ' + p + ', from ' + was + ', is gone; the preamble\'s directives are held as its entries are (D41)');
+        else if (now !== was) fail(lp, ledger.contractFromLine[p], 7, 'the contract line for ' + p + ' moved from ' + was + ' to ' + now + '; it binds from where it was written (D4, D41)');
+      }
+      if (old.hasBaseline) {
+        const since = ledger.rulings.filter(r => !old.byId.has(r.id));
+        // the pair as a word of its own: no path character before it, no digit after — `app.js=40` and `myapp.js=4` carry no `app.js=4`
+        const recorded = pair => { const re = new RegExp('(?:^|[\\s(\\[{,;:`\'"])' + escapeRe(pair) + '(?![0-9])'); return since.some(r => re.test(r.heading) || r.bodyLines.some(l => re.test(l))); };
+        if (!ledger.hasBaseline) fail(lp, 1, 7, 'the bare-cites comment is gone, and every allowance with it; an allowance may fall, and rises only on the record (FORMAT.md 9, D41)');
+        else for (const f of Object.keys(ledger.baseline)) {
+          const was = Object.prototype.hasOwnProperty.call(old.baseline, f) ? old.baseline[f] : 0, now = ledger.baseline[f];
+          if (now > was && !recorded(baselinePair(f, now))) fail(lp, ledger.baselineLine, 7, 'bare-cites allowance for ' + f + ' rose from ' + was + ' to ' + now + ' with no entry recording it: an entry written since carries ' + baselinePair(f, now) + ' (FORMAT.md 9, D41)');
+        }
+      }
+    }
+  }
+  // A ledger the compared revision has and the working tree lacks is the most complete amendment there is (D4); one git no
+  // longer tracks, struck from the index, is that amendment staged; and with no base named, a ledger HEAD's parent has and HEAD's
+  // own commit removed is that amendment committed — a check judges the commit it was given, as it does an entry (D4's addendum)
+  const groot = gitRoot(root);
+  if (groot) {
+    const base = baseRevision().base;
+    const rev = base && sh('git', ['rev-parse', '--verify', '-q', base + '^{commit}'], groot).status === 0 ? base : 'HEAD';
+    const ledgersAt = r => { const ls = sh('git', ['ls-tree', '-r', '--name-only', '-z', r], groot); return ls.status === 0 ? ls.stdout.split('\0').filter(p => /(^|\/)DECISIONS\.md$/.test(p)) : null; };   // -z: a name as it is, not quoted
+    const trackedNow = new Set(trackedFiles(groot) || []);
+    const atRev = ledgersAt(rev) || [];
+    for (const p of atRev) {
+      const full = path.join(groot, p);
+      if (!isWithin(full, path.resolve(root))) continue;
+      if (!isFile(full)) fail(full, 1, 7, 'the ledger is gone from the working tree (append only); ' + rev + ' has it');
+      else if (!trackedNow.has(full)) fail(full, 1, 7, 'the ledger is struck from the index (append only): git no longer tracks it, and ' + rev + ' has it');
+    }
+    if (rev === 'HEAD' || namesHead(rev, groot)) for (const p of ledgersAt('HEAD~1') || []) {
+      const full = path.join(groot, p);
+      if (atRev.includes(p) || !isWithin(full, path.resolve(root)) || trackedNow.has(full)) continue;
+      fail(full, 1, 7, 'HEAD\'s commit removed the ledger (append only); HEAD\'s parent has it');
+    }
+    // A ledger git does not track is read by none of the seven checks and reached by the hook's walk, so a pass would call a
+    // governed tree ungoverned: it fails check 7 as the struck one does, untracked, with the way out named (D54)
+    if (!ctx.untracked) for (const full of looseLedgers(groot)) {
+      if (!isWithin(full, path.resolve(root)) || ctx.ledgers.has(full)) continue;
+      fail(full, 1, 7, 'the ledger is untracked: check reads the files git tracks, and would pass this tree as ungoverned — git add it, or run with --untracked (D54)');
+    }
+    // Older than the tip: a ledger a commit before HEAD's parent removed, with none in the tree since. Read only where no ledger
+    // was read, so a tree that never held one is told from one that lost one, and reported once — the tip's rule above has
+    // named a removal at HEAD or at the base already (D54)
+    if (!ctx.ledgers.size) for (const g of removedLedgers(groot)) {
+      const full = path.join(groot, g.path);
+      if (!isWithin(full, path.resolve(root)) || failures.some(f => f.k === 7 && f.file === rel(root, full))) continue;
+      fail(full, 1, 7, 'the ledger was removed in ' + g.sha + ', and none stands in the tree since: a repository that held a ledger is not ungoverned by its removal (append only, D54)');
+    }
+  }
+  return { failures, info, ctx };
+}
+function firstBareLine(text) { const ls = splitLines(text), fenced = fencedLines(ls); for (let i = 0; i < ls.length; i++) { if (fenced[i]) continue; BARE_CITE_RE.lastIndex = 0; if (BARE_CITE_RE.test(maskCode(ls[i]))) return i + 1; } return 1; }
+function trimBlank(lines) { const a = lines.slice(); while (a.length && a[a.length - 1].trim() === '') a.pop(); return a; }
+function bodyOnlyAppended(oldLines, newLines) {
+  const o = trimBlank(oldLines), n = trimBlank(newLines);
+  if (n.length < o.length) return false;
+  for (let i = 0; i < o.length; i++) if (o[i] !== n[i]) return false;
+  return n.slice(o.length).every(l => l.trim() === '' || ADDENDUM_RE.test(l));
+}
+// The committed ledger for check 7: HEAD's, or HEAD's parent's when the ledger in the working tree already
+// equals HEAD's, so a check run on a fresh commit (as in CI) judges the commit it was given; null when no
+// such version exists, and then the check is skipped — or none can be read, a repository git will not read, and then the check is refused (D53).
+function normEol(s) { return s.replace(/\r\n/g, '\n'); }
+// DOCKET_BASE, when the environment names a revision (CI names the commit before the push), is the version compared
+// with: an amendment in the middle of a pushed range is then seen, where a tip-only comparison would miss it. Unset
+// or unreadable, the rule is HEAD's, or HEAD's parent's when the tree already equals HEAD; a revision the repository does
+// not hold — a force-push leaves the commit before it behind — is said in an info line, since the comparison it asked for
+// was not made. A revision it holds whose tree has no file of the ledger skips the check, and says so: nothing from
+// before the push is there to compare, and the tip's parent, inside the push, is not the comparison asked for.
+// Read as { base, refused }: the revision to compare with, or null; and, for a value that is set and names none, why —
+// which check 7's info line says, since the comparison it asked for was not made (FORMAT.md 13). All zeros is a CI's word
+// for no commit before a branch's first push; a revision holds no space, no control character and no colon — the core
+// reads <base>:<path> — and opens with no "-"; anything else is git's to resolve, a long branch name and a reflog's @{…}
+// among it, and one git does not hold is said as such.
+function baseRevision() {
+  const b = process.env.DOCKET_BASE;
+  if (b === undefined || b === '') return { base: null, refused: null };
+  if (/^0+$/.test(b)) return { base: null, refused: 'DOCKET_BASE is all zeros, a CI\'s word for no commit before a branch\'s first push' };
+  if (/[\s:\u0000-\u001f\u007f]/.test(b) || b.startsWith('-')) return { base: null, refused: 'DOCKET_BASE is ' + JSON.stringify(b) + ', which is no revision: a revision holds no space, no control character and no colon, and opens with no "-"' };
+  return { base: b, refused: null };
+}
+function namesHead(rev, groot) {
+  const a = sh('git', ['rev-parse', '--verify', '--quiet', rev + '^{commit}'], groot), h = sh('git', ['rev-parse', '--verify', '--quiet', 'HEAD^{commit}'], groot);
+  return a.status === 0 && h.status === 0 && a.stdout.trim() === h.stdout.trim();
+}
+function committedText(root, filePath, workingText, note) {
+  const groot = gitRoot(path.dirname(filePath)) || root;               // git resolves <rev>:<path> from the repository root, whatever the enumeration root is
+  const p = rel(groot, filePath);
+  const run = sh('git', ['--version'], groot);                         // a git that never started holds no version: said as that, not as a ledger never committed
+  if (run.error) { if (note) note('skipped — git could not be run (' + run.error + '), so no committed version of the ledger was read to compare', true); return null; }
+  // a repository git will not read — its ownership, its config — holds a committed ledger the check cannot read: `git show` fails
+  // there as it fails for a file no commit holds, and read as that, the check said the ledger was not yet committed and passed an
+  // entry rewritten there. Refused, as the gate is (FORMAT.md 16, D53): a skip is said only where there is nothing to compare
+  const unread = unreadRepo(path.dirname(filePath));
+  if (unread) throw Object.assign(new Error('git will not read the repository at ' + groot + ' — ' + unread + '; check 7 cannot read the committed ledger to compare, and a check that cannot run is refused, not skipped (FORMAT.md 13, 16, D53)'), { refusal: true });
+  const { base, refused } = baseRevision();
+  let why = refused, self = false;                                     // why a named base was not the one compared with: said beside what was
+  // a base that names HEAD itself would compare a clean commit with itself and witness nothing: read as unset, so the parent rule
+  // below applies, and said when that rule compares with the parent
+  if (base && namesHead(base, groot)) { self = true; why = 'DOCKET_BASE names HEAD itself, and a clean commit compared with itself witnesses nothing'; }
+  else if (base) {
+    const b = sh('git', ['show', base + ':' + p], groot); if (b.status === 0) return b.stdout;
+    if (sh('git', ['rev-parse', '--verify', '--quiet', base + '^{commit}'], groot).status !== 0) why = 'DOCKET_BASE names ' + base + ', which this repository does not hold';
+    else { if (note) note('skipped — DOCKET_BASE names ' + base + ', which has no such file, so no version from before the push is there to compare', true); return null; }   // FORMAT.md 13
+  }
+  const said = what => { if (why && note && !(self && what === 'HEAD')) note('compared with ' + what + ': ' + why); };
+  const none = what => { if (why && note && !self) note('skipped — ' + why + ', and ' + what + ' has no such file, so no earlier version is there to compare', true); return null; };
+  const head = sh('git', ['show', 'HEAD:' + p], groot);
+  if (head.status !== 0) return none('HEAD');
+  let working = workingText;                                           // the caller's own reading: one run holds one version of a ledger, the comparison included
+  if (working === undefined) { try { working = readText(filePath); } catch (e) { said('HEAD'); return head.stdout; } }
+  if (normEol(working) !== normEol(head.stdout)) { said('HEAD'); return head.stdout; }   // FORMAT.md 1: both sides normalised
+  const parent = sh('git', ['show', 'HEAD~1:' + p], groot);
+  if (parent.status !== 0) return none('HEAD\'s parent');
+  said('HEAD\'s parent'); return parent.stdout;
+}
+// --untracked: the tracked files and the untracked ones git does not ignore — the set the gate reads (FORMAT.md 1, D40), so a
+// judge scores a change on the files its diff holds; without it, the tracked files, which is what CI reads
+function readSet(root, argv) { return has(argv, '--untracked') ? { ctx: loadContext(root, { includeUntracked: true }) } : {}; }
+function check(argv) {
+  if (has(argv, '--ledger')) die('check: no --ledger option — check covers every ledger under the root (index, query, governs, principles, status, spec-check and append take --ledger)', 2);
+  const root = enumerationRoot(process.cwd());
+  const res = runCheck(root, readSet(root, argv));
+  if (argv.json) { out(JSON.stringify({ ok: res.failures.length === 0, failures: res.failures, info: res.info }, null, 2)); return res.failures.length ? 1 : 0; }
+  for (const f of res.failures) out(shown(f.file) + ':' + f.line + '  check ' + f.k + ': ' + f.message);
+  for (const i of res.info) out('info  ' + shown(i));
+  if (!res.failures.length) out(checkOk(res.ctx));
+  return res.failures.length ? 1 : 0;
+}
+
+// ─── 8. spec-check: token rows and contrast rows ────────────────────────────
+
+const HEX = '#(?:[0-9A-Fa-f]{8}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{3})(?![0-9A-Fa-f])';   // a CSS hex colour has 3, 4, 6 or 8 digits and no other count
+const TOKEN_ROW_RE = new RegExp('^\\|\\s*`(--[A-Za-z0-9_-]+)`\\s*\\|\\s*`(' + HEX + ')`\\s*\\|');
+const HEXISH_ROW_RE = /^\|\s*`(--[A-Za-z0-9_-]+)`\s*\|\s*`(#[^`]*)`\s*\|/;                                // a row shaped like a token row whose value opens with #
+// C0 and C1 controls except tab, and the characters that reorder what a terminal shows.
+// The C0 and C1 controls, and Unicode's bidi controls whole — U+061C, U+200E-U+200F, U+202A-U+202E, U+2066-U+2069 — the
+// characters that reorder what a terminal shows; and the characters that show nothing and are still written: the soft hyphen,
+// U+180E, the zero-width space, the line and paragraph separators, U+2060-U+2064, U+206A-U+206F, U+FEFF, U+FFF9-U+FFFB, and
+// the tag characters U+E0000-U+E007F, which spell text no reader sees. A zero-width joiner or non-joiner shapes the letters it
+// stands between, a Persian word or an emoji sequence, and is one of them only where it shapes nothing: beside an ASCII
+// character, a space, another joiner or the text's edge (FORMAT.md 13)
+const INVISIBLE = '\\u00ad\\u180e\\u200b\\u2028\\u2029\\u2060-\\u2064\\u206a-\\u206f\\ufeff\\ufff9-\\ufffb\\u{e0000}-\\u{e007f}';
+const LONE_JOINER = '(?<![^\\x00-\\x7f\\s\\u200c\\u200d])[\\u200c\\u200d]|[\\u200c\\u200d](?![^\\x00-\\x7f\\s\\u200c\\u200d])';
+const UNSAFE_RE = new RegExp('[\\u0000-\\u0008\\u000b-\\u001f\\u007f-\\u009f\\u061c\\u200e\\u200f\\u202a-\\u202e\\u2066-\\u2069' + INVISIBLE + ']|' + LONE_JOINER, 'u');
+const UNSAFE_RE_G = new RegExp(UNSAFE_RE.source, 'gu');
+const UNSAFE_NAME = { '\u00ad': 'SHY', '\u200b': 'ZWSP', '\u200c': 'ZWNJ', '\u200d': 'ZWJ', '\u2028': 'LS', '\u2029': 'PS', '\u2060': 'WJ', '\ufeff': 'ZWNBSP', '\u061c': 'ALM', '\u200e': 'LRM', '\u200f': 'RLM', '\u202a': 'LRE', '\u202b': 'RLE', '\u202c': 'PDF', '\u202d': 'LRO', '\u202e': 'RLO', '\u2066': 'LRI', '\u2067': 'RLI', '\u2068': 'FSI', '\u2069': 'PDI' };
+function unsafeName(ch) { return UNSAFE_NAME[ch] || 'U+' + ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0'); }
+// What a reader is shown never carries them, whatever a ledger holds: check says so, and until it is
+// fixed the text still reads straight.
+const UNSAFE_OUT_RE_G = new RegExp('[\\u0000-\\u0008\\u000b\\u000c\\u000e-\\u001f\\u007f-\\u009f\\u061c\\u200e\\u200f\\u202a-\\u202e\\u2066-\\u2069' + INVISIBLE + ']|' + LONE_JOINER, 'gu');
+function plain(t) { return String(t).replace(UNSAFE_OUT_RE_G, '\ufffd'); }
+// A name the repository holds — a file, a ledger — printed within a line: its own line breaks and tabs replaced too, which
+// plain() keeps since they shape the lines it prints, so a failure is one line whatever its file is called (FORMAT.md 13)
+function shown(s) { return String(s).replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g, '\ufffd'); }
+// An N:1 value (FORMAT.md 13): the 1 ends it — no digit, and no decimal point with a digit, after it — so 4.5:10 is not one
+const CONTRAST_RE = /(\d+(?:\.\d+)?):1(?!\d|\.\d)/;
+const CONTRAST_RE_ALL = /(\d+(?:\.\d+)?):1(?!\d|\.\d)/g;
+function hexToRgb(hex) {
+  let h = hex.replace('#', '');
+  if (h.length === 3 || h.length === 4) h = h.split('').map(c => c + c).join('');
+  const n = parseInt(h.slice(0, 6), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+// A colour, not its spelling (FORMAT.md 13): shorthand expanded, lower case, an opaque alpha dropped — #fff, #FFFFFF and
+// #ffffffff are one value, and a token row matches the declaration that says its colour however either writes it
+function colourOf(hex) { let h = hex.replace('#', '').toLowerCase(); if (h.length === 3 || h.length === 4) h = h.split('').map(c => c + c).join(''); return '#' + (h.length === 8 && h.endsWith('ff') ? h.slice(0, 6) : h); }
+function luminance(hex) {
+  const [r, g, b] = hexToRgb(hex).map(v => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+// A decimal as written, in hundredths, rounded half-up on its own digits: "1.005" is 101, where float arithmetic
+// on the value (1.005 * 100 = 100.49999…) would say 100 (FORMAT.md 13).
+function hundredths(s) {
+  const m = /^(\d+)(?:\.(\d*))?$/.exec(s);
+  if (!m) return NaN;
+  const frac = (m[2] || '') + '000';
+  return Number(m[1]) * 100 + Number(frac.slice(0, 2)) + (frac.charCodeAt(2) >= 0x35 ? 1 : 0);   // a third digit of 5 or more rounds up
+}
+function fixed2(h) { return Math.floor(h / 100) + '.' + String(h % 100).padStart(2, '0'); }
+function contrast(hexA, hexB) { const a = luminance(hexA), b = luminance(hexB); const [hi, lo] = a >= b ? [a, b] : [b, a]; return (hi + 0.05) / (lo + 0.05); }
+// The CSS a file holds: a style sheet whole; a page, the inside of its <style> elements and nothing else — markup, script
+// and the tags themselves blanked, so line numbers hold, and a <style> never closed runs to the end of the file, as an HTML
+// parser reads it; a style="…" attribute is not read (D56; FORMAT.md 13)
+function styleText(e) {
+  const t = fileText(e);
+  if (/\.css$/i.test(e.path)) return t;
+  const blank = s => s.replace(/[^\n]/g, ' ');
+  return t.replace(/(<style\b[^>]*>)([\s\S]*?)(<\/style\s*>|$)|[\s\S]/gi, (m, open, css, close) => open === undefined ? blank(m) : blank(open) + css + blank(close));
+}
+function runSpecCheck(root, ctx, onlyLedger) {
+  ctx = ctx || loadContext(root);
+  const failures = [], info = [];
+  let rows = 0;
+  for (const [lp, ledger] of ctx.ledgers) {
+    if (onlyLedger && lp !== onlyLedger) continue;
+    const docs = specDocs(lp);
+    if (!docs.uiux) continue;
+    if (!ledger.rulings.length) {                                      // FORMAT.md 1: no entries, nothing governed — the same exemption check makes, said the same way
+      info.push(rel(root, lp) + ': no entries; its subtree is ungoverned and spec-check reads no row beside it');
+      continue;
+    }
+    const specLines = splitLines(readText(docs.uiux));
+    const cssFiles = ctx.files.filter(e => e.ledger === lp && /\.(?:css|html?)$/i.test(e.path));   // a page's own <style> blocks are its CSS (D56; FORMAT.md 13)
+    const decls = new Map(); // token -> [{value, file, line}]
+    for (const e of cssFiles) splitLines(styleText(e).replace(/\/\*[\s\S]*?(?:\*\/|$)/g, m => m.replace(/[^\n]/g, ' '))).forEach((l, i) => {   // a comment is not a declaration, and one never closed runs to the end of the file, as CSS reads it; blanked, so line numbers hold
+      const re = new RegExp('(--[A-Za-z0-9_-]+)\\s*:\\s*(' + HEX + ')', 'g'); let m;
+      while ((m = re.exec(l)) !== null) { if (!decls.has(m[1])) decls.set(m[1], []); decls.get(m[1]).push({ value: m[2].toLowerCase(), file: e.path, line: i + 1 }); }
+    });
+    const specValue = new Map();
+    specLines.forEach((l, i) => {
+      const m = TOKEN_ROW_RE.exec(l);
+      if (!m) {
+        const h = HEXISH_ROW_RE.exec(l);                                // not a hex of 3, 4, 6 or 8 digits: the typo is named, not skipped
+        if (h) failures.push({ file: rel(root, docs.uiux), line: i + 1, k: 'a', message: h[1] + ' is ' + h[2] + ' in the spec, which is not a CSS hex colour (3, 4, 6 or 8 digits)' });
+        return;
+      }
+      rows++;
+      const token = m[1], hex = m[2].toLowerCase();
+      specValue.set(token, hex);
+      const d = decls.get(token);
+      if (!d) failures.push({ file: rel(root, docs.uiux), line: i + 1, k: 'a', message: token + ' is ' + hex + ' in the spec but is declared in no CSS file that resolves to ' + rel(root, lp) });
+      else if (!d.some(x => colourOf(x.value) === colourOf(hex))) failures.push({ file: rel(root, docs.uiux), line: i + 1, k: 'a', message: token + ' is ' + hex + ' in the spec but ' + d.map(x => x.value + ' at ' + rel(root, x.file) + ':' + x.line).join(', ') });
+      else for (const x of d) if (colourOf(x.value) !== colourOf(hex)) info.push(rel(root, docs.uiux) + ':' + (i + 1) + ': ' + token + ' is ' + hex + ' in the spec and one declaration matches; ' + x.value + ' at ' + rel(root, x.file) + ':' + x.line + ' is a second value (a theme, or a stray)');
+    });
+    const valueOf = t => specValue.get(t) || (decls.get(t) ? decls.get(t)[0].value : null);
+    specLines.forEach((l, i) => {
+      if (!/^\|/.test(l)) return;
+      const toksAll = uniq(Array.from(l.matchAll(/`(--[A-Za-z0-9_-]+)`/g)).map(m => m[1]));
+      const cm = CONTRAST_RE.exec(l);
+      if (!cm) {
+        // two tokens and no ratio the grammar reads: the row means to assert one and does not.
+        if (toksAll.length === 2 && /\d\s*(?::\s*\d|to\s+1\b)/.test(l)) { rows++; failures.push({ file: rel(root, docs.uiux), line: i + 1, k: 'b', message: toksAll.join(' on ') + ': the ratio is not written as <n>:1, so no ratio is read from this row' }); }
+        return;
+      }
+      const toks = toksAll;
+      if (toks.length === 0) return;                                   // a ratio in prose, no tokens: not a contrast row
+      rows++;
+      const allRatios = uniq((l.match(CONTRAST_RE_ALL) || []));
+      if (allRatios.length > 1) { failures.push({ file: rel(root, docs.uiux), line: i + 1, k: 'b', message: 'contrast row states ' + allRatios.join(' and ') + '; a row states one ratio, and the first is not a rule' }); return; }
+      if (toks.length !== 2) { failures.push({ file: rel(root, docs.uiux), line: i + 1, k: 'b', message: 'contrast row names ' + toks.length + ' tokens; a contrast row names exactly two' }); return; }
+      const a = valueOf(toks[0]), b = valueOf(toks[1]);
+      if (!a || !b) { failures.push({ file: rel(root, docs.uiux), line: i + 1, k: 'b', message: 'contrast row: no hex known for ' + (a ? toks[1] : toks[0]) }); return; }
+      // each hex read as its colour, as a token row reads it: an opaque alpha, ff, is the colour it spells (FORMAT.md 13)
+      const ca = colourOf(a), cb = colourOf(b);
+      for (const [tok, hx, c] of [[toks[0], a, ca], [toks[1], b, cb]]) if (c.length === 9) {   // an alpha short of opaque
+        failures.push({ file: rel(root, docs.uiux), line: i + 1, k: 'b', message: 'contrast row: ' + tok + ' is ' + hx + ', whose alpha channel is short of opaque; what it meets the eye as depends on what lies behind it, so a ratio cannot be recomputed from it' });
+        return;
+      }
+      const statedH = hundredths(cm[1]), gotH = Math.round(contrast(ca, cb) * 100);   // both in hundredths: the stated one from its digits, the computed one from its value
+      if (gotH !== statedH) failures.push({ file: rel(root, docs.uiux), line: i + 1, k: 'b', message: toks[0] + ' on ' + toks[1] + ' states ' + fixed2(statedH) + ':1 but the hexes give ' + fixed2(gotH) + ':1' });
+    });
+  }
+  return { failures, info, rows };
+}
+function specCheck(argv) {
+  const s = scope(argv);
+  const res = runSpecCheck(s.root, readSet(s.root, argv).ctx || null, has(argv, '--all') ? null : s.ledger);
+  if (argv.json) { out(JSON.stringify({ ok: res.failures.length === 0, rows: res.rows, info: res.info, failures: res.failures }, null, 2)); return res.failures.length ? 1 : 0; }
+  for (const f of res.failures) out(shown(f.file) + ':' + f.line + '  spec-check ' + f.k + ': ' + f.message);
+  for (const i of res.info) out('info  ' + shown(i));
+  if (!res.failures.length) out('spec-check: ok (' + res.rows + ' rows)');
+  return res.failures.length ? 1 : 0;
+}
+
+// ─── 9. append: entry, addendum, baseline (D4, D8) ──────────────────────────
+
+function flags(argv, name) { const r = []; for (let i = 0; i < argv.raw.length; i++) if (argv.raw[i] === name && i + 1 < argv.raw.length) r.push(argv.raw[i + 1]); return r; }
+// A CRLF ledger stays CRLF through every write (FORMAT.md 1): the line ending is read once, from the file.
+// Atomic within the directory: a reader sees the ledger before the write or after it, never half of it.
+function writeLedger(ledger, text) {
+  // a byte that begins no UTF-8 character was read as U+FFFD, and written back it would be three other bytes, in a line this entry
+  // does not touch: refused, the ledger unchanged (FORMAT.md 1; D4, D45's addendum)
+  { let b = null; try { b = fs.readFileSync(ledger.path); } catch (e) { b = null; }
+    const bad = b && badUtf8(b);
+    if (bad) die('append: ' + ledger.path + ' is not UTF-8 text — byte ' + bad.byte + ', on line ' + bad.line + ', begins no UTF-8 character; a write would rewrite it, in a line this entry does not touch, and the ledger is append only: save it as UTF-8 (FORMAT.md 1; D4, D45)', 2); }
+  const crlf = (ledger.text.match(/\r\n/g) || []).length, lf = (ledger.text.match(/(^|[^\r])\n/g) || []).length;
+  if (crlf && lf) die('append: ' + ledger.path + ' ends some lines with CRLF and some with LF; a write would have to give the whole file one ending, rewriting lines this entry does not touch, and the ledger is append only (FORMAT.md 1; D4)', 2);
+  if (crlf) text = text.replace(/\r?\n/g, '\r\n');
+  if (ledger.text.charCodeAt(0) === 0xFEFF && text.charCodeAt(0) !== 0xFEFF) text = '\uFEFF' + text;   // the mark it was saved with stays (FORMAT.md 1)
+  let target = ledger.path, mode = null;                              // a ledger that is a link is written where it points, and keeps its mode
+  try { target = fs.realpathSync(ledger.path); } catch (e) { target = ledger.path; }
+  try { mode = fs.statSync(target).mode & 0o7777; } catch (e) { mode = null; }
+  const tmp = target + '.docket-' + process.pid;
+  // a write the filesystem refuses — the directory read only, the file immutable, the disk full — is named with its code, and
+  // the new file taken away: the ledger is unchanged, and nothing is left beside it for check 1 to read as a second ledger
+  try { fs.writeFileSync(tmp, text); if (mode !== null) fs.chmodSync(tmp, mode); fs.renameSync(tmp, target); }
+  catch (e) { try { fs.unlinkSync(tmp); } catch (e2) { /* never written */ } die('append: ' + ledger.path + ' cannot be written (' + (e && e.code ? e.code : 'error') + '); the ledger is unchanged, and nothing is left beside it', 2); }
+}
+// A ledger that two sessions can append to at once is a ledger that can lose an entry: each would read the same last
+// id, compute the same next one, and the later write would carry the earlier one away while both callers were told the
+// entry was written. So a write command takes an exclusive lock beside the ledger and re-reads it inside the lock: the
+// id it computes is the id it writes (D4 — append, never amend; a record that can be rewritten proves nothing).
+const LOCK_WAIT_MS = 5000;
+// D14's addendum: at a session's start the tree is read within three and a half seconds of the core's start — the hook's five,
+// less the time to start, the base's lock wait (which comes first) and the time to print; DOCKET_START_MS, a test's hook,
+// replaces it. Past it the docket prints the ledger's own parts and names what it left unread.
+const START_READ_MS = 3500;
+let readBy = Infinity;                                                 // the moment, in ms since the core started, past which the tree is not read
+function inTime() { if (performance.now() > readBy) throw Object.assign(new Error('the session start\'s bound'), { startBound: true }); }
+function startReadMs() {
+  const v = process.env.DOCKET_START_MS;
+  if (v === undefined || v === '') return START_READ_MS;
+  if (!/^\d{1,7}$/.test(v)) die('DOCKET_START_MS is ' + JSON.stringify(v) + ', which is no whole number of milliseconds of seven digits at most (FORMAT.md 16)', 2);
+  return Number(v);
+}
+const SESSION_START_WAIT_MS = 1000;   // D14's addendum: a fifth of the session-start hook's five seconds; the rest are the docket's to print in
+// One lock rule for the ledger and the state: an exclusive file beside the one it guards, naming its holder, so a release
+// frees its own lock and no other, and a lock whose holder is gone — a run that was killed — is taken over. It waits up to
+// `ms`, and answers null when the lock is still held then.
+function takeLock(lockPath, ms) {
+  const mine = 'docket ' + process.pid + '\n';
+  let waited = 0;
+  for (;;) {
+    try { const fd = fs.openSync(lockPath, 'wx'); fs.writeSync(fd, mine); return { fd, mine }; }
+    catch (e) {
+      if (e.code !== 'EEXIST') throw e;
+      let holder = 0; try { holder = Number((/^docket (\d+)$/m.exec(fs.readFileSync(lockPath, 'utf8')) || [])[1]); } catch (e2) { /* released between the two calls: try again */ }
+      let alive = true; if (holder) { try { process.kill(holder, 0); } catch (e2) { alive = e2.code === 'EPERM'; } }
+      if (holder && !alive) { try { fs.unlinkSync(lockPath); } catch (e2) { /* another took it over first */ } continue; }
+      if (waited >= ms) return null;
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 25); waited += 25;   // a plain sleep, no dependency
+    }
+  }
+}
+function releaseLock(lockPath, lock) {
+  if (!lock) return;
+  try { fs.closeSync(lock.fd); } catch (e) { /* closed already */ }
+  try { if (fs.readFileSync(lockPath, 'utf8') === lock.mine) fs.unlinkSync(lockPath); } catch (e) { /* gone already */ }
+}
+function lockedLedger(argv) {
+  const scoped = ledgerFromCwd(argv);
+  const lockPath = scoped.ledger.path + '.lock';
+  let lock;
+  try { lock = takeLock(lockPath, LOCK_WAIT_MS); }
+  catch (e) { die('append: the lock ' + rel(scoped.root, lockPath) + ' cannot be made (' + (e && e.code ? e.code : 'error') + '); the ledger is unchanged', 2); }   // a directory that will not take the lock: named, never a stack
+  if (!lock) die('append: ' + rel(scoped.root, scoped.ledger.path) + ' is held by another append that has not finished; if none is running, remove ' + rel(scoped.root, lockPath), 2);
+  // Released once, and only while it is still ours: a second release at exit, after another append has
+  // taken the lock, would unlink that one's and let two writers read the same last id.
+  let released = false;
+  const release = () => { if (released) return; released = true; releaseLock(lockPath, lock); };
+  process.on('exit', release);                                        // die() exits, so the lock never outlives the command
+  return { root: scoped.root, ledger: loadLedger(scoped.ledger.path), release };
+}
+function ensureNl(s) { return s.endsWith('\n') ? s : s + '\n'; }
+// One verb may name several targets joined by "/" — the grammar reads it (5), so the writer produces it: one edge per target.
+function parseEdgeArg(s) {
+  const re = new RegExp('^(?:(' + caseHead(ADVERBS).join('|') + ')\\s+)?(' + caseHead(VERBS).join('|') + ')\\s+([A-Za-z]+\\d+(?:\\/[A-Za-z]+\\d+)*)(?:\\s*\\(([^()]*)\\))?$');
+  const m = re.exec(s.trim());
+  if (!m) return null;
+  return { adverb: (m[1] || '').toLowerCase(), verb: m[2].toLowerCase(), tos: m[3].split('/'), qualifier: m[4] || '' };
+}
+function appendEntry(argv) {
+  entryArgs(argv);                                                     // usage first, outside the lock
+  const { root, ledger, release } = lockedLedger(argv);
+  const entry = buildEntry(argv, root, ledger);
+  if (has(argv, '--dry-run')) return dryRun(argv, release, entry);
+  const text = (ledger.text.trim() ? ensureNl(ledger.text) + '\n' : '') + entry;   // an empty ledger opens with its entry, not with blank lines
+  writeLedger(ledger, text);
+  release();
+  return afterWrite(argv, root, ledger, entry);
+}
+// Everything append refuses, it refuses here, before any write; constitute builds its first entry through
+// this same function so a constitution cannot carry what a ruling could not.
+// The refusals that read the arguments alone: append makes them before it takes the ledger's lock, so a malformed call
+// never waits on the lock, or holds it, while another append needs it; buildEntry makes them again, for constitute
+function entryArgs(argv) {
+  const title = flag(argv, '--title'), issue = flag(argv, '--issue'), principle = flag(argv, '--principle'), body = flag(argv, '--body');
+  const edges = flags(argv, '--edge');
+  if (!title || !title.trim()) die('append: --title is required (one line, the ruling in a phrase)', 2);
+  if (/[\r\n\u2028\u2029]/.test(title)) die('append: --title is one line — a line break would open a second heading (FORMAT.md 2, 3)', 2);
+  if (!stripMarks(title.trim()).trim()) die('append: --title renders empty — marks alone are no title; give the ruling in words (FORMAT.md 3)', 2);
+  if (metaStart(title) >= 0) die('append: --title may not contain " (" outside a code span — the title rule would cut it there; put the parenthetical in the body', 2);   // the same reader as the title rule
+  if (!issue || !issue.trim()) die('append: --issue is required (an issue number, or a phrase naming the context the ruling answers)', 2);
+  if (/[\r\n\u2028\u2029]/.test(issue)) die('append: --issue is one line — the meta sits on the heading line (FORMAT.md 4)', 2);
+  if (/[;()]/.test(issue)) die('append: --issue may not contain ";", "(" or ")" — the meta is one parenthetical whose clauses are split on ";" (FORMAT.md 4)', 2);
+  if (isEdgeClause(issue.trim())) die('append: --issue "' + issue.trim() + '" reads as an edge; the meta opens with a grounding — an issue number or the context the ruling answers — and an edge goes in --edge (FORMAT.md 4, 11)', 2);
+  if (!principle || !principle.trim()) die('append: --principle is required (one of `docket principles`)', 2);
+  if (!body || !body.trim()) die('append: --body is required (the ruling in prose, with its Reason:)', 2);
+  for (const [name, v] of [['--title', title], ['--issue', issue], ['--principle', principle], ['--body', body]].concat(edges.map(e => ['--edge', e]))) {
+    const um = UNSAFE_RE.exec(v);                                      // check 2 would fail the entry for ever; it is refused before it is written
+    if (um) die('append: ' + name + ' carries U+' + um[0].codePointAt(0).toString(16).toUpperCase().padStart(4, '0') + ', a control, bidi or invisible character the ledger refuses (check 2); once written it could never be unwritten', 2);
+  }
+  if ((splitLines(body).filter(l => /^\s*```/.test(l)).length % 2) === 1) die('append: --body opens a fence it does not close; every line after it, in this entry and the next, would be read as code (FORMAT.md 8)', 2);
+
+  if (!assertsReason(splitLines(body))) die('append: --body must state the reason as a sentence beginning "Reason:" that says something after it (outside code spans and fenced blocks)', 2);
+  if (splitLines(body).some(l => ADDENDUM_RE.test(l))) die('append: --body may not carry an addendum line; an addendum is written by append --addendum and dated by the tool (FORMAT.md 6)', 2);
+  if (splitLines(body).some(isBoundary)) die('append: --body may not carry an entry or section heading line — a body opens no entry; the heading is the tool\'s to write (FORMAT.md 2, 7, 11)', 2);
+  { const bl = splitLines(body), bf = fencedLines(bl); if (bl.some((l, k) => !bf[k] && PRINCIPLE_LINE_RE.test(l))) die('append: --body may not carry a Principle: line; the tool writes it from --principle, and two would leave the reader to guess (FORMAT.md 11)', 2); }
+  return { title, issue, principle, body, edges };
+}
+function buildEntry(argv, root, ledger) {
+  const { title, issue, principle, body, edges } = entryArgs(argv);
+  const prin = principlesOf(ledger);
+  if (!prin.list.length) die('append: no principles list found (the first section of PRD.md, or a "Principles" list in the ledger preamble)', 2);
+  const pr = principleNamed(prin.list, principle);
+  if (!pr) die('append: principle "' + principle + '" is not one of: ' + prin.list.map(p => p.name).join(' · '), 2);
+  let prefix = flag(argv, '--prefix');
+  if (!prefix) prefix = ledger.rulings.length ? ledger.rulings[ledger.rulings.length - 1].prefix : null;
+  if (!prefix) die('append: --prefix is required for an empty ledger', 2);
+  if (!/^[A-Za-z]+$/.test(prefix)) die('append: --prefix must be letters', 2);
+  const n = ledger.rulings.filter(r => r.prefix === prefix).reduce((m, r) => Math.max(m, r.n), 0) + 1;
+  if (String(n).length > NUMERAL_MAX_DIGITS) die('append: the ' + prefix + ' entries end at ' + (n - 1) + ', the largest number the grammar allows (' + NUMERAL_MAX_DIGITS + ' digits); a further ruling needs a new prefix — pass --prefix (FORMAT.md 2, 12)', 2);
+  const selfId = prefix + n;                                           // the id this entry will receive
+  const parsedEdges = [], edgeKeys = new Set();
+  for (const e of edges) {
+    if (/[\r\n\u2028\u2029]/.test(e)) die('append: --edge "' + e.replace(/[\r\n]+/g, ' ') + '" is one line — the meta sits on the heading line (FORMAT.md 4)', 2);
+    const p = parseEdgeArg(e);
+    if (!p) die('append: --edge "' + e + '" is not "<verb> <id>" with a verb from: ' + VERBS.join(', '), 2);
+    if (/;/.test(p.qualifier)) die('append: --edge "' + e + '": a qualifier may not contain ";" — the meta\'s clauses are split on it (FORMAT.md 4)', 2);
+    p.tos = p.tos.map(to => {                                           // the target is read whatever its case, as governs reads one
+      const res = resolveRuling(ledger, to);
+      if (res.ambiguous) die('append: --edge "' + e + '" names ' + to + '; ' + res.ambiguous.join(' and ') + ' differ only in case — name one exactly', 2);
+      if (!res.r && to.toLowerCase() === selfId.toLowerCase()) die('append: --edge "' + e + '" names ' + selfId + ', the id this entry will receive — an edge from ' + selfId + ' to itself; a ruling may not name itself (FORMAT.md 5)', 2);
+      if (!res.r) die('append: --edge "' + e + '" names ' + to + ', which is not in ' + rel(root, ledger.path), 2);
+      return res.r.id;
+    });
+    const k = [p.adverb, p.verb, p.tos.join('/'), p.qualifier].join('|');
+    if (edgeKeys.has(k)) continue;                                      // the same edge given twice is one edge
+    edgeKeys.add(k); parsedEdges.push(p);
+  }
+  // The ledger is append only: an entry whose text names a ruling that does not exist is refused before it is written,
+  // not failed by check 1 after (FORMAT.md 8). The entry's own id may appear in its body.
+  const probe = parseLedger(ledger.text + '\n### ' + prefix + n + '. x\n', ledger.path);
+  for (const c of citesIn(title + '\n' + body, probe)) if (!c.exists) die('append: the entry names ' + c.id + ', which is not in ' + rel(root, ledger.path), 2);
+  for (const li of splitLines(body)) for (const ed of edgesIn(li, selfId, 0, false).filter(e => probe.prefixes.includes(e.toPrefix))) {   // an edge names a ruling of this ledger (FORMAT.md 8)
+    if (ed.to === selfId) die('append: --body says "' + ed.clause.trim() + '", which is an edge from ' + selfId + ' to itself; a ruling may not name itself (FORMAT.md 5), and once written the ledger could never stop failing check 5', 2);
+    if (!probe.byId.has(ed.to)) die('append: --body says "' + ed.clause.trim() + '", naming ' + ed.to + ', which is not in ' + rel(root, ledger.path), 2);
+  }
+  const grounding = /^#?\d+$/.test(issue.trim()) ? 'issue #' + issue.trim().replace('#', '') : issue.trim();
+  const metaParts = [grounding].concat(parsedEdges.map(e => (e.adverb ? e.adverb + ' ' : '') + e.verb + ' ' + e.tos.join('/') + (e.qualifier ? ' (' + e.qualifier + ')' : '')));   // one clause, the targets joined as the grammar reads them (5)
+  const entry = '### ' + prefix + n + '. ' + title.trim() + ' (' + metaParts.join('; ') + ')\n' + 'Principle: ' + pr.name + '.\n' + body.trim() + '\n';
+  refuseFailing(root, ledger, selfId, entry);
+  return entry;
+}
+// FORMAT.md 11: an entry append writes satisfies the header contract and adds no failure to check — the ledger is append only, so
+// what check would fail is refused before the write, read as check reads it, on the ledger as it would stand: the title, the
+// grounding and every edge's qualifier are the entry's text as much as its body is.
+function refuseFailing(root, ledger, selfId, entry) {
+  const before = ledger.text, after = (before.trim() ? ensureNl(before) + '\n' : '') + entry;
+  const parsed = parseLedger(after, ledger.path), r = parsed.byId.get(selfId), why = [];
+  if (!r) why.push('the entry would not read as ' + selfId + ' (FORMAT.md 2)');
+  else {
+    const { meta, end } = metaOf(r.heading);
+    if (!meta || end !== r.heading.length - 1) why.push('the heading would not end with its parenthetical meta — a code span or a parenthesis in --title or --issue runs into it (FORMAT.md 4, 11)');
+    else { const cl = clausesOf(meta); if (!cl.length || isEdgeClause(cl[0])) why.push('the meta would open with an edge, not a grounding (FORMAT.md 11)'); for (const c of cl.slice(1)) if (!isEdgeClause(c)) why.push('a meta clause would not be an edge: "' + c + '" (FORMAT.md 11)'); }
+  }
+  const run = (text, led) => runCheck(root, { ctx: { root, ledgers: new Map([[ledger.path, led]]), files: [{ path: ledger.path, ledger: ledger.path, rel: rel(root, ledger.path), text }], vendored: [] } }).failures;
+  const key = f => f.k + '|' + f.line + '|' + f.message, had = new Set(run(before, ledger).map(key));
+  for (const f of run(after, parsed)) if (f.k !== 7 && !had.has(key(f))) why.push('check ' + f.k + ', line ' + f.line + ': ' + f.message);
+  if (why.length) die('append: the entry would fail as written, and the ledger is append only, so nothing is written (FORMAT.md 11):\n  ' + uniq(why).join('\n  '), 2);
+}
+function afterWrite(argv, root, ledger, printed) {
+  const res = runCheck(root);
+  if (argv.json) { out(JSON.stringify({ written: printed, ok: res.failures.length === 0, failures: res.failures }, null, 2)); return res.failures.length ? 1 : 0; }
+  out(printed.trimEnd());
+  for (const f of res.failures) out(shown(f.file) + ':' + f.line + '  check ' + f.k + ': ' + f.message);
+  out(res.failures.length ? 'check: ' + res.failures.length + ' failure(s) — the ledger is written; fix before you rely on it' : 'check: ok');
+  return res.failures.length ? 1 : 0;
+}
+function appendAddendum(argv) {
+  const id = flag(argv, '--addendum'), text = flag(argv, '--text');
+  if (!text || !text.trim()) die('append: --text is required (why the entry\'s reason no longer holds, or what changed)', 2);   // usage first, outside the lock
+  const { root, ledger, release } = lockedLedger(argv);
+  const res = resolveRuling(ledger, id || '');                        // an id is read as governs and --edge read it (FORMAT.md 12)
+  if (res.ambiguous) die('append: --addendum ' + id + ' names ' + res.ambiguous.join(' and ') + ', which differ only in case — name one exactly', 2);
+  const r = res.r;
+  if (!r) die('append: --addendum ' + id + ' names no ruling in ' + rel(root, ledger.path), 2);
+  if (!text || !text.trim()) die('append: --text is required (why the entry\'s reason no longer holds, or what changed)', 2);
+  const um = UNSAFE_RE.exec(text);
+  if (um) die('append: --text carries U+' + um[0].codePointAt(0).toString(16).toUpperCase().padStart(4, '0') + ', a control, bidi or invisible character the ledger refuses (check 2); once written it could never be unwritten', 2);
+  for (const c of citesIn(text, ledger)) if (!c.exists) die('append: --text names ' + c.id + ', which is not in ' + rel(root, ledger.path), 2);
+  const lines = ledger.lines.slice();
+  let end = r.endLine;                       // index of the next heading line (exclusive end of the entry)
+  while (end > r.line && lines[end - 1].trim() === '') end--;
+  const line = '> Addendum ' + today() + ': ' + text.trim().replace(/\s*\n\s*/g, ' ');
+  lines.splice(end, 0, line);
+  // the ledger is append only: an addendum that would add a failure to check is refused before it is written, as an entry is
+  // (FORMAT.md 11, D4's addendum) — read as the ledger would stand, a failure's line number set aside, since the line moves
+  const after = ensureNl(lines.join('\n'));
+  const run = (t, led) => runCheck(root, { ctx: { root, ledgers: new Map([[ledger.path, led]]), files: [{ path: ledger.path, ledger: ledger.path, rel: rel(root, ledger.path), text: t }], vendored: [] } }).failures;
+  const key = f => f.k + '|' + f.message.replace(/\blines? \d+(?: and \d+)?\b/g, 'line'), had = new Map();
+  for (const f of run(ledger.text, ledger)) had.set(key(f), (had.get(key(f)) || 0) + 1);
+  const why = [];
+  for (const f of run(after, parseLedger(after, ledger.path))) { if (f.k === 7) continue; const n = had.get(key(f)) || 0; if (n > 0) had.set(key(f), n - 1); else why.push('check ' + f.k + ', line ' + f.line + ': ' + f.message); }
+  if (why.length) die('append: the addendum would fail as written, and the ledger is append only, so nothing is written (FORMAT.md 11):\n  ' + uniq(why).join('\n  '), 2);
+  if (has(argv, '--dry-run')) return dryRun(argv, release, line);
+  writeLedger(ledger, after);
+  return afterWrite(argv, root, ledger, line);
+}
+function rewriteBaseline(argv) {
+  const { root, ledger, release } = lockedLedger(argv);
+  const ctx = loadContext(root);
+  const counts = [];
+  for (const e of ctx.files) {
+    if (e.ledger !== ledger.path || isSpecDoc(e, ledger)) continue;
+    const n = bareCitesIn(fileText(e));
+    const p = rel(ledger.home, e.path);
+    if (n > 0) counts.push(baselinePair(p, n));
+  }
+  const comment = '<!-- docket: bare-cites' + (counts.length ? ' ' + counts.join(' ') : '') + ' -->';
+  const lines = ledger.lines.slice();
+  const pre = ledger.preambleLines.length;
+  let at = -1;
+  for (let i = 0; i < pre; i++) if (/<!--\s*docket:\s*bare-cites/.test(lines[i])) at = i;
+  if (at >= 0) lines[at] = comment; else lines.splice(pre, 0, comment, '');
+  if (has(argv, '--dry-run')) return dryRun(argv, release, comment);
+  writeLedger(ledger, ensureNl(lines.join('\n')));
+  return afterWrite(argv, root, ledger, comment);
+}
+// --dry-run, in any of append's three modes: everything the write refuses is refused, and what it would write — the entry, the
+// addendum's line, the baseline's comment — is printed as the write would print it, and nothing is written. The intake's confirm
+// block is this output, so the person confirms the bytes the write appends (FORMAT.md 11, D8's addendum).
+function dryRun(argv, release, text) {
+  release();
+  if (argv.json) { out(JSON.stringify({ wouldWrite: text }, null, 2)); return 0; }
+  out(text.trimEnd());
+  return 0;
+}
+// Each of append's three modes takes its own options, and refuses another's: an option accepted and dropped would let a reader
+// believe it had an effect (FORMAT.md 11).
+const ENTRY_OPTS = ['--title', '--issue', '--principle', '--body', '--edge', '--prefix'];
+// The judge cites and writes nothing (D37): the stop names its judge to the core — DOCKET_JUDGE, the session it judges, in the
+// judge's environment — and a write the judge asks for is refused here, since its one permission is a pattern the host matches
+// against a command's text, which admits every subcommand of the core (FORMAT.md 16)
+function judgeWrites(cmd, instead) {
+  const j = process.env.DOCKET_JUDGE;
+  if (j) die(cmd + ': refused — this session is the judge of session ' + j + ', and the judge cites and writes nothing (D37); ' + instead + ' (docs/FORMAT.md 16)', 2);
+}
+function append(argv) {
+  judgeWrites('append', "a ruling or an addendum is the person's, through /rule");
+  const mode = has(argv, '--addendum') ? '--addendum' : has(argv, '--baseline') ? '--baseline' : null;
+  const foreign = mode === '--addendum' ? ENTRY_OPTS.concat(['--baseline']) : mode === '--baseline' ? ENTRY_OPTS.concat(['--text']) : ['--text'];
+  const extra = foreign.filter(o => has(argv, o));
+  if (extra.length) die('append: ' + (mode ? mode + ' does not take ' : 'an entry does not take ') + extra.join(', ') + ' — the option would be dropped, and a dropped option reads as one that worked (FORMAT.md 11)', 2);
+  if (mode === '--addendum') return appendAddendum(argv);
+  if (mode === '--baseline') return rewriteBaseline(argv);
+  return appendEntry(argv);
+}
+
+// ─── 10. status: the docket ─────────────────────────────────────────────────
+
+function statePath(root) { return path.join(root, '.docket', 'verdict.json'); }
+// .docket/ is the docket's own and never the project's: it is made with a .gitignore of "*" inside it, so git ignores it
+// whatever the project's own .gitignore says, and an `add -A` never tracks a verdict or the core's path (FORMAT.md 16)
+function docketDir(root) {
+  const d = path.join(root, '.docket');
+  fs.mkdirSync(d, { recursive: true });
+  const gi = path.join(d, '.gitignore');
+  if (!exists(gi)) { try { fs.writeFileSync(gi, '*\n'); } catch (e) { /* the state is written without it */ } }
+  return d;
+}
+function loadState(root) {
+  let st = null;
+  try { st = JSON.parse(readText(statePath(root))); } catch (e) { st = null; }
+  if (!st || typeof st !== 'object' || Array.isArray(st)) st = {};
+  // Every field is filled here so that a file written by hand, or half-written, informs rather than throws (D1).
+  // A session id is the host's text, or a person's: a map with no prototype, where a session named __proto__ or
+  // constructor is stored and read like any other and not the prototype of the map (D11).
+  // Each session is read field by field: a count that is not a whole number, a history that is not a list of them, a mark
+  // that is not true — hand-edited or half-written — holds nothing and is read as nothing (FORMAT.md 16).
+  const sessions = Object.create(null);
+  if (st.sessions && typeof st.sessions === 'object' && !Array.isArray(st.sessions)) for (const k of Object.keys(st.sessions)) {
+    const s = st.sessions[k];
+    if (!s || typeof s !== 'object' || Array.isArray(s)) continue;
+    sessions[k] = Object.assign({ blocks: Number.isInteger(s.blocks) && s.blocks >= 0 ? s.blocks : 0, history: Array.isArray(s.history) ? s.history.filter(n => Number.isInteger(n) && n >= 0) : [], surfaced: s.surfaced === true },
+      typeof s.base === 'string' && /^[0-9a-f]{40,64}$/.test(s.base) ? { base: s.base } : {},   // the commit its diff runs from (D40)
+      typeof s.stop === 'string' && /^[0-9a-f]{16}$/.test(s.stop) ? { stop: s.stop, counted: s.counted === true } : {});   // the stop its last record came from, and whether it counted (D38's addendum)
+  }
+  // The last verdict is read whole: one whose word, time or count is missing or of another kind holds nothing and is read as
+  // none, where its gaps had printed as "undefined"; its hash, session and reason, when present, are text (FORMAT.md 16)
+  const L = st.last, text_ = v => v === undefined || typeof v === 'string';
+  const last = L && typeof L === 'object' && !Array.isArray(L) && ['PASS', 'FAIL', 'STALE'].includes(L.verdict) && typeof L.at === 'string'
+    && Number.isInteger(L.failures) && L.failures >= 0 && text_(L.hash) && text_(L.session) && text_(L.reason) ? L : null;
+  return { last, lastPassHash: typeof st.lastPassHash === 'string' ? st.lastPassHash : null, sessions };
+}
+function saveState(root, st) { const p = statePath(root); docketDir(root); const tmp = p + '.' + process.pid; fs.writeFileSync(tmp, JSON.stringify(st, null, 2) + '\n'); fs.renameSync(tmp, p); }
+// The state is one file the gate, the verdict and the stop each read, change and write: two judges recording at once would
+// each read the same state, and the later write would carry the earlier away — a session's count, a surfaced mark, the last
+// PASS (D11). So each change is made under a lock beside the file, the state re-read inside it and written whole, as the
+// ledger's append is (D4), by the one lock rule both keep (takeLock). One held past the wait is written through, with a
+// note naming the lock and the remedy, because a stop that died on it would be allowed unjudged; the call at a session's start waits a second and records
+// nothing past it (`orSkip`), since its hook's five seconds are the docket's to print in (D14's addendum).
+function withState(root, change, opts) {
+  const p = statePath(root), lockPath = p + '.lock', wait = opts && opts.wait !== undefined ? opts.wait : LOCK_WAIT_MS;
+  if (exists(path.dirname(p)) && !isDir(path.dirname(p))) throw Object.assign(new Error(rel(root, path.dirname(p)) + ' is a file, not a directory: the state has nowhere to go; move it aside'), { docket: true });
+  if (exists(p) && !isFile(p)) throw Object.assign(new Error(rel(root, p) + ' is not a file: the state cannot be written over it; move it aside'), { docket: true });
+  // a refusal the filesystem makes — the directory, the lock or the file cannot be written: unwritable, read only, full — is
+  // named as the two above are, with the error's code, and never a stack: the state has nowhere to go (FORMAT.md 16)
+  const nowhere = (e, what) => { if (e && e.docket) return e; if (!e || typeof e.code !== 'string') throw e; return Object.assign(new Error(what + ' cannot be written (' + e.code + '): the state has nowhere to go (the docket writes it under .docket/)'), { docket: true, code: e.code }); };
+  try { docketDir(root); } catch (e) { throw nowhere(e, rel(root, path.dirname(p))); }
+  let lock;
+  try { lock = takeLock(lockPath, wait); } catch (e) { throw nowhere(e, rel(root, lockPath)); }
+  if (!lock) {
+    if (opts && opts.orSkip) return null;
+    process.stderr.write('note: ' + rel(root, lockPath) + ' was held past ' + wait / 1000 + ' seconds; the state is changed without it, and each later change waits as long while the lock stays: if no docket command is running, remove ' + rel(root, lockPath) + '\n');
+  }
+  try { const st = loadState(root); change(st); try { saveState(root, st); } catch (e) { throw nowhere(e, rel(root, p)); } return st; }
+  finally { releaseLock(lockPath, lock); }
+}
+// An addendum is pending until a ruling written after it has an edge into its entry (FORMAT.md 6, D21). Which came
+// first is read from history: the edge's line was added in a commit that descends from the one that added the
+// addendum's line, or it is not committed yet while the addendum's line is. An in-edge older than the addendum answered
+// something else: supersession is clause-level (D3), and a ruling that once named an entry has not moved the law past the
+// clause a later addendum is about. Where history holds no order — one commit, neither line committed, no history to read
+// (no repository, or a ledger never committed) — the ledger's own dates are read first: entries are appended, so an
+// entry was written by the earliest date an addendum carries under it or under any entry after it, and an edge from one
+// written by a day before the addendum's is older than it (D21's addendum); where they say nothing, the preamble's order.
+function blameCommits(ledgerPath) {
+  // -w: a commit that changes only a line's whitespace or ending — CRLF, a renormalisation — wrote no line, so each keeps the
+  // commit that wrote its words, and an addendum is not answered by the commit that re-ended it (FORMAT.md 6, D21)
+  const r = sh('git', ['blame', '-w', '--no-textconv', '--porcelain', '--', path.basename(ledgerPath)], path.dirname(ledgerPath));   // the ledger's own lines, never a conversion of them
+  if (r.status !== 0) return null;
+  const m = new Map();
+  for (const line of r.stdout.split('\n')) { const h = /^([0-9a-f]{40}(?:[0-9a-f]{24})?) \d+ (\d+)(?: \d+)?$/.exec(line); if (h) m.set(Number(h[2]), h[1]); }   // SHA-1 or SHA-256 names
+  return m;
+}
+function pendingAddenda(ledger) {
+  const pend = [], anc = new Map();
+  let blame;                                                          // read once, and only for a ledger that carries an addendum
+  const writtenBy = new Map();                                        // each entry's latest possible day, from the addenda under it and below it
+  { let min = null; const byLine = ledger.rulings.slice().sort((x, y) => x.line - y.line);
+    for (let i = byLine.length - 1; i >= 0; i--) { for (const d of byLine[i].addenda) if (min === null || d.date < min) min = d.date; writtenBy.set(byLine[i].id, min); } }
+  const datesSayOlder = (o, add) => { const w = writtenBy.get(o.id); return typeof w === 'string' && w < add.date; };
+  const writtenAfter = (o, edgeLine, add) => {
+    if (blame === undefined) blame = blameCommits(ledger.path);
+    if (!blame) return !datesSayOlder(o, add);
+    const a = blame.get(add.line), e = blame.get(edgeLine), zero = /^0+$/;
+    if (!a || !e || a === e) return !datesSayOlder(o, add);           // unknown, one commit, or neither committed: the dates, then the preamble's order
+    if (zero.test(e)) return true;                                    // the edge is not committed and the addendum is: written after it
+    if (zero.test(a)) return false;                                   // the addendum is not committed and the edge is: the edge came first
+    // the commits after the addendum's, asked once for each addendum's commit and not once per pair: the edge's commit is one
+    // of them when the addendum's is its ancestor (blame names only ancestors of HEAD, or none)
+    if (!anc.has(a)) { const d = sh('git', ['rev-list', '--ancestry-path', a + '..HEAD'], path.dirname(ledger.path)); anc.set(a, d.status === 0 ? new Set(d.stdout.split('\n').filter(Boolean)) : null); }
+    const after = anc.get(a);
+    return after === null ? sh('git', ['merge-base', '--is-ancestor', a, e], path.dirname(ledger.path)).status === 0 : after.has(e);
+  };
+  for (const r of ledger.rulings) {
+    for (const a of r.addenda) {
+      const resolved = ledger.rulings.some(o => o.line > r.line && o.edges.some(e => e.to === r.id && writtenAfter(o, e.line, a)));
+      if (!resolved) pend.push({ id: r.id, date: a.date, text: a.text });
+    }
+  }
+  return pend;
+}
+// The session-start call's input on stdin (D40): the session's identifier, why it starts, and the project directory. A session
+// that starts afresh — a new one, or one cleared — records HEAD as the base its diff runs from; one resumed or compacted
+// keeps the base it has, and takes HEAD only when it has none. It prints nothing: the docket is the hook's output.
+function recordSessionBase() {
+  let input = {};
+  try { input = JSON.parse(readStdin()) || {}; } catch (e) { input = {}; }
+  if (typeof input !== 'object' || Array.isArray(input) || typeof input.session_id !== 'string' || !input.session_id) return;
+  const root = stopRoot(typeof input.cwd === 'string' && isDir(input.cwd) ? input.cwd : process.cwd());   // the stop's root (D28)
+  const head = headCommit(root);
+  if (!head) return;
+  const afresh = input.source === 'startup' || input.source === 'clear', sid = sessionKey(input.session_id);
+  // a lock held past a second is another session's write: this one records no base, and its diff reads from HEAD (D40)
+  try { withState(root, st => { const x = Object.assign(freshSession(), st.sessions[sid] || {}); if (afresh || !x.base) x.base = head; st.sessions[sid] = x; }, { wait: SESSION_START_WAIT_MS, orSkip: true }); } catch (e) { /* the docket prints without it */ }
+}
+function status(argv) {
+  if (has(argv, '--session-start')) readBy = startReadMs();          // the hook's time is the docket's to print in (D14's addendum)
+  const s = scope(argv), cwd = s.cwd, root = s.root, lp = s.ledger;
+  // A walk goes up: a ledger below is named, not found. The look below is read within the session start's bound, and past it the
+  // tree is read as the ungoverned tree it would be — nothing printed, no base recorded — as past the walk's bound (FORMAT.md 1)
+  let below = [];
+  if (!lp) try { below = ledgersBelow(cwd, root); } catch (e) { if (!e || !e.startBound) throw e; }
+  if (lp || below.length) recordCore(root);                            // the judge finds the core through this file (16): the tree is governed somewhere
+  if (has(argv, '--session-start') && (lp || below.length)) recordSessionBase();   // the call at a session's start: the session's base (D40)
+  if (!lp) {                                                          // no ledger governs the working directory
+    const groot = gitRoot(cwd);
+    const ls = groot ? sh('git', ['ls-tree', '-r', '--name-only', '-z', 'HEAD'], groot) : null;
+    const gone = ls && ls.status === 0 ? ls.stdout.split('\0').filter(p => /(^|\/)DECISIONS\.md$/.test(p) && !isFile(path.join(groot, p))) : [];
+    if (gone.length) {                                                 // the committed ledger is gone: not an ungoverned project, an amended one
+      if (argv.json) { out(JSON.stringify({ ledger: null, gone, below }, null, 2)); return 0; }
+      out('Docket — the committed ledger ' + gone.join(', ') + ' is gone from the working tree; check 7 says so (D4)');
+      return 0;
+    }
+    if (!below.length) return 0;                                      // ungoverned project: the docket is silent
+    if (argv.json) { out(JSON.stringify({ ledger: null, below }, null, 2)); return 0; }
+    out('Docket — no ledger governs ' + rel(root, cwd) + ' (under ' + root + '); below it: ' + below.join(', ') + ' — pass --ledger <path>, or run from inside');
+    return 0;
+  }
+  const ledger = loadLedger(lp);
+  // the tree, read within the session start's bound: past it, the ledger's own parts are printed and the rest named (D14's addendum)
+  let ctx = null, uncited = null, check_ = null, spec_ = null;
+  try {
+    ctx = loadContext(root);
+    const cited = new Set(codeCites(ctx, ledger).map(c => c.id));
+    uncited = ledger.rulings.filter(r => !cited.has(r.id)).map(r => r.id);
+    check_ = runCheck(root, { ctx });
+    spec_ = runSpecCheck(root, ctx, lp);
+  } catch (e) { if (!e.startBound) throw e; }
+  readBy = Infinity;
+  const pend = pendingAddenda(ledger);
+  const st = loadState(stopRoot(cwd));                                 // the verdict the stop's commands keep (D28)
+  const surfaced = !!(st.last && st.sessions[st.last.session] && st.sessions[st.last.session].surfaced);   // D11: the surfaced state is the one the docket exists to show; a verdict naming a session the file never recorded is not surfaced
+  // `last` names one session; every surfaced session waits for the human, and the protocol's release says status names it (D11)
+  const surfacedAll = Object.keys(st.sessions).filter(k => st.sessions[k] && st.sessions[k].surfaced).sort();
+  const surfacedOthers = surfacedAll.filter(k => !(st.last && k === st.last.session));
+  const witness = check_ && spec_ ? { ok: check_.failures.length === 0 && spec_.failures.length === 0, ledgers: check_.ctx.ledgers.size, failures: check_.failures.concat(spec_.failures) } : null;
+  const UNREAD = 'not read at the session\'s start: the tree is more than the hook\'s time reads, and `docket status` reads it whole';
+  if (argv.json) {
+    out(JSON.stringify({ ledger: rel(root, lp), rulings: ledger.rulings.length, prefixes: ledger.prefixes, last: ledger.rulings.slice(-3).reverse().map(r => ({ id: r.id, title: r.title })), uncited, pendingAddenda: pend, lastVerdict: st.last, surfaced, surfacedSessions: surfacedAll, witness }, null, 2));
+    return 0;
+  }
+  const L = [];
+  L.push('Docket — ' + shown(rel(root, lp)) + ' (' + ledger.rulings.length + ' ruling' + (ledger.rulings.length === 1 ? '' : 's') + (ledger.prefixes.length ? '; prefix' + (ledger.prefixes.length === 1 ? ' ' : 'es ') + ledger.prefixes.join(', ') : '; no prefix') + ')');
+  L.push('Last rulings:');
+  for (const r of ledger.rulings.slice(-3).reverse()) L.push('  ' + named(r) + (r.issue !== null ? '  · issue #' + r.issue : ''));
+  L.push('Cited nowhere: ' + (uncited === null ? UNREAD : uncited.length ? uncited.join(', ') + ' (' + uncited.length + ' of ' + ledger.rulings.length + ')' : 'none'));
+  L.push('Addenda pending:' + (pend.length ? '' : ' none'));
+  for (const a of pend) {                                              // D14: one line each, cut at a glance; governs <id> prints the whole, and --json carries it
+    L.push('  ' + a.id + ' (' + a.date + '): ' + glance(a.text));
+  }
+  L.push('Last verdict: ' + (st.last ? st.last.verdict + ' at ' + st.last.at + ' (' + st.last.failures + ' located failure' + (st.last.failures === 1 ? '' : 's') + ')' + (surfaced ? '; session ' + st.last.session + ' is SURFACED — its residue waits for the human' : '') : 'none'));
+  // the last judge's own report — what it scored, and a check it could not run — kept for the person to read (D46)
+  const jlog = path.join(stopRoot(cwd), '.docket', 'judge.log');
+  if (isFile(jlog)) L.push('Judge\'s report: ' + rel(root, jlog) + ' — the last judge\'s own words, a check it could not run named there');
+  if (surfacedOthers.length) L.push('Surfaced: ' + surfacedOthers.map(k => { const x = st.sessions[k]; return k + ' (' + x.blocks + ' block' + (x.blocks === 1 ? '' : 's') + ' since its last PASS; located failures per verdict: ' + (x.history && x.history.length ? x.history.join(' → ') : 'none recorded') + ')'; }).join(', ') + ' — each waits for the human, who releases it with a PASS naming it');
+  // a check 7 the run skipped is said beside an ok, as check's info line says it, so a skip is never read as a pass (FORMAT.md 13)
+  if (!witness) { L.push('Witness: ' + UNREAD.replace('not read', 'not run')); out(L.join('\n')); return 0; }
+  const skipped7 = check_.info.filter(i => /: check 7 skipped/.test(i)).length;
+  L.push('Witness: ' + (witness.ok ? 'ok (' + witness.ledgers + ' ledger' + (witness.ledgers === 1 ? '' : 's') + (skipped7 ? '; check 7 skipped for ' + skipped7 + ' — docket check says why' : '') + ')' : 'FAIL (' + witness.failures.length + ')'));
+  for (const f of witness.failures.slice(0, 5)) L.push('  ' + shown(f.file) + ':' + f.line + '  ' + (typeof f.k === 'number' ? 'check ' : 'spec-check ') + f.k + ': ' + f.message);
+  if (witness.failures.length > 5) {                                  // D14's addendum: five, then the pointer — at the command, or the two, that list what is hidden
+    const hidden = witness.failures.slice(5), cmds = uniq(hidden.map(f => typeof f.k === 'number' ? 'docket check' : 'docket spec-check'));
+    L.push('  +' + hidden.length + ' more — ' + cmds.join(' and ') + (cmds.length > 1 ? ' list' : ' lists') + ' them all');
+  }
+  out(L.join('\n'));
+  return 0;
+}
+
+// ─── 12. diff: what changed in the law ──────────────────────────────────────
+
+// Two readings of one ledger, compared entry by entry with the seventh check's own comparison, so
+// `diff` and `check` cannot disagree about what "changed" means. Loud first: an existing heading or
+// body that differs, or an entry gone, is the thing the ledger exists to make impossible (D4), and is
+// listed before anything added. Exit 1 when such a change is listed, as a failed check exits 1; exit 2
+// when a revision or file cannot be read (FORMAT.md 13).
+function ledgerAtRev(root, ledgerPath, rev) {
+  const p = rel(root, ledgerPath);
+  const r = sh('git', ['show', rev + ':' + p], root);
+  if (r.status !== 0) die('diff: cannot read ' + p + ' at ' + rev + (r.stderr && r.stderr.trim() ? ' — ' + r.stderr.trim().split('\n')[0] : ''), 2);
+  return parseLedger(r.stdout, ledgerPath);
+}
+function ledgerFromFile(given) {
+  const full = path.resolve(process.cwd(), given);
+  if (!isFile(full)) die('diff: cannot read ' + given, 2);
+  return parseLedger(readText(full), full);
+}
+function diffLedgers(a, b) {
+  const changed = [], added = [], edges = [], addenda = [];
+  for (const o of a.rulings) {
+    const cur = b.byId.get(o.id);
+    if (!cur) { changed.push({ id: o.id, kind: 'removed', line: o.line }); continue; }
+    if (cur.heading !== o.heading) changed.push({ id: o.id, kind: 'heading', from: o.heading, to: cur.heading, line: cur.line });
+    if (!bodyOnlyAppended(o.bodyLines, cur.bodyLines)) changed.push({ id: o.id, kind: 'body', line: cur.line });
+    const had = new Map();                                             // counted, not a set: one that repeats an earlier one, date and words, is added too
+    for (const x of o.addenda) { const k = x.date + '|' + x.text; had.set(k, (had.get(k) || 0) + 1); }
+    for (const x of cur.addenda) { const k = x.date + '|' + x.text, n = had.get(k) || 0; if (n > 0) had.set(k, n - 1); else addenda.push({ id: o.id, date: x.date, text: x.text, line: x.line }); }
+  }
+  const oldEdges = new Set();
+  for (const r of a.rulings) for (const e of r.edges) oldEdges.add(edgeKey(e));
+  for (const r of b.rulings) {
+    if (!a.byId.has(r.id)) { added.push(r); for (const x of r.addenda) addenda.push({ id: r.id, date: x.date, text: x.text, line: x.line }); }   // an added ruling's addenda are addenda added, as its edges are edges added: a range that appends a ruling and then its addendum hides neither
+    for (const e of r.edges) if (!oldEdges.has(edgeKey(e))) edges.push(e);   // an added ruling's edges are edges added: what governs what has changed
+  }
+  return { changed, added, edges, addenda };
+}
+function diff(argv) {
+  const a = argv._[1], b = argv._[2];
+  if (!a || !b) die('diff: two revisions, or two files with --files\n\n  docket diff <revA> <revB>\n  docket diff --files <a> <b>', 2);
+  let A, B, label;
+  if (has(argv, '--files')) { A = ledgerFromFile(a); B = ledgerFromFile(b); label = a + ' → ' + b; }
+  else {
+    const s = scope(argv);
+    if (!s.ledger) die(noLedgerMessage(s.cwd, s.root), 2);
+    const root = gitRoot(path.dirname(s.ledger));                        // a revision is git's: the repository that holds the ledger
+    if (!root) die('diff: ' + rel(s.root, s.ledger) + ' is not in a git repository; compare two files with --files', 2);
+    A = ledgerAtRev(root, s.ledger, a); B = ledgerAtRev(root, s.ledger, b);
+    label = rel(root, s.ledger) + '  ' + a + ' → ' + b;
+  }
+  const d = diffLedgers(A, B);
+  if (argv.json) {
+    out(JSON.stringify({ from: a, to: b, ok: d.changed.length === 0, changed: d.changed,
+      added: d.added.map(r => ({ id: r.id, title: r.title, meta: r.meta, line: r.line })),
+      edges: d.edges.map(e => ({ from: e.from, adverb: e.adverb, verb: e.verb, to: e.to, qualifier: e.qualifier })), addenda: d.addenda }, null, 2));
+    return d.changed.length ? 1 : 0;
+  }
+  const L = [label];
+  if (d.changed.length) {
+    L.push('CHANGED — an existing entry differs, which the ledger forbids (append only):');
+    for (const c of d.changed) {
+      if (c.kind === 'removed') L.push('  ' + c.id + ' was removed');
+      else if (c.kind === 'heading') L.push('  ' + c.id + ': heading changed: "' + c.from + '" → "' + c.to + '"');
+      else L.push('  ' + c.id + ': body changed other than by appended addendum lines');
+    }
+  }
+  L.push('Rulings added (' + d.added.length + '):');
+  for (const r of d.added) L.push('  ' + r.id + '.' + (r.title ? ' ' + r.title : '') + (r.meta ? ' (' + r.meta + ')' : ''));
+  L.push('Edges added (' + d.edges.length + '):');
+  for (const e of d.edges) L.push('  ' + renderEdge(e));
+  L.push('Addenda added (' + d.addenda.length + '):');
+  for (const x of d.addenda) L.push('  ' + x.id + '  ' + x.date + ': ' + x.text);
+  if (!d.changed.length && !d.added.length && !d.edges.length && !d.addenda.length) L.push('nothing changed');
+  out(L.join('\n'));
+  return d.changed.length ? 1 : 0;
+}
+
+// ─── 13. vendor: the witness where the law lives (D9) ───────────────────────
+
+// The core is one file with no dependencies, so the witness a repository runs in CI is this file,
+// copied; the plugin need not be installed where the law is checked. The copy runs bare as the
+// witness and answers every read subcommand; it does not carry templates/, so it cannot constitute.
+const CI_STEP = [
+  '      - uses: actions/checkout@v4',
+  '        with:',
+  '          fetch-depth: 0          # the seventh check compares with the committed ledger; a shallow clone has none to compare',
+  '      - uses: actions/setup-node@v4',
+  '        with:',
+  '          node-version: 20',
+  '      - name: The witness',
+  '        run: node test/docket.js',
+  '        env:',
+  '          DOCKET_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}   # the commit before the push, or a pull request\'s base: the seventh check compares a pushed range with it',
+].join('\n');
+function vendorInto(dir) {
+  const dest = path.join(dir, 'test', 'docket.js');
+  const replaced = isFile(dest);
+  // What sits there is replaced only when it is a docket core of some version — it opens as this file opens, the third
+  // line naming the program — so a project's own test file, or this repository's suite, is never written over.
+  if (replaced) {
+    const theirs = normEol(readText(dest)), mine = normEol(readText(__filename));
+    if (coreOpening(theirs) !== coreOpening(mine)) die('vendor: ' + rel(process.cwd(), dest) + ' exists and is not a copy of the docket\'s core — move it aside first; the witness goes to test/docket.js', 2);
+  }
+  if (exists(path.dirname(dest)) && !isDir(path.dirname(dest))) die('vendor: ' + rel(process.cwd(), path.dirname(dest)) + ' exists and is not a directory; the witness goes to test/docket.js', 2);
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.copyFileSync(__filename, dest);
+  return { dest, replaced };
+}
+function vendor(argv) {
+  judgeWrites('vendor', 'the witness is vendored by the person');
+  const target = argv._[1];
+  if (!target) die('vendor: a directory is required\n\n  docket vendor <dir>', 2);
+  const dir = path.resolve(process.cwd(), target);
+  if (!isDir(dir)) die('vendor: ' + target + ' is not a directory', 2);
+  const v = vendorInto(dir);
+  if (argv.json) { out(JSON.stringify({ written: rel(dir, v.dest), replaced: v.replaced, ciStep: CI_STEP }, null, 2)); return 0; }
+  out((v.replaced ? 'replaced ' : 'wrote ') + rel(process.cwd(), v.dest) + ' — the witness: one file, no dependencies (D9). Run it bare: node test/docket.js\n\nThe CI step:\n' + CI_STEP);
+  return 0;
+}
+
+// ─── 14. constitute: a spine before the first line (D9, D13) ────────────────
+
+// The mechanical half of /constitute. The intake (intake/CONSTITUTE.md) refuses what only a reader can
+// tell — a category, a feature; this refuses what a shape check can tell, each by the field's name,
+// and then fills the templates, writes the first entry through append's own validation, vendors the
+// witness, prints the CI step and the agent-instructions section, and runs check. Nothing here names a
+// host: the section is "for the repository's agent-instructions file", and the host's skill says which.
+const ABBREVIATIONS = ['dr', 'mr', 'mrs', 'ms', 'prof', 'st', 'e.g', 'i.e', 'etc', 'vs', 'cf', 'no', 'jr', 'sr'];   // a stop after one of these ends no sentence — a list, stated
+function unAbbreviated(s) { let t = s.trim(); for (const a of ABBREVIATIONS) t = t.replace(new RegExp('\\b' + a.replace('.', '\\.') + '\\.', 'gi'), a.replace('.', '')); return t; }
+function sentenceCount(s) {
+  let t = unAbbreviated(s);
+  if (!t) return 0;
+  let n = 0;
+  const re = /[.!?]+(?=\s+[A-Z"'(À-Þ]|\s*$)/g;               // a stop that ends a sentence: followed by a capital, or last
+  while (re.exec(t)) n++;
+  if (!/[.!?]["')]*\s*$/.test(t)) n++;                                 // a text that ends without a stop: its last sentence is unfinished, and is one — "It does X. It does Y" reads as two
+  return Math.max(1, n);
+}
+// A crowd is refused when the role IS one, article or not, or one followed by a relative clause ("everyone who
+// cooks"); when it opens with a word that can only open a crowd, whatever follows ("everyone at the company"); and when
+// its last word names a crowd, whatever qualifies it ("non-technical users", "busy people", "the general public"). A role that holds a
+// crowd's word in front of a person's noun — "a people manager", "users researcher", "the public defender", "a
+// non-technical founder" — names a person and is not this shape check's to refuse; the semantic line is the intake's (D13).
+// The role and the list are read alike, as a reader sees them: case folded, an invisible mark dropped, a hyphen or a dash of any
+// kind read as the space it stands for, punctuation at either end dropped, and "non" joined to the word it negates — so
+// "non technical", "nontechnical", non-technical with a non-breaking or a soft hyphen, "general-audience" and "Everyone!" are
+// the list's own; and the pronoun
+// crowds beside the list open a crowd as the list's do, each refused as the phrase it reads as.
+const CROWD_OPENERS = ['everyone', 'anyone', 'all users', 'someone curious', 'general audience'], CROWD_NOUNS = ['users', 'people', 'public'];
+const CROWD_ALIASES = { everybody: 'everyone', anybody: 'anyone', 'any user': 'all users', 'any users': 'all users', 'every user': 'all users' };
+function roleText(t) {
+  return t.normalize('NFKC').toLowerCase().replace(/\p{Cf}/gu, '').replace(/[\p{Pd}\u2212]/gu, ' ')
+    .replace(/^[\s\p{P}\p{S}]+|[\s\p{P}\p{S}]+$/gu, '').replace(/\s+/g, ' ').replace(/\bnon /g, 'non');
+}
+function invalidRole(role) {
+  const strip = t => t.replace(/^(a|an|the)\s+/, '');
+  let raw = roleText(role);
+  for (const [alias, as] of Object.entries(CROWD_ALIASES)) if (raw === alias || raw.startsWith(alias + ' ') || raw.startsWith(alias + ',')) raw = as + raw.slice(alias.length);
+  const forms = [raw, strip(raw)];
+  const words = raw.split(/[\s,]+/).filter(Boolean), last = words[words.length - 1];
+  for (const bad of INVALID_ROLES) {
+    for (const b of [roleText(bad), strip(roleText(bad))]) for (const f of forms) {
+      if (f === b || f.startsWith(b + ',')) return bad;
+      if (f.startsWith(b + ' ') && /^(who|that|which|whom|whose)\b/.test(f.slice(b.length + 1))) return bad;
+      if (CROWD_OPENERS.includes(bad) && f.startsWith(b + ' ')) return bad;
+    }
+  }
+  // A crowd's noun last is read after every phrase, so the refusal names the phrase the role reads as: "all users", not "users".
+  for (const bad of INVALID_ROLES) if (CROWD_NOUNS.includes(strip(bad)) && last === strip(bad)) return bad;
+  return null;
+}
+function readAnswers(argv) {
+  const given = flag(argv, '--answers');
+  if (!given) die('constitute: --answers <file> is required — the answers as JSON, in the shape intake/CONSTITUTE.md gives', 2);
+  let o;
+  try { o = JSON.parse(readText(path.resolve(process.cwd(), given))); } catch (e) { die('constitute: --answers ' + given + ' is not readable JSON — ' + e.message, 2); }
+  if (!o || typeof o !== 'object' || Array.isArray(o)) die('constitute: --answers must hold a JSON object', 2);
+  const bad = (field, why) => die('constitute: ' + field + ' ' + why, 2);
+  const str = v => (typeof v === 'string' ? v.trim() : '');
+  const oneLine = (field, v) => { if (/[\r\n]/.test(v)) bad(field, 'is one line'); if (/\*/.test(v)) bad(field, 'may not contain "*" — it is set in a bold phrase a ruling cites by name'); };
+  const what = str(o.what);
+  if (!what) bad('what', 'is required: one sentence naming the object and the verb');
+  if (/[\r\n]/.test(what)) bad('what', 'is one sentence, on one line');
+  if (sentenceCount(what) !== 1) bad('what', 'is one sentence; this reads as ' + sentenceCount(what));
+  const who = o.who && typeof o.who === 'object' && !Array.isArray(o.who) ? o.who : null;
+  if (!who) bad('who', 'is required: {"role": …, "knows": …, "doesntKnow": …}');
+  const role = str(who.role), knows = str(who.knows), doesntKnow = str(who.doesntKnow);
+  if (!role) bad('who.role', 'is required: the person this is for, as a role');
+  const crowd = invalidRole(role);
+  if (crowd) bad('who.role', '"' + role + '" is refused — a role names a person, not a crowd; "' + crowd + '" is one of: ' + INVALID_ROLES.join(', '));
+  if (!knows) bad('who.knows', 'is required: one thing that person knows');
+  if (!doesntKnow) bad('who.doesntKnow', 'is required: one thing that person does not know');
+  const feeling = str(o.feeling);
+  if (!feeling) bad('feeling', 'is required: one phrase, the feeling every iteration keeps — no default is offered');
+  oneLine('feeling', feeling);
+  if (/[.!?]$/.test(feeling) || sentenceCount(feeling) > 1 || /[.!?]+\s+\S/.test(unAbbreviated(feeling))) bad('feeling', 'is a phrase, not a sentence');   // a stop before more words is two fragments, whatever case the second opens in
+  if (!Array.isArray(o.refuses)) bad('refuses', 'is required: at least ' + REFUSALS_MIN + ' verb phrases, as a JSON array');
+  const refuses = o.refuses.map(str);
+  refuses.forEach((r, i) => { if (!r) bad('refuses[' + i + ']', 'is empty'); oneLine('refuses[' + i + ']', r); });
+  if (refuses.length < REFUSALS_MIN) bad('refuses', 'needs at least ' + REFUSALS_MIN + '; this has ' + refuses.length);
+  // a repeat is the same phrase in the role check's normal form — NFKC, case, spacing and the marks around it folded — so two
+  // spaces, a decomposed é or a second period never count one refusal twice (intake/CONSTITUTE.md, question 4)
+  const lower = refuses.map(roleText);
+  const dup = lower.find((r, i) => lower.indexOf(r) !== i);
+  if (dup) bad('refuses', 'repeats "' + dup + '"');
+  const prefix = o.prefix === undefined ? 'R' : str(o.prefix);
+  if (!/^[A-Za-z]+$/.test(prefix)) bad('prefix', 'must be letters (FORMAT.md 12)');
+  const name = o.name === undefined ? null : str(o.name);
+  if (name !== null) { if (!name) bad('name', 'is one line, or omitted to name the project after its directory'); oneLine('name', name); }
+  return { what, role, knows, doesntKnow, feeling, refuses, prefix, name };
+}
+function fillTemplate(file, vars) {
+  const p = path.join(__dirname, '..', 'templates', file);
+  if (!isFile(p)) die('constitute: templates/' + file + ' is not beside this file\'s bin/ — constitute runs from the plugin; the vendored witness at test/docket.js is the witness and carries no templates', 2);
+  return readText(p).replace(/\{\{(\w+)\}\}/g, (m, k) => {
+    if (!Object.prototype.hasOwnProperty.call(vars, k)) die('constitute: templates/' + file + ' names {{' + k + '}}, which constitute does not fill', 2);
+    return vars[k];
+  });
+}
+function constitute(argv) {
+  judgeWrites('constitute', "a constitution is the person's, through /constitute");
+  const a = readAnswers(argv);
+  const target = flag(argv, '--target');
+  const dir = path.resolve(process.cwd(), target || '.');
+  if (!isDir(dir)) die('constitute: --target ' + target + ' is not a directory', 2);
+  const docs = path.join(dir, 'docs');
+  if (exists(docs) && !isDir(docs)) die('constitute: docs exists and is not a directory; the three documents go under docs/', 2);
+  if (exists(path.join(dir, 'test')) && !isDir(path.join(dir, 'test'))) die('constitute: test exists and is not a directory; the witness goes to test/docket.js', 2);
+  for (const f of ['DECISIONS.md', 'PRD.md', 'UIUX.md']) {
+    if (isFile(path.join(docs, f))) die('constitute: docs/' + f + ' already exists — a constitution is written once; the ledger is append only (D4), so what comes after is docket append, not a second constitution', 2);
+  }
+  // a ledger at the directory itself is the one discovery tries first there (FORMAT.md 1): docs/DECISIONS.md written beside
+  // it would govern nothing, and the check that follows would pass over a constitution no file reads
+  if (isFile(path.join(dir, 'DECISIONS.md'))) die('constitute: DECISIONS.md already exists here, and it is the ledger discovery finds before docs/DECISIONS.md (FORMAT.md 1): a constitution written under docs/ would govern nothing; the ledger is append only (D4), so what comes after is docket append, not a second constitution', 2);
+  const name = a.name || path.basename(dir);
+  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+  const principles = ['- **' + cap(a.feeling) + '.** The feeling every iteration must keep; a change that loses it fails whatever else it does.']
+    .concat(a.refuses.map(r => '- **Will not ' + r.replace(/\.$/, '') + '.** Refused at constitution; a ruling that needs otherwise supersedes this one by name.'))
+    .join('\n');
+  const reader = cap(a.role) + ': knows ' + a.knows.replace(/\.$/, '') + ', and does not know ' + a.doesntKnow.replace(/\.$/, '') + '.';
+  const date = today();
+  const vars = { name, what: a.what, principles, reader, date, prefix: a.prefix };
+  const filled = { 'PRD.md': fillTemplate('PRD.md', vars), 'UIUX.md': fillTemplate('UIUX.md', vars), 'DECISIONS.md': fillTemplate('DECISIONS.md', vars) };
+  // Written whole or not at all: a refusal after this point (a cite in the answers naming a ruling that
+  // does not exist, say) removes what was written, so a half-constitution never stands.
+  const written = [];
+  let complete = false;
+  process.on('exit', () => {
+    if (complete) return;
+    for (const f of written) { try { fs.unlinkSync(f); } catch (e) { /* already gone */ } }
+    // The append lock is ours while the refusal fires — it names this pid — and a foreign one is never touched.
+    const lock = path.join(docs, 'DECISIONS.md.lock');
+    try { if (readText(lock).trim() === 'docket ' + process.pid) fs.unlinkSync(lock); } catch (e) { /* no lock, or not ours */ }
+    for (const d of [docs, path.join(dir, 'test')]) { try { fs.rmdirSync(d); } catch (e) { /* held something else, or absent */ } }
+  });
+  fs.mkdirSync(docs, { recursive: true });
+  for (const [f, text] of Object.entries(filled)) { const p = path.join(docs, f); fs.writeFileSync(p, text); written.push(p); }
+  const ledgerPath = path.join(docs, 'DECISIONS.md');
+  const body = [
+    'What: ' + a.what,
+    'For: ' + a.role + ' — knows ' + a.knows.replace(/\.$/, '') + '; does not know ' + a.doesntKnow.replace(/\.$/, '') + '.',
+    'Must keep: ' + a.feeling + '.',
+    'Will not: ' + a.refuses.map(r => r.replace(/\.$/, '')).join('; ') + '.',
+    'Reason: every later ruling resolves against these answers by name — a ruling that serves none of them is a preference, and a change that loses the feeling fails whatever else it does.',
+  ].join('\n');
+  const entryArgv = { raw: ['--ledger', ledgerPath, '--title', 'The constitution', '--issue', 'constituted ' + date, '--principle', a.feeling, '--body', body, '--prefix', a.prefix], _: ['append'], json: false };
+  const { root, ledger, release } = lockedLedger(entryArgv);
+  const entry = buildEntry(entryArgv, root, ledger);
+  writeLedger(ledger, ensureNl(ledger.text) + '\n' + entry);
+  release();
+  const v = vendorInto(dir);
+  written.push(v.dest);
+  // What was just written is not yet tracked, and the context reads tracked files where there is a repository; the
+  // check here includes untracked files so that it reads the constitution it is meant to check, and says how many
+  // ledgers it read, so a check over nothing is never mistaken for a check.
+  const croot = enumerationRoot(dir);
+  const res = runCheck(croot, { ctx: loadContext(croot, { includeUntracked: true }) });
+  complete = true;
+  const section = [
+    '## The docket',
+    'This repository is governed by docs/DECISIONS.md: a ledger of rulings, appended and never edited.',
+    'Before changing behaviour, read what governs it — `node test/docket.js query <term>`, then',
+    '`node test/docket.js governs <id>` for each ruling that comes back. A decision is recorded as a new',
+    'entry, never as an edit to an old one. Run `node test/docket.js` before you stop: it is the witness,',
+    'and CI runs the same command. The witness reads tracked files: add and commit docs/ and test/ first, or it',
+    'reads nothing and says so.',
+  ].join('\n');
+  if (argv.json) {
+    out(JSON.stringify({ name, dir: rel(process.cwd(), dir) || '.', prefix: a.prefix, written: written.map(f => rel(dir, f)), entry: entry.trimEnd(), ciStep: CI_STEP, agentSection: section, ok: res.failures.length === 0, failures: res.failures, info: res.info }, null, 2));
+    return res.failures.length ? 1 : 0;
+  }
+  const L = ['constituted ' + name + ' in ' + (rel(process.cwd(), dir) || '.') + ' (prefix ' + a.prefix + ')',
+    '  docs/PRD.md        the principles (' + (1 + a.refuses.length) + ') and the reader',
+    '  docs/UIUX.md       the token tables, empty until a value is stated, and the minimum',
+    '  docs/DECISIONS.md  ' + entry.split('\n')[0].replace(/^### /, ''),
+    '  test/docket.js     the witness (D9) — run it bare: node test/docket.js',
+    '', 'The CI step:', CI_STEP,
+    '', 'For the repository\'s agent-instructions file — the host names it; add this yourself:', section, ''];
+  for (const f of res.failures) L.push(shown(f.file) + ':' + f.line + '  check ' + f.k + ': ' + f.message);
+  for (const i of res.info) L.push('info  ' + shown(i));
+  L.push(res.failures.length ? 'check: ' + res.failures.length + ' failure(s) — the constitution is written; fix before you build on it' : checkOk(res.ctx));
+  out(L.join('\n'));
+  return res.failures.length ? 1 : 0;
+}
+
+// ─── 15. intake: an intake file, printed ─────────────────────────────────────
+
+// A skill splices its intake at load through this command rather than through `cat`: the host runs a splice under the
+// skill's own allow-list, which names `node … docket.js …` and nothing else, and refuses to read a file outside the
+// project by any other means. The intake text stays in intake/*.md (D13); this only prints it. The vendored witness
+// carries no intake/ and says so.
+function intake(argv) {
+  const which = argv._[1];
+  if (!which || !/^(rule|constitute)$/.test(which)) die('intake: which one — docket intake rule | docket intake constitute', 2);
+  const p = path.join(__dirname, '..', 'intake', which.toUpperCase() + '.md');
+  if (!isFile(p)) die('intake: intake/' + which.toUpperCase() + '.md is not beside this file\'s bin/ — the intakes live in the plugin; the vendored witness at test/docket.js carries none', 2);
+  const text = readText(p);
+  if (argv.json) { out(JSON.stringify({ intake: which, file: 'intake/' + which.toUpperCase() + '.md', text }, null, 2)); return 0; }
+  out(text);
+  return 0;
+}
+
+// ─── 16. gate and verdict: the mechanical gate, the verdict file (D10, D11) ──
+
+// The judge is a subagent the host runs at a stop. The host gives it a shell and the project directory and nothing
+// else: not where the plugin is, in its prompt or in its environment, and no reading outside the project. So the core,
+// when it runs as the plugin's own hook — the binding passes the plugin root as DOCKET_PLUGIN_ROOT, taken from whatever
+// the host calls it (D13), and this file is under it — leaves its own path in the project, at .docket/core, and the
+// judge reads that (D20). Written only where a ledger governs (an ungoverned project gets no .docket/), and rewritten only
+// when it changes. A maker can overwrite it: that is a visible Write in its transcript, the boundary the protocol gives
+// a forged verdict.
+function recordCore(root) {
+  const pr = process.env.DOCKET_PLUGIN_ROOT;
+  if (!pr) return;
+  // both as the filesystem resolves them: a plugin root named through a symbolic link contains the file it leads to (FORMAT.md 16)
+  const me = realOr(path.resolve(__filename));
+  if (!me.startsWith(realOr(path.resolve(pr)) + path.sep)) return;
+  const p = path.join(root, '.docket', 'core');
+  try {
+    if (isFile(p) && readText(p) === me + '\n') return;
+    docketDir(root); fs.writeFileSync(p, me + '\n');
+  } catch (e) { /* a tree that cannot be written to: the judge says the file is missing */ }
+}
+// A session's identifier is text: a control character in it — a NUL in a hook's input among them — is kept as its escape,
+// \u0000, so the state, the judge's environment, its prompt and the verdict name one session, and none of them throws
+// (FORMAT.md 16)
+function sessionKey(s) { return String(s).replace(/[\u0000-\u001f\u007f]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')); }
+// A session named on the command line is named: a --session whose value is empty or blank names none, and read as absent it
+// would record under the hook's session or the default one (FORMAT.md 16, D11's addendum)
+function sessionOpt(argv) {
+  const s = flag(argv, '--session');
+  if (s !== null && !String(s).trim()) die('--session names no session: its value is empty or blank; name one, or leave the option out (FORMAT.md 16)', 2);
+  return s;
+}
+function sessionId(argv) {
+  const s = sessionOpt(argv);
+  if (s) return sessionKey(s);
+  if (process.env.DOCKET_SESSION) return sessionKey(process.env.DOCKET_SESSION);
+  return 'default';
+}
+// The commit a session's diff runs from (D40): the base recorded at its start — moved to HEAD by a PASS recorded while
+// nothing governed differs from HEAD — while that commit is an ancestor of HEAD; else HEAD. A maker that commits its work
+// before it stops commits into the range the gate reads, so the stop still judges it; a base the history no longer holds,
+// after a reset or a rebase, is dropped for HEAD.
+function sessionBase(root, st, id) {
+  const s = st.sessions[id], b = s && s.base;
+  if (b && sh('git', ['merge-base', '--is-ancestor', b, 'HEAD'], root).status === 0) return b;
+  return 'HEAD';
+}
+function headCommit(root) { const r = sh('git', ['rev-parse', '--verify', '-q', 'HEAD'], root); return r.status === 0 ? r.stdout.trim() : null; }
+// A session's first call records the commit its diff runs from when the session-start hook did not — the host runs no such
+// hook, or the session began before it was bound (D40's addendum): HEAD at that call, so a commit later in the session stays
+// in the gate's range. A session with a base keeps it; a tree with no commit records none; a lock held past a second, or a
+// state with nowhere to go, records none, and the diff runs from HEAD as one with no base does.
+function ensureSessionBase(root, id) {
+  const s = loadState(root).sessions[id];
+  if (s && s.base) return;
+  const head = headCommit(root);
+  if (!head) return;
+  try { withState(root, st => { const x = Object.assign(freshSession(), st.sessions[id] || {}); if (!x.base) x.base = head; st.sessions[id] = x; }, { wait: SESSION_START_WAIT_MS, orSkip: true }); }
+  catch (e) { /* nowhere to go: the diff runs from HEAD */ }
+}
+// Files the base governed that the working tree does not show as governed — deleted, stripped of their last cite, or under
+// a ledger that is gone — a ledger the base held that is gone, and a spec document beside it that is gone. A diff that
+// removes a governed file touches a governed file (D10), so each is in the diff (D22). Governed is read at the base: the
+// file's text there cites a ruling that its ledger there holds.
+function governedAt(root, have, base) {
+  // --no-renames: a rename is the deletion it is, so the old path — governed at the base — is a candidate like any deleted file
+  const ch = sh('git', GIT_DIFF.concat([base, '--no-renames', '--relative', '--name-only', '-z']), root);
+  if (ch.status !== 0) return [];
+  const cand = ch.stdout.split('\0').filter(p => p && !have.has(p) && !p.split('/').includes('.docket'));
+  if (!cand.length) return [];
+  const ls = sh('git', ['ls-tree', '-r', '--name-only', '-z', base], root);
+  const atBase = new Set(ls.status === 0 ? ls.stdout.split('\0').filter(Boolean) : []);
+  const show = p => { const r = sh('git', ['show', base + ':./' + p], root); return r.status === 0 ? r.stdout : null; };
+  const showBytes = p => { const r = cp.spawnSync('git', ['show', base + ':./' + p], { cwd: root, maxBuffer: 1 << 28, env: gitEnv() }); return r.status === 0 && r.stdout ? r.stdout : null; };   // the sniff is over bytes (FORMAT.md 1)
+  const ledgers = new Map();
+  const ledgerAt = p => {                                             // the nearest DECISIONS.md or docs/DECISIONS.md above p, at the base
+    for (let dir = path.posix.dirname(p); ; dir = path.posix.dirname(dir)) {
+      for (const c of dir === '.' ? ['DECISIONS.md', 'docs/DECISIONS.md'] : [dir + '/DECISIONS.md', dir + '/docs/DECISIONS.md']) {
+        if (!atBase.has(c)) continue;
+        if (!ledgers.has(c)) { const t = show(c); ledgers.set(c, t === null ? null : parseLedger(t, path.join(root, c))); }
+        return ledgers.get(c);
+      }
+      if (dir === '.' || dir === '/') return null;
+    }
+  };
+  const out = [];
+  for (const p of cand) {
+    if (!atBase.has(p)) continue;                                     // new since the base: the working tree's reading decides it
+    const name = path.posix.basename(p), dir = path.posix.dirname(p);
+    if (name === 'DECISIONS.md') { out.push(p); continue; }           // a ledger the base held
+    if ((name === 'UIUX.md' || name === 'PRD.md') && atBase.has(dir === '.' ? 'DECISIONS.md' : dir + '/DECISIONS.md')) { out.push(p); continue; }   // a spec document beside it (D40)
+    const b = showBytes(p);
+    if (isLedgerDoc(p, () => b === null ? null : b.toString('utf8'))) continue;   // a ledger document is never governed code: a ledger, or a copy of one, at the base (FORMAT.md 8)
+    if (b === null || b.subarray(0, SNIFF_BYTES).includes(0)) continue;   // binary at the base, as isTextFile reads the working tree
+    const t = b.toString('utf8');
+    const L = ledgerAt(p);
+    if (L && citesIn(t, L).some(c => c.exists)) out.push(p);
+  }
+  return out;
+}
+// `git diff <base>` over the given paths, one run for each list of extra arguments, with every untracked path among them read
+// as if added — intent to add, in a copy of the index, so the repository's own index is never touched: an untracked file's
+// diff is then the one `git add` gives it, and the gate's hash is the same before the add and after it (D40).
+function diffsFrom(root, base, rels, untracked, runs) {
+  let env = gitEnv(), tmp = null;
+  // A copy that is not made, or an add that fails, leaves git an index with nothing in it, and every tracked file would read as
+  // deleted: the diff would be another diff, and the stop would start a judge on it, so it is refused (FORMAT.md 16)
+  const refuse = why => { if (tmp) { try { fs.rmSync(tmp, { force: true }); } catch (e) { /* never made */ } } throw Object.assign(new Error('the gate could not read the untracked governed files as added, in a copy of the index: ' + why + '; a diff read without them would be another diff, so none is judged (FORMAT.md 16)'), { refusal: true }); };
+  // Where git reads no repository — none at all, or one it will not read — there is no index to copy, and the diff below
+  // fails: governedDiff reads which of the two it is (FORMAT.md 16)
+  const ip = untracked.length ? sh('git', ['rev-parse', '--git-path', 'index'], root) : null;
+  if (ip && ip.status === 0) {
+    tmp = path.join(os.tmpdir(), 'docket-index-' + process.pid + '-' + crypto.randomBytes(4).toString('hex'));
+    const src = path.resolve(root, ip.stdout.trim());
+    if (isFile(src)) { try { fs.copyFileSync(src, tmp); } catch (e) { refuse('the copy could not be written at ' + tmp + ' (' + (e.code || e.message) + ')'); } }   // no index yet: git starts one
+    env = gitEnv(Object.assign({}, process.env, { GIT_INDEX_FILE: tmp }));
+    const add = cp.spawnSync('git', ['add', '-N', '--'].concat(untracked), { cwd: root, env, encoding: 'utf8' });
+    if (add.status !== 0) refuse('git add -N failed — ' + (String(add.stderr || (add.error && add.error.message) || '').trim().split('\n')[0] || 'exit ' + add.status));
+  }
+  try {
+    // git matches every pathspec it is given against every path it walks, so a run naming each governed file cost their count
+    // squared, out of the stop's bound (D37's addendum). The paths the diff moves are listed once, over the whole tree, and each
+    // run names the governed ones among them: the same diff, byte for byte, at a cost that grows with the tree and the change.
+    const all = cp.spawnSync('git', GIT_DIFF.concat([base, '--no-renames', '--relative', '--name-only', '-z', '--']), { cwd: root, env, encoding: 'utf8', maxBuffer: 1 << 28 });
+    if (all.status !== 0) return runs.map(() => ({ status: all.status === null ? 1 : all.status, stdout: '', stderr: all.stderr || '' }));
+    const want = new Set(rels), moved = all.stdout.split('\0').filter(p => want.has(p));
+    return runs.map(extra => {
+      if (!moved.length) return { status: 0, stdout: '', stderr: '' };
+      const r = cp.spawnSync('git', GIT_DIFF.concat([base, '--no-renames'], extra, ['--'], moved), { cwd: root, env, encoding: 'utf8', maxBuffer: 1 << 28 });
+      return { status: r.status === null ? 1 : r.status, stdout: r.stdout || '', stderr: r.stderr || '' };
+    });
+  } finally { if (tmp) { try { fs.rmSync(tmp, { force: true }); } catch (e) { /* the copy is the reading's own */ } } }
+}
+// The diff the judge reads and the gate hashes (D40): `git diff <base>` — the session's base, HEAD when it has none — over
+// every governed file, every ledger and the spec documents beside it: those the working tree holds, and those the base
+// governed that it no longer shows (D22), every untracked one among them read as if added. Empty when nothing governed moved.
+function governedDiff(root, base) {
+  base = base || 'HEAD';
+  const ctx = loadContext(root, { includeUntracked: true });
+  const tracked = new Set(trackedFiles(root) || []);
+  const files = new Set();
+  for (const [lp, ledger] of ctx.ledgers) {
+    files.add(lp);
+    const sd = specDocs(lp); for (const s of [sd.uiux, sd.prd]) if (s) files.add(s);   // the spec documents beside it, as the ledger (D40)
+    for (const f of governedFiles(ctx, ledger)) files.add(f);
+  }
+  const now = Array.from(files).map(f => rel(root, f));
+  const gone = governedAt(root, new Set(now), base);
+  const rels = uniq(now.concat(gone)).sort();
+  // an untracked path the base holds was struck from the index: the deletion git shows, not a new file to add again (D40's addendum)
+  const lsBase = sh('git', ['ls-tree', '-r', '--name-only', '-z', base], root);
+  const atBase = new Set(lsBase.status === 0 ? lsBase.stdout.split('\0').filter(Boolean) : []);
+  const untracked = rels.filter(r => !tracked.has(path.join(root, r)) && !gone.includes(r) && !atBase.has(r));
+  let text = '', touched = [], fromGit = true;
+  if (rels.length) {
+    const [dr, nr] = diffsFrom(root, base, rels, untracked, [['-U3'], ['--name-only', '-z']]);   // three lines of context, whatever diff.context says
+    if (dr.status === 0) { text = dr.stdout; touched = nr.stdout.split('\0').filter(Boolean); }
+    else {
+      // no commit yet, or no repository at all: everything governed is new. A repository git will not read — its ownership, its
+      // config — is neither, and read as either its diff would be another diff: refused, with git's own line (FORMAT.md 16). git
+      // is asked in its own words, whatever the locale, so "not a git repository" is read as written
+      const C_ = gitEnv(Object.assign({}, process.env, { LC_ALL: 'C', LANGUAGE: '' }));
+      const gd = cp.spawnSync('git', ['rev-parse', '--git-dir'], { cwd: root, encoding: 'utf8', env: C_ });
+      if (gd.error) throw Object.assign(new Error('the gate cannot run git (' + (gd.error.code || gd.error.message) + ') at ' + root + ': it reads no diff it cannot read whole (FORMAT.md 16)'), { refusal: true });
+      const noRepo = gd.status !== 0 && /not a git repository/i.test(gd.stderr || '');
+      const unborn = gd.status === 0 && cp.spawnSync('git', ['rev-parse', '--verify', '-q', base + '^{commit}'], { cwd: root, encoding: 'utf8', env: C_ }).status !== 0;
+      if (!noRepo && !unborn) throw Object.assign(new Error('git will not read the repository at ' + root + ' — ' + (String(gd.status !== 0 ? gd.stderr : dr.stderr).trim().split('\n')[0] || 'git diff ' + base + ' failed') + '; the gate reads no diff it cannot read whole (FORMAT.md 16)'), { refusal: true });
+      fromGit = false;
+      for (const f of rels) if (isFile(path.join(root, f))) { text += '+++ ' + f + '\n' + readText(path.join(root, f)); touched.push(f); }
+    }
+  }
+  return { hash: sha256(text), touched: uniq(touched), empty: text === '', text, base, rels: fromGit ? rels : [], untracked, ledgers: ctx.ledgers.size };
+}
+// The diff the judge reads: the hashed text with each touched function whole, so that a ruling's premise in the same
+// function is on the page and not a file read away; a host caps a judge's turns (D30). Beneath it, each ruling cited
+// within the window of a hunk, as governs prints it — the rulings the judge's step 4 reads (D33). The hash never reads it.
+function wideDiff(root, d) {
+  const w = d.rels.length ? diffsFrom(root, d.base, d.rels, d.untracked, [['--function-context']])[0] : null;
+  const body = w && w.status === 0 ? w.stdout : d.text;
+  const rs = touchedRulings(root, d);
+  if (!rs.length) return body;
+  let ctx = null;
+  const blocks = rs.map(({ ledger, r }) => { ctx = ctx || loadContext(root); return governsBlock(root, ledger, r, codeCites(ctx, ledger).filter(c => c.id === r.id)); });
+  return body.replace(/\n*$/, '\n') + '\nThe rulings cited within ' + WINDOW + ' lines of each hunk, each as governs prints it (D33):\n\n' + blocks.join('\n\n');
+}
+// The rulings cited within WINDOW lines of each hunk of each touched file — read as near reads an edit (D7), a new file
+// whole — each once, in the order of the files and their lines. A hunk has two sides: its lines in the working tree, and
+// the lines it removed, read in the base's version of the file, so a ruling cited only on a removed line — the thing a
+// removal contradicts — is listed too (D33); a deleted file is its base version, whole.
+function touchedRulings(root, d) {
+  const found = [], ledgers = new Map(), untracked = new Set(d.untracked);
+  const read = (ledger, lines, ranges) => {
+    const fenced = fencedLines(lines);
+    for (const [a, b] of ranges) for (let ln = a; ln <= b; ln++) {
+      if (fenced[ln - 1]) continue;
+      for (const c of citesInLine(lines[ln - 1], ledger)) {
+        if (!c.exists || found.some(x => x.ledger === ledger && x.r.id === c.id)) continue;
+        const r = resolveRuling(ledger, c.id).r;
+        if (r) found.push({ ledger, r });
+      }
+    }
+  };
+  for (const rf of d.touched) {
+    const abs = path.join(root, rf), lp = findLedger(abs, root);
+    if (!lp) continue;
+    if (!ledgers.has(lp)) ledgers.set(lp, loadLedger(lp));
+    const ledger = ledgers.get(lp);
+    const now = isFile(abs) && isTextFile(abs) ? splitLines(normEol(readText(abs))) : null;
+    if (!d.rels.length || untracked.has(rf)) { if (now) read(ledger, now, [[1, now.length]]); continue; }   // a new file whole, as near reads a Write
+    const b = cp.spawnSync('git', ['show', d.base + ':' + rf], { cwd: root, maxBuffer: 1 << 28, env: gitEnv() });
+    const was = b.status === 0 && !b.stdout.subarray(0, SNIFF_BYTES).includes(0) ? splitLines(normEol(b.stdout.toString('utf8'))) : null;
+    if (!now) { if (was) read(ledger, was, [[1, was.length]]); continue; }   // deleted: its base version, whole
+    const h = sh('git', GIT_DIFF.concat([d.base, '--no-renames', '-U0', '--', rf]), root);
+    const nowR = [], wasR = [];
+    for (const m of (h.status === 0 ? h.stdout : '').matchAll(/^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/gm)) {
+      const oc = Number(m[1]), on = m[2] === undefined ? 1 : Number(m[2]), nc = Number(m[3]), nn = m[4] === undefined ? 1 : Number(m[4]);
+      nowR.push([Math.max(1, nc - WINDOW), Math.min(now.length, nc + Math.max(nn, 1) - 1 + WINDOW)]);
+      if (was && on > 0) wasR.push([Math.max(1, oc - WINDOW), Math.min(was.length, oc + on - 1 + WINDOW)]);   // the removed lines, in the base
+    }
+    read(ledger, now, nowR);
+    if (was) read(ledger, was, wasR);
+  }
+  return found;
+}
+function freshSession() { return { blocks: 0, history: [], surfaced: false }; }
+// The residue a surfaced session reports: its blocks since its last PASS, how many of them had no verdict recorded (D38),
+// the failures per verdict, and the last verdict with the lines it was recorded with (D11). The gate prints it at SURFACE,
+// and `stop` relays it (D22).
+function residueLines(st, sess, id) {
+  const h = sess.history, L = [], none = sess.blocks - h.length;
+  L.push('residue: ' + sess.blocks + ' block' + (sess.blocks === 1 ? '' : 's') + ' this session since its last PASS' + (none > 0 ? ', ' + none + ' of them with no verdict recorded' : '') + '; located failures per verdict: ' + (h.length ? h.join(' → ') : 'none recorded'));
+  if (st.last) {
+    const other = st.last.session !== id;                              // `last` is one for the repository: a verdict another session recorded is named as its (FORMAT.md 16)
+    L.push('last verdict: ' + st.last.verdict + ' at ' + st.last.at + ' (' + st.last.failures + ' located failure' + (st.last.failures === 1 ? '' : 's') + ')' +
+      (other ? ', recorded by another session' + (st.last.session ? ', ' + st.last.session : '') + ', not this one' : ''));
+    if (st.last.reason) for (const line of String(st.last.reason).split('\n')) if (line.trim()) L.push('  ' + line.trim());
+  }
+  return L;
+}
+// The gate's decision (D10, D11), `gate`'s and `stop`'s alike: SKIP; SURFACE, with the session marked surfaced here; or JUDGE. A gate
+// run by hand (`byHand`, the session HAND_SESSION) neither surfaces the session nor reads it as surfaced (D11's addendum).
+function gateDecide(root, id, byHand) {
+  const st = loadState(root), sess = Object.assign(freshSession(), st.sessions[id] || {});
+  let d;
+  try { d = governedDiff(root, sessionBase(root, st, id)); }          // from the session's base (D40)
+  catch (e) {
+    // past the walk's bound, a tree with no ledger between the working directory and the root is read as the ungoverned tree
+    // it would be: the stop is a hook, and a hook does not tax a project the docket does not govern; with a ledger there the
+    // refusal stands (FORMAT.md 1)
+    if (!e || !e.walkBound || findLedger(path.join(process.cwd(), 'x'), root)) throw e;
+    d = { hash: sha256(''), touched: [], empty: true, text: '', base: 'HEAD', rels: [], untracked: [] };
+    return { decision: 'SKIP', reason: 'no ledger governs the working directory, and the tree past the walk\'s bound is not read', d, st, sess };
+  }
+  if (d.ledgers) ensureSessionBase(root, id);                         // a governed session's first call records where its diff runs from (D40's addendum)
+  if (d.empty || d.hash === st.lastPassHash) return { decision: 'SKIP', reason: d.empty ? 'nothing governed changed' : 'the last PASS judged this diff', d, st, sess };   // D10
+  if (sess.surfaced && !byHand) return { decision: 'SKIP', reason: 'this session is surfaced until a PASS or a new session', d, st, sess };   // D11
+  const h = sess.history;
+  const stuck = sess.blocks >= THIRD_CYCLE && h.length >= 2 && h[h.length - 1] >= h[h.length - 2];   // failures not falling after the third block
+  if (!byHand && (sess.blocks >= BLOCK_CAP || stuck)) {               // D11: the mark made under the state's lock
+    let now;
+    try { now = withState(root, s => { s.sessions[id] = Object.assign(freshSession(), s.sessions[id] || {}, { surfaced: true }); }); }
+    catch (e) { if (!e.docket) throw e; now = st; now.sessions[id] = Object.assign(freshSession(), st.sessions[id] || {}, { surfaced: true }); }   // the answer stands; the mark has nowhere to go
+    return { decision: 'SURFACE', d, st: now, sess: now.sessions[id] };
+  }
+  return { decision: 'JUDGE', d, st, sess };
+}
+function gate(argv) {
+  const root = diffRoot(process.cwd());                               // D28
+  const id = sessionId(argv);
+  const g = gateDecide(root, id, id === HAND_SESSION), d = g.d;
+  const say = (decision, extra) => { if (argv.json) out(JSON.stringify(Object.assign({ decision, session: id, hash: d.hash, files: d.touched }, extra || {}), null, 2)); };
+  if (g.decision === 'SKIP') { say('SKIP', { reason: g.reason }); if (!argv.json) out('SKIP'); return 0; }
+  if (g.decision === 'SURFACE') {
+    const L = ['SURFACE'].concat(residueLines(g.st, g.sess, id));
+    L.push('report this to the user verbatim, then stop again');
+    say('SURFACE', { residue: L.slice(1, -1) }); if (!argv.json) out(L.join('\n'));
+    return 0;
+  }
+  say('JUDGE', has(argv, '--diff') ? { diff: wideDiff(root, d) } : null);   // an option accepted is an option honoured, --json or not
+  if (!argv.json) { out('JUDGE ' + d.hash + (d.touched.length ? ' ' + d.touched.map(shown).join(' ') : '')); if (has(argv, '--diff')) out(wideDiff(root, d)); }
+  return 0;
+}
+// A verdict is held to its lines (D23). Each is one located failure in the protocol's form — pack · F<n> · file:line ·
+// what · … · route — and their count is --failures. A code-pack line that names a ruling answers the question of the
+// protocol's step 4 in so many words, after what the diff breaks and before the route: "reason holds" (a failure), or
+// "reason gone" or "cite stale" (a stale one, whose route is an addendum). The verdict follows from its lines: STALE
+// when every failure is a stale one, FAIL when any is not. A judge that named the contradiction and never asked
+// whether its reason still stood was the failure measured most often; the form asks, and the record refuses an answer
+// that skipped the question.
+const LOCATED_SEP = ' · ';
+// The answer to the reason question carries its evidence (D27): a field of its own, `reason holds: <the premise> (<file:line>)`
+// or `reason gone: <what changed> (<file:line>)`, the location a line of a file in the repository before or after the diff,
+// a ledger's included (D29).
+// The answer's field: the token, the premise in words, and its line in parentheses anywhere in the field — one
+// location or several, each `<file>:<line>` or `<file>:<first>-<last>`, with words beside them if the judge adds
+// some, each a line of the file as the diff leaves it or as it stood at HEAD.
+// A path in backticks is one path, a space or a parenthesis in it or not: `app/(group)/login.js`:46 (D23)
+const LOC_RE = /(?:`([^`\n]+)`|([^\s(),;`]+?)):(\d+)(?:\s*[-–]\s*(\d+))?/g;
+const locPath = L => (L[1] !== undefined ? L[1] : L[2]).trim();
+function lineCount(text) { return text === null ? 0 : text.split('\n').length - (text.endsWith('\n') ? 1 : 0); }
+// A location is the file it resolves to, as FORMAT.md 1 reads a link for the walk: a link out of the tree is not the tree's
+// file, and a link to a ledger is that ledger. A path that resolves to nothing is kept as written (read at HEAD, or refused).
+function realOr(p) { try { return fs.realpathSync(p); } catch (e) { return p; } }
+function evidenceOf(root, fields, at, base) {
+  const a = fields.map(x => x.trim()).find(x => /^reason (?:holds|gone)\b/i.test(x));
+  const groups = a ? [...a.matchAll(/\(((?:`[^`\n]*`|[^()`])*)\)/g)].filter(g => /:\d/.test(g[1])) : [];   // a backticked path may hold a parenthesis
+  const g = groups.length ? groups[groups.length - 1] : null;
+  const premise = a && g ? a.replace(g[0], ' ').replace(/^reason (?:holds|gone)\b[\s:—–-]*/i, '').trim() : '';
+  const locs = g ? [...g[1].trim().matchAll(LOC_RE)] : [], ev = [];
+  if (!a || !g || !/[\p{L}\p{N}]/u.test(premise) || !locs.length) die(at + ' answers the reason question without its evidence' + (a ? ' (read: "' + a + '")' : '') + ': the answer is a field of its own, `reason holds: <the premise, as the code the diff leaves shows it> (<file:line>)` or `reason gone: <what the diff changed> (<file:line>)`; a range `<file:first-last>`, or several locations with commas, will do (protocol step 4, D27)', 2);
+  for (const L of locs) ev.push(heldLine(root, L, at + ' points its evidence', base));
+  return ev;
+}
+// A location held as evidence (D27): a line of a file in the repository, before or after the diff, the file its path
+// resolves to (FORMAT.md 1). `lead` says what points there, so a refusal names it. Before the diff is the file as HEAD and
+// as the session's base hold it: the diff runs from the base, so a file the session deleted in a commit is located there (D40).
+function heldLine(root, L, lead, base) {
+  const p = locPath(L), first = Number(L[3]), last = L[4] === undefined ? first : Number(L[4]), abs = path.resolve(root, p), where = L[0].trim();
+  if (!isWithin(abs, root)) die(lead + ' outside the repository: ' + where, 2);
+  const real = realOr(abs);
+  if (!isWithin(real, realOr(root))) die(lead + ' outside the repository: ' + where + ' is a link to a file outside it (FORMAT.md 1)', 2);
+  let now = null;
+  if (isFile(abs)) { try { now = fs.readFileSync(abs, 'utf8'); } catch (e) { now = null; } }
+  const blobAt = rev => { const h = sh('git', ['cat-file', 'blob', rev + ':./' + rel(root, abs).split(path.sep).join('/')], root); return h.status === 0 ? h.stdout : null; };
+  const count = Math.max(lineCount(now), lineCount(blobAt('HEAD')), base && base !== 'HEAD' ? lineCount(blobAt(base)) : 0);
+  // a bare path that follows a space or a parenthesis may be the tail of one that holds them: the refusal says how to write it whole
+  const cut = L[1] === undefined && L.index > 0 && /[\s(]/.test(L.input[L.index - 1]) ? '; a path with a space or a parenthesis is written in backticks, `like this.js`:12 (D23)' : '';
+  if (!(first >= 1 && last >= first && last <= count)) die(lead + ' at ' + where + ', which is not a line of a file in this repository, before or after the diff (D27)' + cut, 2);
+  return { abs: real, first, last };
+}
+// An answer's evidence is never its own claim (D36): a "reason holds" whose every location lies in the entry of a ruling
+// the line names — the ruling restated — or in the failure's own located lines — the contradiction itself — shows no
+// premise, and is refused with what to point at instead. A "reason gone" may point at the diff's own line: the change is
+// its evidence.
+function ownClaim(root, f, ev, at) {
+  const named = new Set(f[3].match(/(?<![\p{L}\p{N}_])[A-Za-z]+[1-9]\d*(?![\p{L}\p{N}_])/gu) || []);
+  const entries = [];
+  for (const [lp, L] of loadContext(root).ledgers) for (const r of L.rulings) if (named.has(r.id)) entries.push({ abs: realOr(path.resolve(lp)), first: r.line, last: r.endLine, id: r.id, lp });
+  const own = [...String(f[2]).matchAll(LOC_RE)].map(L => ({ abs: realOr(path.resolve(root, locPath(L))), first: Number(L[3]), last: L[4] === undefined ? Number(L[3]) : Number(L[4]) }));   // compared as the files they resolve to, the evidence's included
+  const inside = (e, s) => e.abs === s.abs && e.first >= s.first && e.last <= s.last;
+  const why = ev.map(e => {
+    const en = entries.find(s => inside(e, s));
+    if (en) return 'the entry of ' + en.id + ' itself (' + rel(root, en.lp) + ':' + en.first + '-' + en.last + ')';
+    return own.some(s => inside(e, s)) ? 'the failure\'s own line (' + f[2] + ')' : null;
+  });
+  if (ev.length && why.every(Boolean)) die(at + ' answers "reason holds" with its own claim as the evidence — ' + Array.from(new Set(why)).join(' and ') + ': a ruling\'s text restates the claim and the failure\'s own line is the contradiction, so neither shows the premise; point the evidence at the line that shows it, as the code the diff leaves shows it, and record again (D36)', 2);
+}
+// A located line names a pack and one of its features: a pack none of the packs here is, or a feature the pack does not
+// define, is no location in the protocol — a judge that wrote `bogus · F3` or `code · F99` recorded a failure no pack scores,
+// and the record stood as one (protocol step 4). The vendored copy carries no packs/ and holds the shape alone.
+function packFeature(pack, feature, at) {
+  const dir = path.join(__dirname, '..', 'packs');
+  if (!isDir(dir)) return;
+  const names = fs.readdirSync(dir).filter(f => /^[a-z][a-z0-9-]*\.md$/.test(f)).map(f => f.slice(0, -3)).sort();
+  if (!names.includes(pack)) die(at + ' names the pack ' + pack + ', which none of the packs here is: they are ' + names.join(', ') + ' (protocol step 4)', 2);
+  const feats = Array.from(readText(path.join(dir, pack + '.md')).matchAll(/^\*\*(F\d+[a-z]?)\b/gm), m => m[1]);
+  if (!feats.includes(feature)) die(at + ' names ' + pack + ' · ' + feature + ', a feature the ' + pack + ' pack does not define: its features are ' + feats.join(', ') + ' (protocol step 4)', 2);
+}
+function holdToLines(root, v, failures, lines, base) {
+  if (!lines.length) die('verdict: a ' + v + ' names its located failures: --reason "<one per line: pack · F<n> · file:line · what · route>"', 2);
+  if (lines.length !== failures) die('verdict: --failures ' + failures + ' but --reason carries ' + lines.length + ' line' + (lines.length === 1 ? '' : 's') + ': one located failure per line, and the count is theirs', 2);
+  let ids = null;
+  const rulingIds = () => { if (!ids) { ids = new Set(); for (const [, L] of loadContext(root).ledgers) for (const r of L.rulings) ids.add(r.id); } return ids; };
+  let stale = 0;
+  lines.forEach((l, i) => {
+    const f = l.split(LOCATED_SEP).map(x => x.trim()), at = 'verdict: line ' + (i + 1);
+    if (f.length < 5 || !/^[a-z][a-z0-9-]*$/.test(f[0]) || !/^F\d+[a-z]?$/.test(f[1]) || !f[2] || !f[f.length - 1]) die(at + ' is not a located failure: <pack> · F<n> · <file:line> · <what> · <fix route>, its fields joined by " · " (the protocol\'s form)', 2);
+    packFeature(f[0], f[1], at);                                       // the pack and the feature are the packs' own (protocol step 4)
+    // The answer is a field of its own (protocol step 4), read there and nowhere else: prose that says the words is not an
+    // answer, and an answer on any line, of any pack, is held to its line (D27)
+    const mid = f.slice(3, -1), said = mid.filter(x => /^(?:reason (?:holds|gone)|cite stale)\b/i.test(x)).join(LOCATED_SEP);
+    const gone = /\b(?:reason gone|cite stale)\b/i.test(said), holds = /\breason holds\b/i.test(said);
+    if (gone && holds) die(at + ' says both that the reason holds and that it is gone', 2);
+    const names = f[0] === 'code' && (f[3].match(/(?<![\p{L}\p{N}_])[A-Za-z]+[1-9]\d*(?![\p{L}\p{N}_])/gu) || []).some(t => rulingIds().has(t));
+    if (names && !gone && !holds && /\b(?:reason (?:holds|gone)|cite stale)\b/i.test(mid.join(LOCATED_SEP))) evidenceOf(root, mid, at, base);   // an answer said inside another field is told where it goes
+    if (names && !gone && !holds) die(at + ' names a ruling and says nothing of its reason: after what the diff breaks, write "reason holds: <the premise> (<file:line>)", or "reason gone: <what changed> (<file:line>)" (or "cite stale"), then the route (protocol step 4)', 2);
+    if (holds || /\breason gone\b/i.test(said)) { const ev = evidenceOf(root, mid, at, base); if (holds) ownClaim(root, f, ev, at); }
+    else if (gone) {                                                   // `cite stale`: the failure's own location is its evidence (D27)
+      const own = [...String(f[2]).matchAll(LOC_RE)];
+      if (!own.length) die(at + ' says cite stale, whose evidence is its own location, and ' + f[2] + ' names no line of a file (D27)', 2);
+      for (const L of own) heldLine(root, L, at + ' says cite stale, whose evidence is its own location, and points', base);
+    }
+    if (gone) stale += 1;
+    // the failure's own location is held as its evidence is (D23, D27): a line of a file in the repository, before or after the
+    // diff — read after the answer, so a line that skipped the question is told so first
+    const own = [...String(f[2]).matchAll(LOC_RE)];
+    if (!own.length) die(at + ' locates its failure at "' + f[2] + '", which names no line of a file: the third field is <file:line> — a range <file:first-last>, or several with commas, will do, and a path with a space or a parenthesis is written in backticks, `like this.js`:12 (protocol step 4, D23)', 2);
+    for (const L of own) heldLine(root, L, at + ' locates its failure', base);
+  });
+  if (v === 'STALE' && stale < lines.length) die('verdict: STALE is the verdict only when every failure is a stale one (protocol step 6); ' + (lines.length - stale) + ' of these ' + lines.length + (lines.length - stale === 1 ? ' is' : ' are') + ' not: record FAIL, with the stale ones and their addendum route among its lines', 2);
+  if (v === 'FAIL' && stale === lines.length) die('verdict: every failure here is a stale one: the verdict is STALE, not FAIL (protocol step 6)', 2);
+}
+function verdict(argv) {
+  const v = (argv._[1] || '').toUpperCase();
+  if (!['PASS', 'FAIL', 'STALE'].includes(v)) die('usage: docket verdict <PASS|FAIL|STALE> [--hash <hash>] [--failures <n>] [--session <id>] [--reason "<the located failures>"]', 2);
+  const root = diffRoot(process.cwd());                               // D28
+  const id = sessionId(argv);
+  const fRaw = flag(argv, '--failures'), failures = fRaw === null ? 0 : /^\d+$/.test(String(fRaw)) ? Number(fRaw) : NaN;   // a whole number, written as one
+  if (!Number.isInteger(failures) || failures < 0) die('verdict: --failures must be a non-negative integer', 2);
+  if (v === 'PASS' && failures !== 0) die('verdict: a PASS has no located failures; this names ' + failures, 2);
+  if (v !== 'PASS' && failures === 0) die('verdict: a ' + v + ' names at least one located failure; --failures is 0', 2);
+  const reason = flag(argv, '--reason');
+  if (reason !== null && UNSAFE_RE.test(reason)) die('verdict: --reason carries a control, bidi or invisible character', 2);
+  const lines = reason === null ? [] : String(reason).split('\n').map(x => x.trim()).filter(Boolean);
+  if (v === 'PASS' && lines.length) die('verdict: a PASS names no located failures; --reason is for a FAIL or a STALE', 2);
+  const base = sessionBase(root, loadState(root), id);                 // the diff's own start (D40): a line before the diff is one there too
+  if (v !== 'PASS') holdToLines(root, v, failures, lines, base);      // D23
+  // A verdict is the judgement of the diff in front of the judge: a hash the working tree does not hash to is another diff's,
+  // and counted here it would be counted again by the stop, which reads no record for its own, or reset the count at every
+  // stop and never surface the session (D11, D38). It is refused, with the way to record it.
+  const now = governedDiff(root, base).hash, given = flag(argv, '--hash');
+  if (given !== null && !String(given).trim()) die('verdict: --hash names no diff: its value is empty or blank; give the hash the gate printed, or leave the option out and the diff in front of you is recorded (FORMAT.md 16)', 2);   // an option accepted and ignored is a silence
+  if (given && given !== now) die('verdict: --hash ' + given + ' is not the diff in front of you: the working tree\'s governed diff hashes to ' + now + ' now; run `docket gate` for the hash, judge the diff it names, and record again', 2);
+  const hash = now;
+  const moveTo = v === 'PASS' && governedDiff(root, 'HEAD').empty ? headCommit(root) : null;   // a PASS on a committed tree: the diff since it runs from HEAD (D40)
+  const stopTok = /^[0-9a-f]{16}$/.test(process.env.DOCKET_STOP || '') ? process.env.DOCKET_STOP : null;   // the stop that started this judge, when one did (D38's addendum)
+  let sess, st;
+  try { st = withState(root, s => {
+    sess = Object.assign(freshSession(), s.sessions[id] || {});
+    s.last = { verdict: v, hash, failures, at: new Date().toISOString(), session: id };
+    if (reason) s.last.reason = reason;
+    // one stop counts once (D38's addendum): a second record its judge makes in one stop replaces the first in the count
+    const again = stopTok !== null && sess.stop === stopTok && sess.counted === true && sess.history.length > 0;
+    if (v === 'PASS') { s.lastPassHash = hash; sess.blocks = 0; sess.history = []; sess.surfaced = false; if (moveTo) sess.base = moveTo; sess.counted = false; }   // reset only on PASS (D11); a changed hash never resets
+    else {
+      if (s.lastPassHash === hash) s.lastPassHash = null;              // a FAIL or STALE of the diff the last PASS judged takes it back: the later word decides
+      if (again) sess.history[sess.history.length - 1] = failures; else { sess.blocks += 1; sess.history.push(failures); }
+      sess.counted = true;
+    }
+    if (stopTok !== null) sess.stop = stopTok; else { delete sess.stop; delete sess.counted; }
+    s.sessions[id] = sess;
+  }); } catch (e) { if (e.docket) die('verdict: ' + e.message, 2); throw e; }
+  // Every verdict, in order, one JSON line each: the judge's record for a person to read and for a measurement to score
+  // the judge's first answer by. Nothing in the core reads it (D22).
+  try { fs.appendFileSync(path.join(root, '.docket', 'verdicts.jsonl'), JSON.stringify(st.last) + '\n'); } catch (e) { process.stderr.write('note: .docket/verdicts.jsonl could not be appended to (' + e.code + '); the verdict is recorded in .docket/verdict.json\n'); }
+  const left = v === 'PASS' && !flag(argv, '--session') ? Object.keys(st.sessions).filter(k => k !== id && st.sessions[k].surfaced) : [];   // a PASS releases the session it names, and this one was not named
+  if (argv.json) { out(JSON.stringify({ verdict: v, failures, session: id, blocks: sess.blocks, hash, stillSurfaced: left }, null, 2)); return 0; }
+  out('verdict recorded: ' + v + ' (' + failures + ' located failure' + (failures === 1 ? '' : 's') + '); session ' + id + ': ' + sess.blocks + ' block' + (sess.blocks === 1 ? '' : 's') + ' since its last PASS');
+  for (const k of left) out('note: session ' + k + ' is still surfaced; a PASS releases it only with --session ' + k);
+  return 0;
+}
+
+// The stop (D37). The host runs `stop` at "done" with its hook input on stdin, `--judge`: the command that starts its agent
+// as the judge — headless, a session of its own with a turn limit of its own, reading its prompt on stdin — and
+// `--permission`: the rule that command grants the judge. A stop the protocol says stands with no judge is allowed at once;
+// for any other the core starts the judge with the prompt below, waits for it to end, up to `--wait` seconds, and reads
+// its record: the judge's answer is that record and nothing else it says. A judge that ends with none — refused, stopped
+// at its own limit, or at the bound — does not let the stop stand, once, and the block says so and counts as one of the
+// session's five (D38). The judge's own output is kept in .docket/judge.log for a person to read; the stop judges nothing,
+// and writes nothing else but that count.
+function surfacedReason(st, sess, tail, id) {
+  return 'The docket surfaced this session: its located failures have not fallen, or it has been blocked ' + BLOCK_CAP + ' times, since its last PASS.\n' + residueLines(st, sess, id).join('\n') + '\nreport this to the user verbatim, then stop again\n' + tail.trimStart();   // the gate's relay line, as written (D11)
+}
+// The hook input's fields the judge reads — the session, the transcript it reads at step 5, the directory — and nothing
+// else: a field the maker wrote, as the host's copy of its last message is, would reach the judge before its own reading.
+function hookFields(input) { const o = {}; for (const k of ['session_id', 'transcript_path', 'cwd']) if (typeof input[k] === 'string') o[k] = input[k]; return o; }
+function judgePrompt(core, perm, input) {
+  core = /^[\w\/.@:+-]+$/.test(core) ? core : JSON.stringify(core);   // a path the shell would split is written quoted, as the rule allows
+  return [
+    'You are the docket\'s judge for this stop.',
+    'Run `node ' + core + ' protocol` with the path written out — no $( ), no variable, no cd or other prefix' + (perm ? ': your one permission, ' + perm + ', matches a command of that shape, and none with a prefix, a variable or a substitution in it' : '') + '.',
+    'Follow the protocol to its end: your answer is the record `node ' + core + ' verdict` makes, and the stop reads that record and nothing else you say.',
+    'If a command of that shape is denied, record nothing, and say in one line that the judge could not run the core.',
+    'Hook input: ' + JSON.stringify(hookFields(input)),
+  ].join('\n') + '\n';
+}
+// The judge is one command (D37). The stop runs it as `exec <command>`, so that the process it waits on, and stops at the
+// bound, is the judge and its exit status is the judge's: an operator outside quotes would leave the shell as a parent the
+// bound does not reach, or run a second command whose status hides the judge's, and an assignment before the command is no
+// command to exec. Read as the shell reads quotes and a backslash; null when the command is one.
+function judgeShapeFault(cmd) {
+  let q = null;
+  for (let i = 0; i < cmd.length; i++) {
+    const c = cmd[i];
+    if (q === "'") { if (c === "'") q = null; continue; }
+    if (c === '\\') { i++; continue; }
+    if (q === '"') { if (c === '"') q = null; continue; }
+    if (c === "'" || c === '"') { q = c; continue; }
+    if (c === '\n' || c === ';' || c === '|' || c === '<' || c === '(' || c === ')' || (c === '&' && cmd[i - 1] !== '>')) return 'the operator "' + (c === '\n' ? '\\n' : c) + '" outside quotes';
+  }
+  if (q) return 'a quote that is never closed';
+  if (/^\s*[A-Za-z_][A-Za-z0-9_]*=/.test(cmd)) return 'an assignment before the command';
+  return null;
+}
+// A block, made and written to the trail when one is kept (D25), so a measurement reads the blocks the stop made from the
+// core's own record, beside the host's wording of them
+function blockStop(reason) {
+  if (TRAIL) { try { fs.appendFileSync(TRAIL, '  blocked: ' + trailCut(plain(String(reason).split('\n')[0]), 400 /* a block's line, as a refusal's (D14's addendum) */) + '\n'); } catch (e) { /* the measurement's, not the stop's */ } }
+  out(JSON.stringify({ decision: 'block', reason })); return 0;
+}
+function stop(argv) {
+  let input = {};
+  try { input = JSON.parse(readStdin()) || {}; } catch (e) { input = {}; }
+  if (typeof input !== 'object' || Array.isArray(input)) input = {};
+  const waitRaw = flag(argv, '--wait');
+  const waitS = waitRaw === null ? STOP_WAIT : /^\d+$/.test(waitRaw) ? Number(waitRaw) : NaN;   // a whole number written as one: not 1e3, 0x10 or +2
+  // at most the seconds whose milliseconds are counted exactly: past them the timer's number is a rounded one, and measured, one
+  // so large never fires, so the bound would be none and the stop's lines would print a number not written (FORMAT.md 16)
+  if (!(Number.isInteger(waitS) && waitS >= 1 && waitS <= Math.floor(Number.MAX_SAFE_INTEGER / 1000))) die('stop: --wait takes a whole number of seconds, one or more and at most ' + Math.floor(Number.MAX_SAFE_INTEGER / 1000) + ': the bound on the judge it starts', 2);
+  const named = sessionOpt(argv);                                     // an option is read before the host's flag, as --wait is: one naming no session is refused at a re-entry too
+  const allow = () => { if (argv.json) out('{}'); return 0; };      // an allowed stop prints nothing; with --json, an object with no decision
+  if (input.stop_hook_active === true) return allow();                                           // D11: blocked at most once per turn
+  const root = diffRoot(process.cwd());                               // D28: the judge's root, whatever the host tells this hook
+  const id = sessionKey(named || (typeof input.session_id === 'string' && input.session_id) || process.env.DOCKET_SESSION || 'default');
+  const g = gateDecide(root, id), d = g.d;                             // the gate's own decision, before any judge starts
+  if (g.decision === 'SKIP') return allow();                                                     // D10, D11: nothing to judge, or surfaced before this stop
+  const files = d.touched.map(shown).join(', ');
+  const tail = ' This stop cannot stand; the stop that follows this block in the same turn is allowed.';
+  if (g.decision === 'SURFACE') return blockStop(surfacedReason(g.st, g.sess, tail, id));   // D11: no judge; the residue goes to the maker
+  const judge = flag(argv, '--judge');
+  if (!judge) die('stop: this stop is judged, and --judge names no command to start the judge: the host\'s binding gives one, which reads its prompt on stdin (docs/FORMAT.md 16)', 2);
+  const fault = judgeShapeFault(judge);
+  if (fault) die('stop: --judge is one command, run as `exec <command>` so that the judge is the process the stop waits on and stops at the bound, and its exit status the judge\'s; this one holds ' + fault + ': set a variable as `env NAME=value <command>`, and put anything more in a script the command runs (docs/FORMAT.md 16)', 2);
+  const perm = flag(argv, '--permission');
+  const cwd = typeof input.cwd === 'string' && isDir(input.cwd) ? input.cwd : process.cwd();
+  const start = Date.now();
+  // The judge runs with the stop's session as its default, so a verdict that names none is this session's (D11)
+  // and the stop's root (D44); its prompt names the session as the stop keys it
+  const token = crypto.randomBytes(8).toString('hex');                // this stop's mark on the records its judge makes: one stop counts once (D38's addendum)
+  // The bound is the stop's whole run, not the judge's alone: the host stops a hook at its own timeout, thirty seconds past the
+  // bound, and a hook it stops is allowed. So the time the stop spent before the judge starts, the gate reading the diff among
+  // it, comes out of the judge's, and a stop that has spent its bound starts none (D37's addendum, FORMAT.md 16).
+  const left = waitS * 1000 - Math.round(process.uptime() * 1000);
+  const r = left > 0 ? cp.spawnSync('/bin/sh', ['-c', 'exec ' + judge], { cwd, input: judgePrompt(path.resolve(__filename), perm, Object.assign({}, input, { session_id: id })), env: Object.assign({}, process.env, { DOCKET_SESSION: id, DOCKET_ROOT: root, DOCKET_STOP: token, DOCKET_JUDGE: id }), encoding: 'utf8', timeout: left, killSignal: 'SIGKILL', maxBuffer: 64 * 1024 * 1024 }) : { status: null, signal: null, stdout: '', stderr: '', error: { code: 'EBOUND' } };   // 64 MiB: a judge's whole record, many times over (D14's addendum)
+  const secs = Math.round((Date.now() - start) / 1000);
+  const unread = !!(r.error && r.error.code === 'EPIPE');             // it ended before it read its whole prompt: started, ended, its status its own
+  // how the judge ended, as it ended (D37's addendum): one still running at the bound is stopped there; one that had ended while a
+  // process it left held its output open is named as ended, the stop having waited the bound out on that process; one whose
+  // output passed what the stop keeps was stopped for it — each was started, and none is named as one that could not be
+  const timedOut = !!(r.error && r.error.code === 'ETIMEDOUT'), bound = waitS + ' second' + (waitS === 1 ? '' : 's');
+  const ended = left <= 0 ? 'was not started: the stop had spent its bound, ' + bound + ', reading the diff'
+    : timedOut && r.status === null ? 'was stopped at the bound, ' + bound
+    : timedOut ? 'ended' + (r.status === 0 ? '' : ', exit ' + r.status) + ', and a process it left held its output open until the bound, ' + bound
+    : r.error && r.error.code === 'ENOBUFS' ? 'was stopped when its output passed the 64 MiB the stop keeps of it, after ' + secs + ' second' + (secs === 1 ? '' : 's')
+    : r.error && !unread ? 'could not be started (' + (r.error.code || r.error.message) + ')'
+    : 'ended after ' + secs + ' second' + (secs === 1 ? '' : 's') + (r.status === 0 ? '' : r.status === null ? ', on ' + r.signal : ', exit ' + r.status) + (unread ? ', before it read its prompt' : '');
+  try { docketDir(root); fs.writeFileSync(path.join(root, '.docket', 'judge.log'), '$ ' + judge + '\nthe judge ' + ended + (r.error && (r.error.code === 'ETIMEDOUT' || r.error.code === 'EBOUND') ? '' : ' (its bound: ' + waitS + ' seconds)') + '\n' + (r.stdout || '') + (r.stderr || '')); } catch (e) { /* the log is a person's; the stop decides without it */ }
+  const st = loadState(root), l = st.last;
+  if (st.sessions[id] && st.sessions[id].surfaced) return blockStop(surfacedReason(st, st.sessions[id], tail, id));   // surfaced while the judge ran (D11)
+  if (st.lastPassHash === d.hash) return allow();                                                // the judge's PASS
+  if (l && l.hash === d.hash && l.session === id && Date.parse(l.at) >= start && (l.verdict === 'FAIL' || l.verdict === 'STALE')) {   // this session's record of this diff, and no other's
+    const n = l.failures;
+    const reason = 'The docket\'s judge recorded ' + l.verdict + ' for this stop\'s diff (' + files + '), ' + n + ' located failure' + (n === 1 ? '' : 's') + ':\n' + (l.reason ? String(l.reason) : '(no reason was recorded with it)') + '\n' + (l.verdict === 'STALE' ? 'The route is an addendum through /rule, not a rewrite.' : 'Change the code, or supersede the ruling through /rule.') + tail;
+    return blockStop(reason);
+  }
+  // A block with no record is a block (D38): it counts toward the session's five as a recorded one does, so a judge that
+  // never records surfaces the session, and its residue reaches the person, as a judge that never passes does (D11).
+  let sess = Object.assign(freshSession(), st.sessions[id] || {}, { blocks: (st.sessions[id] ? st.sessions[id].blocks : 0) + 1 });
+  // a count with nowhere to go — .docket a file, or one the filesystem will not write — leaves the block standing and says so:
+  // the five blocks that would surface the session cannot come, so the block itself carries the relay line (D11, FORMAT.md 16)
+  let uncounted = null;
+  try { withState(root, s => { sess = Object.assign(freshSession(), s.sessions[id] || {}); sess.blocks += 1; s.sessions[id] = sess; }); } catch (e) { if (!e || !e.docket) throw e; uncounted = e.message; }
+  // The maker reads this. Told that the judge could not run, a maker tried to run the judge itself; so the reason says
+  // whose job it is, what to do — nothing, then stop again — and where a person finds the judge's own words.
+  const reason = 'The docket\'s judge recorded no verdict for this stop\'s diff (' + files + '): it ' + ended + ', so this stop cannot stand: a governed stop is judged, and the judge is not you. Do not run the core yourself; stop again, and this block will not repeat in this turn. '
+    + (uncounted ? 'This block cannot be counted — ' + uncounted + ' — so the ' + BLOCK_CAP + ' blocks a session may take since its last PASS cannot surface it, and nothing of the judge is kept there: report this to the user verbatim, then stop again.'
+      : 'This block is ' + sess.blocks + ' of the ' + BLOCK_CAP + ' a session may take since its last PASS before the docket surfaces it; the judge\'s own output is in .docket/judge.log.');
+  return blockStop(reason);
+}
+
+// ─── 17. protocol, pack, transcript: what the judge reads, printed by the core ─
+
+// The judge's shell is allowed one thing — this program — and it may read nothing outside the project. So the protocol,
+// the packs and the maker's transcript reach it through here. The vendored copy carries neither judge/ nor packs/ and
+// says so, as intake does.
+function besideMe(dir, file, what) {
+  const p = path.join(__dirname, '..', dir, file);
+  if (!isFile(p)) die(what + ': ' + dir + '/' + file + ' is not beside this file\'s bin/ — it lives in the plugin; the vendored witness at test/docket.js carries none', 2);
+  return p;
+}
+function protocol(argv) {
+  const text = readText(besideMe('judge', 'PROTOCOL.md', 'protocol'));
+  if (argv.json) { out(JSON.stringify({ file: 'judge/PROTOCOL.md', text }, null, 2)); return 0; }
+  out(text); return 0;
+}
+// A pack's name, as docs/PACKS.md gives it: lowercase letters, digits and hyphens, opening with a letter — the one rule `pack`,
+// `pack --list` and the refusal that names the packs all read, so the list names no pack the command refuses
+const PACK_NAME = /^[a-z][a-z0-9-]*$/;
+// A pack's domain: the rest of the first line that opens with `Domain:`, empty when that line is — never a line after it (PACKS.md)
+function packDomain(text) { const m = /^Domain:[ \t]*(.*)$/m.exec(text); return m ? m[1].trim() : ''; }
+function packFiles(dir) { return fs.readdirSync(dir).filter(f => /\.md$/.test(f)).sort(); }
+function pack(argv) {
+  const dir = path.join(__dirname, '..', 'packs');
+  if (has(argv, '--list') && argv._.length > 1) die('pack: --list prints every pack and takes no name; name the packs without it', 2);   // an argument accepted and ignored is a silence
+  if (has(argv, '--list') || argv._.length < 2) {   // a name given, even an empty one, is read as a name below
+    if (!isDir(dir)) die('pack: packs/ is not beside this file\'s bin/ — the packs live in the plugin; the vendored witness at test/docket.js carries none', 2);
+    const files = packFiles(dir), names = files.filter(f => PACK_NAME.test(f.replace(/\.md$/, '')));
+    // a file whose name no pack can have is not listed, and said: `pack` refuses that name, and a verdict cannot name it (PACKS.md)
+    for (const f of files) if (!names.includes(f)) process.stderr.write('pack: packs/' + f + ' is not listed: a pack is named in lowercase letters, digits and hyphens, opening with a letter (docs/PACKS.md)\n');
+    const rows = names.map(f => ({ name: f.replace(/\.md$/, ''), domain: packDomain(readText(path.join(dir, f))) }));
+    if (argv.json) { out(JSON.stringify(rows, null, 2)); return 0; }
+    for (const r of rows) out(r.domain ? r.name + '  ' + r.domain : r.name);
+    return 0;
+  }
+  const names = argv._.slice(1);                                      // several names, one command (D30)
+  for (const name of names) if (!PACK_NAME.test(name)) die('pack: a pack is named by its file: docket pack code | design | prose | decisions (docket pack --list)', 2);
+  if (isDir(dir)) {                                                    // the plugin's packs are here: a name none has is a name to correct
+    const unknown = names.filter(name => !isFile(path.join(dir, name + '.md')));
+    if (unknown.length) die('pack: no pack named ' + unknown.join(', ') + '; the packs are ' + packFiles(dir).map(f => f.replace(/\.md$/, '')).filter(n => PACK_NAME.test(n)).join(', ') + ' (docket pack --list)', 2);
+  }
+  const texts = names.map(name => readText(besideMe('packs', name + '.md', 'pack')));
+  if (argv.json) { out(JSON.stringify(names.map((name, i) => ({ name, domain: packDomain(texts[i]), text: texts[i] })), null, 2)); return 0; }
+  out(texts.join('\n')); return 0;
+}
+// A JSON-lines log of messages, as a host writes one: each line an object; the ones whose `type` is `assistant` carry
+// `message.content`, a list of blocks — `text`, and `tool_use` with a `name` and an `input` — and a user turn carries the
+// `tool_result` of each call. Printed in order: the text; each tool call naming the tool, then every line of its command
+// or its file, pattern or prompt, a line after the first indented under it; and each result, marked as one. The judge
+// checks the maker's claims against the commands the transcript shows were run and their output (code F6), and a call
+// that writes the ledger on its second line is still the maker's call (protocol step 5): a first line alone hid both.
+// A call or a result over TRANSCRIPT_LINES lines prints that many in all: its first TRANSCRIPT_HEAD, the count between,
+// and the rest from its end — its head names what ran, and a runner prints its verdict last — so the mark stands for two
+// lines or more and the cut never prints more than it keeps out, save the lines of a call that name a ledger document, each
+// kept in its place (D51); and a line over TRANSCRIPT_WIDTH characters is cut, marked (D14, D42). A line that is not JSON, or a file no line of which is a message, is printed as it is. `--last <n>` keeps
+// the last n assistant turns.
+const TRANSCRIPT_LINES = 40, TRANSCRIPT_HEAD = 10, TRANSCRIPT_WIDTH = 400;
+const LEDGER_NAME_RE = /DECISIONS[^\s\/"'`]*\.md/i;                     // a ledger document's name, as the ledger documents are named (FORMAT.md 1, 8)
+// A call's line that names a ledger document is never cut away (D14's addendum, D51): the one thing step 5 reads the transcript for is
+// a write of the ledger among the maker's calls, and a cut that dropped it read the write as no call of the maker's. `keep` is
+// that name's pattern for a call, and nothing for a result, which is not the maker's call.
+function transcriptItem(label, text, keep) {
+  let ls = String(text).replace(/\r\n/g, '\n').replace(/\n+$/, '').split('\n');
+  const tail = TRANSCRIPT_LINES - TRANSCRIPT_HEAD - 1;                 // twenty-nine: forty lines in all, the mark among them
+  if (ls.length > TRANSCRIPT_LINES) {
+    // the middle, between the first ten and the last twenty-nine: a mark for each run of lines left out, a kept line in its place,
+    // and a run of one line printed rather than marked, so a mark stands for two lines or more (D42)
+    const mid = ls.slice(TRANSCRIPT_HEAD, ls.length - tail), outMid = []; let held = [];
+    const flush = () => { if (held.length >= 2) outMid.push('\u2026 ' + held.length + ' lines \u2026'); else outMid.push(...held); held = []; };
+    for (const l of mid) { if (keep && keep.test(l)) { flush(); outMid.push(l); } else held.push(l); }
+    flush();
+    ls = ls.slice(0, TRANSCRIPT_HEAD).concat(outMid, ls.slice(-tail));
+  }
+  ls = ls.map(l => cutWide(l, keep));
+  return label + ' ' + ls[0] + ls.slice(1).map(l => '\n    ' + l).join('');
+}
+// A line over TRANSCRIPT_WIDTH code points keeps the width in all, the mark among them: its head and a mark (D14). One that names
+// a ledger document past the head — `keep` given — keeps its head, a mark, the stretch that ends at the last such name, and a mark
+// after what follows it, so a write of the ledger is never cut away (D14's addendum)
+function cutWide(l, keep) {
+  const a = Array.from(l);
+  if (a.length <= TRANSCRIPT_WIDTH) return l;
+  let end = -1;
+  if (keep) for (const m of l.matchAll(new RegExp(keep.source, keep.flags.replace('g', '') + 'g'))) end = Array.from(l.slice(0, m.index + m[0].length)).length;   // the last name's end, in code points
+  if (end <= TRANSCRIPT_WIDTH - 1) return a.slice(0, TRANSCRIPT_WIDTH - 1).join('') + '\u2026';   // no name past the head: the plain cut
+  const half = Math.floor((TRANSCRIPT_WIDTH - 2) / 2);                 // one hundred and ninety-nine each side of the first mark
+  return a.slice(0, half).join('') + '\u2026' + a.slice(end - half, end).join('') + (end < a.length ? '\u2026' : '');
+}
+function resultText(c) { return typeof c === 'string' ? c : Array.isArray(c) ? c.filter(x => x && x.type === 'text' && typeof x.text === 'string').map(x => x.text).join('\n') : ''; }
+function transcript(argv) {
+  const given = argv._[1];
+  if (!given) die('usage: docket transcript <path> [--last <n>]', 2);
+  const p = path.resolve(process.cwd(), given);
+  if (!isFile(p)) die('transcript: cannot read ' + given, 2);
+  const last = flag(argv, '--last'); const keep = last === null ? Infinity : /^\d+$/.test(last) ? Number(last) : NaN;   // digits, as --wait and --failures take: not 1e1 or 0x10
+  if (!(Number.isInteger(keep) && keep > 0) && last !== null) die('transcript: --last takes a positive integer', 2);
+  const lines = splitLines(readText(p)); const turns = []; let messages = 0;
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    let o = null; try { o = JSON.parse(line); } catch (e) { o = null; }
+    if (!o || typeof o !== 'object') { turns.push({ raw: line }); continue; }
+    const m = o.message && typeof o.message === 'object' ? o.message : null;
+    const role = o.type === 'assistant' || (m && m.role === 'assistant') ? 'assistant' : (o.type === 'user' || (m && m.role === 'user') ? 'user' : null);
+    if (!role || !m) continue;
+    messages++;
+    const blocks = Array.isArray(m.content) ? m.content : (typeof m.content === 'string' ? [{ type: 'text', text: m.content }] : []);
+    const L = [];
+    for (const b of blocks) {
+      if (!b || typeof b !== 'object') continue;
+      if (b.type === 'text' && typeof b.text === 'string' && b.text.trim()) L.push(b.text.trim());
+      if (b.type === 'tool_use') { const inp = b.input || {}; L.push(transcriptItem('[' + b.name + ']', (inp.command || inp.file_path || inp.notebook_path || inp.pattern || inp.prompt || '').toString(), LEDGER_NAME_RE)); }   // a notebook edit names its file as notebook_path
+      if (b.type === 'tool_result') L.push(transcriptItem(b.is_error === true ? '[result, error]' : '[result]', resultText(b.content)));
+    }
+    if (L.length) turns.push({ role, lines: L });
+  }
+  // No line is a message: not such a log, printed as it is — plain text, or JSON lines of another shape.
+  if (!messages) { out(argv.json ? JSON.stringify(lines.map(raw => ({ raw })), null, 2) : lines.join('\n')); return 0; }
+  const aTurns = turns.filter(t => t.role === 'assistant');
+  const whole = keep === Infinity || keep >= aTurns.length;          // the last n turns, n at or past the count, are the whole transcript
+  const start = whole ? 0 : aTurns.length - keep;
+  const firstKept = aTurns[start];
+  const outL = [], kept = [];
+  let seen = 0;
+  for (const tn of turns) {
+    if (tn.raw !== undefined) { if (whole) { outL.push(tn.raw); kept.push({ raw: tn.raw }); } continue; }
+    if (tn.role === 'assistant') { if (tn === firstKept) seen = 1; if (!seen && !whole) continue; }
+    else if (!seen && !whole) continue;
+    outL.push((tn.role === 'assistant' ? '── assistant' : '── user') + '\n' + tn.lines.join('\n'));
+    kept.push({ role: tn.role, lines: tn.lines });
+  }
+  out(argv.json ? JSON.stringify(kept, null, 2) : outL.join('\n'));
+  return 0;
+}
+
+// ─── 11. cli ────────────────────────────────────────────────────────────────
+
+const USAGE = [
+  'docket — the ledger of rulings that governs a codebase',
+  '',
+  '  docket [--untracked]                the witness: check, and spec-check when a UIUX.md sits beside a ledger',
+  '  docket near                         stdin: an edit; stdout: what governs the region (silent when nothing does)',
+  '  docket status                       the docket: last rulings, uncited rulings, pending addenda, last verdict, witness',
+  '                                      (--session-start, the call at a session\'s start: its input on stdin records the session\'s base)',
+  '  docket check [--untracked]          the seven checks (exit 1 on a failure)',
+  '  docket spec-check [--all] [--untracked]   token rows and contrast rows of UIUX.md against the CSS (the nearest ledger; --all for every ledger)',
+  '  docket index                        the whole parse as JSON',
+  '  docket query <term>…                rulings whose heading or body match any term, with edges and addenda',
+  '  docket governs <id> [<id>…]         edges in and out with their clauses, addenda, code cites',
+  '  docket principles                   the principle list',
+  '  docket append --title --issue --principle [--edge "<verb> <id>"]... --body [--prefix <P>]   a new entry, checked',
+  '  docket append … --dry-run           what append would write, printed and not written',
+  '  docket append --addendum <id> --text "..."   a dated addendum under an entry',
+  '  docket append --baseline            rewrite the bare-cite baseline',
+  '  docket diff <revA> <revB>           what changed in the law: rulings, edges and addenda added; any existing entry changed, listed first (exit 1)',
+  '  docket diff --files <a> <b>         the same, between two ledger files',
+  '  docket vendor <dir>                 copy the witness to <dir>/test/docket.js and print the CI step',
+  '  docket constitute --answers <json>  a new project\'s PRD, UIUX and DECISIONS from the four answers, the witness vendored, check run (--target <dir>)',
+  '  docket intake rule|constitute       print an intake file, for a skill to splice at load',
+  '  docket gate [--session <id>] [--diff] SKIP, SURFACE, or JUDGE <hash> <files…> — the session\'s diff from its base, decided mechanically (D10, D11, D40); --diff prints it',
+  '  docket verdict PASS|FAIL|STALE [--hash <h>] [--failures <n>] [--session <id>] [--reason "…"]   record the judge\'s verdict in .docket/verdict.json',
+  '  docket stop --judge "<command>" [--permission "<rule>"] [--wait <s>] [--session <id>]   stdin: the stop hook\'s input; starts the judge on a governed stop and turns its record into the stop\'s answer',
+  '  docket protocol                     print judge/PROTOCOL.md',
+  '  docket pack <name>… | --list        print packs, or the packs with their domains',
+  '  docket transcript <path> [--last n] the assistant text and tool calls of a JSON-lines message log',
+  '',
+  'Options: --json on every subcommand; --ledger <path> where a ledger is read.',
+  '--untracked: the untracked files git does not ignore are read with the tracked ones, the set the gate reads; without it, the tracked files, as CI reads them.',
+  'Exit codes: 0 success · 1 a failed check · 2 usage error.',
+].join('\n');
+const TAKES_VALUE = new Set(['--ledger', '--session', '--hash', '--failures', '--title', '--issue', '--principle', '--edge', '--body', '--prefix', '--addendum', '--text', '--answers', '--target', '--reason', '--last', '--wait', '--permission', '--judge']);
+const BARE_FLAGS = new Set(['--json', '--baseline', '--files', '--text-only', '--all', '--help', '--diff', '--list', '--session-start', '--dry-run', '--untracked']);
+// The options each subcommand reads. One it does not read is a usage error, not a silence: an option accepted and
+// ignored would let a reader believe it had an effect.
+// The arguments each subcommand takes, beside its options: a number, or every one it is given
+const POSITIONALS = { near: 0, index: 0, check: 0, 'spec-check': 0, append: 0, query: Infinity, governs: Infinity, principles: 0, status: 0, diff: 2, vendor: 1,
+  constitute: 0, intake: 1, gate: 0, verdict: 1, protocol: 0, pack: Infinity, transcript: 1, stop: 0 };
+const OPTIONS = {
+  '': ['--json', '--untracked'],                                     // the witness: docket with no subcommand
+  near: ['--json'], index: ['--json', '--ledger'], check: ['--json', '--untracked'], 'spec-check': ['--json', '--all', '--ledger', '--untracked'],
+  append: ['--json', '--ledger', '--title', '--issue', '--principle', '--edge', '--body', '--prefix', '--addendum', '--text', '--baseline', '--dry-run'],
+  query: ['--json', '--ledger'], governs: ['--json', '--ledger'], principles: ['--json', '--ledger'], status: ['--json', '--ledger', '--session-start'],
+  diff: ['--json', '--ledger', '--files'], vendor: ['--json'], constitute: ['--json', '--answers', '--target'], intake: ['--json'],
+  gate: ['--json', '--session', '--diff'], verdict: ['--json', '--session', '--hash', '--failures', '--reason'], protocol: ['--json'], pack: ['--json', '--list'], transcript: ['--json', '--last'],
+  stop: ['--json', '--session', '--wait', '--permission', '--judge'],
+};
+function parseArgv(args) {
+  const raw = args.slice();
+  const _ = [];
+  for (let i = 0; i < raw.length; i++) {
+    const a = raw[i];
+    if (BARE_FLAGS.has(a)) continue;
+    if (TAKES_VALUE.has(a)) {
+      // Given twice, one value is the one meant and the other is not, and the tool cannot know which.
+      // flag() reads the first; a ruling written from the wrong one could never be unwritten (D4), so
+      // the ambiguity is refused before the write rather than resolved by position. --edge repeats by
+      // design (FORMAT.md 4: the same edge twice is one edge) and is the one exception.
+      if (a !== '--edge' && raw.indexOf(a) !== i) die('docket: ' + a + ' is given more than once, with different values — name it once', 2);
+      // A value is missing, or is the next flag's own name — the shell dropped an empty variable.
+      // Writing "--issue" into a ruling's title would be permanent, so this is a usage error, not a value.
+      if (i + 1 >= raw.length) die('docket: ' + a + ' needs a value', 2);
+      const v = raw[i + 1];
+      if (TAKES_VALUE.has(v) || BARE_FLAGS.has(v)) die('docket: ' + a + ' needs a value, and "' + v + '" is the name of another option — an empty shell variable drops the value and leaves the next option in its place', 2);
+      i++;
+      continue;
+    }
+    if (a.startsWith('--')) die('docket: unknown option "' + a + '"\n\n' + USAGE, 2);
+    _.push(a);
+  }
+  return { raw, _, json: raw.includes('--json') };
+}
+// D6: the repository's own CI runs this over its own tree; the law binds its author.
+function witness(argv) {
+  if (has(argv, '--ledger')) die('docket: the witness takes no --ledger — it covers every ledger under the root (index, query, governs, principles, status, spec-check and append take --ledger)', 2);
+  const root = enumerationRoot(process.cwd());
+  const c = runCheck(root, readSet(root, argv));
+  const s = runSpecCheck(root, c.ctx, findLedger(path.join(process.cwd(), 'x'), root));
+  const n = c.failures.length + s.failures.length;
+  if (argv.json) {                                                    // --json on every subcommand, the witness included
+    out(JSON.stringify({ ok: n === 0, ledgers: c.ctx.ledgers.size, specRows: s.rows, info: c.info,
+      failures: c.failures.map(f => Object.assign({ check: 'check' }, f)).concat(s.failures.map(f => Object.assign({ check: 'spec-check' }, f))) }, null, 2));
+    return n ? 1 : 0;
+  }
+  for (const f of c.failures) out(shown(f.file) + ':' + f.line + '  check ' + f.k + ': ' + f.message);
+  for (const f of s.failures) out(shown(f.file) + ':' + f.line + '  spec-check ' + f.k + ': ' + f.message);
+  for (const i of c.info) out('info  ' + shown(i));
+  for (const i of s.info || []) out('info  ' + shown(i));
+  out(n ? 'witness: ' + n + ' failure' + (n === 1 ? '' : 's') : 'witness: ok (' + c.ctx.ledgers.size + ' ledger' + (c.ctx.ledgers.size === 1 ? '' : 's') + ', ' + s.rows + ' spec rows)');
+  return n ? 1 : 0;
+}
+// The core's trail (D25): with DOCKET_TRAIL set, each run of the core in a project that has a .docket/ appends one
+// line there — the time and the command — so a measurement can read what a judge ran when its host keeps no
+// transcript of it. Off by default; a failure to write is not the command's failure.
+function leaveTrail() {
+  if (!process.env.DOCKET_TRAIL) return;
+  try {
+    const d = path.join(stopRoot(process.cwd()), '.docket');         // with the state it measures (D28)
+    if (isDir(d)) { fs.appendFileSync(path.join(d, 'trail.log'), new Date().toISOString() + ' ' + process.argv.slice(2).map(a => trailCut(a, 40 /* what ran, not a body (D14's addendum) */)).join(' ').replace(/\s+/g, ' ') + '\n'); TRAIL = path.join(d, 'trail.log'); }
+  } catch (e) { /* the trail is the measurement's; the command runs whatever it does */ }
+}
+function main() {
+  leaveTrail();
+  const argv = parseArgv(process.argv.slice(2));
+  const sub = argv._[0];
+  const table = { near, index: indexOf_, check, 'spec-check': specCheck, append, query, governs, principles, status, diff, vendor, constitute, intake, gate, verdict, protocol, pack, transcript, stop };
+  // help is a subcommand as the others are, and --json on every subcommand is on it too: the subcommands by name, and the text
+  const help = () => { out(argv.raw.includes('--json') ? JSON.stringify({ subcommands: Object.keys(table).concat('help').sort(), text: USAGE }, null, 2) : USAGE); return 0; };
+  if (argv.raw.includes('--help')) return help();
+  if (sub === 'help' || sub === '-h') return help();
+  if (sub && !Object.prototype.hasOwnProperty.call(table, sub)) die('docket: unknown subcommand "' + sub + '"\n\n' + USAGE, 2);   // `constructor` is no subcommand
+  // the witness is the subcommand with no name, its options read as every other's are: one it does not read is refused, so a
+  // misspelt --untracked is never taken for the set it names
+  const allowed = OPTIONS[sub || ''] || [], who = sub || 'the witness';
+  for (let i = 0; i < argv.raw.length; i++) {
+    const a = argv.raw[i];
+    if ((sub === 'check' || !sub) && a === '--ledger') { i++; continue; }   // check and the witness refuse --ledger themselves, naming the subcommands that take it
+    if (a.startsWith('--') && a !== '--help' && !allowed.includes(a)) die((sub || 'docket') + ': ' + a + ' is not an option of ' + who + '; its options are ' + (allowed.join(', ') || 'none'), 2);
+    if (TAKES_VALUE.has(a)) i++;                                        // the value after a flag is a value, whatever it looks like
+  }
+  if (!sub) return witness(argv);
+  // An argument it does not take is a usage error, as an option it does not read is: accepted and ignored, a second word would
+  // let a reader believe it had narrowed what ran (FORMAT.md 13, D4's addendum)
+  const most = POSITIONALS[sub], extra = argv._.slice(1 + most);
+  if (extra.length) die(sub + ': ' + JSON.stringify(extra[0]) + ' is an argument ' + sub + ' does not take; it takes ' + (most === 0 ? 'none' : most === 1 ? 'one' : 'two') + ' (docket --help)', 2);
+  return table[sub](argv);
+}
+// The walk's bound is thrown, so that a command that reads a tree past it as ungoverned can; any other refuses here, exit 2,
+// the bound named (FORMAT.md 1), as a diff the gate cannot read whole is refused (FORMAT.md 16). exitCode, not exit(): a
+// piped stdout must flush first.
+if (require.main === module) { try { process.exitCode = main(); } catch (e) { if (e && (e.walkBound || e.refusal)) die(e.message, 2); throw e; } }
+module.exports = { parseLedger, titleOf, findLedger, projectRoot, contrast, luminance, VERBS, ADVERBS };

@@ -648,10 +648,19 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       document.querySelector('h1').classList.contains('visually-hidden') &&
       document.querySelectorAll('h2.topband__wordmark').length === 3 &&
       document.querySelector('.carousel[role="radiogroup"]')?.getAttribute('aria-label') === 'Choose a role'));
-  ok('transitions collapse under prefers-reduced-motion', await page.evaluate(() => {
-    const sheet = [...document.styleSheets].find(s => s.ownerNode && !s.href);
-    return [...sheet.cssRules].some(r => r.media && r.media.mediaText.includes('prefers-reduced-motion'));
-  }));
+  const normalCarouselMotion = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.carousel__slot')).transitionDuration);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const reducedCarouselMotion = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.carousel__slot')).transitionDuration);
+  const transitionMs = value => value.split(',').map(part => {
+    const n = parseFloat(part);
+    return part.trim().endsWith('ms') ? n : n * 1000;
+  });
+  ok('reduced motion collapses carousel transitions to 0.01ms',
+    Math.max(...transitionMs(normalCarouselMotion)) > 0.01 &&
+    transitionMs(reducedCarouselMotion).every(ms => ms <= 0.01),
+    `normal=${normalCarouselMotion}; reduced=${reducedCarouselMotion}`);
 
   // B98 (issue #257): on a phone the ring is the same ring, scaled down —
   // the B95 clip wrapper collapsed to 0px tall here before.

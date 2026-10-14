@@ -12,7 +12,7 @@ const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/index.html';
 const OUT = process.env.PORTFOLIO_OUT && path.resolve(process.env.PORTFOLIO_OUT);
 const VW = 1440, VH = 900;
 let failures = 0;
-const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
+const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}${!cond && details ? ' :: ' + details : ''}`); };
 
 (async () => {
   const browser = await chromium.launch();
@@ -220,19 +220,24 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
 
   // pressed: 1px inset transforms + green glow (Idea #b9d2b2 = rgb(185, 210, 178))
   await page.mouse.down();
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(250);   // allow the active green glow to settle
   const pressedTransform = await first.evaluate(el => getComputedStyle(el).transform);
   ok('active presses 1px inset', pressedTransform.includes('1px') || (pressedTransform !== 'none' && !pressedTransform.includes('0, 0, 0, 1)')));
+  const pressedShadow = await first.evaluate(el => getComputedStyle(el).boxShadow);
+  ok('active state uses the Idea green glow', /rgba?\(185, 210, 178(?:,|\))/.test(pressedShadow), pressedShadow);
   await page.mouse.up();
 
   // focus ring for keyboard (never colour alone)
   await page.keyboard.press('Tab');
   await page.waitForTimeout(80);
-  const css = await page.evaluate(() => {
-    const s = [...document.styleSheets].map(sh => { try { return [...sh.cssRules].map(r => r.cssText).join('\n'); } catch (e) { return ''; } }).join('\n');
-    return { hasFocusRing: s.includes(':focus-visible') && s.includes('outline'), hasTransition: s.includes('transition') };
+  const focus = await page.evaluate(() => {
+    const el = document.activeElement;
+    const style = getComputedStyle(el);
+    return { isDoor: el.matches('a.door-card'), outlineStyle: style.outlineStyle, outlineWidth: parseFloat(style.outlineWidth) };
   });
-  ok('CSS rules for focus ring + motion present', css.hasFocusRing && css.hasTransition);
+  ok('Tab focuses a door-card with a visible focus ring',
+    focus.isDoor && focus.outlineStyle !== 'none' && focus.outlineWidth > 0,
+    JSON.stringify(focus));
 
   // no service worker registrations (B13)
   ok('no service worker', await page.evaluate(async () => {

@@ -23,9 +23,9 @@ const VIEWPORTS = [
 ];
 
 let pass = 0, fail = 0;
-function ok(label, cond) {
+function ok(label, cond, details = '') {
   if (cond) { pass++; console.log('PASS ' + label); }
-  else { fail++; console.log('FAIL ' + label); }
+  else { fail++; console.log('FAIL ' + label + (details ? ' :: ' + details : '')); }
 }
 
 (async () => {

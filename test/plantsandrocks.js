@@ -252,14 +252,23 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('the ink neutrals come from TheBoards :root verbatim',
     tokens.inkLight === '#f4f5f1' && tokens.inkDark === '#031019');
 
-  // ≤743px: the band stacks to one column, the lot stacks
+  // ≤743px: the band stacks to one column, the footer becomes a vertical stack.
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(200);
-  ok('at 390px the band stacks to one column and the lot stacks, no overflow',
+  ok('at 390px the band stacks to one column with no overflow',
     await page.evaluate(() => {
       const band = getComputedStyle(document.querySelector('.topband')).gridTemplateColumns;
       const overflow = document.documentElement.scrollWidth > document.documentElement.clientWidth;
       return !band.includes(' ') && !overflow;
+    }));
+  ok('at 390px the footer stacks copy, divider and download section vertically',
+    await page.evaluate(() => {
+      const lot = document.querySelector('.parking-lot');
+      const back = document.querySelector('.parking-lot__facts--back').getBoundingClientRect();
+      const divider = document.querySelector('.parking-lot__divider').getBoundingClientRect();
+      const download = document.querySelector('.parking-lot__facts:not(.parking-lot__facts--back)').getBoundingClientRect();
+      return getComputedStyle(lot).flexDirection === 'column' &&
+        back.top <= divider.top && divider.top <= download.top && divider.height <= 1;
     }));
   ok('at 390px the poles reader still renders the storybook iframe full-width, below the cards',
     await (async () => {
@@ -284,10 +293,19 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       document.querySelector('h1').classList.contains('visually-hidden') &&
       document.querySelector('h1').innerText.trim() === 'Plants & Rocks' &&
       document.querySelectorAll('h2.topband__wordmark').length === 2));
-  ok('transitions collapse under prefers-reduced-motion', await page.evaluate(() => {
-    const sheet = [...document.styleSheets].find(s => s.ownerNode && !s.href);
-    return [...sheet.cssRules].some(r => r.media && r.media.mediaText.includes('prefers-reduced-motion'));
-  }));
+  const normalFooterMotion = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.parking-lot .cta')).transitionDuration);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const reducedFooterMotion = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.parking-lot .cta')).transitionDuration);
+  const transitionMs = value => value.split(',').map(part => {
+    const n = parseFloat(part);
+    return part.trim().endsWith('ms') ? n : n * 1000;
+  });
+  ok('reduced motion collapses the footer CTA transition to 0.01ms',
+    Math.max(...transitionMs(normalFooterMotion)) > 0.01 &&
+    transitionMs(reducedFooterMotion).every(ms => ms <= 0.01),
+    `normal=${normalFooterMotion}; reduced=${reducedFooterMotion}`);
 
   await browser.close();
   console.log(failures === 0 ? '\nAll plantsandrocks checks passed.' : `\n${failures} failure(s).`);

@@ -729,6 +729,6 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     !t2.hover && await tp.locator('#role-2').isChecked());
 
   await browser.close();
-  console.log(failures === 0 ? '\nAll career checks passed.' : `\n${failures} failure(s).`);
+  console.log(failures === 0 ? '\nCAREER PASS' : `\nCAREER FAIL: ${failures}`);
   process.exit(failures === 0 ? 0 : 1);
-})();
+})().catch(e => { console.error('ERROR', e); process.exit(2); });

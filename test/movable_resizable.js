@@ -43,11 +43,10 @@ const MIN_SCALE = 0.5;   // TheBoards' note-scale floor (B45); the ceiling is pe
    drawing re-sizes nine cards (community, career, writing, software-ai,
    plants-rocks, apple-music, zeved-boards, agentic-plugins,
    plants-in-rocks) and re-places seven; LinkedIn and Plants on Poles are
-   untouched. B67's #175 list is superseded; the B52 board/sub tier split
-   at scale 1 was superseded at B67. The gesture bounds (0.5 floor,
-   one-fifth ceiling) are untouched; this pins the default rendered size and
-   placement per card only. B80 (issue #196) adds the Philly Plant Dads note
-   — the Spotify card's own box at the Spotify rest scale 1.19 (B80). */
+   untouched. The gesture bounds (0.5 floor, one-fifth ceiling) are
+   untouched; this pins the default rendered size and placement per card
+   only. B80 (issue #196) adds the Philly Plant Dads note — the Spotify
+   card's own box at the Spotify rest scale 1.19 (B80). */
 const REST_SCALES = {
   'community': 2.33, 'career': 2.18, 'writing': 1.86, 'software-ai': 1.78,
   'plants-rocks': 2.26, 'music': 1.70, 'apple-music': 1.01, 'spotify': 1.19,
@@ -217,9 +216,7 @@ async function runScenario(page, tag, width, height) {
   // state.js MIN_SCALE) and ceilinged at the issue #142/B51 one-fifth-of-the-
   // viewport bound: one uniform scale, the card stops at the first axis that
   // reaches 0.2 × the board's logical dimensions (the board fills the
-  // viewport, so board-logical == viewport). The old fixed MAX_SCALE 2.0 and
-  // the old B21 1/5-viewport w/h ceiling are superseded by this per-card
-  // ceiling; the 132x80 unscaled floor still stands.
+  // viewport, so board-logical == viewport).
   const grown = await page.evaluate(async () => {
     const board = document.querySelector('#board');
     const c = document.querySelector('a.door-card');
@@ -298,10 +295,8 @@ async function runScenario(page, tag, width, height) {
   // semantics are only trustworthy through a real press-move-release — which is
   // exactly how the bug reproduces. Assert on the tab count, like the B3 check.
   await page.goto(URL, { waitUntil: 'networkidle' });
-  // issue #112 (B43) authored the first door-card 310px wide. B45 removed
-  // the w/h ceiling entirely (scale-based resize); B51 (issue #142) sets the
-  // per-card 1/5-viewport ceiling in its place, so the proof still runs on
-  // the Spotify door, far from the sheet edges.
+  // the resize proof runs on the Spotify door, far from the sheet edges
+  // (B45's scale resize; B51's per-card ceiling, issue #142).
   const resizeCard = page.locator('[data-id="spotify"]');
   const resizeBox = await resizeCard.boundingBox();
   const handleBox = await resizeCard.locator('.resize-handle').boundingBox();

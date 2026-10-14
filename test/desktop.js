@@ -72,10 +72,8 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('Requirements zone label', (await page.locator('#zone-requirements .band-label').innerText()) === 'Requirements');
   ok('Parking Lot header', (await page.locator('#lot-header').innerText()) === 'Parking Lot');
 
-  // issue #174/B68 removed the prior Components line; issue #185/B69 added the
-  // pseudonyms line; issue #208/B85 replaces it with two lines — the issue's
-  // literal line break. Requirements keeps the anchor grammar; issue
-  // #183/B71 replaced its copy.
+  // the Components zone renders its two-line copy (issue #208/B85); the
+  // Requirements anchor renders its copy (issue #183/B71).
   const bandCopy = await page.evaluate(() => {
     const g = sel => { const el = document.querySelector(sel); return el ? { text: el.textContent.trim(), weight: getComputedStyle(el).fontWeight } : null; };
     return {
@@ -143,9 +141,8 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   }), { w: VW, h: VH });
   ok('all door-cards sit inside the viewport (no clipping)', inside);
 
-  // issue #145/B53 + #146/B55: the eight linked sub cards render plain (400)
-  // text — and issue #167/B60 supersedes B53's 600 clause: every note card
-  // (all fourteen) renders plain 400 — UIUX §4's weight clause
+  // issue #145/B53 + #146/B55: the linked sub cards render plain 400 text;
+  // every note card (all fourteen) renders plain 400 (issue #167/B60, UIUX §4).
   const weights = await page.evaluate(() => {
     const w = id => { const el = document.querySelector(`.door-card[data-id="${id}"]`); return el ? getComputedStyle(el).fontWeight : null; };
     return {

@@ -91,10 +91,10 @@ There is **no `test/sw-update.js`** — the site ships **no service worker**
 `CACHE` string) does not exist here. Do not add it. Do not add a service
 worker.
 
-Env overrides (read by the tests): `PORTFOLIO_URL` (default
-`http://localhost:8000/index.html`; `career.js` and `plantsandrocks.js` default to
-their own pages on `:8000`), `PORTFOLIO_OUT` (screenshot directory for `mobile.js`,
-`desktop.js`, `movable_resizable.js`), `PROOF_DIR` (output directory for `proof.js`,
+Env overrides (read by the tests): `PORTFOLIO_BASE_URL` (default
+`http://localhost:8000/`; each suite appends its own page),
+`PORTFOLIO_OUT` (screenshot directory for `mobile.js`, `desktop.js`,
+`movable_resizable.js`), `PROOF_DIR` (output directory for `proof.js`,
 default `/tmp/portfolio-proof`). There is no lint/build/typecheck command — the project has
 none.
 

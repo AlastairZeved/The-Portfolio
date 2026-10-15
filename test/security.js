@@ -63,8 +63,10 @@ ok("no CSP in any block loosens script-src with 'unsafe-inline' or 'unsafe-eval'
 ok('no Referrer-Policy header is set (AGENTS.md §4: Formspree needs the referrer)',
   !/^\s*Referrer-Policy:/mi.test(headers));
 const sbCsp = ((blocks['/monstera-storybook.html'] || []).find(h => /^Content-Security-Policy:/i.test(h)) || '');
-ok("the storybook block allows self-framing only (frame-ancestors 'self', B57)",
+ok("the storybook block allows same-origin framing (frame-ancestors 'self', B57)",
   /frame-ancestors 'self'(;|$)/.test(sbCsp));
+ok("the storybook block allows its blob worker (worker-src 'self' blob:', B57)",
+  /worker-src 'self' blob:(;|$)/.test(sbCsp));
 
 // Every shipped page and script, discovered from the repo root (not a hardcoded list).
 const SHIPPED_HTML = fs.readdirSync(ROOT).filter(f => f.endsWith('.html')).sort();

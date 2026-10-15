@@ -99,10 +99,9 @@ jobs:
 
       - name: proof.js
         # The only suite that needs the pin: its built-in default is a
-        # placeholder host. career.js and plantsandrocks.js keep their own
-        # defaults (career.html / plantsandrocks.html on :8000).
+        # placeholder host; each suite resolves its page against this base.
         env:
-          PORTFOLIO_URL: http://localhost:8000/index.html
+          PORTFOLIO_BASE_URL: http://localhost:8000/
         run: node test/proof.js
 
       - name: scaling.js

@@ -3,12 +3,13 @@
    (hover glow, pressed green, never colour alone). The fourteen note links
    (B28, UIUX §4.3) — pairs, 1px --frame line, card-centre endpoints.
    Black-box Playwright.
-   Run: node test/desktop.js   (PORTFOLIO_URL default http://localhost:8000/index.html) */
+   Run: node test/desktop.js   (PORTFOLIO_BASE_URL default http://localhost:8000/) */
 
 const { chromium } = require('playwright');
 const path = require('path');
 
-const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/index.html';
+const BASE_URL = process.env.PORTFOLIO_BASE_URL || 'http://localhost:8000/';
+const URL = new globalThis.URL('index.html', BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/').href;
 const OUT = process.env.PORTFOLIO_OUT && path.resolve(process.env.PORTFOLIO_OUT);
 const VW = 1440, VH = 900;
 let failures = 0;
@@ -212,6 +213,49 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     lk.lines.every(l => l.cA && l.cB &&
       Math.abs(l.x1 - l.cA[0]) < 0.6 && Math.abs(l.y1 - l.cA[1]) < 0.6 &&
       Math.abs(l.x2 - l.cB[0]) < 0.6 && Math.abs(l.y2 - l.cB[1]) < 0.6));
+
+  // issue #275: assert resize writes every card's new max-width before
+  // drawLinks reads any card geometry; the order matters when a cap rewraps.
+  await page.evaluate(() => {
+    const events = { capWrites: 0, firstLineWriteAfter: null };
+    const setProperty = CSSStyleDeclaration.prototype.setProperty;
+    const setAttribute = Element.prototype.setAttribute;
+    CSSStyleDeclaration.prototype.setProperty = function (name, ...args) {
+      if (name === '--card-max-w') events.capWrites++;
+      return setProperty.call(this, name, ...args);
+    };
+    Element.prototype.setAttribute = function (name, ...args) {
+      if (this.tagName === 'line' && name === 'x1' && events.firstLineWriteAfter === null) {
+        events.firstLineWriteAfter = events.capWrites;
+      }
+      return setAttribute.call(this, name, ...args);
+    };
+    window.__issue275ResizeEvents = events;
+  });
+  await page.setViewportSize({ width: 1024, height: VH });
+  await page.waitForTimeout(100);
+  const resizeEvents = await page.evaluate(() => window.__issue275ResizeEvents);
+  ok('[L17] resize lays out every card before link geometry is read',
+    resizeEvents.capWrites >= 6 && resizeEvents.firstLineWriteAfter === resizeEvents.capWrites);
+  const resizedLinks = await page.evaluate(() => {
+    const board = document.getElementById('board');
+    const br = board.getBoundingClientRect();
+    const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
+    return [...document.querySelectorAll('#link-layer line')].map(l => {
+      const a = board.querySelector('[data-id="' + l.dataset.from + '"]').getBoundingClientRect();
+      const b = board.querySelector('[data-id="' + l.dataset.to + '"]').getBoundingClientRect();
+      return [
+        +l.getAttribute('x1'), +l.getAttribute('y1'),
+        (a.left - br.left + a.width / 2) / rs, (a.top - br.top + a.height / 2) / rs,
+        +l.getAttribute('x2'), +l.getAttribute('y2'),
+        (b.left - br.left + b.width / 2) / rs, (b.top - br.top + b.height / 2) / rs
+      ];
+    });
+  });
+  ok('[L18] resize re-lays out cards before redrawing all link endpoints',
+    resizedLinks.length === 14 && resizedLinks.every(p =>
+      Math.abs(p[0] - p[2]) < 0.6 && Math.abs(p[1] - p[3]) < 0.6 &&
+      Math.abs(p[4] - p[6]) < 0.6 && Math.abs(p[5] - p[7]) < 0.6));
 
   // card states (B14) on the first door-card
   const first = page.locator('a.door-card').first();

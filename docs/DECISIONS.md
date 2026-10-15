@@ -3291,3 +3291,9 @@ Number: The relevant rulings are B97, B98, B46, B20 and B18; B46's cited value i
 Reason: B98's "`replaces B97`" was committed 3 minutes before the addendum, so it doesn't count. When B46 was written, the Parking Lot ruling was numbered B18. After the 2026-10-06 renumber it is B20, and B18 is now the All Boards rail.
 
 **Source:** the owner's issue [#273](https://github.com/AlastairZeved/The-Portfolio/issues/273), quoted verbatim — "Only an entry that retires B97 clears it."; "B98's `replaces B97` was committed 3 minutes before the addendum, so it doesn't count."; "When B46 was written, the Parking Lot ruling was numbered B18. After the 2026-10-06 renumber it is B20, and B18 is now the All Boards rail."
+
+### B109. Resize redraws links after laying out cards; test URLs share one base (issue #275)
+
+On viewport resize, lay out the cards before redrawing their note links. Test suites share `PORTFOLIO_BASE_URL` and append the page each suite exercises. The storybook's `frame-ancestors 'self'` allows any same-origin page to frame it; its comment describes that accurately. No CSP policy change is made.
+
+**Source:** the owner's issue [#275](https://github.com/AlastairZeved/The-Portfolio/issues/275), quoted verbatim — "If confirmed, swap the two calls."; "a base-URL variable that each suite joins with its own page. This changes the env interface, so update AGENTS.md's Commands section in the same PR."; "In fact `frame-ancestors 'self'` means any same-origin page may frame it. Reword it."

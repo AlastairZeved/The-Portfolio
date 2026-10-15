@@ -274,8 +274,10 @@
   // logical px like every authored size: it scales with the sheet (B30).
   layoutAllCards();
   // the percentage-authored layout re-scales with the viewport: recompute
-  window.addEventListener('resize', drawLinks);
-  window.addEventListener('resize', layoutAllCards);
+  window.addEventListener('resize', function () {
+    layoutAllCards();
+    drawLinks();
+  });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
     layoutAllCards();
     drawLinks();

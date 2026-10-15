@@ -1,12 +1,13 @@
 /* test/mobile.js — mobile render + nine new-tab door-cards + form + the one
    render scale (no clip, no overflow, link endpoints under the scale) and the
    fourteen note links (B28, B55, B80) (black-box, Playwright).
-   Run: node test/mobile.js   (PORTFOLIO_URL default http://localhost:8000/index.html) */
+   Run: node test/mobile.js   (PORTFOLIO_BASE_URL default http://localhost:8000/) */
 
 const { chromium } = require('playwright');
 const path = require('path');
 
-const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/index.html';
+const BASE_URL = process.env.PORTFOLIO_BASE_URL || 'http://localhost:8000/';
+const URL = new globalThis.URL('index.html', BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/').href;
 const OUT = process.env.PORTFOLIO_OUT && path.resolve(process.env.PORTFOLIO_OUT);
 let failures = 0;
 const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };

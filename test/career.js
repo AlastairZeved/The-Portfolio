@@ -19,7 +19,7 @@
    the description card as the only scroll container; B76 still renders the
    agentic-plugins source geometry scaled uniformly by the plate's own width.
    Single file, zero script; only the B63 favicon links. Black-box Playwright.
-   Run: node test/career.js   (PORTFOLIO_URL default http://localhost:8000/career.html)
+   Run: node test/career.js   (PORTFOLIO_BASE_URL default http://localhost:8000/)
    Viewport note: the desktop run is at the page's own design canvas
    (REF_H ≈ 1104.55 → rs ≈ 1), because the band's literals render at the B46
    scale (--rs). The carousel's card geometry scales by the plate's own width
@@ -28,7 +28,8 @@
 
 const { chromium } = require('playwright');
 
-const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/career.html';
+const BASE_URL = process.env.PORTFOLIO_BASE_URL || 'http://localhost:8000/';
+const URL = new globalThis.URL('career.html', BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/').href;
 let failures = 0;
 const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
 

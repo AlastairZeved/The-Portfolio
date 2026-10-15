@@ -8,11 +8,12 @@
    idea-board green palette (byte-exact, NOT a re-hue). Single file, zero
    script on plantsandrocks.html itself; only the B63 favicon links.
    Black-box Playwright, career.js's harness.
-   Run: node test/plantsandrocks.js   (PORTFOLIO_URL default http://localhost:8000/plantsandrocks.html) */
+   Run: node test/plantsandrocks.js   (PORTFOLIO_BASE_URL default http://localhost:8000/) */
 
 const { chromium } = require('playwright');
 
-const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/plantsandrocks.html';
+const BASE_URL = process.env.PORTFOLIO_BASE_URL || 'http://localhost:8000/';
+const URL = new globalThis.URL('plantsandrocks.html', BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/').href;
 let failures = 0;
 const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
 

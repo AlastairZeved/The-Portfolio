@@ -90,11 +90,6 @@ body {
   font: 400 1rem/1.6 "Montserrat Alternates", system-ui, sans-serif;
 }
 
-a:focus-visible {
-  outline: 2px solid var(--ink-light);
-  outline-offset: 2px;
-}
-
 /* ---- Header — the two-page selector (issue #134 §1; conventions fixed to
    the landing page's render, issue #140/B50). The landing's band grammar —
    the water (radial foot, three-stop ladder, 0.05 dither) over the deep,
@@ -137,16 +132,12 @@ a:focus-visible {
   width: max-content;
   min-width: 0;
   min-height: calc(var(--rule-y) + 29 * var(--rs));
-  padding: calc(var(--band-top) + calc(8 * var(--rs))) var(--card-pad) var(--card-pad);
+  padding: calc(var(--band-top) + 8 * var(--rs)) var(--card-pad) var(--card-pad);
   border: calc(2 * var(--rs)) solid var(--frame);
   border-top: 0;
   border-radius: 0 0 calc(3 * var(--rs)) calc(3 * var(--rs));   /* only the corners that exist */
   background: var(--card);
   text-align: center;
-  transition:
-    box-shadow 200ms var(--ease),
-    filter 200ms var(--ease),
-    transform 200ms var(--ease);
 }
 
 /* Selection: the radio is checked (default Plants on Poles). The selected
@@ -156,16 +147,6 @@ a:focus-visible {
 .topband__card:has(.topband__tab:checked) {
   box-shadow: 0 0 8px 0 var(--frame);
 }
-.topband__card:active {
-  filter: brightness(0.92);
-  transform: translateY(2px);
-  transition-duration: 80ms;
-}
-.topband__card:has(.topband__tab:focus-visible) {
-  outline: 2px solid var(--ink-light);
-  outline-offset: 2px;
-}
-
 /* The radio: focusable, never drawn. The label is the card's click surface. */
 .topband__tab {
   position: absolute;
@@ -184,19 +165,19 @@ a:focus-visible {
 /* The B31 type: both lines at 20px logical, single size in the card — the
    page name is the pinned line (600), the oneliner (the owner's B48 copy)
    the eyebrow line (400), the landing title card's two-line grammar. */
-.topband__wordmark {
+.topband__wordmark,
+.topband__oneliner {
   margin: 0;
-  font-weight: 600;
   font-size: calc(20 * var(--rs));
-  letter-spacing: -0.02em;
   line-height: 1.2;
+}
+.topband__wordmark {
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 /* The owner's oneliner copy (B48, verbatim) — these slots are NOT blank. */
 .topband__oneliner {
-  margin: 0;
   font-weight: 400;
-  font-size: calc(20 * var(--rs));
-  line-height: 1.2;
 }
 /* Unselected: career.html's dim-italic state. */
 .topband__card:not(:has(.topband__tab:checked)) .topband__wordmark,
@@ -299,6 +280,9 @@ body:has(#page-rocks:checked) .reader--rocks {
   text-decoration: none;
   cursor: pointer;
   box-shadow: var(--elevation), 0 0 6px 0 var(--frame);
+}
+.topband__card,
+.cta {
   transition:
     box-shadow 200ms var(--ease),
     filter 200ms var(--ease),
@@ -323,15 +307,22 @@ body:has(#page-rocks:checked) .cta[download] {
     box-shadow: var(--elevation), 0 0 12px 2px var(--frame), 0 0 24px 4px var(--frame);
   }
 }
+.topband__card:active,
 .cta:active {
   filter: brightness(0.92);
   transform: translateY(2px);
-  box-shadow: var(--elevation-inset);
   transition-duration: 80ms;
 }
+.cta:active {
+  box-shadow: var(--elevation-inset);
+}
+a:focus-visible,
+.topband__card:has(.topband__tab:focus-visible),
 .cta:focus-visible {
   outline: 2px solid var(--ink-light);
   outline-offset: 2px;
+}
+.cta:focus-visible {
   box-shadow: var(--elevation), 0 0 12px 2px var(--frame), 0 0 0 4px var(--deep);
 }
 

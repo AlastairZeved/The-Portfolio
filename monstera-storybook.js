@@ -54,34 +54,37 @@ function armDrop(fn, ms) {
   return setTimeout(fn, ms + 1000); // fallback when workers are unavailable
 }
 
-/* book model (1-indexed pages p1..p24 = PAGES[0..23]):
+/* book model (1-indexed pages p1..pN = PAGES[0..PAGES.length-1]):
    closed: right half holds the cover; each turn flips a sheet left,
    revealing the next right page and laying the sheet's back as the next left page. */
 function build() {
   spreads = [];
   if (mq.matches) {
     spreads.push([NONE, 0]);                    // closed book — cover alone, right half
-    for (var i = 1; i < 23; i += 2) spreads.push([i, i + 1]);  // [p2|p3] … [p22|p23]
-    spreads.push([23, NONE]);                   // last page alone
+    // Page 0 is the cover; pair the rest in order, leaving an empty half if
+    // PAGES has an even count.
+    for (var i = 1; i < PAGES.length; i += 2) {
+      spreads.push([i, i + 1 < PAGES.length ? i + 1 : NONE]);
+    }
   } else {
-    for (var j = 0; j < 24; j++) spreads.push([j]);
+    for (var j = 0; j < PAGES.length; j++) spreads.push([j]);
   }
   idx = Math.min(idx, spreads.length - 1);
+}
+function pageImg(page) {
+  var im = document.createElement('img'); im.src = PAGES[page]; im.alt = '';
+  return im;
 }
 function makeSpread(s, cls) {
   var d = document.createElement('div');
   d.className = 'spread' + (cls ? ' ' + cls : '');
   if (s.length === 1) {
     var h = document.createElement('div'); h.className = 'half';
-    var img = document.createElement('img'); img.src = PAGES[s[0]]; img.alt = '';
-    h.appendChild(img); d.appendChild(h);
+    h.appendChild(pageImg(s[0])); d.appendChild(h);
   } else {
     for (var k = 0; k < 2; k++) {
       var h2 = document.createElement('div'); h2.className = 'half';
-      if (s[k] !== NONE) {
-        var im = document.createElement('img'); im.src = PAGES[s[k]]; im.alt = '';
-        h2.appendChild(im);
-      }
+      if (s[k] !== NONE) h2.appendChild(pageImg(s[k]));
       d.appendChild(h2);
     }
   }
@@ -89,9 +92,12 @@ function makeSpread(s, cls) {
 }
 function faceImg(page) {
   var f = document.createElement('div'); f.className = 'face';
-  var im = document.createElement('img'); im.src = PAGES[page]; im.alt = '';
-  f.appendChild(im);
+  f.appendChild(pageImg(page));
   return f;
+}
+function syncButtons() {
+  btnPrev.disabled = idx === 0;
+  btnNext.disabled = idx === spreads.length - 1;
 }
 function flip(dir) {
   if (busy || !cur) return;
@@ -133,8 +139,7 @@ function flip(dir) {
   }
   turn.addEventListener('animationend', cleanup, { once: true });
   fallback = armDrop(cleanup, 900); // worker-driven: unthrottled in hidden tabs
-  btnPrev.disabled = idx === 0;
-  btnNext.disabled = idx === spreads.length - 1;
+  syncButtons();
 }
 btnPrev.addEventListener('click', function () { flip(-1); });
 btnNext.addEventListener('click', function () { flip(1); });
@@ -145,8 +150,7 @@ document.addEventListener('keydown', function (e) {
 function show() {
   if (cur) stage.removeChild(cur);
   var d = makeSpread(spreads[idx]); stage.appendChild(d); cur = d;
-  btnPrev.disabled = idx === 0;
-  btnNext.disabled = idx === spreads.length - 1;
+  syncButtons();
 }
 function rebuild() {
   build();
@@ -157,6 +161,7 @@ var builtTwo = mq.matches;
 function onMode() {
   if (mq.matches !== builtTwo) { builtTwo = mq.matches; rebuild(); }
 }
+/* Rebuild only when the media-query breakpoint flips; window resize would
+   repeat the same check on every resize event. */
 mq.addEventListener ? mq.addEventListener('change', onMode) : mq.addListener(onMode);
-window.addEventListener('resize', onMode);
 build(); show();

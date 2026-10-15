@@ -60,7 +60,7 @@ ok('root CSP has exactly the ruled directives and nothing else',
 ok("no wildcard source (*) anywhere in the CSP", !/(^|\s)\*(\s|;|$)/.test(rootCsp));
 ok("no CSP in any block loosens script-src with 'unsafe-inline' or 'unsafe-eval'",
   !/script-src[^;]*'unsafe-(inline|eval)'/.test(headers));
-ok('no Referrer-Policy header is set (AGENTS.md §4: Formspree needs the referrer)',
+ok('no Referrer-Policy header is set (AGENTS.md: Formspree needs the referrer)',
   !/^\s*Referrer-Policy:/mi.test(headers));
 const sbCsp = ((blocks['/monstera-storybook.html'] || []).find(h => /^Content-Security-Policy:/i.test(h)) || '');
 ok("the storybook block allows same-origin framing (frame-ancestors 'self', B57)",

@@ -350,7 +350,7 @@ async function runScenario(page, tag, width, height) {
   const context = await browser.newContext();
   const page = await context.newPage({ viewport: { width: 1440, height: 900 }, hasTouch: false });
 
-  await runScenario(page, 'desktop', 1440, 900);   // rs ≈ 0.815 — the desktop pin
+  await runScenario(page, 'desktop', 1440, 900);   // desktop-scale viewport
   await runScenario(page, 'mobile', 390, 844);     // rs < 1 — the issue #87 scale
 
   if (OUT) await page.screenshot({ path: OUT });

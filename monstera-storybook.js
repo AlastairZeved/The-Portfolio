@@ -51,7 +51,7 @@ function armDrop(fn, ms) {
     ticker.postMessage({ id: id, ms: ms });
     return null;
   }
-  return setTimeout(fn, ms + 1000); // fallback when workers are unavailable
+  return setTimeout(fn, ms + 1000); // fallback timer (issue #274)
 }
 
 /* book model (1-indexed pages p1..pN = PAGES[0..PAGES.length-1]):

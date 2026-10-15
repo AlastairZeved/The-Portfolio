@@ -625,7 +625,8 @@ The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 - **Divider:** the divider grammar career.html ships (`.parking-lot__divider`
   — 1px wide, **3/4** of the section's inner height, centred), re-tokened to
   this page's To-Do blue: `color-mix(in srgb, var(--frame) 45%, transparent)`
-  — the same mix the `#lot-rule` already renders.
+  — the `#lot-rule` is solid `var(--frame)`; career.html's divider and lot
+  rule use the 45% mix.
 - **Right half:** the contact form (§6/§6.1 stand), spanning the right
   half; its tracks are `1fr 2fr` so it **scales with any viewport** (the
   issue's "scaled up and down to fit them all").

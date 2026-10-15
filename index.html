@@ -158,9 +158,7 @@ body {
 .band-zone .anchor {
   left: 0; right: 0;
   top: var(--band-top);
-  width: auto;
   min-height: 44px;
-  padding: 0;
   font-size: 16.57px; font-weight: 400;   /* 15 × 1.10455 (#128/B46) — keeps the band anchor on the same rescaled rung as the band's own literals; weight plain per issue #147/B54 */
 }
 
@@ -252,7 +250,7 @@ body {
    settled rect). Suppress just the transform member; the shadow keeps its
    150ms. */
 .door-card.resizing {
-  transition: box-shadow 150ms ease-out;
+  transition-property: box-shadow;
 }
 /* hover: the blue bloom — --accent-page's channels, wide enough to register (B14 hover member; #67) */
 .door-card:hover {
@@ -298,8 +296,7 @@ body {
    state and no click state — rest surface only (B26). It is still a note, so
    it drags and resizes like the rest (B7). */
 .door-card.note-card:hover,
-.door-card.note-card:active,
-.door-card.note-card:focus-visible {
+.door-card.note-card:active {
   box-shadow: none;
   transform: scale(var(--card-scale, 1));   /* B45: the note's own scale stands under hover */
   outline: none;
@@ -416,7 +413,6 @@ body {
   grid-template-columns: 1fr 2fr;
   gap: 12px;
   align-items: start;
-  justify-content: start;           /* anchored left; right side of the pane stays free */
   width: 100%;
 }
 #contact-form .left-column {
@@ -474,8 +470,8 @@ body {
 #contact-form button[type="submit"]:hover { filter: brightness(1.1); }
 #contact-form button[type="submit"]:active { filter: brightness(0.92); }
 #contact-form .gotcha {
-  position: absolute !important;
-  left: -9999px !important;
+  position: absolute;
+  left: -9999px;
   width: 1px; height: 1px; overflow: hidden;
 }
 #form-note {

@@ -32,7 +32,7 @@ question. The governing issue of record is
   | Professional | razgregory.com/career — the employer-selector career page (B47) |
   | Writing | substack.com/@theaboveaveragerob |
   | Software & AI | alastairzeved.com |
-  | Plants & Rocks | razgregory.com/plantsandrocks (stub) |
+  | Plants & Rocks | razgregory.com/plantsandrocks (B48) |
   | Music | open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ |
 - **Parking Lot:** Formspree contact form — Name (optional), Email
   (optional), Message (required).

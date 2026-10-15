@@ -107,7 +107,7 @@ body {
 }
 #lot-rule { top: 0; }
 
-/* ---- The two zones: furniture present, contents absent (PRD §2.6) ---- */
+/* ---- The two zones: static copy per UIUX §3.3 ---- */
 .band-zone {
   position: absolute;
   top: 0; height: var(--rule-y);
@@ -140,7 +140,7 @@ body {
 /* ---- The Requirements section line (issue #92) ----------------------------
    Ported from TheBoards' section-text mechanism (TheBoards styles.css .anchor
    / .band-zone .anchor). TheBoards' anchors are contenteditable textboxes
-   because TheBoards is the app; this site is static (B7/B13, PRD §2.6 — no
+   because TheBoards is the app; this site is static (B7/B13, UIUX §4.1 — no
    state, no persistence, editing refused), so only the RENDERED format and
    placement are ported: the line hangs from the zone top at --band-top, in
    --ink at 16.57px/400 (UIUX §3.3), above the rule the band-label tab sits under.  The zone

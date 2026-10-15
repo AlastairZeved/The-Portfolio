@@ -35,7 +35,7 @@ const BASE_URL = process.env.PORTFOLIO_BASE_URL || 'http://localhost:8000/';
 const URL = new globalThis.URL('index.html', BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/').href;
 const OUT = process.env.PORTFOLIO_OUT && path.resolve(process.env.PORTFOLIO_OUT);
 let failures = 0;
-const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
+const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}${!cond && details ? ' :: ' + details : ''}`); };
 
 const DRAG_X = 180, DRAG_Y = 150;   // physical px the pointer travels (6 moves of +30/+25)
 const MIN_SCALE = 0.5;   // TheBoards' note-scale floor (B45); the ceiling is per-card (B51)
@@ -133,9 +133,9 @@ async function runScenario(page, tag, width, height) {
   // bounds are untouched.
   const rest = await page.evaluate(() => {
     const out = {};
+    const rs2 = parseFloat(getComputedStyle(document.querySelector('#board')).getPropertyValue('--rs')) || 1;
     document.querySelectorAll('.door-card').forEach(c => {
       const r = c.getBoundingClientRect();
-      const rs2 = parseFloat(getComputedStyle(document.querySelector('#board')).getPropertyValue('--rs')) || 1;
       out[c.dataset.id] = { scale: parseFloat(c.style.getPropertyValue('--card-scale')) || 1,
         left: parseFloat(c.style.left), top: parseFloat(c.style.top),
         logicalW: r.width / rs2, unscaledW: c.offsetWidth };

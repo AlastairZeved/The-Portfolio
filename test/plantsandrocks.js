@@ -15,7 +15,7 @@ const { chromium } = require('playwright');
 const BASE_URL = process.env.PORTFOLIO_BASE_URL || 'http://localhost:8000/';
 const URL = new globalThis.URL('plantsandrocks.html', BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/').href;
 let failures = 0;
-const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
+const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}${!cond && details ? ' :: ' + details : ''}`); };
 
 (async () => {
   const browser = await chromium.launch();
@@ -193,9 +193,12 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('the divider is 1px wide and 3/4 of the section length', await page.evaluate(() => {
     const d = document.querySelector('.parking-lot__divider');
     const bar = parseFloat(getComputedStyle(d, '::before').height);
-    const lot = document.querySelector('.parking-lot').getBoundingClientRect();
+    const lot = document.querySelector('.parking-lot');
+    const lotHeight = lot.getBoundingClientRect().height;
+    const lotStyle = getComputedStyle(lot);
+    const padding = parseFloat(lotStyle.paddingTop) + parseFloat(lotStyle.paddingBottom);
     return getComputedStyle(d, '::before').width === '1px' &&
-      Math.abs(bar - 0.75 * (lot.height - 24)) < 6;
+      Math.abs(bar - 0.75 * (lotHeight - padding)) < 6;
   }));
 
   // Two .cta controls. The Download is a PDF anchor (B58, issue #157), live
@@ -229,8 +232,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     await downloadCta.count() === 1 &&
     (await downloadCta.innerText()).trim() === 'Download' &&
     (await downloadCta.getAttribute('href')) === 'Flattened-Monstera-Division.pdf' &&
-    (await downloadCta.getAttribute('download')) !== null);
-  ok('the Download control has no script handler (the page has no script)',
+    (await downloadCta.getAttribute('download')) !== null &&
     (await downloadCta.getAttribute('onclick')) === null);
   ok('on the poles tab both controls are live, the Download not dimmed', await (async () => {
     // re-select Plants on Poles: the §2 swap step above left Plants in Rocks checked

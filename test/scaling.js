@@ -44,7 +44,10 @@ function ok(label, cond, details = '') {
       const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
       const cards = [...document.querySelectorAll('.door-card')].map(c => {
         const b = c.getBoundingClientRect();
-        return { id: c.getAttribute('data-id'), l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width, h: b.height };
+        const s = parseFloat(c.style.getPropertyValue('--card-scale')) || 1;
+        return { id: c.getAttribute('data-id'), l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width, h: b.height,
+          s, lp: parseFloat(c.style.left) || 0, tp: parseFloat(c.style.top) || 0,
+          unscaledW: c.offsetWidth, unscaledH: c.offsetHeight };
       });
       const overlaps = [];
       for (let i = 0; i < cards.length; i++)
@@ -94,13 +97,11 @@ function ok(label, cond, details = '') {
       // B45 (issue #126): cards are content-sized — physical box = the unscaled
       // layout box × the card's own scale × rs (uniform, no reflow), floored at
       // TheBoards' NOTE_MIN_W 132 logical px (× the card's scale, × rs).
-      const dims = [...document.querySelectorAll('.door-card')].map(c => {
-        const s = parseFloat(c.style.getPropertyValue('--card-scale')) || 1;
-        const b = c.getBoundingClientRect();
-        return { id: c.getAttribute('data-id'), s, rs,
-                 devW: Math.abs(b.width - c.offsetWidth * s * rs),
-                 devH: Math.abs(b.height - c.offsetHeight * s * rs),
-                 logicalW: c.offsetWidth * s };
+      const dims = cards.map(c => {
+        return { id: c.id, s: c.s, rs,
+                 devW: Math.abs(c.w - c.unscaledW * c.s * rs),
+                 devH: Math.abs(c.h - c.unscaledH * c.s * rs),
+                 logicalW: c.unscaledW * c.s };
       });
       // issue #128 (B46): the band, the title card and the Parking Lot size by
       // TheBoards' own laws — band literals RESCALED ×1.10455 (k = 1104.55/1000,
@@ -149,11 +150,9 @@ function ok(label, cond, details = '') {
          (bLeft% − aLeft%). The logical height (vh/rs) grows with the floor,
          spreading the % tops, so the page re-measures until stable; re-derive
          the same way here. Issue #253 pins the handle's child scale. */
-      const geo = [...document.querySelectorAll('.door-card')].map(c => ({
-        lp: parseFloat(c.style.left) || 0, tp: parseFloat(c.style.top) || 0,
-        s: parseFloat(c.style.getPropertyValue('--card-scale')) || 1,
-        w: c.offsetWidth * (parseFloat(c.style.getPropertyValue('--card-scale')) || 1),
-        h: c.offsetHeight * (parseFloat(c.style.getPropertyValue('--card-scale')) || 1)
+      const geo = cards.map(c => ({
+        lp: c.lp, tp: c.tp, s: c.s,
+        w: c.unscaledW * c.s, h: c.unscaledH * c.s
       }));
       for (let pass = 0; pass < 60; pass++) {
         const lh = innerHeight / (innerWidth >= innerHeight

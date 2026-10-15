@@ -104,7 +104,7 @@ body {
   font: 400 1rem/1.6 "Montserrat Alternates", system-ui, sans-serif;
 }
 
-:is(a, button, label:has(input:focus-visible)):focus-visible {
+a:focus-visible {
   outline: 2px solid var(--ink-light);
   outline-offset: 2px;
 }
@@ -187,7 +187,6 @@ body {
    Hover devices only: a phone has no hover to answer. */
 @media (hover: hover) {
   .topband__card:has(.topband__card-hit:hover) {
-    border-color: var(--frame);
     box-shadow: 0 0 calc(32 * var(--rs)) calc(4 * var(--rs)) rgb(var(--glow-gray-a) / 0.9);
   }
 }
@@ -317,8 +316,6 @@ main { flex: 1 1 auto; display: flex; }
 .carousel {
   position: relative;
   z-index: 1;
-  min-width: 0;
-  min-height: 0;
   width: 100%;
   height: 100%;
   /* Flatter than B92's 800px, and proportional to the card so the ring keeps
@@ -331,7 +328,6 @@ main { flex: 1 1 auto; display: flex; }
      card, and would swallow their clicks; only the cards take the pointer. */
   pointer-events: none;
 }
-.carousel__slot { pointer-events: auto; }
 /* The radio: focusable, never drawn -- the .topband__tab's own off-flow pattern. */
 .carousel__radio {
   position: absolute;
@@ -362,12 +358,13 @@ body:has(#role-8:checked) .carousel { --n: 8; }
 .carousel__slot {
   position: absolute;
   left: 50%;
+  animation: ring-arrive 2s var(--ease) both;
   /* The component's own box runs 90 source px below its back card (B76's
      plate inset); dropping it by that much puts the back card's foot on the
      stage floor, so the arrows sit just under the front card. */
   bottom: calc(var(--ring-w) * -90 / 830);
   width: var(--ring-w);
-  min-width: 0;
+  pointer-events: auto;
   /* B95 (issue #250): the SLOT is the scale container -- one uniform --u for
      all 8 components, 1 source px = own-slot-width/830, so every piece of
      every component scales together and all 8 render at one size. */
@@ -414,8 +411,6 @@ body:has(#role-8:checked) .carousel { --n: 8; }
   initial-value: 0deg;
 }
 @keyframes ring-arrive { from { --spin: 360deg; } }
-.carousel__slot { animation: ring-arrive 2s var(--ease) both; }
-
 /* Issue #261: click any card. Each slot carries its own label for its role's
    radio, so a click on a visible side card turns the ring to it -- no script.
    It covers the card's drawn area (the title's 55u top to the back card's
@@ -474,6 +469,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .carousel__slot-hit { d
   transform: translate(-50%, 50%);
   z-index: 0;
   pointer-events: none;
+  animation: 500ms var(--ease) both;
   /* B99 (issue #261): the light is cool moonlight (--moon-a), at alphas lowered so
      its luminance matches B98's grey pool -- a cast, not a colour. A second,
      flat ellipse lights the floor at the front card's foot (79% down the
@@ -498,7 +494,6 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .carousel__slot-hit { d
 @keyframes pool-dip-6 { 50% { opacity: 0.45; } }
 @keyframes pool-dip-7 { 50% { opacity: 0.45; } }
 @keyframes pool-dip-8 { 50% { opacity: 0.45; } }
-.carousel__pool { animation: 500ms var(--ease) both; }
 body:has(#role-1:checked) .carousel__pool { animation-name: pool-dip-1; }
 body:has(#role-2:checked) .carousel__pool { animation-name: pool-dip-2; }
 body:has(#role-3:checked) .carousel__pool { animation-name: pool-dip-3; }
@@ -646,9 +641,6 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
      the content. Above the breakpoint the plate caps at half the left
      half's own height and the description card carries the scroll (B74, see
      the >743px block). */
-  flex: 1 1 0;
-  min-height: 0;
-  min-width: 0;
   width: 100%;
   /* B95 (issue #250): the component's pieces all scale by the ONE uniform
      --u inherited from its .carousel__slot. The component scales together
@@ -666,8 +658,6 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   box-sizing: border-box;
   border: 2.1px solid var(--ink);
   border-radius: 3px;
-  background: var(--note);
-  color: var(--ink);
   text-align: center;
   overflow-wrap: break-word;
 }
@@ -708,7 +698,6 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
 .gm-title {
   position: relative;
   z-index: 1;
-  flex: 0 0 auto;
   width: calc(427 * var(--u));     /* the source's fixed title-card width */
   max-width: 100%;
   margin: calc(55 * var(--u)) auto 0;   /* the source's top: 55px */
@@ -740,11 +729,10 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
    first, background card 0.3s behind it. */
 .gm-title::after,
 .gm-back::after {
-  animation: gm-marquee 6s var(--ease) infinite;
+  animation: 6s var(--ease) infinite;
   /* B102 (issue #261): the glimmer runs on the FRONT card only -- motion where the
      visitor is looking, none in the dark around it (the other 14 sweeps
      stop). The front card's sweep restarts as each new card lands. */
-  animation-name: none;
 }
 .gm-back::after { animation-delay: 0.3s; }
 body:has(#role-1:checked) .carousel__slot[data-role="1"] :is(.gm-title, .gm-back)::after,
@@ -798,10 +786,9 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
   border-color: color-mix(in srgb, var(--frame) 35%, transparent);
   border-top-color: rgb(var(--moon-a) / 0.6);
   background: color-mix(in srgb, var(--card) 78%, transparent);
-  color: var(--glass-ink);
   font-size: max(calc(20 * var(--u)), 11px);   /* the source's 20px, at the 11px floor */
   letter-spacing: 0.015em;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.6;                /* the source's 32px at 20px type */
   box-shadow: inset 0 1px 0 rgb(var(--moon-a) / 0.22), var(--elevation);
 }
@@ -813,7 +800,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
    same uniform box as the filled ones, bare of the scroll region. Width is
    the B76 source ratio (600 of 830). */
 .gm-desc { flex: 0 1 calc(450 * var(--u)); }
-.gm-desc:empty { min-height: 0; }
+
 /* B98 (issue #257): a role whose copy is not written yet shows a quiet
    placeholder instead of a blank slab -- the landing page's dim-italic
    grammar, in the card's own ink at reduced strength (issue #261: the glass
@@ -830,7 +817,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
   font-style: italic;
   opacity: 0.6;
 }
-.gm-desc:not(:empty) { min-height: 0; overflow-y: scroll; }
+.gm-desc:not(:empty) { overflow-y: scroll; }
 /* The bar is a real, visible, in-card scroll bar (B75, carried into B76):
    ::-webkit-scrollbar forces the classic (non-overlay) bar Chromium and
    Safari otherwise auto-hide — 6px, so it takes no room — its thumb the
@@ -847,20 +834,6 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
    ring token, offset 2px so the ring lands on the plate outside the card's
    ink border. */
 .gm-desc:focus-visible { outline: 2px solid var(--ink-light); outline-offset: 2px; }
-
-.blurb, .role-notes, .accomplishments, .learnings { margin: 0 0 1.25rem; }
-.blurb p, .role-notes p, .accomplishments p, .learnings p { margin: 0 0 0.6em; }
-.blurb :last-child, .role-notes :last-child,
-.accomplishments :last-child, .learnings :last-child { margin-bottom: 0; }
-
-.blurb h3, .role-notes h3, .accomplishments h3, .learnings h3 {
-  margin: 0 0 0.35em;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--note);
-}
 
 /* ---- Footer — three sections (issue #133 §3). The
    .parking-lot, same height/formatting/borders, split three ways with
@@ -901,11 +874,10 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
 .parking-lot__facts {
   flex: 1 1 0;
   font-size: 0.85rem;
-  color: rgb(244 245 241 / 0.7);   /* reading text keeps ≥ 4.5:1 */
 }
 .parking-lot__facts p { margin: 0 0 0.35em; }
 .parking-lot__facts p:last-child { margin-bottom: 0; }
-.parking-lot__facts--contact { flex: 1 1 0; display: flex; justify-content: center; }
+.parking-lot__facts--contact { display: flex; justify-content: center; }
 
 /* B65 (issue #177), carried by B77 (issue #193): the footer copy lines — the
    tools line and the education line beneath it — their straight slashes
@@ -958,8 +930,6 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
   }
 }
 .cta:focus-visible {
-  outline: 2px solid var(--ink-light);
-  outline-offset: 2px;
   box-shadow: var(--elevation), 0 0 12px 2px var(--frame), 0 0 0 4px var(--deep);
 }
 
@@ -990,8 +960,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
      the description card is the page's only scroll container. The component
      does not clip (`visible`, B94): since B98 nothing blooms past it, but a
      clip would cut the title card where it straddles the back card. */
-  .gregorian-mode { max-height: 100%;               /* the component's own cap */
-                    overflow: visible; }            /* no clip */
+  .gregorian-mode { overflow: visible; }            /* no clip */
 }
 
 @media (max-width: 743px) {
@@ -1034,7 +1003,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
   }
   /* B56: the component's glimmer dies outright with the motion preference;
      B81 (issue #212): the role band's glimmer does too. */
-  .gm-title::after, .gm-back::after { animation: none; content: none; }
+  .gm-title::after, .gm-back::after { content: none; }
   /* Issue #261: reduced motion drops MOTION only -- no arrival turn, no hover
      rise or nudges, no lift on the CTA -- while the light, the glass, the
      shadows and the grain all stay. */

@@ -335,14 +335,6 @@ main { flex: 1 1 auto; display: flex; }
   opacity: 0; pointer-events: none;
 }
 /* Each role's ring index, and the checked role's index. */
-.carousel__slot[data-role="1"] { --i: 1; }
-.carousel__slot[data-role="2"] { --i: 2; }
-.carousel__slot[data-role="3"] { --i: 3; }
-.carousel__slot[data-role="4"] { --i: 4; }
-.carousel__slot[data-role="5"] { --i: 5; }
-.carousel__slot[data-role="6"] { --i: 6; }
-.carousel__slot[data-role="7"] { --i: 7; }
-.carousel__slot[data-role="8"] { --i: 8; }
 body:has(#role-1:checked) .carousel { --n: 1; }
 body:has(#role-2:checked) .carousel { --n: 2; }
 body:has(#role-3:checked) .carousel { --n: 3; }
@@ -381,8 +373,9 @@ body:has(#role-8:checked) .carousel { --n: 8; }
      the ring's own Z placement, so it never changes depth: a hovered card can
      never come in front of the front card. */
   --lift: 0;
+  --rise: 0px;
   transform-origin: 50% 50%;
-  transform: translateX(-50%) translateY(calc(var(--lift) * var(--ring-w) * -0.025))
+  transform: translateX(-50%) translateY(var(--rise))
              translateZ(calc(var(--ring-r) * -1))
              rotateY(var(--a)) translateZ(var(--ring-r));
   /* Darken with distance: full at the front, the rearmost near --deep. */
@@ -433,7 +426,10 @@ body:has(#role-6:checked) .carousel__slot[data-role="6"] .carousel__slot-hit,
 body:has(#role-7:checked) .carousel__slot[data-role="7"] .carousel__slot-hit,
 body:has(#role-8:checked) .carousel__slot[data-role="8"] .carousel__slot-hit { display: none; }
 @media (hover: hover) {
-  .carousel__slot:has(> .carousel__slot-hit:hover) { --lift: 1; }
+  .carousel__slot:has(> .carousel__slot-hit:hover) {
+    --lift: 1;
+    --rise: calc(var(--ring-w) * -0.025);
+  }
 }
 
 /* Issue #261: grounding. A soft contact shadow under each card's foot, on
@@ -505,15 +501,18 @@ body:has(#role-8:checked) .carousel__pool { animation-name: pool-dip-8; }
 
 /* Side cards keep their titles; only the front card's description reads.
    The text fades on the ring's own 500ms turn. */
-.carousel__slot .gm-desc { color: transparent; transition: color 500ms var(--ease); }
-body:has(#role-1:checked) .carousel__slot[data-role="1"] .gm-desc,
-body:has(#role-2:checked) .carousel__slot[data-role="2"] .gm-desc,
-body:has(#role-3:checked) .carousel__slot[data-role="3"] .gm-desc,
-body:has(#role-4:checked) .carousel__slot[data-role="4"] .gm-desc,
-body:has(#role-5:checked) .carousel__slot[data-role="5"] .gm-desc,
-body:has(#role-6:checked) .carousel__slot[data-role="6"] .gm-desc,
-body:has(#role-7:checked) .carousel__slot[data-role="7"] .gm-desc,
-body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-desc { color: var(--glass-ink); }
+.carousel__slot .gm-desc { color: var(--desc-ink, transparent); transition: color 500ms var(--ease); }
+body:has(#role-1:checked) .carousel__slot[data-role="1"],
+body:has(#role-2:checked) .carousel__slot[data-role="2"],
+body:has(#role-3:checked) .carousel__slot[data-role="3"],
+body:has(#role-4:checked) .carousel__slot[data-role="4"],
+body:has(#role-5:checked) .carousel__slot[data-role="5"],
+body:has(#role-6:checked) .carousel__slot[data-role="6"],
+body:has(#role-7:checked) .carousel__slot[data-role="7"],
+body:has(#role-8:checked) .carousel__slot[data-role="8"] {
+  --desc-ink: var(--ink-light);
+  --glimmer: gm-marquee;
+}
 
 /* The arrows: a pair centred below the front card, OUTSIDE the 3D context
    (inside it, the ring painted over them whatever their z-index). Two
@@ -551,22 +550,26 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .gm-desc { color: var(-
     filter 200ms var(--ease),
     transform 200ms var(--ease);
 }
-.carousel__nav--next .carousel__nav-hit::before { transform: translate(-30%, -50%) rotate(135deg); }
-.carousel__nav--prev .carousel__nav-hit::before { transform: translate(-70%, -50%) rotate(-45deg); }
+.carousel__nav--next { --chevron-x: -30%; --chevron-angle: 135deg; --nudge-hover: 3px; }
+.carousel__nav--prev { --chevron-x: -70%; --chevron-angle: -45deg; --nudge-hover: -3px; }
+.carousel__nav-hit::before {
+  --nudge: 0px;
+  --press: 1;
+  transform: translate(calc(var(--chevron-x) + var(--nudge)), -50%)
+             rotate(var(--chevron-angle)) scale(var(--press));
+}
 /* Issue #261: the arrows answer. On hover a chevron brightens to the
    brightest ink with a soft bloom and nudges 3px the way it points; pressed,
    it sinks (scaled to 0.85) on the 80ms press (UIUX §5's grammar). */
 @media (hover: hover) {
   .carousel__nav-hit:hover::before {
+    --nudge: var(--nudge-hover);
     border-color: var(--ink-light);
     filter: drop-shadow(0 0 4px rgb(var(--glow-gray-a)));
   }
-  .carousel__nav--next .carousel__nav-hit:hover::before { transform: translate(calc(-30% + 3px), -50%) rotate(135deg); }
-  .carousel__nav--prev .carousel__nav-hit:hover::before { transform: translate(calc(-70% - 3px), -50%) rotate(-45deg); }
 }
 .carousel__nav-hit:active::before { transition-duration: 80ms; }
-.carousel__nav--next .carousel__nav-hit:active::before { transform: translate(-30%, -50%) rotate(135deg) scale(0.85); }
-.carousel__nav--prev .carousel__nav-hit:active::before { transform: translate(-70%, -50%) rotate(-45deg) scale(0.85); }
+.carousel__nav-hit:active::before { --press: 0.85; }
 body:has(#role-1:checked) .carousel__nav--next .carousel__nav-hit[for="role-2"] { display:block; }
 body:has(#role-1:checked) .carousel__nav--prev .carousel__nav-hit[for="role-8"] { display:block; }
 body:has(#role-2:checked) .carousel__nav--next .carousel__nav-hit[for="role-3"] { display:block; }
@@ -730,19 +733,12 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
 .gm-title::after,
 .gm-back::after {
   animation: 6s var(--ease) infinite;
+  animation-name: var(--glimmer, none);
   /* B102 (issue #261): the glimmer runs on the FRONT card only -- motion where the
      visitor is looking, none in the dark around it (the other 14 sweeps
      stop). The front card's sweep restarts as each new card lands. */
 }
 .gm-back::after { animation-delay: 0.3s; }
-body:has(#role-1:checked) .carousel__slot[data-role="1"] :is(.gm-title, .gm-back)::after,
-body:has(#role-2:checked) .carousel__slot[data-role="2"] :is(.gm-title, .gm-back)::after,
-body:has(#role-3:checked) .carousel__slot[data-role="3"] :is(.gm-title, .gm-back)::after,
-body:has(#role-4:checked) .carousel__slot[data-role="4"] :is(.gm-title, .gm-back)::after,
-body:has(#role-5:checked) .carousel__slot[data-role="5"] :is(.gm-title, .gm-back)::after,
-body:has(#role-6:checked) .carousel__slot[data-role="6"] :is(.gm-title, .gm-back)::after,
-body:has(#role-7:checked) .carousel__slot[data-role="7"] :is(.gm-title, .gm-back)::after,
-body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back)::after { animation-name: gm-marquee; }
 
 /* The year — the italicized subscript in the .gm-uc grammar, now NESTED
    INSIDE the title card on its own line under the title (B87, issue #218) —
@@ -1008,10 +1004,8 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
      rise or nudges, no lift on the CTA -- while the light, the glass, the
      shadows and the grain all stay. */
   .carousel__slot { animation: none; }
-  .carousel__slot { transform: translateX(-50%) translateZ(calc(var(--ring-r) * -1))
-                               rotateY(var(--a)) translateZ(var(--ring-r)); }
-  .carousel__nav--next .carousel__nav-hit::before { transform: translate(-30%, -50%) rotate(135deg) !important; }
-  .carousel__nav--prev .carousel__nav-hit::before { transform: translate(-70%, -50%) rotate(-45deg) !important; }
+  .carousel__slot { --rise: 0px !important; }
+  .carousel__nav-hit::before { --nudge: 0px !important; --press: 1 !important; }
   .cta:hover { transform: none; }
 }
 </style>
@@ -1060,7 +1054,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
       <input class="carousel__radio" type="radio" name="role" id="role-7" aria-label="Portfolio Specialist">
       <input class="carousel__radio" type="radio" name="role" id="role-8" aria-label="Sr. Portfolio Specialist">
 
-      <div class="carousel__slot" data-role="1">
+      <div class="carousel__slot" data-role="1" style="--i: 1">
         <label class="carousel__slot-hit" for="role-1" aria-hidden="true"></label>
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
@@ -1068,7 +1062,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
         <p class="gm-card gm-desc"></p>
         </div>
       </div>
-      <div class="carousel__slot" data-role="2">
+      <div class="carousel__slot" data-role="2" style="--i: 2">
         <label class="carousel__slot-hit" for="role-2" aria-hidden="true"></label>
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
@@ -1076,7 +1070,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
         <p class="gm-card gm-desc"></p>
         </div>
       </div>
-      <div class="carousel__slot" data-role="3">
+      <div class="carousel__slot" data-role="3" style="--i: 3">
         <label class="carousel__slot-hit" for="role-3" aria-hidden="true"></label>
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
@@ -1084,7 +1078,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
         <p class="gm-card gm-desc">Completed the PNC Leadership Development Program, a high-performer program focused on preparing associates for advancement into specialized financial roles.<br><br>Deployed across the PDSJ region to onboard and coach Branch Relationship Managers on multi-channel client-book development.<br><br>Consistently outperformed branch sales goals while maintaining exceptional client service.</p>
         </div>
       </div>
-      <div class="carousel__slot" data-role="4">
+      <div class="carousel__slot" data-role="4" style="--i: 4">
         <label class="carousel__slot-hit" for="role-4" aria-hidden="true"></label>
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
@@ -1092,7 +1086,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
         <p class="gm-card gm-desc"></p>
         </div>
       </div>
-      <div class="carousel__slot" data-role="5">
+      <div class="carousel__slot" data-role="5" style="--i: 5">
         <label class="carousel__slot-hit" for="role-5" aria-hidden="true"></label>
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
@@ -1100,7 +1094,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
         <p class="gm-card gm-desc">Managed end-to-end account setup, funding, and servicing for complex irrevocable trust portfolios within a highly regulated environment.<br><br>Served as a primary point of contact for trust officers, legal counsel, and beneficiaries, coordinating across stakeholders to resolve complex account and servicing requirements.<br><br>Translated client and operational requirements into practical solutions while balancing service quality, underlying data, and regulatory constraints.</p>
         </div>
       </div>
-      <div class="carousel__slot" data-role="6">
+      <div class="carousel__slot" data-role="6" style="--i: 6">
         <label class="carousel__slot-hit" for="role-6" aria-hidden="true"></label>
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
@@ -1108,7 +1102,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
         <p class="gm-card gm-desc"></p>
         </div>
       </div>
-      <div class="carousel__slot" data-role="7">
+      <div class="carousel__slot" data-role="7" style="--i: 7">
         <label class="carousel__slot-hit" for="role-7" aria-hidden="true"></label>
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
@@ -1116,7 +1110,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] :is(.gm-title, .gm-back
         <p class="gm-card gm-desc"></p>
         </div>
       </div>
-      <div class="carousel__slot" data-role="8">
+      <div class="carousel__slot" data-role="8" style="--i: 8">
         <label class="carousel__slot-hit" for="role-8" aria-hidden="true"></label>
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>

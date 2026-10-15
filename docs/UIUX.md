@@ -730,8 +730,8 @@ value — the source's rose triplet re-tokened, no new hex.)*
 800-weight type. The page's font set gains the **800 face** —
 `MontserratAlternates-800.woff2` from the source repo, embedded as a data
 URI like the existing 400/600 faces — so the title weight is served, not
-browser-synthesized. The desc card's 300 weight has no face in the source
-either; it renders synthesized there and here, unchanged.)*
+browser-synthesized. The desc card uses weight 400, served by the embedded
+400 face.)*
 
 ### §10.2 Regions
 
@@ -1078,7 +1078,7 @@ The eight §10.6 values raised in issue #272 are affirmed as shipped (B103).
 | Arrival (B101) | one full turn on load, ~2s, settles on role 1 | `--spin` (registered `<angle>`) 360° → 0 over 2000ms on `--ease`, once, animated on each slot (an inherited value would drag the 500ms turn transition behind it) |
 | Click any card | a click on a visible side card turns the ring to it | a `label.carousel__slot-hit` per slot for its own radio, over the drawn card (inset `55u 115u 90u`); the front card's is `display: none`; `.carousel` takes no pointer events (its own plane sits in front of the side cards) |
 | Hover: side card | lifts slightly out of the dark | `--lift: 1` → brightness `+0.2`, a world-Y rise of `0.025 × --ring-w` made before the Z placement (depth unchanged: never in front of the front card) |
-| Hover: employer card | soft bloom, like the landing door-cards | `0 0 32px 4px` × `--rs` in `--glow-gray-a` at 0.9, border `--frame`; 200ms box-shadow/filter/transform transitions (B105) |
+| Hover: employer card | soft bloom, like the landing door-cards | `0 0 32px 4px` × `--rs` in `--glow-gray-a` at 0.9; 200ms box-shadow/filter/transform transitions (B105) |
 | Arrows | brighten, nudge their way; press inset | `.carousel__nav` box `2.5rem × 2.5rem`; chevron `0.85rem × 0.85rem`, 3px top/left borders; `--ink-light` + `drop-shadow(0 0 4px)`; 3px hover nudge and 200ms hover transitions; active `scale(0.85)` on 80ms. Reduced-motion behavior is below (B105). |
 | Grounding | soft contact shadows on an invisible floor | per slot `::before`: positioned `bottom: 62u`; `640 × 56u` radial black (0.85 → 0.45 → 0), centred on the back card's foot (B105) |
 | Light (B99) | faint cool moonlight in the pool | `--moon-a: 148 163 189` (luminance 0.36); pool alphas `0.15 / 0.09 / 0.03 / 0` at `0 / 30 / 60 / 90%`; floor ellipse `46% × 7%` at 79%, `0.12 → 0.04 → 0`. The only hue on the page |

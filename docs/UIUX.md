@@ -63,10 +63,12 @@ below are the To-Do ladder's, quoted as shipped in TheBoards
 | `--deep` | `#020812` | the canvas — the deepest surface on the page | 0.0023 |
 | `--chrome` | `#020812` | the room behind the page — the board's ground and any summoned surface | 0.0023 |
 | `--card` | `#08152c` | the title compartment, sitting just above the deep | 0.0077 |
-| `--water` | `#34697f` → `#255265` → `#163646` | the water, as a field — closing both ends of the sheet | 0.1237 … 0.0325 |
-| `--frame` | `#698ebf` | the card's border and both full-width rules | 0.2611 |
+| `--water-top` | `#34697f` | the water's lightest stop | 0.1237 |
+| `--water-mid` | `#255265` | the water's middle stop | 0.0737 |
+| `--water-bot` | `#163646` | the water's darkest stop | 0.0325 |
+| `--frame` | `#698ebf` | the board's linework blue and both full-width rules | 0.2611 |
 | `--note` | `#a0d4da` | the door-card — the lit thing on the deep | 0.5962 |
-| `--danger` | `#E2A08C` | the single warm hue, carried from TheBoards; no destructive action is drawn in v1 | 0.4000 (approx.) |
+| `--danger` | `#E2A08C` | the single warm hue, carried from TheBoards; no destructive action is drawn in v1 | 0.4320 |
 
 ### §2.3 Ink
 
@@ -103,7 +105,7 @@ member, `--frame` `#698ebf`, stands below as superseded history.
 
 | Token | Value | Role |
 |---|---|---|
-| `--accent-page` (hover glow) | `#6d9cb0` | the hover glow's blue, blooming on hover — the brighter existing blue on `--chrome` (B25) |
+| `--accent-page` | `#6d9cb0` | the hover glow's blue, blooming on hover — the brighter existing blue on `--chrome` (B25) |
 | `--frame` (superseded member) | `#698ebf` | the v1 hover-glow blue, superseded by #67 (B25); still the page's linework blue where it is drawn |
 
 The bloom's rendering values (`index.html`):
@@ -136,7 +138,7 @@ holds the bloom while the card sinks 1px, instead of contracting it.
 ### §2.6 Elevation
 
 ```css
---elevation: 0 2px 8px rgb(0 0 0 / 0.45);   /* pressed, transient only — hover's elevation is the bloom, §2.4 */
+--elevation: 0 2px 8px rgb(0 0 0 / 0.45);   /* career / Plants & Rocks CTA shadow; not used by landing door-cards */
 ```
 
 **Resting door-cards take no shadow** (§1).
@@ -151,9 +153,9 @@ holds the bloom while the card sinks 1px, instead of contracting it.
 - The water field (band top, Parking Lot bottom) meets the deep at its
   darkest stop, and the full-width `--frame` rule carries that seam
   (5.95:1 on the deep, 3.77:1 on the water's darkest stop).
-- The door-card's 2px `--frame` border is what separates overlapping cards
-  (their fills are the same colour — 1.00:1). Overlap is allowed; the frame
-  is load-bearing legibility, not chrome.
+- The door-card's 2px `--ink-dark` border is what separates overlapping cards
+  (their fills are the same colour — 1.00:1). Overlap is allowed; the ink-dark
+  border is load-bearing legibility, not chrome.
 - Hairlines, where a separator is needed: that surface's ink at
   `rgb(var(--ink-a) / 0.4)`, clearing 3:1 on its ground.
 
@@ -225,7 +227,8 @@ logical width below the cards' right edges and clip the sheet (~4px at
 800×800); at every ordinary aspect the height term is smaller and the floor
 is inert.
 
-over the issue #112 drawing's own reference space (`REF_W×REF_H` = 2560/z ×
+The authored scene maps to the issue #112 drawing's own reference space
+(`REF_W×REF_H` = 2560/z ×
 1440/z, z = 1.3037 ≈ 1963.64×1104.55, `B43`). On landscape the height term
 binds by law, so the band — fixed logical literals — renders at the same
 fraction of the viewport height at every landscape size (6.1% of vh, exactly
@@ -242,12 +245,12 @@ bottom corners only, centred, **not a link, not a control** (no `role`, no
 `tabindex`, no caret).
 
 **The band sizes to its tallest zone, from a two-line floor** (B46, issue
-#128 — TheBoards' own law, `TheBoards' UIUX §3.1` / B47/B76, with the band
+#128 — TheBoards' own law, `TheBoards' UIUX §3.1` / `TheBoards' B47/B76`, with the band
 literals **rescaled ×1.10455**: TheBoards' literals live in its 1000-tall
 logical frame and this board's space is the issue #112 drawing's
 1104.55-tall frame, so every literal maps through
 k = 1104.55/1000 = 1.10455; numbers agent-derived per the `B33` pattern;
-`bandRuleY` in `index.html`):
+`bandRuleY` in `app.js`):
 
 ```
 rule-y = 15.46 + max(2, lines) × 21.54 + 8.84
@@ -461,9 +464,9 @@ never re-authored and never a fixed physical px.
 |---|---|---|
 | **rest** | note surface, border in the note's own ink (`var(--ink)`), no glow, no underline | — the ink border itself is the resting edge |
 | **hover** | blue bloom: `--accent-page` `#6d9cb0` at `0 0 32px 4px` / `0.9` — no second shadow layer (B14 hover member, settled by #67 → B25) | the bloom *is* the elevation — a temporary lifting, permitted by §1 |
-|| **active (pressed)** | green bloom: `--glow-green` #b9d2b2 at `0 0 32px 4px` / `0.9` — no elevation layer (matches hover geometry, #67 follow-up ruling) | **1px inset** — the card presses into the page |
+| **active (pressed)** | green bloom: `--glow-green` #b9d2b2 at `0 0 32px 4px` / `0.9` — no elevation layer (matches hover geometry, #67 follow-up ruling) | **1px inset** — the card presses into the page |
 | **focus-visible** | a focus ring in the surface's ink (never a tint) | the ring is the geometry; keyboard users are never left to colour alone |
-| **rest-only note** (the Music card) | note surface, ink border, **no hover, no click, no focus ring** — it is not a link and not a control (B26); it still drags and resizes like any note (B7) | — nothing blooms and nothing moves; the note only sits |
+| **rest-only note** (Music and the four B55 sub-cards) | note surface, ink border, **no hover, no click, no focus ring** — it is not a link and not a control (B26, B55); it still drags and resizes like any note (B7) | — nothing blooms and nothing moves; the note only sits |
 
 Transitions between states use TheBoards' closed motion set — short, quiet,
 no bounce; nothing moves on its own after the interaction ends.
@@ -473,18 +476,19 @@ no bounce; nothing moves on its own after the interaction ends.
 | Card | Destination (all `target="_blank"`) | Status |
 |---|---|---|
 | Community | `https://earp-street-park.netlify.app` | live |
-| Professional | `https://razgregory.com/career` | live — the employer-selector career page (B47, `UIUX §10`) |
+| Career | `https://razgregory.com/career` | live — the employer-selector career page (B34, `UIUX §10`) |
 | Writing | `https://substack.com/@theaboveaveragerob` | live |
 | Software & AI | `https://alastairzeved.com` | live |
 | Plants & Rocks | `https://razgregory.com/plantsandrocks` | live — the dual-page-reader Plants & Rocks page (B48, `UIUX §11`) |
+| LinkedIn | `https://www.linkedin.com/in/robertagregory` | live (B34) |
 | Apple Music | `https://music.apple.com/us/artist/aboveaveragerob/1815357064` | live (B26) |
 | Spotify | `https://open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ` | live (B26 — the link the Music card carried) |
 | Philly Plant Dads | `https://www.instagram.com/philly_plant_dads` | live (B80) |
 
 The **Music** card is not a door (§4.1, B26): it is the plain parent note the
 **Apple Music** and **Spotify** doors hang under. The two music doors sit
-**below the Music card as a mirrored pair** — Apple Music lower-left, Spotify
-lower-right — at the placement the owner's screenshot gives (issue #72).
+**below the Music card as a mirrored pair** — Spotify lower-left, Apple Music
+lower-right — at the placement the owner's screenshot gives (issue #72; B78).
 The **Philly Plant Dads** door hangs under **Plants & Rocks** the same way
 (`B80`, issue #196): link pair 14 to its parent, seated at the Spotify
 card's own size to the parent's right.
@@ -497,7 +501,8 @@ Apple Music and Spotify notes below it) are:
 
 Music ↔ Writing · Software & AI ↔ Community · Software & AI ↔ Writing ·
 Plants & Rocks ↔ Community · Plants & Rocks ↔ Writing · Software & AI ↔ Music ·
-Music ↔ Apple Music · Music ↔ Spotify. `B55` (issue #146) adds four more —
+Music ↔ Apple Music · Music ↔ Spotify. `B34` adds Career ↔ LinkedIn.
+`B55` (issue #146) adds four more —
 Software & AI ↔ Zeved Boards · Software & AI ↔ Agentic Plugins ·
 Plants & Rocks ↔ Plants on Poles · Plants & Rocks ↔ Plants in Rocks.
 `B80` (issue #196) adds one more — Plants & Rocks ↔ Philly Plant Dads.
@@ -533,21 +538,17 @@ change.
 
 ## §5 Motion
 
-A closed set of quiet transitions inherited from TheBoards' grammar: hover
-glow ~120–200ms ease-out; pressed inset ~80ms; no keyframes that loop, no
-entrance animations, no staggered reveals. **Nothing animates on load.** If a
-new motion cannot name its job in one sentence it is costume and comes out.
+The site's closed set of quiet transitions is inherited from TheBoards'
+grammar: hover glow ~120–200ms ease-out; pressed inset ~80ms. No keyframes
+that loop, entrance animations, or staggered reveals are permitted except those
+explicitly listed below; nothing animates on load except by an explicit
+page-specific ruling. If a new motion cannot name its job in one sentence it
+is costume and comes out.
 
+| Page | Motion | Ruling |
+|---|---|---|
+| Career (`career.html`) | the light pool dims once on load; the role ring turns once on load; `gm-marquee` glimmers on the front card only | B98, B101, B102; no arrival or glimmer under `prefers-reduced-motion` |
 
-*(Exemption, B98, issue #257 — the career page's light pool dims mid-turn as
-the role ring turns, and that dim may run once on page load. The owner:
-"Allow CSS dim to run once upon page load as an exemption." Nothing else
-animates on load.)*
-
-*(Exemption, B101, issue #261 — the career page's role ring makes one full turn
-over ~2s on load and settles on role 1 (§10.6). It runs once, and never under
-`prefers-reduced-motion`. The pool dim and this turn are the only motions on
-load.)*
 ---
 
 ## §6 The contact form (Parking Lot)
@@ -571,8 +572,8 @@ The form's userspace, per the owner's ruling `B20`, renders left-anchored:
   own width — B62's fr-unit restatement of B20's 1:2 ratio), so the pair
   always reads as half-size beside it.
 - **Message** sits to their immediate right, anchored to the Name/Email right
-  edges, its **size unchanged** from the pre-fix layout (the full Message
-  track, `30%`).
+  edges, its **size unchanged** from the pre-fix layout. The form's tracks are
+  `1fr 2fr` (B62); the textarea flexes to make room for the inline Send button.
 - The **Send** button (`UIUX §6`'s `button[type="submit"]` grammar, unchanged)
   sits **inline, to the right of the Message textarea** on the same row (B83,
   issue #210): its bottom edge is flush with the textarea's bottom and its
@@ -584,8 +585,9 @@ The form's userspace, per the owner's ruling `B20`, renders left-anchored:
   space** (B84, issue #210 follow-up): its `min-height` is **98px** — the
   prior 64px floor plus the Send button's 34px height (`resize: vertical`
   stands).
-- The **right side of the pane is deliberately empty** — free space lives
-  free; it is never filled.
+- The form occupies the **right half** of the Parking Lot beside the owner's
+  copy in the left half, separated by the vertical divider (B62). The earlier
+  empty-right-side clause of B20 is superseded.
 - The **lot's height follows its measured contents** (B46, issue #128 —
   superseding B20's fixed `180px` as a mechanism, which stands only as the
   no-JS fallback): TheBoards' own law, `TheBoards' UIUX §3.2` / B73, ported
@@ -659,6 +661,9 @@ The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 | What is pinned | By |
 |---|---|
 | §2's tokens, ratios, crossover | `test/tokens.js` — recomputed from shipped hexes |
+| security headers and shipped-script contract | `test/security.js` |
+| DECISIONS.md entry numbering | `test/records.js` |
+| ruling citations, token/contrast rows and append-only ledger | `test/docket.js` |
 | card states, region layout, the full-viewport sheet, no rail in the DOM | `test/mobile.js`, `test/desktop.js` |
 | the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L14]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
@@ -666,7 +671,7 @@ The Parking Lot splits **50/50**, closed by a **vertical divider bar**:
 | card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B78 drawing rest scales and placements per card (B80 for philly-plant-dads, seated by the owner's words), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (`B41`) | `test/movable_resizable.js` |
 | no service worker | `PRD §3`, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
-| the career page (B47): employer selector, TheBoards' `B132` glow, split body, two-way lot (B65), monochrome ladder (B73), empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
+| the career page (B47): employer selector, TheBoards' `B132` glow, full-width role carousel (B95), two-way lot with centred CTA (B88), monochrome ladder (B73), empty blocks omitted; the B49 landing-convention band/card/lot render | `test/career.js` |
 | the plantsandrocks page (B48): two-page selector, --frame glow, blank reader body, two-section lot, the B58 Download (PDF anchor) and the B82 Back-to-the-Garden .cta, literal idea-green ladder, the B50 landing-convention band/card/lot render | `test/plantsandrocks.js` |
 
 ---
@@ -715,7 +720,7 @@ unchanged:
 | `--water-bot` | `#333333` | gradient ladder foot | 0.0325 |
 | `--ink-light` | `#f4f5f1` | light ink pole | — |
 | `--ink-dim` | `rgb(244 245 241 / 0.55)` | unselected-card ink | — |
-| `--glow-gray` | `#676767` | selected-card bloom — `--frame` one rung down (TheBoards' `B132` rung rule) | 0.1364 |
+| `--glow-gray` | `#676767` | selected-card bloom — `--frame` one rung down (TheBoards' `B132` rung rule) | 0.1356 |
 
 The final hexes are the owner's sign-off (issue #190, owner chat 2026-10-09:
 "confirmed and approved for use"); the **relationships** above — card above
@@ -963,10 +968,10 @@ straddling the back card's top edge with a gap to the desc card, the wider
 desc card with the back card extending vertically past it, the source-ratio
 type with its 11px floor, long titles wrapping, and the always-visible
 styled bar on filled desc cards; empty role descriptions display B98's
-"Description coming soon" placeholder), the `gm-back` breathing bloom, and — B92 (issue #230) — the 3D coverflow
-carousel: the 8-role radio ring, the centred card, perspective 800px,
-~45°/step fan, centre card ~50% width, one-card-per-click `←`/`→` with
-wrap-around, ~500ms rotation, and the employer cards as role-jump labels.
+"Description coming soon" placeholder), B102's front-card-only `gm-marquee`
+glimmer, and — B98 (issue #257) — the closed 8-role ring: 45° spacing,
+3.6×-card-width perspective, one-card-per-click `←`/`→` with wrap-around,
+~500ms rotation, and employer cards as role-jump labels.
 
 
 ### §10.4 The role coverflow carousel (B92, issue #230)
@@ -1191,7 +1196,7 @@ values, not new numbers.
   renders inert and dimmed via CSS `:has` (`opacity: 0.55`,
   `cursor: not-allowed`, `pointer-events: none` — B48's shipped dim value,
   reused; the inert state is CSS-only, the page has no script). The B58
-  inert-on-Rocks selector is scoped to the Download anchor (`.[download]`),
+  inert-on-Rocks selector is scoped to the Download anchor (`[download]`),
   so the Back-to-the-Garden `.cta` stays live on both tabs.
 
 At ≤743px the band stacks to one column and the lot stacks (career.html's

@@ -14,7 +14,7 @@ is *for*, so that a new ruling has something to resolve against.
 every value the site draws with. This document holds positions; where a value
 appears here it is quoted from `UIUX.md`, never authored here.
 
-Sections are numbered so decisions can cite `PRD §x`.
+Sections are numbered so decisions can cite PRD §x.
 
 ---
 
@@ -103,8 +103,8 @@ correctness:
 | Decision | Choice | Rationale |
 |---|---|---|
 | Theme | **Dark only.** One identity, no choice to make | P4 forbids the setting |
-| The cards' colour | The brightest surface on the page (TheBoards' `--note` rung, To-Do binding; `UIUX §2.2`) | They are the only things the visitor *uses* |
-| Destructive colour | `--danger` is carried from TheBoards but the site has no destructive action (`UIUX §2.2`) | It is not drawn until a ruling gives it a job |
+| The cards' colour | The brightest surface on the page (TheBoards' `--note` rung, To-Do binding; UIUX §2.2) | They are the only things the visitor *uses* |
+| Destructive colour | `--danger` is carried from TheBoards but the site has no destructive action (UIUX §2.2) | It is not drawn until a ruling gives it a job |
 | Symbols | Drawn or text per TheBoards' own grammar; never a new mark invented here | P3 |
 | Motion | A closed set of transitions from TheBoards; it does not grow | Nothing else has earned its place |
 
@@ -213,33 +213,30 @@ self-hosted, no CDN, per TheBoards' own dependency rule.
 ### §3.4 Network calls
 
 Exactly one: the contact form's POST to Formspree. Nothing else leaves the
-page. (Formspree reCAPTCHA is on by default; the form uses the standard
-`_gotcha` honeypot; and the site must never set a `no-referrer` /
-`same-origin` referrer policy, which would make Formspree file every
-submission as spam.)
+page. See UIUX §6.1 for its protection requirements.
 
 ---
 
 ## §4 The regions
 
-1. **Title** — the title card as specified in `UIUX §3.2`.
-2. **Components** — the region and its current copy as specified in `UIUX §3.3`.
-3. **Requirements** — the region and its current copy as specified in `UIUX §3.3`.
-4. **Parking Lot** — as specified in `UIUX §6`.
+1. **Title** — the title card as specified in UIUX §3.2.
+2. **Components** — the region and its current copy as specified in UIUX §3.3.
+3. **Requirements** — the region and its current copy as specified in UIUX §3.3.
+4. **Parking Lot** — as specified in UIUX §6.
 
 There is no fifth region: the All Boards rail is removed (#71, B27) and the
 sheet spans the full viewport.
 
 The door-cards sit **in the free board space** — the empty canvas
 between the regions — never inside Components, Requirements or the Parking
-Lot (B2). Card content and rendering are specified in `UIUX §4`.
+Lot (B2). Card content and rendering are specified in UIUX §4.
 
 ---
 
 ## §5 Behavior
 
 - **Door-cards:** real anchors, `target="_blank"`, open the owner's sites in
-  a new tab (B3). Rest / hover / active states per `UIUX.md §4` (B14).
+  a new tab (B3). Rest / hover / active states per UIUX.md §4 (B14).
 - **Notes (for entertainment):** draggable and resizable on the canvas;
   positions are not stored; nothing persists on reload; no undo; no menu
   (B7).

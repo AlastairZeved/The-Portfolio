@@ -121,13 +121,7 @@ none.
    Requirements, or Parking Lot regions (owner ruling, `DECISIONS.md` B2).
 4. **The contact form is the one network call.** The Parking Lot holds a
    Formspree form: Name (optional), Email (optional), Message (required).
-   reCAPTCHA is on by default at Formspree — never add a second captcha and
-   never claim adding reCAPTCHA adds a third-party script to the page. The
-   honeypot is the standard `_gotcha` field (`type="text"`, visually hidden,
-   NOT `type="hidden"`). Never set `Referrer-Policy: no-referrer` or
-   `same-origin` on the site — Formspree files every submission as spam when
-   the referrer is missing, and a `no-referrer` policy would brick the form
-   silently.
+   Form protections and referrer requirements are specified in UIUX §6.1.
 5. **One scene.** The site wears exactly ONE binding of TheBoards' design
    ladder: the To-Do blue (`UIUX §2.1`, owner ruling `DECISIONS.md` B1). The
    ladder does not rotate — a portfolio is not five board types.

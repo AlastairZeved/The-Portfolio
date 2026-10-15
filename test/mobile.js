@@ -69,7 +69,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   // the fourteen note links (B28, B55, B80) hold their endpoints under the same scale: the
   // layer's user units are the board's LOGICAL px, so every line must land on
   // the LOGICAL centre of the two cards it joins — measured rects are physical,
-  // divided by rs here exactly as index.html's toLogical does (issue #87, B30)
+  // divided by rs here exactly as app.js's toLogical does (issue #87, B30)
   const linkFit = await page.evaluate(() => {
     const board = document.querySelector('#board');
     const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;

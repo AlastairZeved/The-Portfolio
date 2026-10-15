@@ -140,7 +140,7 @@ function cardScale(card) {
    content from the rescaled two-row shelf (TheBoards `B73`), bottom-anchored so
    it grows UPWARD, ceiling half the sheet with #lot-items clipping past it.
    B20's fixed 180px --lot-h is superseded as a mechanism — fallback only.
-   The lot's 34px head and 8px base literal are kept UNSCALED (TheBoards'
+   The lot's 34px head literal is kept UNSCALED (TheBoards'
    chrome is not part of the rescale; noted per the B33 provenance pattern).
    All px here are board-logical (B30): the sheet is never reflowed, so the
    line counts and row heights are scale-stable. */
@@ -203,8 +203,8 @@ function cardScale(card) {
   /* ---- B45 (issue #126): TheBoards' note sizing + scale mechanics, ported ----
      TheBoards state.js: NOTE_MIN_W = 132, MIN_SCALE = 0.5.
      The card's own scale factor (a uniform transform: scale, origin top
-     left) is the ONLY text/size scaling: the font is a fixed 17px/1.4 and
-     the transform scales the card. */
+     left) scales the card's text and size. The default font is 17px/1.4;
+     `.fit-to-spotify` uses 11.4px (B80). */
   var MIN_SCALE = 0.5;                    // TheBoards state.js MIN_SCALE
   var NOTE_MIN_W = 132;                   // TheBoards state.js NOTE_MIN_W
   var MOVE_THRESHOLD = 4;                 // B41: physical px before a gesture moves

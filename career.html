@@ -3,8 +3,7 @@
      DECISIONS.md B47). Structure:
      header.topband with title cards over the water band, .split with
      the full-width role ring (B98), footer .parking-lot with a .cta. The palette is TheBoards'
-     token ladder re-hued to monochrome (B73; owner signs off on the
-     final hexes — blank slot 9). Selection is the eight-way role radio group
+     token ladder re-hued to monochrome (B73). Selection is the eight-way role radio group
      driven by CSS :has — this page needs no script. -->
 <html lang="en">
 <head>
@@ -166,9 +165,6 @@ a:focus-visible {
     transform 200ms var(--ease);
 }
 
-/* Selection: the radio is checked (default PNC Bank). The selected card wears
-   TheBoards' `B132` glow verbatim — border-color + a single soft 0 0 8px 0 bloom, one
-   token, no other states (issue #133 §1). */
 .topband__card:active,
 .cta:active {
   filter: brightness(0.92);
@@ -230,9 +226,9 @@ body:has(#role-6:checked, #role-7:checked, #role-8:checked)
    each hugs the widest of the three labels ("PNC Private Bank"), so the
    boxes are identical and the gaps between them equal. The hidden sizer
    inherits the wordmark's own typography (600, the 20 × --rs type, the
-   mobile 1.1rem, -0.02em, the italic unselected state), so the shared
-   width tracks the type at every breakpoint (the unselected italic is
-   synthetic — the embedded faces ship no true italic — so its advances
+   mobile 1.1rem, -0.02em), so the shared
+   width tracks the type at every breakpoint (the unselected card's italic
+   styling is synthetic — the embedded faces ship no true italic — so its advances
    match the roman). Update the string if a label or a filled oneliner
    slot ever outgrows it. */
 .topband__wordmark::before {
@@ -328,7 +324,7 @@ main { flex: 1 1 auto; display: flex; }
      card, and would swallow their clicks; only the cards take the pointer. */
   pointer-events: none;
 }
-/* The radio: focusable, never drawn -- the .topband__tab's own off-flow pattern. */
+/* The radio: focusable, never drawn -- the carousel's off-flow pattern. */
 .carousel__radio {
   position: absolute;
   width: 1px; height: 1px; margin: 0;
@@ -633,7 +629,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
    implement them. ---- */
 
 .gregorian-mode {
-  --ink: var(--deep);           /* desc ink on the monochrome note: the deep itself */
+  --ink: var(--deep);           /* the .gm-card border ink; descriptions use --glass-ink */
   --glass-ink: var(--ink-light); /* issue #261: the smoked-glass desc card's light ink */
   position: relative;
   box-sizing: border-box;
@@ -652,7 +648,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   flex-direction: column;       /* title → year → desc, the reflow's flow */
   /* B93 (PR #236): no base fill — the component's own `--deep` ("black back
      plate") is ruled out; the component is transparent and the .gm-back water
-     card sits directly on the page's `--deep` canvas (body, line 86). */
+     card sits directly on the page's `--deep` canvas. */
   font-family: "Montserrat Alternates", system-ui, sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -770,7 +766,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   z-index: 1;
   width: calc(600 * var(--u));
   max-width: 100%;
-  margin: calc(13 * var(--u)) auto calc(202 * var(--u));  /* top 180u (source); bottom = the source's desc→plate distance */
+  margin: calc(13 * var(--u)) auto calc(202 * var(--u));  /* top 13u; bottom = the source's desc→plate distance */
   padding: calc(10 * var(--u)) calc(18 * var(--u));
   /* B100 (issue #261): SMOKED GLASS replaces the --note slab, which was the
      brightest object on screen. A dark translucent card (--card at 78%; no
@@ -816,8 +812,8 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
 .gm-desc:not(:empty) { overflow-y: scroll; }
 /* The bar is a real, visible, in-card scroll bar (B75, carried into B76):
    ::-webkit-scrollbar forces the classic (non-overlay) bar Chromium and
-   Safari otherwise auto-hide — 6px, so it takes no room — its thumb the
-   card's own ink (--ink) over a transparent track; Firefox reads the
+   Safari otherwise auto-hide — 6px, so it takes no room — its thumb
+   --frame over a transparent track; Firefox reads the
    standard properties behind @supports (-moz-appearance: none) because in
    Chromium the standard property wins the cascade and widens the bar. */
 .gm-desc::-webkit-scrollbar { width: 6px; }
@@ -997,8 +993,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
-  /* B56: the component's glimmer dies outright with the motion preference;
-     B81 (issue #212): the role band's glimmer does too. */
+  /* B56: the component's glimmer dies outright with the motion preference. */
   .gm-title::after, .gm-back::after { content: none; }
   /* Issue #261: reduced motion drops MOTION only -- no arrival turn, no hover
      rise or nudges, no lift on the CTA -- while the light, the glass, the

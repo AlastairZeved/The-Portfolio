@@ -56,7 +56,7 @@ else console.log('PASS --glow-blue = #6d9cb0 (109 156 176)');
 if (green.join(',') !== '185,210,178') { failures++; console.log('FAIL --glow-green is not Idea #b9d2b2 channels'); }
 else console.log('PASS --glow-green = Idea --note #b9d2b2 (185 210 178)');
 
-// one file: no external CSS/JS; no service worker
+// inline CSS; external JS is permitted by B59; no service worker
 if (html.includes('serviceWorker') || html.includes('sw.js')) { failures++; console.log('FAIL: service worker present'); }
 else console.log('PASS: no service worker (B13)');
 if (/<link[^>]+rel=["']stylesheet/.test(html)) { failures++; console.log('FAIL: external css file'); }

@@ -57,7 +57,7 @@ depth and at dusk.** The palette is dark, and that is deliberate. Deep water
 is peaceful; a bright white hub page is not. The page reads top to bottom as
 one scene — water closing each end of the sheet, the deep between — and the
 door-cards are the lit things on the deep, like the notes on a board (owner
-ruling, `DECISIONS.md` B8: the site wears the To-Do ladder's one blue
+ruling, `DECISIONS.md` B1: the site wears the To-Do ladder's one blue
 binding).
 
 This identity does **not** license decoration. Peace is produced by

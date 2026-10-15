@@ -31,8 +31,8 @@ function cardScale(card) {
   var RESIZE_HANDLE_OVERHANG = 4;
   /* The reference space is the owner's issue #112 drawing's own coordinate
      space (B43: the 2560×1440 screenshot, measured through the calibration
-     z = 1.3037 — 2560/z × 1440/z). The B43 authored geometry (left/top % and
-     px width/height) is exact in THIS space, so rendering the scene here and
+     z = 1.3037 — 2560/z × 1440/z). The B43 authored geometry (left/top %)
+     is exact in THIS space, so rendering the scene here and
      scaling it uniformly reproduces the drawing at every viewport (issue
      #121, B44). */
   var REF_W = 2560 / 1.3037;   // 1963.64 — the #112 drawing's own logical width
@@ -139,7 +139,7 @@ function cardScale(card) {
    at the two-line floor, 88.92 at three). The Parking Lot: measured from its
    content from the rescaled two-row shelf (TheBoards `B73`), bottom-anchored so
    it grows UPWARD, ceiling half the sheet with #lot-items clipping past it.
-   B18's fixed 180px --lot-h is superseded as a mechanism — fallback only.
+   B20's fixed 180px --lot-h is superseded as a mechanism — fallback only.
    The lot's 34px head and 8px base literal are kept UNSCALED (TheBoards'
    chrome is not part of the rescale; noted per the B33 provenance pattern).
    All px here are board-logical (B30): the sheet is never reflowed, so the
@@ -275,7 +275,7 @@ function cardScale(card) {
   }
 
   // B45: seed each card's content-width cap from its authored left/top (the
-  // owner's placements, B43 — the only inline geometry left). The cap is
+  // owner's placements, B78 (+B80) — the only inline geometry left). The cap is
   // logical px like every authored size: it scales with the sheet (B30).
   layoutAllCards();
   // the percentage-authored layout re-scales with the viewport: recompute

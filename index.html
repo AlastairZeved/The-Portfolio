@@ -6,8 +6,7 @@
 <title>The Portfolio of Robert Alastair Zeved Gregory</title>
 <style>
 /* ============================================================
-   The-Portfolio — landing page, CSS inline (B12, B16, B17);
-   JS external in app.js (issue #151, B59)
+   The-Portfolio — landing page, CSS inline (B12); JS external app.js (B59)
    Rendering authority: docs/UIUX.md. One binding: To-Do blue.
    ============================================================ */
 
@@ -50,7 +49,7 @@
   --card-l: calc((100% - var(--card-w)) / 2);
   --band-top: 15.46px;   /* 14 × 1.10455 (#128/B46 — the band literals are TheBoards' 1000-tall frame mapped into the 1104.55-tall drawing space) */
   --rule-y: 67.38px;  /* no-JS fallback: the rescaled two-line floor — JS re-derives it (#128/B46) */
-  --lot-h: 180px;    /* no-JS fallback: B18's fixed value — JS re-derives it (#128/B46) */
+  --lot-h: 180px;    /* no-JS fallback: B20's fixed value — JS re-derives it (#128/B46) */
 }
 
 /* ---- Ink poles (UIUX §2.3): flip at the surface boundary ---- */
@@ -141,7 +140,7 @@ body {
 /* ---- The Requirements section line (issue #92) ----------------------------
    Ported from TheBoards' section-text mechanism (TheBoards styles.css .anchor
    / .band-zone .anchor). TheBoards' anchors are contenteditable textboxes
-   because TheBoards is the app; this site is static (B5/B7/B13, PRD §2.6 — no
+   because TheBoards is the app; this site is static (B7/B13, PRD §2.6 — no
    state, no persistence, editing refused), so only the RENDERED format and
    placement are ported: the line hangs from the zone top at --band-top, in
    --ink at 15px/600, above the rule the band-label tab sits under.  The zone
@@ -206,15 +205,15 @@ body {
    sizes the text: the font is 17px / line-height 1.4 (TheBoards .note-text)
    and the transform scales the whole card uniformly, transform-origin top
    left (.note §4.1 — the stored left/top stays truthful). The owner's
-   authored left/top placements stand (B43). The rest scales are inline per
-   card (B52, B78, B80). The gesture moves the scale from there (B45/B51). */
+   authored placements stand (B78, B80). The rest scales are inline per
+   card (B78, B80). The gesture moves the scale from there (B45/B51). */
 .door-card {
   position: absolute;
   width: max-content;
   min-width: 132px;                 /* = NOTE_MIN_W (TheBoards' `UIUX §4.5`) */
   max-width: var(--card-max-w, none); /* set per card in JS: the distance
      from the card's left edge to the sheet's right edge, divided by the
-     card's own scale — TheBoards geometry.js noteMaxW, issue #53 / B39 */
+     card's own scale — TheBoards geometry.js noteMaxW, B45 */
   background: var(--note);
   color: var(--ink-dark);
   /* TheBoards' note grammar (TheBoards UIUX §4, ported whole): the note
@@ -511,8 +510,8 @@ Planned future work: Add landing pages</div>
        card carries a data-id: the link layer below names its pairs by it
        (B28), so both ends of every link are greppable and readable. B45
        (issue #126): the authored inline geometry is the owner's left/top
-       placement only (B43) — the cards are content-sized with their own
-       scale factor, TheBoards' note mechanics. B52 (issue #138): each card
+       placement only (B78, B80) — the cards are content-sized with their own
+       scale factor, TheBoards' note mechanics. B78 (+B80): each card
        carries its drawing scale of record inline (--card-scale); sizes and
        placements are inline per card (B78). -->
   <a class="door-card" data-id="community" style="--card-scale: 2.33; left:13.6%; top:18.3%" href="https://earp-street-park.netlify.app" target="_blank" rel="noopener noreferrer">

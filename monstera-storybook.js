@@ -110,7 +110,7 @@ function flip(dir) {
   var top = cur;                                        // the settled spread plays the upper layer
   top.classList.add('top');
   var base = makeSpread(to);
-  stage.insertBefore(base, top);                        // beneath it (z-index 2 on .top, B57)
+  stage.insertBefore(base, top);                        // beneath it
   // the sheet being turned: right page (forward) or left page (backward)
   var fi = (from.length === 2) ? (dir > 0 ? 1 : 0) : 0;
   var srcImg = top.children[fi].querySelector('img');

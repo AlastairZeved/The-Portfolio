@@ -57,7 +57,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   ok('no external network requests beyond the page itself', await page.evaluate(() => performance.getEntriesByType('resource')
     .every(r => r.name.startsWith('data:') || r.name.startsWith(location.origin))));
 
-  // §1: three employer cards, chronological order
+  // issue #133 §1: three employer cards, chronological order
   const names = await page.locator('.topband__card .topband__wordmark').allInnerTexts();
   ok('three employer cards', names.length === 3);
   ok('chronological order PNC Bank → PNC Private Bank → Brinker Capital',
@@ -595,7 +595,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   await page.evaluate(() => document.getElementById('role-1').click());
   await page.waitForTimeout(300);
 
-  // §3/§4 footer + tokens (unchanged by the carousel ruling)
+  // issue #133 §3 and UIUX §10: footer and tokens
   ok('footer has two content sections with one CTA',
     await page.locator('.parking-lot__facts').count() === 2 &&
     await page.locator('.parking-lot .cta').count() === 1);
@@ -624,7 +624,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     (await page.locator('.parking-lot .cta').innerText()).trim() === 'Learn More about Rob' &&
     (await page.locator('.parking-lot .cta').getAttribute('href')) === 'https://razgregory.com/');
 
-  // §4: the B73 monochrome ladder (unchanged)
+  // UIUX §10: the B73 monochrome ladder
   const tokens = await page.evaluate(() => {
     const cs = getComputedStyle(document.documentElement);
     return { deep: cs.getPropertyValue('--deep').trim(), card: cs.getPropertyValue('--card').trim(),

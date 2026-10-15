@@ -1,7 +1,7 @@
 /* test/plantsandrocks.js — the Plants & Rocks page (issue #134, B48):
-   two-page selector over the band rule, TheBoards' `B132` glow mechanism on the selected
+   two-page selector over the band rule, TheBoards' `B132` glow on the selected
    card, the poles reader rendering the shipped monstera-storybook.html
-   iframe (issue #156, B57 — deliberate rewrite of the blank-body pin) while
+   iframe (issue #156, B57) while
    the rocks reader stays empty, two-section parking lot with one divider, a
    Download PDF anchor (live on poles, inert on rocks) plus a live
    "Back to the Garden" anchor, and the literal TheBoards
@@ -24,10 +24,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
 
   // Single-file law: no scripts, no stylesheets, no deps
   ok('no <script> elements', await page.locator('script').count() === 0);
-  // issue #168/B63: favicons ship as same-origin <link rel="icon"> on every
-  // page — the single-file law forbids stylesheets and off-origin refs, not
-  // the site's own favicon links (the resource-origin guard below still
-  // holds that line; this assertion rewrite is deliberate).
+  // Only same-origin favicon links are allowed.
   ok('no stylesheets or off-origin links — only the B63 favicon links',
     await page.locator('link').evaluateAll(ls => ls.every(l =>
       ['icon', 'apple-touch-icon', 'shortcut icon'].includes(l.rel) &&
@@ -35,7 +32,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   ok('no external network requests beyond the page itself', await page.evaluate(() => performance.getEntriesByType('resource')
     .every(r => r.name.startsWith('data:') || r.name.startsWith(location.origin))));
 
-  // §1: two title cards, one per page, over the band rule
+  // issue #134 §1: two title cards, one per page, over the band rule
   const names = await page.locator('.topband__card .topband__wordmark').allInnerTexts();
   ok('two page cards', names.length === 2);
   ok('cards are "Plants on Poles" and "Plants in Rocks"',
@@ -58,7 +55,6 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   // B50 (issue #140): the band, cards and lot render at B49's landing-page
   // conventions — B46's height-anchored scale (rs = vh/1104.55), B31's card
   // box, the lot's two-row-shelf floor — re-tokened to the idea-green block.
-  // (Deliberate rewrite: the old pin asserted the -14px margin mechanism.)
   const b50 = await page.evaluate(() => {
     const band = document.querySelector('.topband').getBoundingClientRect();
     const card = document.querySelector('.topband__card');
@@ -77,8 +73,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   ok('card type is the 20px logical rung: font-size = 20 × rs (B31/B50)',
     Math.abs(parseFloat(b50.font) - 20 * b50.rs) < 0.5);
   ok('card is the B31 box: border-top 0, radius only on the bottom corners, content-sized',
-    // content-sized hug: ~250px at 1440×900 (the B48 oneliner copy is long);
-    // <400 is a sanity bound against regression to the old full-width cell (~690px)
+    // Content-sized hug: ~250px at 1440×900; below 400px is the sanity bound.
     b50.borderTop === '0px' && parseFloat(b50.radius) > 0 && b50.cardW < 400);
   ok('lot is floored at the rescaled two-row shelf: 134.76 × rs (B46/B73/B50)',
     b50.lotH >= 134.76 * b50.rs - 1);
@@ -106,10 +101,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     getComputedStyle(document.querySelectorAll('.topband__card')[1]).boxShadow);
   ok('unselected cards carry no bloom', !unselectedGlow.includes('rgb(82, 153, 127)'));
 
-  // §2: the readers (B57, issue #156 — deliberate rewrite of B48's
-  // blank-body pin): the Plants on Poles reader renders the shipped
-  // monstera-storybook.html in an iframe filling the body edge-to-edge;
-  // the Plants in Rocks reader stays empty.
+  // issue #134 §2: the poles reader embeds the storybook; the rocks reader is empty.
   ok('the poles reader renders the storybook iframe: src, title, fills the width',
     await page.evaluate(() => {
       const reader = document.querySelector('.reader--poles');
@@ -186,7 +178,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
         getComputedStyle(poles).display === 'none';
     }));
 
-  // §3: the footer is the parking-lot grammar, two sections, one divider
+  // issue #134 §3: two parking-lot sections and one divider
   ok('footer has two sections and one divider bar',
     await page.locator('.parking-lot__facts').count() === 2 &&
     await page.locator('.parking-lot__divider').count() === 1);
@@ -235,7 +227,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     (await downloadCta.getAttribute('download')) !== null &&
     (await downloadCta.getAttribute('onclick')) === null);
   ok('on the poles tab both controls are live, the Download not dimmed', await (async () => {
-    // re-select Plants on Poles: the §2 swap step above left Plants in Rocks checked
+    // re-select Plants on Poles after the issue #134 §2 swap check
     await page.locator('.topband__card-hit[for="page-poles"]').click();
     return await page.evaluate(() => {
       const dl = getComputedStyle(document.querySelector('.parking-lot .cta[download]'));
@@ -254,7 +246,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     });
   })());
 
-  // §4: the palette is the LITERAL idea-board green block (byte-exact)
+  // issue #134 §4: the palette is the byte-exact idea-board green block
   const tokens = await page.evaluate(() => {
     const cs = getComputedStyle(document.documentElement);
     return {

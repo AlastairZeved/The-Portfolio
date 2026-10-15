@@ -4,25 +4,9 @@
    Issue #138/B52 also pins each card's REST scale — the size it renders at
    when the page loads (the gesture bounds are untouched by that pin).
 
-   Since issue #87 (B30) the sheet renders through ONE uniform scale, so this
-   scenario runs at two widths in one pass:
-     desktop 1440x900 — scale = vh/REF_H, height-anchored (issue #121/B44:
-         uncapped; issue #128/B46: height-anchored on landscape) < 1 on this viewport:
-                            the drawing's own space is 2560/z × 1440/z, z = 1.3037,
-                            so 1440×900 renders scaled, un-capped), and
-     narrow  390x844  — scale < 1: every pointer reading must be converted into
-                        the board's LOGICAL space. A dragged card tracks the
-                        pointer 1:1 on screen (physical dx/dy unchanged), the
-                        corner resize changes the card's own scale: floored at
-                        TheBoards' 0.5 (B45) and CEILINGED at the issue
-                        #142/B51 one-fifth-of-the-viewport bound — one uniform
-                        scale, the card stops at the first axis reaching 1/5
-                        of the viewport, superseding the old 2.0 MAX_SCALE.
-                        The NOTE_MIN_W 132 floor is an unscaled logical size
-                        that scales with the sheet.
-   The style.left values are asserted in LOGICAL px directly, so a
-   regression that reads clientX/clientY against card geometry again (the
-   issue #87 review finding) fails here at 390x844.
+   At 1440×900 and 390×844, this scenario verifies scaled pointer readings:
+   cards drag at 1:1 physical speed and resize from the 0.5 floor to the
+   one-fifth viewport cap (B45/B51), with a 132px logical minimum.
 
    Dispatch synthetic pointer events ON the target element so the card's own
    event handlers run with the correct e.target (a Playwright real-mouse drag
@@ -335,9 +319,7 @@ async function runScenario(page, tag, width, height) {
   const freshCard = page.locator('a.door-card').first();
   const beforePages = (await page.context().pages()).length;
   const bb = await freshCard.boundingBox();
-  // B45: the cards are content-sized now, at mobile widths only a few
-  // physical px tall — a +10px offset lands OUTSIDE the card. Click its
-  // centre, like every other real-mouse proof in this suite.
+  // At mobile widths the content-sized card is small; click its centre.
   await page.mouse.click(bb.x + bb.width / 2, bb.y + bb.height / 2);
   await page.waitForTimeout(1500);
   const pages = page.context().pages();

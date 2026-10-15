@@ -186,9 +186,9 @@ a:focus-visible {
     box-shadow: 0 0 calc(32 * var(--rs)) calc(4 * var(--rs)) rgb(var(--glow-gray-a) / 0.9);
   }
 }
-/* B95 (issue #250): the employer title cards glow again, two-way. The
-   selected state is TheBoards' `B132` glow verbatim, as it was before B92
-   removed it (border-color + a single soft 0 0 8px 0 bloom, the one token)
+/* B95 (issue #250): the employer title cards glow two-way. The
+   selected state is TheBoards' `B132` glow (border-color + a single soft
+   0 0 8px 0 bloom, the one token)
    — but it is now driven by the CAROUSEL, not its own radio: the card whose
    employer owns the centred (checked) role is the selected one (PNC Bank
    owns roles 1-3, PNC Private Bank 4-5, Brinker 6-8). */
@@ -260,9 +260,7 @@ main { flex: 1 1 auto; display: flex; }
 }
 
 /* ---- Body — per-employer detail (issue #133 §2). B95 (issue #250): the
-   body is a single full-width cell — the .split__rule
-   divider and the empty .split__copy right half are removed; the carousel
-   spans the entire body content area. ---- */
+   carousel spans the full-width body content area. ---- */
 .split {
   flex: 1 1 auto;
   min-height: 0;
@@ -276,30 +274,13 @@ main { flex: 1 1 auto; display: flex; }
   align-items: center;
 }
 
-/* ---- B98 (issue #257): the role RING. The 8 role components stand in one
-   closed ring, 45deg apart, turning around a vertical axis -- superseding
-   B92's left/right coverflow fan (the owner: "it was supposed to be circular
-   and dimensional with all 8 in a circle shape, utilizing the background").
-   The checked role is the FRONT card, the nearest object in the scene; the
-   ring is wide, with dark gaps between cards; the back cards face outward,
-   see-through, so their mirrored fronts show faintly; the camera sits
-   slightly above, looking down onto the ring; cards darken with distance
-   until the rearmost almost melt into --deep; nothing leaves the page.
-
-   One formula per card instead of B92's 64-rule state table: each slot's
-   angle is its ring offset from the checked role, --a = (i - n) x 45deg, and
-   its depth cue is read off cos(--a) (1 at the front, -1 at the back). The
-   angle is NOT normalized, so every card turns by the same delta and the
-   ring rotates rigidly; the accepted CSS-only cost (owner, issue #257) is
-   that the wrap (8->1, 1->8) and some employer jumps turn the long way round.
-
-   Geometry is one unit, --ring-w (the card width), sized against the .clip
-   container so the whole ring -- radius, perspective, falloff -- scales 1:1
-   with the body ("the same ring, scaled down" on phones). The literals below
-   are agent-derived under the B33/B40 provenance pattern: the owner ruled
-   the relationships (front nearest, wide gaps, camera above, flatter than
-   800px, darken with distance, see-through backs); the numbers implement
-   them, recorded in UIUX §10.5. ---- */
+/* ---- B98 (issue #257): the role ring. The 8 role components stand in one
+   closed ring, 45deg apart, turning around a vertical axis. The checked role
+   is nearest; back cards face outward and fade with distance. Each slot's
+   angle is its offset from the checked role, --a = (i - n) x 45deg; the depth
+   cue is cos(--a). The unnormalized angle keeps the ring rigid, so wraparound
+   and some employer jumps take the longer route. The geometry scales with the
+   .clip container; rendering values are recorded in UIUX §10.5. ---- */
 .carousel__stage {
   position: relative;
   flex: 1 1 auto;
@@ -314,8 +295,8 @@ main { flex: 1 1 auto; display: flex; }
   z-index: 1;
   width: 100%;
   height: 100%;
-  /* Flatter than B92's 800px, and proportional to the card so the ring keeps
-     one look at every size. The eye sits above the ring: the far cards rise
+  /* Perspective scales with the card so the ring keeps one look at every
+     size. The eye sits above the ring: the far cards rise
      toward it and read as standing behind the front card. */
   perspective: calc(var(--ring-w) * 3.6);
   perspective-origin: 50% -12%;
@@ -446,13 +427,9 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .carousel__slot-hit { d
     rgb(0 0 0 / 0.85) 0%, rgb(0 0 0 / 0.45) 50%, rgb(0 0 0 / 0) 100%);
 }
 
-/* The light pool: a soft, edgeless pool on the canvas behind the front card --
-   the scene's one light source (it replaces B94's card glow). It lives
-   outside the 3D context so it never sorts in front of a card. Subtle: the
-   B99’s --moon-a channels at a low alpha. It dims mid-turn and
-   brightens as the new card lands: each role names its own copy of the
-   keyframes, so a change of role restarts the dip (CSS-only; the owner's
-   issue #257 exemption lets it run once on page load). */
+/* The soft light pool sits behind the front card, outside the 3D context,
+   so it never sorts in front of a card. It dims mid-turn and brightens as the
+   next card lands. */
 .carousel__pool {
   position: absolute;
   left: 50%; bottom: calc(var(--ring-w) * 0.5);
@@ -462,8 +439,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .carousel__slot-hit { d
   z-index: 0;
   pointer-events: none;
   animation: 500ms var(--ease) both;
-  /* B99 (issue #261): the light is cool moonlight (--moon-a), at alphas lowered so
-     its luminance matches B98's grey pool -- a cast, not a colour. A second,
+  /* B99 (issue #261): cool moonlight (--moon-a) casts a second,
      flat ellipse lights the floor at the front card's foot (79% down the
      pool box: the stage floor), so the contact shadows have light to fall
      on. */
@@ -594,52 +570,18 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   outline: 2px solid var(--ink-light);
   outline-offset: 2px;
 }
-/* ---- B56 (issue #154): the career body's left half carries the Agentic
-   Plugins page's plugin component — one per role. B66 (issue #173) rules
-   the plates READ LEFT TO RIGHT in one row — the owner: "These components
-   will never fit in a top to bottom layout once description text is added.
-   They need to read left to right" — equally sized (equal flex cells),
-   evenly spaced (the page's gutter), contained in the half. Above the
-   breakpoint the description card scrolls (B74, see the >743px block); below
-   it the readable reflow stacks them (B74).
-   B76 (issue #194): the component renders the agentic-plugins SOURCE
-   geometry at the source's exact proportions, scaled uniformly by the
-   plate's own width — the owner: "Uniform by plate width — component keeps
-   the source's exact proportions everywhere" (the source itself is a fixed
-   830px plate scaled uniformly, styles.css .gregorian-mode). One scale
-   unit, --u below, carries every literal: 1 source px = plate-width/830.
-   The title card STRADDLES the back card's top edge (title top 55 < back
-   top 90) with a gap to the description card below it (owner ruling); the
-   desc card is WIDER than the back card (600 vs 500 source px) and the
-   BACK CARD EXTENDS VERTICALLY PAST it (the source's desc→plate distance,
-   202px, leaves 112px of back card visible below the desc card); long
-   titles WRAP to two lines rather than
-   shrinking (owner ruling); the component's type renders at the source's
-   ratios (title 28, year 14, desc 20 per 830px plate) with the owner's
-   readable floor — nothing below 11px.
-   Ported VERBATIM in structure from the .gregorian-mode class set
-   (.gm-back/.gm-title/.gm-uc/.gm-desc), with NO .gm-cta and NO item
-   selector row (B56). The re-hue re-points the component's token ladder at
-   this page's monochrome :root tokens (§10.1, B73) —
-   --deep/--card/--frame/--note, the water ladder, --water-bot-a,
-   --elevation and --ink-light all stand from :root; no hex is duplicated
-   here. Values are agent-derived under the B33/B40 provenance pattern: the
-   owner ruled the relationships (source proportions, plate-relative scale,
-   straddle, wrap, floor, always-visible filled-card bar); the literals
-   implement them. ---- */
+/* B76 (issue #194): each role component scales from the 830px source plate
+   by its width. The title card straddles the back card; the description card
+   is wider, and the back extends 112px below it. Long titles wrap. Type uses
+   the source ratios (28/14/20 per 830px) with an 11px floor. The component
+   uses the B56 structure and UIUX §10.1 monochrome tokens. */
 
 .gregorian-mode {
   --ink: var(--deep);           /* the .gm-card border ink; descriptions use --glass-ink */
   --glass-ink: var(--ink-light); /* issue #261: the smoked-glass desc card's light ink */
   position: relative;
   box-sizing: border-box;
-  /* B64 (issue #176): the plates size to their content (the filled desc
-     cards) and share the half's leftover space equally. Spacing stands: the
-     1.25rem gutter keeps the row evenly spaced. In B66's row the equal
-     cells equalize the plates' WIDTHS (flex-basis 0); the vertical size is
-     the content. Above the breakpoint the plate caps at half the left
-     half's own height and the description card carries the scroll (B74, see
-     the >743px block). */
+  /* The component fills its slot and stacks title, year, and description. */
   width: 100%;
   /* B95 (issue #250): the component's pieces all scale by the ONE uniform
      --u inherited from its .carousel__slot. The component scales together
@@ -672,9 +614,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   box-shadow: var(--elevation);
   overflow: hidden;
 }
-/* B98 (issue #257): B94's selected glow on the centred card's back card is
-   removed -- the light pool behind the ring (.carousel__pool) is the scene's
-   one light source, so no box edge can show. */
+/* The pool provides ambient light; the back card has no selected-state glow. */
 .gm-back::after,
 .gm-title::after {
   content: "";
@@ -724,8 +664,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   30%  { background-position: -30% 0; }
   100% { background-position: -30% 0; }
 }
-/* The glimmer clock (the plugins page's issue #95 grammar): title card
-   first, background card 0.3s behind it. */
+/* B102: the title-card glimmer precedes the background-card glimmer by 0.3s. */
 .gm-title::after,
 .gm-back::after {
   animation: 6s var(--ease) infinite;
@@ -758,9 +697,8 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
    the 122 bottom padding + the 30+50 CTA block the career page does not
    port), so the back card's own 90px bottom inset leaves 112px of back
    card visibly showing below the card — long copy scrolls inside instead.
-   EMPTY on purpose (B56 owner override of the omit-empty rule) except the
-   three B64 fills; the 116px empty placeholder is already in source design
-   coordinates (3 × 32px line + 2 × 10px padding at the source's own type). */
+   The empty card reserves a 116px placeholder (3 × 32px line + 2 × 10px
+   padding at source size). */
 .gm-desc {
   position: relative;
   z-index: 1;
@@ -1035,11 +973,9 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
     <div class="carousel__stage">
     <div class="carousel__pool" aria-hidden="true"></div>
     <section class="carousel" role="radiogroup" aria-label="Choose a role">
-      <!-- B95 (issue #250): the carousel spans the whole body content area — the
-           .split__rule divider and the empty .split__copy right half are gone.
-           Each employer title card jumps to that employer's LAST role; the
-           ring sets a selected glow on the title card whose employer owns
-           the centred role. Still CSS :has only — no script. -->
+      <!-- B95 (issue #250): the carousel spans the whole body content area.
+           Each employer title card jumps to that employer's last role; the
+           selected title card follows the centred role. CSS :has only. -->
       <input class="carousel__radio" type="radio" name="role" id="role-1" checked aria-label="Branch Sales &amp; Service Representative">
       <input class="carousel__radio" type="radio" name="role" id="role-2" aria-label="Branch Sales &amp; Service Associate">
       <input class="carousel__radio" type="radio" name="role" id="role-3" aria-label="Branch Banker">

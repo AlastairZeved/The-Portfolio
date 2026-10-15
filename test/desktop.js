@@ -175,9 +175,8 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     const layer = document.getElementById('link-layer');
     if (!layer) return null;
     const br = board.getBoundingClientRect();
-    /* measured rects arrive PHYSICAL px; the line attrs are LOGICAL (B30's
-       ÷ rs conversion — issue #121/B44 renders the desktop below REF too,
-       where rs ≠ 1, so the conversion is no longer the identity). */
+    /* rs ≠ 1 at desktop sizes too (B44): measured rects are physical px;
+       line attrs are logical px, so divide by rs. */
     const RS = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
     const note = document.querySelector('.door-card');
     return {

@@ -303,7 +303,7 @@ main { flex: 1 1 auto; display: flex; }
    are agent-derived under the B33/B40 provenance pattern: the owner ruled
    the relationships (front nearest, wide gaps, camera above, flatter than
    800px, darken with distance, see-through backs); the numbers implement
-   them, recorded in UIUX §10.4. ---- */
+   them, recorded in UIUX §10.5. ---- */
 .carousel__stage {
   position: relative;
   flex: 1 1 auto;
@@ -453,7 +453,7 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] .carousel__slot-hit { d
 /* The light pool: a soft, edgeless pool on the canvas behind the front card --
    the scene's one light source (it replaces B94's card glow). It lives
    outside the 3D context so it never sorts in front of a card. Subtle: the
-   existing --glow-gray channels at a low alpha. It dims mid-turn and
+   B99’s --moon-a channels at a low alpha. It dims mid-turn and
    brightens as the new card lands: each role names its own copy of the
    keyframes, so a change of role restarts the dip (CSS-only; the owner's
    issue #257 exemption lets it run once on page load). */

@@ -1,12 +1,4 @@
-# Run the existing regression suite before merge.
-#
-# The repo has no package.json and no dependencies (AGENTS.md law), so until
-# now nothing ran the tests automatically — only a human remembering to,
-# locally, after the fact. This runs every suite on every PR and on push to
-# main, before a bad change can reach the Netlify deploy (see _headers).
-#
-# Shape ported from AlastairZeved/TheBoards' .github/workflows/ci.yml, the
-# owner-designated reference for issue #149.
+# Run the regression suite on every pull request and push to main.
 name: CI
 
 on:

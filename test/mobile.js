@@ -17,15 +17,11 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.goto(URL, { waitUntil: 'networkidle' });
 
-  // title card, B17/B19 text
+  // Title card copy and two-rung type (B17/B19/B61/B72).
   const title = await page.locator('#anchor-title').innerText();
   ok('title card line 1 "The Digital Garden of" (issue #188/B72)', title.includes('The Digital Garden of'));
   ok('title card line 2 name', title.includes('Robert Alastair Zeved Gregory'));
 
-  // title card, B17 text; B19's hug-the-text borders; B61's two-rung type
-  // (issue #170: the eyebrow renders on TheBoards' reduced secondary rung —
-  // 13.33px/400 — under the 20px/600 title rung; supersedes the single-size
-  // clause of B19 for this line)
   const titleSizes = await page.locator('#anchor-title .title-eyebrow, #anchor-title .title-pinned')
     .evaluateAll(els => els.map(el => getComputedStyle(el)));
   ok('title card two rungs: eyebrow reduced 13.33px/400, name 20px/600 (issue #170/B61)',

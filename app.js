@@ -8,8 +8,7 @@
    logical px — renders at the same fraction of the viewport height at every
    landscape size, exactly as TheBoards' band renders 61/1000 = 6.1% of vh.
    Portrait keeps B30's down-scale min(vw/REF_W, vh/REF_H), the only way the
-   wide drawing fits a narrow screen. This supersedes B44's min() formula
-   clause for landscape viewports only (B46). Above and below the reference
+   wide drawing fits a narrow screen. Above and below the reference
    space the sheet scales as one: the authored geometry stands, nothing
    reflows, nothing clips (issue #121, B44). Logical width/height are set so
    the scaled sheet always fills the viewport edge to edge. (TheBoards
@@ -77,9 +76,8 @@ function cardScale(card) {
       /* B52 (issue #138): the cards' drawing rest scales widen the cards, so
          at square-ish landscape aspects the pure height anchor compresses the
          % horizontal spread until two cards OVERLAP — breaking B44's
-         no-overlap law. Extend the measured width floor above (same
-         agent-derived provenance as B46's lw_min, per the B33/B43 pattern)
-         with the pairwise gap term: for every pair of cards whose rendered
+         no-overlap law. Extend the measured width floor above with the pairwise
+         gap term: for every pair of cards whose rendered
          vertical ranges overlap, the left card's right edge must clear the
          right card's left edge — lw >= aW / (bLeft% − aLeft%). The logical
          height (vh/rs) grows as the floor widens the sheet, so the % tops
@@ -200,11 +198,8 @@ function cardScale(card) {
     return px / (scale === undefined ? renderScale(board) : scale);
   }
 
-  /* ---- B45 (issue #126): TheBoards' note sizing + scale mechanics, ported ----
-     TheBoards state.js: NOTE_MIN_W = 132, MIN_SCALE = 0.5.
-     The card's own scale factor (a uniform transform: scale, origin top
-     left) scales the card's text and size. The default font is 17px/1.4;
-     `.fit-to-spotify` uses 11.4px (B80). */
+  /* B45 (issue #126): the card's own scale transforms its text and size
+     uniformly. The default font is 17px/1.4; `.fit-to-spotify` uses 11.4px (B80). */
   var MIN_SCALE = 0.5;                    // TheBoards state.js MIN_SCALE
   var NOTE_MIN_W = 132;                   // TheBoards state.js NOTE_MIN_W
   var MOVE_THRESHOLD = 4;                 // B41: physical px before a gesture moves
@@ -238,16 +233,7 @@ function cardScale(card) {
     drawLinks();
   }
 
-  /* ---- The link layer (UIUX §4.3, B28): fourteen straight 1px --frame lines
-     between card centres, one per pair authored in the markup. The pairing
-     is authored; the geometry is computed, so a line stays true while a
-     card is dragged or resized (TheBoards' link idiom, TheBoards' `UIUX §4.6` / `B91` —
-     endpoints are plain board-logical centres, recomputed on every path
-     that moves a note). The SVG's user units ARE the board's logical px, so
-     a measured rect — which is physical — is converted with toLogical()
-     before it is written: under the one render scale (B30) an unconverted
-     centre would place the line at 1/rs of the card's distance from the
-     board's origin. */
+  /* Link endpoints for the authored pairs in #link-layer (UIUX §4.3, B28). */
   var linkLayer = document.getElementById('link-layer');
   var links = linkLayer ? Array.prototype.slice.call(linkLayer.querySelectorAll('line')) : [];
 
@@ -402,13 +388,7 @@ function cardScale(card) {
   });
 
   function endDrag() {
-    // A gesture that MOVED is not a click and must never navigate (issue #109).
-    // The resize handle is a span inside the <a>, so releasing a resize fires
-    // the anchor's own click and navigates away mid-gesture — the resize branch
-    // carries the same `moved` flag the drag branch already had, so both
-    // gestures route through one guard and one test.
-    // A press that never crossed the 4px threshold is still a click and must
-    // still open the door (B3) — including a tap squarely on the handle.
+    // A gesture past MOVE_THRESHOLD is not a click (B41); a press under it still opens the door (B3).
     var gesture = (drag && drag.moved) ? drag : (resizing && resizing.moved ? resizing : null);
     if (gesture) {
       gesture.card.addEventListener('click', function (e) { e.preventDefault(); }, { once: true, capture: true });

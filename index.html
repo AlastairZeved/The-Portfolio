@@ -196,15 +196,15 @@ body {
 
 /* ---- The door-cards (UIUX §4): notes that are doors ---- */
 /* Sizing per B45 (issue #126): TheBoards' own note mechanics, ported whole
-   (TheBoards styles.css §4 .note/.note-text). A card is CONTENT-SIZED:
+   (TheBoards' `UIUX §4`; styles.css .note/.note-text). A card is CONTENT-SIZED:
    width: max-content floored at min-width 132px (= TheBoards' NOTE_MIN_W,
-   state.js / styles.css .note-text, TheBoards' `UIUX §4.5` `B84`), height following the
+   state.js / styles.css .note-text, TheBoards' `UIUX §4.5`, TheBoards' `B84`), height following the
    wrapped text — no authored px footprint. Its own scale factor — the var
    --card-scale, floored at MIN_SCALE 0.5 (TheBoards state.js) and ceilinged
    at one fifth of the viewport (issue #142 / B51) — is the ONLY thing that
    sizes the text: the font is 17px / line-height 1.4 (TheBoards .note-text)
    and the transform scales the whole card uniformly, transform-origin top
-   left (.note §4.1 — the stored left/top stays truthful). The owner's
+   left (TheBoards' `UIUX §4.1` — the stored left/top stays truthful). The owner's
    authored placements stand (B78, B80). The rest scales are inline per
    card (B78, B80). The gesture moves the scale from there (B45/B51). */
 .door-card {
@@ -216,7 +216,7 @@ body {
      card's own scale — TheBoards geometry.js noteMaxW, B45 */
   background: var(--note);
   color: var(--ink-dark);
-  /* TheBoards' note grammar (TheBoards UIUX §4, ported whole): the note
+  /* TheBoards' note grammar (TheBoards' `UIUX §4`, ported whole): the note
      carries a 2px border in its own ink — dark on this surface — and the
      border is what makes the 3px radius read near-square. The reference demo
      card in TheBoards states it: "See how this card has a border and is
@@ -237,8 +237,7 @@ body {
   transition: box-shadow 150ms ease-out, transform 80ms ease-out;
   /* rest: no shadow, no glow (UIUX §1 — cards are ON the page) */
   box-shadow: none;
-  /* TheBoards .note: the card's own scale lives on the transform,
-     transform-origin top left so the authored left/top stays truthful. */
+  /* The card's own scale lives on the transform. */
   transform: scale(var(--card-scale, 1));
   transform-origin: top left;
 }
@@ -315,9 +314,9 @@ body {
 .door-card.fit-to-spotify { font-size: 11.4px; line-height: 23.8px; }
 
 /* ---- The link layer (UIUX §4.3): the lines that join the note cards ----
-   TheBoards' link idiom ported verbatim (TheBoards' `UIUX §4.6` / `B91`): a thin
+   TheBoards' link idiom ported verbatim (TheBoards' `UIUX §4.6`, TheBoards' `B91`): a thin
    straight 1px line between two cards' centres, in --frame — this page's own
-   linework blue (§2.2) — with no fill, no cap decoration and no marker, held
+   linework blue (UIUX §2.2) — with no fill, no cap decoration and no marker, held
    to a crisp 1px at any render scale by non-scaling-stroke. It draws BELOW
    the notes and ABOVE the board furniture: z-index 1, the door-cards being
    z-index 2, with DOM order after the furniture. The layer never takes a hit
@@ -449,9 +448,8 @@ body {
   font-size: 14px;
   min-height: 34px;
 }
+/* B84 (issue #210 follow-up): Message textarea height. */
 #contact-form textarea { min-height: 98px; resize: vertical; }
-/* B84 (issue #210 follow-up): the Send button's former vertical footprint
-   (34px) is given back to the Message textarea — 64px floor + 34px = 98px. */
 #contact-form input::placeholder,
 #contact-form textarea::placeholder { color: var(--ink); opacity: 0.55; }
 #contact-form button[type="submit"] {
@@ -594,11 +592,7 @@ Planned future work: Add landing pages</div>
            Formspree form keeps the right half, split and divider per B62. -->
       <div class="lot-split">
         <div class="lot-copy">
-          <!-- issue #209 / B86: the footer's copy of record — two lines, no
-               gap (.lot-copy p { margin: 0 }). The closing phrase renders
-               italic (B68), spelled "curiouser" per the owner's correction.
-               The copy scales to the 16.57px band-anchor rung (15 × 1.10455,
-               B46); weight 400, no bold. -->
+          <!-- issue #209 / B86: footer copy. -->
           <p>Welcome to Rob's digital garden.</p>
           <p>All it takes to flex one's curiosity is to ask a question, then keep asking questions and always strive to be <em>curiouser and curiouser.</em></p>
         </div>
@@ -632,14 +626,7 @@ Planned future work: Add landing pages</div>
     </div>
   </div>
 
-  <!-- The link layer (UIUX §4.3, B28): the fourteen straight 1px --frame
-       lines that join the note cards, one `<line>` per pair the owner names
-       in issue #75, #72, #74, #146 and #196. TheBoards' link idiom ported verbatim
-       (TheBoards' `UIUX §4.6` / `B91`) — a line between two cards' centres,
-       below the notes,
-       never a hit target. Endpoints are computed from live card geometry
-       in app.js (issue #151, B59), so a line follows a card that is dragged
-       or resized; only the pairing is authored here. -->
+  <!-- Link pairings are authored here; app.js computes endpoints (UIUX §4.3, B28). -->
   <svg id="link-layer" aria-hidden="true" focusable="false">
     <line data-link="1" data-from="music" data-to="writing"></line>
     <line data-link="2" data-from="software-ai" data-to="community"></line>

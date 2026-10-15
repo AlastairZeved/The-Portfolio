@@ -143,8 +143,7 @@ function ok(label, cond, details = '') {
       }));
       /* B52 (issue #138): the drawing rest scales widen the cards, so at
          square-ish landscape aspects the width floor also carries the
-         pairwise gap term (B44's no-overlap law; same agent-derived
-         provenance as B46's lw_min): for every pair whose vertical ranges
+         pairwise gap term (B44's no-overlap law): for every pair whose vertical ranges
          overlap, the left card's right edge AND scaled resize-handle overhang
          must clear the right card's left edge — lw >= (aW + 4 × aScale) /
          (bLeft% − aLeft%). The logical height (vh/rs) grows with the floor,
@@ -201,18 +200,18 @@ function ok(label, cond, details = '') {
     ok(`${tag}: every card floored at NOTE_MIN_W 132 logical px (× own scale)`,
       r.dims.every(d => d.logicalW >= 132 * d.s - 0.5));
     // issue #128 (B46): the band / title card / lot follow TheBoards' laws
-    ok(`${tag}: band rule-y = 15.46 + max(2, lines) × 21.54 + 8.84 (TheBoards B47/B76 × 1.10455)`,
+    ok(`${tag}: band rule-y = 15.46 + max(2, lines) × 21.54 + 8.84 (TheBoards' \`B47\`/\`B76\` × 1.10455)`,
       Math.abs(r.band.ruleY - r.band.expectedRuleY) < 0.001, JSON.stringify(r.band));
     ok(`${tag}: band-top is 15.46 = 14 × 1.10455 (TheBoards state.js × k)`, r.band.bandTop.trim() === '15.46px');
     ok(`${tag}: title card min-height = rule-y + 29 (B31 STANDS — B46, owner ruling 3)`,
       Math.abs(r.band.cardMinH - (r.band.ruleY + 29)) < 0.5);
     ok(`${tag}: title card box = B31's (band-top+8) 16px 16px padding, occluding the rule`,
       r.band.cardPad === `${23.46.toFixed(2)}px 16px 16px` && r.band.cardBottomLogical >= r.band.ruleY + 28);
-    ok(`${tag}: lot-h = min(max(134.76 shelf, 34 + Σ rows), ⌈half the sheet⌉) (TheBoards B73 × k)`,
+    ok(`${tag}: lot-h = min(max(134.76 shelf, 34 + Σ rows), ⌈half the sheet⌉) (TheBoards' \`B73\` × k)`,
       Math.abs(r.band.lotHval - r.band.lotH) < 0.5, `lot-h ${r.band.lotHval} vs expected ${r.band.lotH}`);
     ok(`${tag}: band rule renders at rule-y × rs physical px (UIUX §3.2; 6.1% of vh per UIUX §3.1 at floor-inert sizes)`,
       Math.abs(r.band.rulePx - r.band.ruleY * r.rs) < 1, `rule ${r.band.rulePx} vs ${r.band.ruleY * r.rs}`);
-    ok(`${tag}: band label font-size is 14.36px (UIUX §3.2; B46: TheBoards B54's 13px × k)`,
+    ok(`${tag}: band label font-size is 14.36px (UIUX §3.2; B46: TheBoards' \`B54\` 13px × k)`,
       r.band.labelFont === '14.36px', r.band.labelFont);
     ok(`${tag}: #lot-items clips past the lot ceiling`, r.band.lotItemsClip === 'hidden');
   }

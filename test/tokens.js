@@ -33,7 +33,7 @@ function check(label, actual, expected, tol = 0.0002) {
   console.log(`${ok ? 'PASS' : 'FAIL'} ${label}: got ${actual.toFixed(4)}, want ${expected.toFixed(4)}`);
 }
 
-// §2.2 ladder, To-Do binding (rel. luminance)
+// UIUX §2.2 ladder, To-Do binding (rel. luminance)
 check('--deep luminance', lum(token('deep')), 0.0023);
 check('--card luminance', lum(token('card')), 0.0077);
 check('--water-top luminance', lum(token('water-top')), 0.1237);
@@ -41,14 +41,14 @@ check('--water-bot luminance', lum(token('water-bot')), 0.0325);
 check('--frame luminance', lum(token('frame')), 0.2611);
 check('--note luminance', lum(token('note')), 0.5962);
 
-// §2.3 ink contrast, each at its worst extreme
+// UIUX §2.3 ink contrast, each at its worst extreme
 check('deep/ink-light 18.33', contrast(token('deep'), token('ink-light')), 18.33, 0.05);
 check('card/ink-light 16.62', contrast(token('card'), token('ink-light')), 16.62, 0.05);
 check('water-top/ink-light 5.52', contrast(token('water-top'), token('ink-light')), 5.52, 0.05);
 check('water-bot/ink-light 11.62', contrast(token('water-bot'), token('ink-light')), 11.62, 0.05);
 check('note/ink-dark 11.84', contrast(token('note'), token('ink-dark')), 11.84, 0.05);
 
-// §2.4/§2.5 card-state bindings present as rgb channels
+// UIUX §2.4/§2.5 card-state bindings present as rgb channels
 const blue = token('glow-blue').split(/\s+/).map(Number);
 const green = token('glow-green').split(/\s+/).map(Number);
 if (blue.join(',') !== '109,156,176') { failures++; console.log('FAIL --glow-blue is not #6d9cb0 channels'); }

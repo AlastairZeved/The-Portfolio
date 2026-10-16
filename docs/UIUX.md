@@ -26,7 +26,7 @@ The governing design law and register are stated in PRD §1 and PRD §1.1.
   transient interaction states — hover glow, pressed inset. **Resting cards
   carry no shadow.** They are *on* the page, not floating over it.
 
-**Rulings:** B1.
+**Rulings:** B1, B10.
 
 ### §1.1 The register
 
@@ -150,9 +150,9 @@ corners (`border-radius: 0 0 3px 3px`).
 **Montserrat Alternates**, self-hosted, **no CDN** — the same face as
 TheBoards. Three weights shipped: 400, 600, 800, Latin-subset woff2,
 `font-display: swap`. May be embedded as a data URI to keep the single-file
-law (PRD §3.3).
+law (PRD §3.3). No monospace face is used anywhere.
 
-**Rulings:** B23.
+**Rulings:** B22, B23.
 
 ### §2.10 Favicons
 

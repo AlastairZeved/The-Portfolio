@@ -158,7 +158,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   ok('every note card renders plain 400 — no bold (issue #167/B60, superseding B53)',
     weights.rest.length === 6 && weights.rest.every(x => x === '400'));
 
-  // the fourteen note links (B28, UIUX §4.3): one <line> per owner-named pair
+  // the fourteen note links (B28, B32, B34, UIUX §4.3): one <line> per owner-named pair
   // (issue #75, #72, #74, #146 and #196), 1px --frame between the two cards' centres, on a hitless
   // layer below the notes. [L0] is the layer, [L1]–[L14] the fourteen pairs,
   // [L15]–[L16] the layer-wide line checks.

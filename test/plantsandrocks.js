@@ -20,6 +20,11 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
 (async () => {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const pageAssetRequests = new Set();
+  page.on('request', request => {
+    const path = new globalThis.URL(request.url()).pathname;
+    if (/^\/storybook\/p\d{2}\.webp$/.test(path)) pageAssetRequests.add(path);
+  });
   await page.goto(URL, { waitUntil: 'networkidle' });
 
   // Single-file law: no scripts, no stylesheets, no deps
@@ -122,8 +127,24 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   // Issue #274: a stale fallback from one flip must not corrupt the next
   // spread after two turns roughly one second apart.
   const storybook = page.frameLocator('.reader--poles iframe');
+  ok('the storybook declares all 24 pages as lazy WebP images in its HTML',
+    await storybook.locator('#page-assets img').evaluateAll(imgs =>
+      imgs.length === 24 && imgs.every((img, i) =>
+        img.getAttribute('src') === `storybook/p${String(i + 1).padStart(2, '0')}.webp` &&
+        img.loading === 'lazy' && img.alt === '')));
+  ok('the desktop storybook renders a two-half spread with a decoded page image',
+    await storybook.locator('#stage > .spread').evaluate(spread =>
+      spread.querySelectorAll('.half').length === 2 &&
+      spread.querySelectorAll('img').length === 1 &&
+      spread.querySelector('img').complete && spread.querySelector('img').naturalWidth > 0));
+  ok('initial page load fetches only the cover image',
+    pageAssetRequests.size === 1 && pageAssetRequests.has('/storybook/p01.webp'),
+    [...pageAssetRequests].join(', '));
   await storybook.locator('#next').click();
   await page.waitForTimeout(850);
+  ok('turning to the next spread fetches its images on demand',
+    pageAssetRequests.has('/storybook/p02.webp') && pageAssetRequests.has('/storybook/p03.webp'),
+    [...pageAssetRequests].join(', '));
   await storybook.locator('#next').click();
   await page.waitForTimeout(1100);
   await storybook.locator('#next').click();
@@ -329,6 +350,11 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
         return Math.abs(r.width - innerWidth) < 1 && r.top >= card.bottom - 1;
       });
     })());
+  ok('at 390px the storybook renders one decoded page in a single half',
+    await storybook.locator('#stage > .spread').evaluate(spread =>
+      spread.querySelectorAll('.half').length === 1 &&
+      spread.querySelectorAll('img').length === 1 &&
+      spread.querySelector('img').complete && spread.querySelector('img').naturalWidth > 0));
 
   // a11y: the selector is a named radio group; one off-canvas h1
   await page.setViewportSize({ width: 1440, height: 900 });

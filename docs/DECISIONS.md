@@ -3320,3 +3320,13 @@ left in `app.js` once issues #308 and #309 land, and records the owner's
 This supersedes nothing; it adds a burden of proof on top of B12 and B59.
 
 **Source:** owner chat, 2026-10-15, quoted verbatim in [issue #304](https://github.com/AlastairZeved/The-Portfolio/issues/304) — "Shipped JS is a last resort: a change that adds or grows JS must state in the PR why HTML/CSS cannot do it". Context from the same message: "A vanilla HTML/CSS site was the goal and at some point my agent introduced JS aggressively. I realize it may be needed somewhere for something, but it shouldn't be the default as my Hermes agent, Stromboli, seems to be treating it."
+
+### B111. The storybook's 24 page images are separate WebP files (issue #306)
+
+The 24 page images ship as separate files in `storybook/` and are referenced
+by `<img>` elements in `monstera-storybook.html`. B57's “committed verbatim”
+clause is superseded only for these images. The HTML document and current
+JavaScript pager remain. The storybook-specific CSP permits `img-src 'self'`;
+`font-src 'self' data:` remains.
+
+**Source:** the owner's issue [#306](https://github.com/AlastairZeved/The-Portfolio/issues/306), quoted verbatim — “Move them to files, e.g. `storybook/p01.webp` … `p24.webp`, and reference them from markup as `<img>` elements in `monstera-storybook.html`.”; and the owner's pre-implementation ruling, quoted verbatim — “I rule that B57’s “committed verbatim” clause is superseded only for the 24 page images: ship them as separate WebP files referenced by `<img>` elements in the storybook HTML; leave the HTML document and current JavaScript pager in place.”; “Yes—remove `data:` from the storybook-specific `img-src` only.”

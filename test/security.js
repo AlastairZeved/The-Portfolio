@@ -65,8 +65,11 @@ ok('no Referrer-Policy header is set (AGENTS.md: Formspree needs the referrer)',
 const sbCsp = ((blocks['/monstera-storybook.html'] || []).find(h => /^Content-Security-Policy:/i.test(h)) || '');
 ok("the storybook block allows same-origin framing (frame-ancestors 'self', B57)",
   /frame-ancestors 'self'(;|$)/.test(sbCsp));
-ok("the storybook block allows its blob worker (worker-src 'self' blob:', B57)",
-  /worker-src 'self' blob:(;|$)/.test(sbCsp));
+ok('the storybook block does not grant a worker-src exception',
+  !/(?:^|;)\s*worker-src\b/i.test(sbCsp));
+const storybookScript = read('monstera-storybook.js');
+ok('the storybook script does not use Worker, Blob, or object URLs',
+  !/\b(?:Worker|Blob|createObjectURL)\b/.test(storybookScript));
 
 // Every shipped page and script, discovered from the repo root (not a hardcoded list).
 const SHIPPED_HTML = fs.readdirSync(ROOT).filter(f => f.endsWith('.html')).sort();

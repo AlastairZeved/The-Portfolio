@@ -31,28 +31,10 @@ var btnNext = document.getElementById('next');
 var NONE = -1;
 var spreads = [], idx = 0, busy = false, cur = null, flipId = 0;
 var mq = window.matchMedia('(min-width: 768px)');
-/* hidden tabs throttle page timers; a Worker timer keeps the flip's
-   cleanup deadline honest even when the tab is in the background */
-var pendingDrops = Object.create(null), dropId = 0, ticker = null;
-try {
-  ticker = new Worker(URL.createObjectURL(new Blob(
-    ['onmessage=function(e){var id=e.data.id;setTimeout(function(){postMessage(id)},e.data.ms)}'],
-    { type: 'text/javascript' })));
-  ticker.onmessage = function (e) {
-    var f = pendingDrops[e.data];
-    delete pendingDrops[e.data];
-    if (f) f();
-  };
-} catch (e) { ticker = null; }
-function armDrop(fn, ms) {
-  if (ticker) {
-    var id = ++dropId;
-    pendingDrops[id] = fn;
-    ticker.postMessage({ id: id, ms: ms });
-    return null;
-  }
-  return setTimeout(fn, ms + 1000); // fallback timer (issue #274)
-}
+var pendingCleanup = null;
+document.addEventListener('visibilitychange', function () {
+  if (document.visibilityState === 'visible' && pendingCleanup) pendingCleanup();
+});
 
 /* book model (1-indexed pages p1..pN = PAGES[0..PAGES.length-1]):
    closed: right half holds the cover; each turn flips a sheet left,
@@ -132,13 +114,15 @@ function flip(dir) {
   function cleanup() {
     if (ended || ownFlip !== flipId) return;
     ended = true;
+    if (pendingCleanup === cleanup) pendingCleanup = null;
     clearTimeout(fallback);
     if (turn.parentNode) stage.removeChild(turn);
     if (top.parentNode) stage.removeChild(top);
     busy = false; cur = base;
   }
+  pendingCleanup = cleanup;
   turn.addEventListener('animationend', cleanup, { once: true });
-  fallback = armDrop(cleanup, 900); // worker-driven: unthrottled in hidden tabs
+  fallback = setTimeout(cleanup, 1900); // safety net if animationend never fires
   syncButtons();
 }
 btnPrev.addEventListener('click', function () { flip(-1); });
@@ -153,6 +137,8 @@ function show() {
   syncButtons();
 }
 function rebuild() {
+  ++flipId;
+  pendingCleanup = null;
   build();
   stage.innerHTML = ''; cur = null; busy = false;
   show();

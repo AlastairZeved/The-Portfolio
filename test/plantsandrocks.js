@@ -137,6 +137,34 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   ok('the storybook pager remains usable after the third page turn',
     await storybook.locator('.turn').count() === 1);
   await page.waitForTimeout(900);
+
+  // Issue #305: a hidden-to-visible transition settles the active page turn.
+  const beforeBackgroundTurns = await storybook.locator('body').evaluate(() => idx);
+  await storybook.locator('#next').click();
+  await storybook.locator('body').evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.waitForTimeout(900);
+  await storybook.locator('body').evaluate(() => document.getElementById('next').click());
+  const hiddenTurnState = await storybook.locator('body').evaluate(() => ({
+    idx,
+    turns: document.querySelectorAll('.turn').length,
+  }));
+  ok('a second turn starts about a second later while the storybook is hidden',
+    hiddenTurnState.idx === beforeBackgroundTurns + 2 && hiddenTurnState.turns === 1);
+  await storybook.locator('body').evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  ok('returning to the visible state settles the in-flight turn',
+    await storybook.locator('.turn').count() === 0 &&
+    await storybook.locator('#stage > .spread').count() === 1);
+  await storybook.locator('#next').click();
+  ok('the storybook pager remains usable after the background turns',
+    await storybook.locator('.turn').count() === 1);
+  await page.waitForTimeout(900);
+
   ok('the storybook document wears Montserrat Alternates (issue #160, UIUX §2.9)',
     await page.evaluate(() => {
       const doc = document.querySelector('.reader--poles iframe').contentDocument;

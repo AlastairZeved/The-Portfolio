@@ -25,7 +25,7 @@ persisted, nothing is computed, the page holds no state.
 Keep it that way. The site refuses: accounts, sync, sharing, tags, folders,
 search, filters, rich text, images, snapping, reminders, a theme switch,
 **and additionally** a blog/CMS, analytics, comments, and a newsletter signup
-(owner ruling). Each refusal is argued in `docs/PRD.md`'s out-of-scope table.
+(B9; owner ruling). Each refusal is argued in `docs/PRD.md`'s out-of-scope table.
 
 ## Read before you change anything
 
@@ -45,7 +45,7 @@ asked to add one.
 **Cite with the document prefix** (`UIUX §3`, not bare `§3`) — the numbering
 spaces overlap between records.
 
-**Quote TheBoards' numbers; never cite them bare.** TheBoards' record uses
+**Quote TheBoards' numbers; never cite them bare (B90).** TheBoards' record uses
 the same `B` prefix and the same `UIUX §` numbering as this one. A bare
 `B91` or `UIUX §4.6` in this repository means *this* repository's ruling or
 heading — and when that number does not exist yet, it will the day the
@@ -92,7 +92,7 @@ There is **no `test/sw-update.js`** — the site ships **no service worker**
 worker.
 
 Env overrides (read by the tests): `PORTFOLIO_BASE_URL` (default
-`http://localhost:8000/`; each suite appends its own page),
+`http://localhost:8000/`; each suite appends its own page, B109),
 `PORTFOLIO_OUT` (screenshot directory for `mobile.js`, `desktop.js`,
 `movable_resizable.js`), `PROOF_DIR` (output directory for `proof.js`,
 default `/tmp/portfolio-proof`). There is no lint/build/typecheck command — the project has

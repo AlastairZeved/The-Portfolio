@@ -45,6 +45,8 @@ And the governing design law, which `UIUX.md` implements:
 
 > **If you have to think about the interface, it failed. Every pixel earns
 > its place.**
+>
+> **Ruling:** DECISIONS.md B10.
 
 ### §1.1 Emotional identity
 
@@ -153,10 +155,10 @@ argued here — boundedness is a feature of this site, not a gap.
 | Accounts, sync, sharing, collaboration | There is no backend; adding one changes what the site is |
 | Tags, folders, search, filters, auto-grouping | P2, P4 — the cards are the whole index |
 | Rich text, images, attachments, drawing | P5 — static is the point; and TheBoards refuses them too |
-| A blog / CMS | Owner ruling (issue #51) — Writing is a door to Substack, not a feature here |
-| Analytics / tracking | Owner ruling (issue #51) — this page asks for nothing and reports nothing |
-| Comments | Owner ruling (issue #51) |
-| Newsletter signup | Owner ruling (issue #51) |
+| A blog / CMS | Owner ruling (B9, issue #51) — Writing is a door to Substack, not a feature here |
+| Analytics / tracking | Owner ruling (B9, issue #51) — this page asks for nothing and reports nothing |
+| Comments | Owner ruling (B9, issue #51) |
+| Newsletter signup | Owner ruling (B9, issue #51) |
 | Snap, alignment guides, auto-layout | Notes overlap freely; the visitor places them, entertained |
 | Due dates, reminders, streaks, recurring anything | TheBoards' refusal, carried; no calendar rail (owner ruling) |
 | Infinite canvas, pan, zoom | Boundedness is the feature — one page you can see all of |

@@ -1,4 +1,4 @@
-/* test/movable_resizable.js — bug #58 regression: door-cards must be
+/* test/movable_resizable.js — issue #58/B21 regression: door-cards must be
    draggable, resizable via the corner handle, clamped to a 1/5-viewport max
    and a legible minimum, with each card's link still opening in a new tab.
    Issue #138/B52 also pins each card's REST scale — the size it renders at

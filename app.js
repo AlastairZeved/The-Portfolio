@@ -154,7 +154,7 @@ function cardScale(card) {
       // it reads as whole line boxes; min-height 44 keeps the floor's answer 2.
       lines = Math.max(lines, Math.round(node.scrollHeight / BAND_LINE));
     });
-    return BAND_TOP + lines * BAND_LINE + BAND_GAP;
+    return BAND_TOP + lines * BAND_LINE + BAND_GAP; // B106
   }
   function lotH() {
     var sum = 0;
@@ -201,7 +201,7 @@ function cardScale(card) {
   /* B45 (issue #126): the card's own scale transforms its text and size
      uniformly. The default font is 17px/1.4; `.fit-to-spotify` uses 11.4px (B80). */
   var MIN_SCALE = 0.5;                    // TheBoards state.js MIN_SCALE
-  var NOTE_MIN_W = 132;                   // TheBoards state.js NOTE_MIN_W
+  var NOTE_MIN_W = 132;                   // TheBoards state.js NOTE_MIN_W; B21's legible floor
   var MOVE_THRESHOLD = 4;                 // B41: physical px before a gesture moves
   var MAX_VIEW_FRAC = 0.2;                // issue #142 / B51: one fifth of the viewport
 
@@ -264,7 +264,7 @@ function cardScale(card) {
   // owner's placements, B78 (+B80) — the only inline geometry left). The cap is
   // logical px like every authored size: it scales with the sheet (B30).
   layoutAllCards();
-  // the percentage-authored layout re-scales with the viewport: recompute
+  // B109: on resize, lay out cards before redrawing the note links.
   window.addEventListener('resize', function () {
     layoutAllCards();
     drawLinks();

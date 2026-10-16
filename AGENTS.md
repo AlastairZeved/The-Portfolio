@@ -108,7 +108,8 @@ none.
    owner ruling. The typeface (Montserrat Alternates, self-hosted,
    no CDN) may be embedded in the CSS as a data URI if the build requires it
    to stay single-file; that is the Earp-Street-Park precedent, not a new
-   dependency.
+   dependency. Read `docs/DECISIONS.md` B110 before adding or growing shipped
+   JavaScript.
 2. **No persistence, no state.** The page renders its content as literals in
    the HTML. Note drag/resize is visual entertainment only: positions are not
    stored, nothing survives reload, there is no undo, no import/export, no

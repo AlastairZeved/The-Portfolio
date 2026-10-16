@@ -3297,3 +3297,26 @@ Reason: B98's "`replaces B97`" was committed 3 minutes before the addendum, so i
 On viewport resize, lay out the cards before redrawing their note links. Test suites share `PORTFOLIO_BASE_URL` and append the page each suite exercises. The storybook's `frame-ancestors 'self'` allows any same-origin page to frame it; its comment describes that accurately. No CSP policy change is made.
 
 **Source:** the owner's issue [#275](https://github.com/AlastairZeved/The-Portfolio/issues/275), quoted verbatim — "If confirmed, swap the two calls."; "a base-URL variable that each suite joins with its own page. This changes the env interface, so update AGENTS.md's Commands section in the same PR."; "In fact `frame-ancestors 'self'` means any same-origin page may frame it. Reword it."
+
+### B110. Shipped JavaScript is a last resort (issue #304)
+
+Shipped JS is a last resort: a change that adds or grows JS must state in the
+PR why HTML/CSS cannot do it.
+
+This applies to shipped JS only — `app.js`, `monstera-storybook.js`, and any
+JS loaded by a page. It does not apply to `test/*.js`, the dev-only Playwright
+suites that are never shipped. This table is the baseline: it covers the JS
+left in `app.js` once issues #308 and #309 land, and records the owner's
+2026-10-15 review of #310, #311 and #312 (closed as not planned).
+
+| JS (in `app.js`) | Why HTML/CSS cannot do it | Ruling it serves |
+|---|---|---|
+| **Drag to move** (`pointerdown/move/up`, `toLogical`, pointer capture, `dragstart` suppression, click suppression after a drag) | CSS has no way to move an element by pointer. The suppressions exist only because the cards are real `<a>` links being dragged. | B7, B41, B3 |
+| **Corner resize** (`gestureScale`, the one-fifth-viewport ceiling, `applyCardScale`) | CSS `resize` changes a box's width and height through the browser's own grip. It cannot scale the card and its text uniformly from the custom handle, which has the enlarged grab area. | B45, B51, B42 |
+| **`drawLinks()`** (the 14 note links) | The links follow cards that JS drags and resizes. Drawing them in CSS would mean rewriting the drag code, replacing the SVG `<line>`s, and accepting a lag during the 80ms scale ease (#312). | B28, `UIUX §4.3`, B109 |
+| **`frame()` render scale and width floor** (`--rs`, `--logical-w/h`, `lwMin`, the B52 overlap loop) | Cards are content-sized (B45), so the width floor depends on rendered text width, which CSS cannot read into a calculation. Fixing card sizes to remove this would add permanent upkeep and overturn B45 (#310, #311). | B30, B44, B46, B52, B45, B42 |
+| **`applyCardMaxW`** (the cap that keeps a card's text from running off the sheet's right edge) | It depends on where the card currently sits, which changes when it is dragged. | B45 |
+
+This supersedes nothing; it adds a burden of proof on top of B12 and B59.
+
+**Source:** owner chat, 2026-10-15, quoted verbatim in [issue #304](https://github.com/AlastairZeved/The-Portfolio/issues/304) — "Shipped JS is a last resort: a change that adds or grows JS must state in the PR why HTML/CSS cannot do it". Context from the same message: "A vanilla HTML/CSS site was the goal and at some point my agent introduced JS aggressively. I realize it may be needed somewhere for something, but it shouldn't be the default as my Hermes agent, Stromboli, seems to be treating it."

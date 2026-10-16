@@ -10,10 +10,10 @@ The-Portfolio — Robert A. Gregory's portfolio site and the central hub for his
 scattered pseudonyms and websites. It is built **literally on TheBoards as the
 template** (owner ruling, 2026-09-29): a landing page, `index.html`, and
 three static sub-pages — `career.html` (B47), `plantsandrocks.html` (B48) and
-the `monstera-storybook.html` document it frames (B57) — each with its CSS
-inline and its JS in external .js files (issue #151, B59). **No calendar
-rail**, no service worker, no backend, no build step, no package manager, no
-dependencies.
+the `monstera-storybook.html` document it frames (B57) — each with CSS inline.
+Only `index.html` ships JavaScript, as external `app.js` (B59); the storybook
+pager is CSS-only (B112). **No calendar rail**, no service worker, no backend,
+no build step, no package manager, no dependencies.
 
 The site is a **functional advertisement for TheBoards**: it wears TheBoards'
 own design system (same tokens, same regions, same fonts) and behaves as a
@@ -100,10 +100,9 @@ none.
 
 ## Architecture: facts that explain most of `index.html`
 
-1. **One page.** The CSS is inline in `index.html`; the JS ships as
-   external .js files (`app.js`, and `monstera-storybook.js` beside its
-   page) per the issue-#151 owner ruling (B59), which supersedes the old
-   "all JS inline, truly one file" clause of B12. Do not split it further
+1. **Static pages.** CSS is inline in the landing and sub-pages. Only
+   `index.html` loads JavaScript, from external `app.js` (B59); the Monstera
+   storybook pager is CSS-only (B112). Do not split the landing page further
    into a module tree — additional shipped JS files are a FAIL without an
    owner ruling. The typeface (Montserrat Alternates, self-hosted,
    no CDN) may be embedded in the CSS as a data URI if the build requires it

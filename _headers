@@ -3,7 +3,7 @@
 
 # B57: plantsandrocks.html embeds the storybook; any same-origin page may frame it.
 /monstera-storybook.html
-  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self' data:; base-uri 'none'; frame-ancestors 'self'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'none'; script-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self' data:; base-uri 'none'; frame-ancestors 'self'; upgrade-insecure-requests
 
 # B91
 /sitemap.xml

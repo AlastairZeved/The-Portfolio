@@ -40,105 +40,372 @@ body {
   display: flex; flex-direction: column;
   overflow: hidden;
 }
+#storybook {
+  position: relative; flex: 1; min-height: 0;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.position-controls { display: contents; }
+.position {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap;
+}
 .band {
   flex: none; height: 56px;
   border-top: 1px solid var(--frame);
   background: linear-gradient(0deg, var(--water-top) 0%, var(--water-mid) 46%, var(--water-bot) 100%); /* sole band per B57 */
   display: flex; align-items: center; justify-content: center; gap: 28px;
 }
-.band button {
+.band label {
   width: 44px; height: 44px; border-radius: 3px;
   border: 2px solid var(--note); background: var(--card); color: var(--note);
   font-size: 20px; line-height: 1; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
+  display: none; align-items: center; justify-content: center;
 }
-.band button:disabled { opacity: 0.4; cursor: default; }
-.band button:not(:disabled):hover { background: var(--note); color: var(--deep); }
+.band label:hover { background: var(--note); color: var(--deep); }
+#storybook:has(.position:focus-visible) .band label { outline: 2px solid var(--note); }
 #stage-wrap { flex: 1; min-height: 0; width: 100%; display: flex; }
 #stage { position: relative; width: 100%; height: 100%; perspective: 1600px; }
-.spread { position: absolute; inset: 0; display: flex; z-index: 1; }
-.spread.top { z-index: 2; }
-.half {
-  width: 50%; height: 100%; min-width: 0;
-  display: flex; align-items: center; justify-content: center;
+.page-stack { position: absolute; inset: 0; }
+.sheet-position {
+  position: absolute; inset: 0 0 0 50%; width: 50%;
+  display: none; align-items: center; justify-content: center;
 }
-.half + .half { border-left: 1px solid var(--frame); }
-.half img {
-  display: block; max-width: 100%; max-height: 100%;
-  width: auto; height: auto; object-fit: contain;
-  background: var(--card);
-  box-shadow: 0 6px 24px rgb(0 0 0 / 0.55);
-}
-/* the turning sheet: overlays one half, rotates around the spine */
-.turn {
-  position: absolute; z-index: 5;
+.sheet {
+  position: relative; height: 100%; width: max-content;
+  transform: rotateY(0); transform-origin: left center;
   transform-style: preserve-3d;
+  transition: transform 850ms cubic-bezier(.5,.06,.36,1);
+}
+.sheet .face {
+  position: absolute; inset: 0; backface-visibility: hidden;
   box-shadow: 0 6px 24px rgb(0 0 0 / 0.55);
-  background: var(--card);
 }
-.turn .face { position: absolute; inset: 0; backface-visibility: hidden; }
-.turn .face img { width: 100%; height: 100%; object-fit: fill; display: block; background: var(--card); }
-.turn .face.back { transform: rotateY(180deg); }
-.turn.next { transform-origin: left center; animation: turn-next 850ms cubic-bezier(.5,.06,.36,1) both; }
-.turn.prev { transform-origin: right center; animation: turn-prev 850ms cubic-bezier(.5,.06,.36,1) both; }
-@keyframes turn-next {
-  0%   { transform: rotateY(0) translateZ(0); }
-  50%  { transform: rotateY(-90deg) translateZ(28px); }
-  100% { transform: rotateY(-180deg) translateZ(0); }
+.sheet .face.front { position: relative; height: 100%; width: max-content; }
+.sheet .face img {
+  display: block; height: 100%; width: auto; max-width: 50vw;
+  object-fit: contain; background: var(--card);
 }
-@keyframes turn-prev {
-  0%   { transform: rotateY(0) translateZ(0); }
-  50%  { transform: rotateY(90deg) translateZ(28px); }
-  100% { transform: rotateY(180deg) translateZ(0); }
+.sheet .face.back {
+  transform: rotateY(180deg); background-color: var(--card);
+  background-position: center; background-repeat: no-repeat; background-size: 100% 100%;
 }
-/* the grabbed corner folds up, then the sheet takes over */
-.curl { position: absolute; top: 0; width: 16%; aspect-ratio: 1 / 1; opacity: 0; pointer-events: none; animation: curl 850ms ease-out both; }
-.turn.next .curl { right: 0; clip-path: polygon(0 0, 100% 0, 100% 100%); background: linear-gradient(225deg, #f2f4ef 0%, #c9d4c4 65%, #a8b8a6 100%); }
-.turn.prev .curl { left: 0; clip-path: polygon(0 0, 100% 0, 0 100%); background: linear-gradient(135deg, #f2f4ef 0%, #c9d4c4 65%, #a8b8a6 100%); }
+/* A state exposes only the current page and its turning neighbor. */
+.curl {
+  position: absolute; top: 0; right: 0; width: 16%; aspect-ratio: 1 / 1;
+  opacity: 0; pointer-events: none;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  background: linear-gradient(225deg, #f2f4ef 0%, #c9d4c4 65%, #a8b8a6 100%);
+}
 @keyframes curl {
   0%   { opacity: 0; transform: scale(0.4); }
   22%  { opacity: 0.95; transform: scale(1); }
   40%  { opacity: 0; transform: scale(1.12); }
   100% { opacity: 0; }
 }
+/* Each checked position is a literal CSS state; no generator or build step. */
+@media (min-width: 768px) {
+  .position-controls:has(.position:checked) .prev-desktop,
+  .position-controls:has(.position:checked) .next-desktop { display: flex; }
+  #storybook:has(#position-01:checked) #sheet-01 { display: flex; }
+  #storybook:has(#position-02:checked) #sheet-01,
+  #storybook:has(#position-03:checked) #sheet-01 { display: flex; }
+  #storybook:has(#position-02:checked) #sheet-01 .sheet,
+  #storybook:has(#position-03:checked) #sheet-01 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-02:checked) #sheet-03,
+  #storybook:has(#position-03:checked) #sheet-03 { display: flex; }
+  #storybook:has(#position-04:checked) #sheet-03,
+  #storybook:has(#position-05:checked) #sheet-03 { display: flex; }
+  #storybook:has(#position-04:checked) #sheet-03 .sheet,
+  #storybook:has(#position-05:checked) #sheet-03 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-04:checked) #sheet-05,
+  #storybook:has(#position-05:checked) #sheet-05 { display: flex; }
+  #storybook:has(#position-06:checked) #sheet-05,
+  #storybook:has(#position-07:checked) #sheet-05 { display: flex; }
+  #storybook:has(#position-06:checked) #sheet-05 .sheet,
+  #storybook:has(#position-07:checked) #sheet-05 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-06:checked) #sheet-07,
+  #storybook:has(#position-07:checked) #sheet-07 { display: flex; }
+  #storybook:has(#position-08:checked) #sheet-07,
+  #storybook:has(#position-09:checked) #sheet-07 { display: flex; }
+  #storybook:has(#position-08:checked) #sheet-07 .sheet,
+  #storybook:has(#position-09:checked) #sheet-07 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-08:checked) #sheet-09,
+  #storybook:has(#position-09:checked) #sheet-09 { display: flex; }
+  #storybook:has(#position-10:checked) #sheet-09,
+  #storybook:has(#position-11:checked) #sheet-09 { display: flex; }
+  #storybook:has(#position-10:checked) #sheet-09 .sheet,
+  #storybook:has(#position-11:checked) #sheet-09 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-10:checked) #sheet-11,
+  #storybook:has(#position-11:checked) #sheet-11 { display: flex; }
+  #storybook:has(#position-12:checked) #sheet-11,
+  #storybook:has(#position-13:checked) #sheet-11 { display: flex; }
+  #storybook:has(#position-12:checked) #sheet-11 .sheet,
+  #storybook:has(#position-13:checked) #sheet-11 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-12:checked) #sheet-13,
+  #storybook:has(#position-13:checked) #sheet-13 { display: flex; }
+  #storybook:has(#position-14:checked) #sheet-13,
+  #storybook:has(#position-15:checked) #sheet-13 { display: flex; }
+  #storybook:has(#position-14:checked) #sheet-13 .sheet,
+  #storybook:has(#position-15:checked) #sheet-13 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-14:checked) #sheet-15,
+  #storybook:has(#position-15:checked) #sheet-15 { display: flex; }
+  #storybook:has(#position-16:checked) #sheet-15,
+  #storybook:has(#position-17:checked) #sheet-15 { display: flex; }
+  #storybook:has(#position-16:checked) #sheet-15 .sheet,
+  #storybook:has(#position-17:checked) #sheet-15 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-16:checked) #sheet-17,
+  #storybook:has(#position-17:checked) #sheet-17 { display: flex; }
+  #storybook:has(#position-18:checked) #sheet-17,
+  #storybook:has(#position-19:checked) #sheet-17 { display: flex; }
+  #storybook:has(#position-18:checked) #sheet-17 .sheet,
+  #storybook:has(#position-19:checked) #sheet-17 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-18:checked) #sheet-19,
+  #storybook:has(#position-19:checked) #sheet-19 { display: flex; }
+  #storybook:has(#position-20:checked) #sheet-19,
+  #storybook:has(#position-21:checked) #sheet-19 { display: flex; }
+  #storybook:has(#position-20:checked) #sheet-19 .sheet,
+  #storybook:has(#position-21:checked) #sheet-19 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-20:checked) #sheet-21,
+  #storybook:has(#position-21:checked) #sheet-21 { display: flex; }
+  #storybook:has(#position-22:checked) #sheet-21,
+  #storybook:has(#position-23:checked) #sheet-21 { display: flex; }
+  #storybook:has(#position-22:checked) #sheet-21 .sheet,
+  #storybook:has(#position-23:checked) #sheet-21 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-22:checked) #sheet-23,
+  #storybook:has(#position-23:checked) #sheet-23 { display: flex; }
+  #storybook:has(#position-24:checked) #sheet-23 { display: flex; }
+  #storybook:has(#position-24:checked) #sheet-23 .sheet { transform: rotateY(-180deg); }
+
+  #storybook:has(#position-02:checked) #sheet-01 .back,
+  #storybook:has(#position-03:checked) #sheet-01 .back { background-image: url("storybook/p02.webp"); }
+  #storybook:has(#position-04:checked) #sheet-03 .back,
+  #storybook:has(#position-05:checked) #sheet-03 .back { background-image: url("storybook/p04.webp"); }
+  #storybook:has(#position-06:checked) #sheet-05 .back,
+  #storybook:has(#position-07:checked) #sheet-05 .back { background-image: url("storybook/p06.webp"); }
+  #storybook:has(#position-08:checked) #sheet-07 .back,
+  #storybook:has(#position-09:checked) #sheet-07 .back { background-image: url("storybook/p08.webp"); }
+  #storybook:has(#position-10:checked) #sheet-09 .back,
+  #storybook:has(#position-11:checked) #sheet-09 .back { background-image: url("storybook/p10.webp"); }
+  #storybook:has(#position-12:checked) #sheet-11 .back,
+  #storybook:has(#position-13:checked) #sheet-11 .back { background-image: url("storybook/p12.webp"); }
+  #storybook:has(#position-14:checked) #sheet-13 .back,
+  #storybook:has(#position-15:checked) #sheet-13 .back { background-image: url("storybook/p14.webp"); }
+  #storybook:has(#position-16:checked) #sheet-15 .back,
+  #storybook:has(#position-17:checked) #sheet-15 .back { background-image: url("storybook/p16.webp"); }
+  #storybook:has(#position-18:checked) #sheet-17 .back,
+  #storybook:has(#position-19:checked) #sheet-17 .back { background-image: url("storybook/p18.webp"); }
+  #storybook:has(#position-20:checked) #sheet-19 .back,
+  #storybook:has(#position-21:checked) #sheet-19 .back { background-image: url("storybook/p20.webp"); }
+  #storybook:has(#position-22:checked) #sheet-21 .back,
+  #storybook:has(#position-23:checked) #sheet-21 .back { background-image: url("storybook/p22.webp"); }
+  #storybook:has(#position-24:checked) #sheet-23 .back { background-image: url("storybook/p24.webp"); }
+
+  #storybook:has(#position-02:focus) #sheet-01 .curl,
+  #storybook:has(#position-03:focus) #sheet-01 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-04:focus) #sheet-03 .curl,
+  #storybook:has(#position-05:focus) #sheet-03 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-06:focus) #sheet-05 .curl,
+  #storybook:has(#position-07:focus) #sheet-05 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-08:focus) #sheet-07 .curl,
+  #storybook:has(#position-09:focus) #sheet-07 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-10:focus) #sheet-09 .curl,
+  #storybook:has(#position-11:focus) #sheet-09 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-12:focus) #sheet-11 .curl,
+  #storybook:has(#position-13:focus) #sheet-11 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-14:focus) #sheet-13 .curl,
+  #storybook:has(#position-15:focus) #sheet-13 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-16:focus) #sheet-15 .curl,
+  #storybook:has(#position-17:focus) #sheet-15 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-18:focus) #sheet-17 .curl,
+  #storybook:has(#position-19:focus) #sheet-17 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-20:focus) #sheet-19 .curl,
+  #storybook:has(#position-21:focus) #sheet-19 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-22:focus) #sheet-21 .curl,
+  #storybook:has(#position-23:focus) #sheet-21 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-24:focus) #sheet-23 .curl { animation: curl 850ms ease-out both; }
+}
 @media (max-width: 767px) {
-  .half { width: 100%; }
-  .half img { max-width: calc(100% - 24px); }
+  .position-controls:has(.position:checked) .prev-mobile,
+  .position-controls:has(.position:checked) .next-mobile { display: flex; }
+  .sheet-position { inset: 0; width: 100%; }
+  .sheet .face img { max-width: calc(100vw - 24px); }
+  #storybook:has(#position-01:checked) #sheet-01 { display: flex; }
+  #storybook:has(#position-02:checked) #sheet-01,
+  #storybook:has(#position-02:checked) #sheet-02 { display: flex; }
+  #storybook:has(#position-02:checked) #sheet-01 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-03:checked) #sheet-02,
+  #storybook:has(#position-03:checked) #sheet-03 { display: flex; }
+  #storybook:has(#position-03:checked) #sheet-02 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-04:checked) #sheet-03,
+  #storybook:has(#position-04:checked) #sheet-04 { display: flex; }
+  #storybook:has(#position-04:checked) #sheet-03 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-05:checked) #sheet-04,
+  #storybook:has(#position-05:checked) #sheet-05 { display: flex; }
+  #storybook:has(#position-05:checked) #sheet-04 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-06:checked) #sheet-05,
+  #storybook:has(#position-06:checked) #sheet-06 { display: flex; }
+  #storybook:has(#position-06:checked) #sheet-05 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-07:checked) #sheet-06,
+  #storybook:has(#position-07:checked) #sheet-07 { display: flex; }
+  #storybook:has(#position-07:checked) #sheet-06 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-08:checked) #sheet-07,
+  #storybook:has(#position-08:checked) #sheet-08 { display: flex; }
+  #storybook:has(#position-08:checked) #sheet-07 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-09:checked) #sheet-08,
+  #storybook:has(#position-09:checked) #sheet-09 { display: flex; }
+  #storybook:has(#position-09:checked) #sheet-08 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-10:checked) #sheet-09,
+  #storybook:has(#position-10:checked) #sheet-10 { display: flex; }
+  #storybook:has(#position-10:checked) #sheet-09 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-11:checked) #sheet-10,
+  #storybook:has(#position-11:checked) #sheet-11 { display: flex; }
+  #storybook:has(#position-11:checked) #sheet-10 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-12:checked) #sheet-11,
+  #storybook:has(#position-12:checked) #sheet-12 { display: flex; }
+  #storybook:has(#position-12:checked) #sheet-11 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-13:checked) #sheet-12,
+  #storybook:has(#position-13:checked) #sheet-13 { display: flex; }
+  #storybook:has(#position-13:checked) #sheet-12 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-14:checked) #sheet-13,
+  #storybook:has(#position-14:checked) #sheet-14 { display: flex; }
+  #storybook:has(#position-14:checked) #sheet-13 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-15:checked) #sheet-14,
+  #storybook:has(#position-15:checked) #sheet-15 { display: flex; }
+  #storybook:has(#position-15:checked) #sheet-14 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-16:checked) #sheet-15,
+  #storybook:has(#position-16:checked) #sheet-16 { display: flex; }
+  #storybook:has(#position-16:checked) #sheet-15 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-17:checked) #sheet-16,
+  #storybook:has(#position-17:checked) #sheet-17 { display: flex; }
+  #storybook:has(#position-17:checked) #sheet-16 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-18:checked) #sheet-17,
+  #storybook:has(#position-18:checked) #sheet-18 { display: flex; }
+  #storybook:has(#position-18:checked) #sheet-17 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-19:checked) #sheet-18,
+  #storybook:has(#position-19:checked) #sheet-19 { display: flex; }
+  #storybook:has(#position-19:checked) #sheet-18 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-20:checked) #sheet-19,
+  #storybook:has(#position-20:checked) #sheet-20 { display: flex; }
+  #storybook:has(#position-20:checked) #sheet-19 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-21:checked) #sheet-20,
+  #storybook:has(#position-21:checked) #sheet-21 { display: flex; }
+  #storybook:has(#position-21:checked) #sheet-20 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-22:checked) #sheet-21,
+  #storybook:has(#position-22:checked) #sheet-22 { display: flex; }
+  #storybook:has(#position-22:checked) #sheet-21 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-23:checked) #sheet-22,
+  #storybook:has(#position-23:checked) #sheet-23 { display: flex; }
+  #storybook:has(#position-23:checked) #sheet-22 .sheet { transform: rotateY(-180deg); }
+  #storybook:has(#position-24:checked) #sheet-23,
+  #storybook:has(#position-24:checked) #sheet-24 { display: flex; }
+  #storybook:has(#position-24:checked) #sheet-23 .sheet { transform: rotateY(-180deg); }
+
+  #storybook:has(#position-02:checked) #sheet-01 .back { background-image: url("storybook/p02.webp"); }
+  #storybook:has(#position-03:checked) #sheet-02 .back { background-image: url("storybook/p03.webp"); }
+  #storybook:has(#position-04:checked) #sheet-03 .back { background-image: url("storybook/p04.webp"); }
+  #storybook:has(#position-05:checked) #sheet-04 .back { background-image: url("storybook/p05.webp"); }
+  #storybook:has(#position-06:checked) #sheet-05 .back { background-image: url("storybook/p06.webp"); }
+  #storybook:has(#position-07:checked) #sheet-06 .back { background-image: url("storybook/p07.webp"); }
+  #storybook:has(#position-08:checked) #sheet-07 .back { background-image: url("storybook/p08.webp"); }
+  #storybook:has(#position-09:checked) #sheet-08 .back { background-image: url("storybook/p09.webp"); }
+  #storybook:has(#position-10:checked) #sheet-09 .back { background-image: url("storybook/p10.webp"); }
+  #storybook:has(#position-11:checked) #sheet-10 .back { background-image: url("storybook/p11.webp"); }
+  #storybook:has(#position-12:checked) #sheet-11 .back { background-image: url("storybook/p12.webp"); }
+  #storybook:has(#position-13:checked) #sheet-12 .back { background-image: url("storybook/p13.webp"); }
+  #storybook:has(#position-14:checked) #sheet-13 .back { background-image: url("storybook/p14.webp"); }
+  #storybook:has(#position-15:checked) #sheet-14 .back { background-image: url("storybook/p15.webp"); }
+  #storybook:has(#position-16:checked) #sheet-15 .back { background-image: url("storybook/p16.webp"); }
+  #storybook:has(#position-17:checked) #sheet-16 .back { background-image: url("storybook/p17.webp"); }
+  #storybook:has(#position-18:checked) #sheet-17 .back { background-image: url("storybook/p18.webp"); }
+  #storybook:has(#position-19:checked) #sheet-18 .back { background-image: url("storybook/p19.webp"); }
+  #storybook:has(#position-20:checked) #sheet-19 .back { background-image: url("storybook/p20.webp"); }
+  #storybook:has(#position-21:checked) #sheet-20 .back { background-image: url("storybook/p21.webp"); }
+  #storybook:has(#position-22:checked) #sheet-21 .back { background-image: url("storybook/p22.webp"); }
+  #storybook:has(#position-23:checked) #sheet-22 .back { background-image: url("storybook/p23.webp"); }
+  #storybook:has(#position-24:checked) #sheet-23 .back { background-image: url("storybook/p24.webp"); }
+
+  #storybook:has(#position-02:focus) #sheet-01 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-03:focus) #sheet-02 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-04:focus) #sheet-03 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-05:focus) #sheet-04 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-06:focus) #sheet-05 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-07:focus) #sheet-06 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-08:focus) #sheet-07 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-09:focus) #sheet-08 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-10:focus) #sheet-09 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-11:focus) #sheet-10 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-12:focus) #sheet-11 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-13:focus) #sheet-12 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-14:focus) #sheet-13 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-15:focus) #sheet-14 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-16:focus) #sheet-15 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-17:focus) #sheet-16 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-18:focus) #sheet-17 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-19:focus) #sheet-18 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-20:focus) #sheet-19 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-21:focus) #sheet-20 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-22:focus) #sheet-21 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-23:focus) #sheet-22 .curl { animation: curl 850ms ease-out both; }
+  #storybook:has(#position-24:focus) #sheet-23 .curl { animation: curl 850ms ease-out both; }
 }
 </style>
 </head>
 <body>
-<div id="stage-wrap"><div id="stage"></div></div>
-<div id="page-assets" hidden>
-  <img src="storybook/p01.webp" alt="" loading="lazy">
-  <img src="storybook/p02.webp" alt="" loading="lazy">
-  <img src="storybook/p03.webp" alt="" loading="lazy">
-  <img src="storybook/p04.webp" alt="" loading="lazy">
-  <img src="storybook/p05.webp" alt="" loading="lazy">
-  <img src="storybook/p06.webp" alt="" loading="lazy">
-  <img src="storybook/p07.webp" alt="" loading="lazy">
-  <img src="storybook/p08.webp" alt="" loading="lazy">
-  <img src="storybook/p09.webp" alt="" loading="lazy">
-  <img src="storybook/p10.webp" alt="" loading="lazy">
-  <img src="storybook/p11.webp" alt="" loading="lazy">
-  <img src="storybook/p12.webp" alt="" loading="lazy">
-  <img src="storybook/p13.webp" alt="" loading="lazy">
-  <img src="storybook/p14.webp" alt="" loading="lazy">
-  <img src="storybook/p15.webp" alt="" loading="lazy">
-  <img src="storybook/p16.webp" alt="" loading="lazy">
-  <img src="storybook/p17.webp" alt="" loading="lazy">
-  <img src="storybook/p18.webp" alt="" loading="lazy">
-  <img src="storybook/p19.webp" alt="" loading="lazy">
-  <img src="storybook/p20.webp" alt="" loading="lazy">
-  <img src="storybook/p21.webp" alt="" loading="lazy">
-  <img src="storybook/p22.webp" alt="" loading="lazy">
-  <img src="storybook/p23.webp" alt="" loading="lazy">
-  <img src="storybook/p24.webp" alt="" loading="lazy">
+<div id="storybook">
+  <div id="stage-wrap"><div id="stage">
+    <div class="page-stack" id="page-assets">
+      <div class="sheet-position" id="sheet-01"><div class="sheet"><div class="face front"><img src="storybook/p01.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-02"><div class="sheet"><div class="face front"><img src="storybook/p02.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-03"><div class="sheet"><div class="face front"><img src="storybook/p03.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-04"><div class="sheet"><div class="face front"><img src="storybook/p04.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-05"><div class="sheet"><div class="face front"><img src="storybook/p05.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-06"><div class="sheet"><div class="face front"><img src="storybook/p06.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-07"><div class="sheet"><div class="face front"><img src="storybook/p07.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-08"><div class="sheet"><div class="face front"><img src="storybook/p08.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-09"><div class="sheet"><div class="face front"><img src="storybook/p09.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-10"><div class="sheet"><div class="face front"><img src="storybook/p10.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-11"><div class="sheet"><div class="face front"><img src="storybook/p11.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-12"><div class="sheet"><div class="face front"><img src="storybook/p12.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-13"><div class="sheet"><div class="face front"><img src="storybook/p13.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-14"><div class="sheet"><div class="face front"><img src="storybook/p14.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-15"><div class="sheet"><div class="face front"><img src="storybook/p15.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-16"><div class="sheet"><div class="face front"><img src="storybook/p16.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-17"><div class="sheet"><div class="face front"><img src="storybook/p17.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-18"><div class="sheet"><div class="face front"><img src="storybook/p18.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-19"><div class="sheet"><div class="face front"><img src="storybook/p19.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-20"><div class="sheet"><div class="face front"><img src="storybook/p20.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-21"><div class="sheet"><div class="face front"><img src="storybook/p21.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-22"><div class="sheet"><div class="face front"><img src="storybook/p22.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-23"><div class="sheet"><div class="face front"><img src="storybook/p23.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+      <div class="sheet-position" id="sheet-24"><div class="sheet"><div class="face front"><img src="storybook/p24.webp" alt="" loading="lazy"></div><div class="face back" aria-hidden="true"></div><div class="curl" aria-hidden="true"></div></div></div>
+    </div>
+  </div></div>
+  <div class="band" id="band-bottom" role="radiogroup" aria-label="Choose a page">
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-01" checked aria-label="Page 1"><label class="next-desktop" for="position-03" aria-label="Next page">&#8250;</label><label class="next-mobile" for="position-02" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-02" aria-label="Page 2"><label class="next-desktop" for="position-04" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-01" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-03" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-03" aria-label="Page 3"><label class="prev-desktop" for="position-01" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-05" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-02" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-04" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-04" aria-label="Page 4"><label class="prev-desktop" for="position-02" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-06" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-03" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-05" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-05" aria-label="Page 5"><label class="prev-desktop" for="position-03" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-07" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-04" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-06" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-06" aria-label="Page 6"><label class="prev-desktop" for="position-04" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-08" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-05" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-07" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-07" aria-label="Page 7"><label class="prev-desktop" for="position-05" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-09" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-06" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-08" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-08" aria-label="Page 8"><label class="prev-desktop" for="position-06" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-10" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-07" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-09" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-09" aria-label="Page 9"><label class="prev-desktop" for="position-07" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-11" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-08" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-10" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-10" aria-label="Page 10"><label class="prev-desktop" for="position-08" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-12" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-09" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-11" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-11" aria-label="Page 11"><label class="prev-desktop" for="position-09" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-13" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-10" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-12" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-12" aria-label="Page 12"><label class="prev-desktop" for="position-10" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-14" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-11" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-13" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-13" aria-label="Page 13"><label class="prev-desktop" for="position-11" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-15" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-12" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-14" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-14" aria-label="Page 14"><label class="prev-desktop" for="position-12" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-16" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-13" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-15" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-15" aria-label="Page 15"><label class="prev-desktop" for="position-13" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-17" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-14" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-16" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-16" aria-label="Page 16"><label class="prev-desktop" for="position-14" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-18" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-15" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-17" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-17" aria-label="Page 17"><label class="prev-desktop" for="position-15" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-19" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-16" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-18" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-18" aria-label="Page 18"><label class="prev-desktop" for="position-16" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-20" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-17" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-19" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-19" aria-label="Page 19"><label class="prev-desktop" for="position-17" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-21" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-18" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-20" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-20" aria-label="Page 20"><label class="prev-desktop" for="position-18" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-22" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-19" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-21" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-21" aria-label="Page 21"><label class="prev-desktop" for="position-19" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-23" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-20" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-22" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-22" aria-label="Page 22"><label class="prev-desktop" for="position-20" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-24" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-21" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-23" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-23" aria-label="Page 23"><label class="prev-desktop" for="position-21" aria-label="Previous page">&#8249;</label><label class="next-desktop" for="position-24" aria-label="Next page">&#8250;</label><label class="prev-mobile" for="position-22" aria-label="Previous page">&#8249;</label><label class="next-mobile" for="position-24" aria-label="Next page">&#8250;</label></div>
+    <div class="position-controls"><input class="position" type="radio" name="page-position" id="position-24" aria-label="Page 24"><label class="prev-desktop" for="position-23" aria-label="Previous page">&#8249;</label><label class="prev-mobile" for="position-23" aria-label="Previous page">&#8249;</label></div>
+  </div>
 </div>
-<div class="band" id="band-bottom">
-  <button id="prev" aria-label="Previous page">&#8249;</button>
-  <button id="next" aria-label="Next page">&#8250;</button>
-</div>
-<script src="monstera-storybook.js"></script>
 </body>
 </html>

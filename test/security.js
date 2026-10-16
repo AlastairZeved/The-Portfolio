@@ -63,6 +63,8 @@ ok("no CSP in any block loosens script-src with 'unsafe-inline' or 'unsafe-eval'
 ok('no Referrer-Policy header is set (AGENTS.md: Formspree needs the referrer)',
   !/^\s*Referrer-Policy:/mi.test(headers));
 const sbCsp = ((blocks['/monstera-storybook.html'] || []).find(h => /^Content-Security-Policy:/i.test(h)) || '');
+ok("the storybook blocks scripts (script-src 'none', B112)",
+  /script-src 'none'(?:;|$)/.test(sbCsp));
 ok('the storybook permits only same-origin images',
   /img-src 'self'(?:;|$)/.test(sbCsp) && !/img-src[^;]*\bdata:/.test(sbCsp));
 ok('the storybook keeps data-URI fonts permitted',
@@ -71,11 +73,8 @@ ok("the storybook block allows same-origin framing (frame-ancestors 'self', B57)
   /frame-ancestors 'self'(;|$)/.test(sbCsp));
 ok('the storybook block does not grant a worker-src exception',
   !/(?:^|;)\s*worker-src\b/i.test(sbCsp));
-const storybookScript = read('monstera-storybook.js');
-ok('storybook JavaScript contains no embedded WebP page data',
-  !/data:image\/webp;base64,/i.test(storybookScript));
-ok('the storybook script does not use Worker, Blob, or object URLs',
-  !/\b(?:Worker|Blob|createObjectURL)\b/.test(storybookScript));
+ok('the storybook has no script element', !/<script\b/i.test(read('monstera-storybook.html')));
+ok('the storybook JavaScript file is removed', !fs.existsSync(path.join(ROOT, 'monstera-storybook.js')));
 
 // Every shipped page and script, discovered from the repo root (not a hardcoded list).
 const SHIPPED_HTML = fs.readdirSync(ROOT).filter(f => f.endsWith('.html')).sort();

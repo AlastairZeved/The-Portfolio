@@ -504,7 +504,7 @@ The Parking Lot is split **50/50** by a vertical divider.
 | releasing a resize navigates nothing; a tap on the handle still opens the door (B41) | `test/movable_resizable.js` |
 | no service worker | PRD §3, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 | the career page: employer-card shared size/equal gaps, oneliner dates and selection glow; eight-role ring and uniform components; last-role jumps; one-viewport layout, component geometry and in-card scroll; monochrome tokens; filled and blank slots; two-way footer and centred CTA; reduced-motion, touch and glass-legibility behavior | `test/career.js` |
-| the Plants & Rocks page: selector mechanics and `--frame` glow; storybook iframe and empty rocks reader; two-section lot; B58 Download (live on poles, inert on rocks) and B82 Back-to-the-Garden anchors (live on both tabs); idea-green tokens; single-file page and B50 landing-convention band/card/lot | `test/plantsandrocks.js` |
+| the Plants & Rocks page: selector mechanics and `--frame` glow; storybook iframe, CSS-only 24-position pager/page turn and empty rocks reader; two-section lot; B58 Download (live on poles, inert on rocks) and B82 Back-to-the-Garden anchors (live on both tabs); idea-green tokens; single-file page and B50 landing-convention band/card/lot | `test/plantsandrocks.js`, `test/security.js` |
 
 ---
 
@@ -740,12 +740,13 @@ The selected-card glow uses `--frame` `#52997f` for its border and
   one per radio, driven by `:has`. The **Plants on Poles** reader embeds
   `monstera-storybook.html` in an
   `<iframe src="monstera-storybook.html" title="Monstera Division and Moss
-  Pole Introduction">`; the storybook handles its own paging and ships without
-  a top header band. The iframe fills the body region edge-to-edge (`width:
-  100%`, no side gaps, `border: 0`) and sits below the title-card overhang,
-  with `29 × --rs` plus `8 × --rs` clearance; this collapses to zero on
-  mobile. The **Plants in Rocks** reader is an empty container with no styled
-  content, placeholder, chevrons, or split furniture.
+  Pole Introduction">`; the storybook's CSS-only pager and page turn are
+  specified in UIUX §11.4 (B112), and it ships without a top header band. The iframe
+  fills the body region edge-to-edge (`width: 100%`, no side gaps, `border: 0`)
+  and sits below the title-card overhang, with `29 × --rs` plus `8 × --rs`
+  clearance; this collapses to zero on mobile. The **Plants in Rocks** reader
+  is an empty container with no styled content, placeholder, chevrons, or
+  split furniture.
 - **Footer (two sections):** the shared Parking Lot convention is in §9.
   This page has one divider bar. The **"Back to the Garden"**
   `.cta` links to `https://razgregory.com/` in the same tab and is live on
@@ -768,3 +769,28 @@ chevrons, or split furniture. The page carries non-rendering `SLOT` comments
 for future fills; no copy is invented.
 
 **Rulings:** B48, B57.
+
+### §11.4 The Monstera storybook pager
+
+`monstera-storybook.html` keeps its own pager inside the B57 iframe. Its 24
+page positions are one radio group controlled by CSS `:has`; the 24 WebP files
+remain `<img>` elements in the HTML (B111), and there is no shipped JavaScript.
+The storybook-specific CSP uses `script-src 'none'`.
+
+- **Desktop (≥768px):** two-page spreads; page-turn labels move between the
+  adjacent spread positions, and the last position is the single final page.
+- **Mobile (<768px):** one page at a time; labels move one position.
+- **Ends:** the first position has no Previous label; the last position has no
+  Next label.
+- **Controls:** the checked position's adjacent `<label>` controls are the
+  only visible pair for the active viewport. Each label keeps its `aria-label`
+  and **44×44px** target. Radios are named “Page 1” through “Page 24” in the
+  “Choose a page” group. Keyboard arrow navigation is native to the radio group
+  and works only while that group has focus. A focused radio shows a **2px**
+  `--note` outline on the visible controls.
+- **Turn:** each sheet has front/back faces with `backface-visibility: hidden`.
+  Its transform transitions over **850ms** with
+  `cubic-bezier(.5,.06,.36,1)`; the existing corner curl keyframes run over
+  **850ms ease-out**. Rapid radio changes retarget the CSS transition.
+
+**Rulings:** B57, B111, B112.

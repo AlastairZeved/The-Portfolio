@@ -124,67 +124,138 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     await page.evaluate(() =>
       document.querySelector('.reader--poles iframe').contentDocument &&
       document.querySelector('.reader--poles iframe').contentDocument.body.scrollHeight > 0));
-  // Issue #274: a stale fallback from one flip must not corrupt the next
-  // spread after two turns roughly one second apart.
+  // Issue #307/B112: one CSS radio group owns the pager state.
   const storybook = page.frameLocator('.reader--poles iframe');
-  ok('the storybook declares all 24 pages as lazy WebP images in its HTML',
-    await storybook.locator('#page-assets img').evaluateAll(imgs =>
+  ok('the storybook declares all 24 page images as lazy WebP markup',
+    await storybook.locator('#page-assets .sheet-position > .sheet > .front img').evaluateAll(imgs =>
       imgs.length === 24 && imgs.every((img, i) =>
         img.getAttribute('src') === `storybook/p${String(i + 1).padStart(2, '0')}.webp` &&
         img.loading === 'lazy' && img.alt === '')));
-  ok('the desktop storybook renders a two-half spread with a decoded page image',
-    await storybook.locator('#stage > .spread').evaluate(spread =>
-      spread.querySelectorAll('.half').length === 2 &&
-      spread.querySelectorAll('img').length === 1 &&
-      spread.querySelector('img').complete && spread.querySelector('img').naturalWidth > 0));
+  ok('the storybook has 24 labeled positions in one radio group',
+    await storybook.locator('.position').evaluateAll(inputs =>
+      inputs.length === 24 && inputs.every(input => input.type === 'radio' &&
+        input.name === 'page-position' && input.getAttribute('aria-label') === `Page ${Number(input.id.slice(-2))}`)));
+  ok('the desktop cover is the only visible sheet at the first position',
+    await storybook.locator('#position-01').isChecked() &&
+    await storybook.locator('#sheet-01').isVisible() &&
+    await storybook.locator('#sheet-03').isHidden() &&
+    await storybook.locator('#sheet-01 img').evaluate(img => img.complete && img.naturalWidth > 0));
   ok('initial page load fetches only the cover image',
     pageAssetRequests.size === 1 && pageAssetRequests.has('/storybook/p01.webp'),
     [...pageAssetRequests].join(', '));
-  await storybook.locator('#next').click();
-  await page.waitForTimeout(850);
-  ok('turning to the next spread fetches its images on demand',
-    pageAssetRequests.has('/storybook/p02.webp') && pageAssetRequests.has('/storybook/p03.webp'),
-    [...pageAssetRequests].join(', '));
-  await storybook.locator('#next').click();
-  await page.waitForTimeout(1100);
-  await storybook.locator('#next').click();
-  ok('the storybook still starts a third page turn after two turns one second apart',
-    await storybook.locator('.turn').count() === 1);
+  ok('the CSS page-turn keeps the 850ms easing and a visible focus ring',
+    await storybook.locator('#sheet-01 .sheet').evaluate(sheet => {
+      const style = getComputedStyle(sheet);
+      const duration = parseFloat(style.transitionDuration) *
+        (style.transitionDuration.trim().endsWith('ms') ? 1 : 1000);
+      return duration === 850 &&
+        style.transitionTimingFunction === 'cubic-bezier(0.5, 0.06, 0.36, 1)';
+    }));
+  await storybook.locator('.position-controls:has(#position-01) .next-desktop').click();
+  ok('desktop navigation advances from the cover to the next two-page spread',
+    await storybook.locator('#position-03').isChecked() &&
+    await storybook.locator('#sheet-01').isVisible() &&
+    await storybook.locator('#sheet-03').isVisible() &&
+    await storybook.locator('#sheet-01 .back').evaluate(el => getComputedStyle(el).backgroundImage.includes('p02.webp')) &&
+    await storybook.locator('#sheet-01 .curl').evaluate(el => getComputedStyle(el).animationName === 'curl'));
   await page.waitForTimeout(900);
-  ok('the third page turn settles to one spread',
-    await storybook.locator('#stage > .spread').count() === 1 &&
-    await storybook.locator('.turn').count() === 0);
-  await storybook.locator('#next').click();
-  ok('the storybook pager remains usable after the third page turn',
-    await storybook.locator('.turn').count() === 1);
+  ok('the first turn fetches only its back and the next visible page',
+    pageAssetRequests.has('/storybook/p02.webp') && pageAssetRequests.has('/storybook/p03.webp') &&
+    pageAssetRequests.size === 3, [...pageAssetRequests].join(', '));
+  for (let n = 1; n <= 24; n++) {
+    const id = String(n).padStart(2, '0');
+    await storybook.locator(`#position-${id}`).evaluate(input => { input.checked = true; });
+    const lastTurned = n === 24 ? 23 : n === 1 ? 0 : (n % 2 ? n - 2 : n - 1);
+    const expected = n === 1 ? ['sheet-01'] : n === 24 ? ['sheet-23'] :
+      [`sheet-${String(lastTurned).padStart(2, '0')}`, `sheet-${String(lastTurned + 2).padStart(2, '0')}`];
+    const actual = await storybook.locator('.sheet-position').evaluateAll(sheets =>
+      sheets.filter(sheet => getComputedStyle(sheet).display === 'flex').map(sheet => sheet.id));
+    ok(`desktop CSS position ${n} exposes the correct spread`,
+      JSON.stringify(actual) === JSON.stringify(expected), `${actual} != ${expected}`);
+    const controls = await storybook.locator(`.position-controls:has(#position-${id}) label:visible`)
+      .evaluateAll(labels => Object.fromEntries(labels.map(label => [label.className,
+        [label.htmlFor, label.getAttribute('aria-label')]])));
+    const expectedControls = {};
+    if (n > 2) expectedControls['prev-desktop'] = [
+      `position-${String(n === 24 ? 23 : n - 2).padStart(2, '0')}`, 'Previous page'];
+    if (n < 24) expectedControls['next-desktop'] = [
+      `position-${String(n === 23 ? 24 : n + 2).padStart(2, '0')}`, 'Next page'];
+    ok(`desktop CSS position ${n} has the correct adjacent labels`,
+      JSON.stringify(controls) === JSON.stringify(expectedControls),
+      `${JSON.stringify(controls)} != ${JSON.stringify(expectedControls)}`);
+  }
+  await storybook.locator('#position-03').evaluate(input => { input.checked = true; });
   await page.waitForTimeout(900);
+  ok('desktop label controls retain their names and 44px targets',
+    await storybook.locator('.position-controls:has(#position-03) label:visible').evaluateAll(labels =>
+      labels.length === 2 && labels.every(label => label.getAttribute('aria-label') &&
+        label.getBoundingClientRect().width === 44 && label.getBoundingClientRect().height === 44)));
+  await storybook.locator('#position-03').focus();
+  await storybook.locator('#position-03').press('ArrowRight');
+  ok('native radio arrows move the page when the group has focus',
+    await storybook.locator('#position-04').isChecked());
+  const focusRing = await storybook.locator('.position-controls:has(#position-04) .next-desktop')
+    .evaluate(label => getComputedStyle(label).outlineStyle !== 'none' &&
+      getComputedStyle(label).outlineWidth === '2px');
+  ok('focused page controls show a visible ring', focusRing);
+  await storybook.locator('#position-04').evaluate(input => input.blur());
+  await page.keyboard.press('ArrowRight');
+  ok('arrow keys outside the radio group do not page-turn',
+    await storybook.locator('#position-04').isChecked());
+  await storybook.locator('#position-04').focus();
+  await storybook.locator('#position-04').press('ArrowLeft');
+  await storybook.locator('.position-controls:has(#position-03) .next-desktop').click();
+  await storybook.locator('.position-controls:has(#position-05) .next-desktop').click();
+  ok('rapid CSS label changes retarget to the selected position',
+    await storybook.locator('#position-07').isChecked());
 
-  // Headless Chromium keeps tabs visible, so simulate the hidden-to-visible transition.
-  const beforeBackgroundTurns = await storybook.locator('body').evaluate(() => idx);
-  await storybook.locator('#next').click();
-  await storybook.locator('body').evaluate(() => {
-    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
-    document.dispatchEvent(new Event('visibilitychange'));
-  });
-  await page.waitForTimeout(900);
-  await storybook.locator('body').evaluate(() => document.getElementById('next').click());
-  const hiddenTurnState = await storybook.locator('body').evaluate(() => ({
-    idx,
-    turns: document.querySelectorAll('.turn').length,
-  }));
-  ok('a second turn starts about a second later while the storybook is hidden',
-    hiddenTurnState.idx === beforeBackgroundTurns + 2 && hiddenTurnState.turns === 1);
-  await storybook.locator('body').evaluate(() => {
-    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
-    document.dispatchEvent(new Event('visibilitychange'));
-  });
-  ok('returning to the visible state settles the in-flight turn',
-    await storybook.locator('.turn').count() === 0 &&
-    await storybook.locator('#stage > .spread').count() === 1);
-  await storybook.locator('#next').click();
-  ok('the storybook pager remains usable after the background turns',
-    await storybook.locator('.turn').count() === 1);
-  await page.waitForTimeout(900);
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (let n = 1; n <= 24; n++) {
+    const id = String(n).padStart(2, '0');
+    await storybook.locator(`#position-${id}`).evaluate(input => { input.checked = true; });
+    const expected = n === 1 ? ['sheet-01'] :
+      [`sheet-${String(n - 1).padStart(2, '0')}`, `sheet-${id}`];
+    const actual = await storybook.locator('.sheet-position').evaluateAll(sheets =>
+      sheets.filter(sheet => getComputedStyle(sheet).display === 'flex').map(sheet => sheet.id));
+    ok(`mobile CSS position ${n} exposes one page`,
+      JSON.stringify(actual) === JSON.stringify(expected), `${actual} != ${expected}`);
+    const controls = await storybook.locator(`.position-controls:has(#position-${id}) label:visible`)
+      .evaluateAll(labels => Object.fromEntries(labels.map(label => [label.className,
+        [label.htmlFor, label.getAttribute('aria-label')]])));
+    const expectedControls = {};
+    if (n > 1) expectedControls['prev-mobile'] = [
+      `position-${String(n - 1).padStart(2, '0')}`, 'Previous page'];
+    if (n < 24) expectedControls['next-mobile'] = [
+      `position-${String(n + 1).padStart(2, '0')}`, 'Next page'];
+    ok(`mobile CSS position ${n} has the correct adjacent labels`,
+      JSON.stringify(controls) === JSON.stringify(expectedControls),
+      `${JSON.stringify(controls)} != ${JSON.stringify(expectedControls)}`);
+  }
+  await storybook.locator('#position-07').evaluate(input => { input.checked = true; });
+  ok('mobile switches to one page and one-step labels',
+    await storybook.locator('#sheet-06').isVisible() &&
+    await storybook.locator('#sheet-07').isVisible() &&
+    await storybook.locator('.position-controls:has(#position-07) .prev-mobile').getAttribute('for') === 'position-06' &&
+    await storybook.locator('.position-controls:has(#position-07) .next-mobile').getAttribute('for') === 'position-08' &&
+    await storybook.locator('.position-controls:has(#position-07) .next-desktop').isHidden());
+  await storybook.locator('.position-controls:has(#position-07) .next-mobile').click();
+  ok('the mobile pager selects the next single-page position',
+    await storybook.locator('#position-08').isChecked() &&
+    await storybook.locator('#sheet-08').isVisible());
+  await storybook.locator('#position-01').evaluate(input => { input.checked = true; });
+  ok('the first position omits Previous and the final position omits Next',
+    await storybook.locator('.position-controls:has(#position-01) .prev-mobile').count() === 0 &&
+    await storybook.locator('.position-controls:has(#position-24) .next-mobile').count() === 0);
+  await storybook.locator('#position-24').evaluate(input => { input.checked = true; });
+  ok('the last mobile position still renders its final page',
+    await storybook.locator('#position-24').isChecked() &&
+    await storybook.locator('#sheet-24').isVisible() &&
+    await storybook.locator('.position-controls:has(#position-24) .prev-mobile').isVisible());
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await storybook.locator('#position-24').evaluate(input => { input.checked = true; });
+  ok('the final desktop position exposes the back of page 24 with no Next control',
+    await storybook.locator('#sheet-23').isVisible() &&
+    await storybook.locator('.position-controls:has(#position-24) .next-desktop').count() === 0);
 
   ok('the storybook document wears Montserrat Alternates (issue #160, UIUX §2.9)',
     await page.evaluate(() => {
@@ -350,11 +421,9 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
         return Math.abs(r.width - innerWidth) < 1 && r.top >= card.bottom - 1;
       });
     })());
-  ok('at 390px the storybook renders one decoded page in a single half',
-    await storybook.locator('#stage > .spread').evaluate(spread =>
-      spread.querySelectorAll('.half').length === 1 &&
-      spread.querySelectorAll('img').length === 1 &&
-      spread.querySelector('img').complete && spread.querySelector('img').naturalWidth > 0));
+  ok('at 390px the storybook renders one decoded page in the current sheet',
+    await storybook.locator('#position-24').isChecked() &&
+    await storybook.locator('#sheet-24 img').evaluate(img => img.complete && img.naturalWidth > 0));
 
   // a11y: the selector is a named radio group; one off-canvas h1
   await page.setViewportSize({ width: 1440, height: 900 });

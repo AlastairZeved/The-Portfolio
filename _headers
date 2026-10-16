@@ -1,9 +1,9 @@
 /*
   Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; frame-src 'self'; form-action https://formspree.io; base-uri 'none'; frame-ancestors 'none'; upgrade-insecure-requests
 
-# B57: the storybook embeds plantsandrocks.html and requires its own blob worker; any same-origin page may frame it.
+# B57: plantsandrocks.html embeds the storybook; any same-origin page may frame it.
 /monstera-storybook.html
-  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; worker-src 'self' blob:; base-uri 'none'; frame-ancestors 'self'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; base-uri 'none'; frame-ancestors 'self'; upgrade-insecure-requests
 
 # B91
 /sitemap.xml

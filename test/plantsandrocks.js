@@ -138,7 +138,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     await storybook.locator('.turn').count() === 1);
   await page.waitForTimeout(900);
 
-  // Issue #305: a hidden-to-visible transition settles the active page turn.
+  // Headless Chromium keeps tabs visible, so simulate the hidden-to-visible transition.
   const beforeBackgroundTurns = await storybook.locator('body').evaluate(() => idx);
   await storybook.locator('#next').click();
   await storybook.locator('body').evaluate(() => {

@@ -3330,3 +3330,15 @@ JavaScript pager remain. The storybook-specific CSP permits `img-src 'self'`;
 `font-src 'self' data:` remains.
 
 **Source:** the owner's issue [#306](https://github.com/AlastairZeved/The-Portfolio/issues/306), quoted verbatim — “Move them to files, e.g. `storybook/p01.webp` … `p24.webp`, and reference them from markup as `<img>` elements in `monstera-storybook.html`.”; and the owner's pre-implementation ruling, quoted verbatim — “I rule that B57’s “committed verbatim” clause is superseded only for the 24 page images: ship them as separate WebP files referenced by `<img>` elements in the storybook HTML; leave the HTML document and current JavaScript pager in place.”; “Yes—remove `data:` from the storybook-specific `img-src` only.”
+
+### B112. The storybook pager stays JavaScript; the CSS-only conversion is declined (issue #307)
+
+`monstera-storybook.html` keeps its shipped `monstera-storybook.js` (B59). The
+owner declines the CSS-only radio/`:has` pager proposed in issue #307: the lift
+and turn of the page must stay rich and immersive, which HTML/CSS cannot
+provide. B110's last-resort rule continues to permit this script, and the
+storybook CSP keeps `script-src 'self'`.
+
+**Source:** the owner's chat on 2026-10-16, quoted verbatim — “The cost is too
+high, JS wins for these components. I'd prefer the animation of the lift and
+turn to be rich and immersive, which HTML/CSS cannot provide.”

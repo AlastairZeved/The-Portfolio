@@ -218,13 +218,15 @@ The title compartment uses the same title-card structure as TheBoards:
 overhangs the full-width `--frame` rule, has bottom-only corners, is centred,
 and is **not a link or control**; it has no `role`, `tabindex`, or caret.
 
-The band sizes to its tallest zone with a two-line floor. At 16.57px/1.3,
-`rule-y = 15.46 + max(2, lines) × 21.54 + 8.84`, yielding **67.38px** at
-the floor and **88.92px** at three lines. Band literals render at ×1.10455.
-The 14.36px / 400 label hangs below the rule and reserves no height above it.
+The band sizes to its tallest zone with a two-line floor. It is one flow box:
+`--band-top` (15.46px) above, the zone's line boxes at **21.54px** a line, and
+`--band-gap` (8.84px) to the rule — `15.46 + max(2, lines) × 21.54 + 8.84`,
+yielding **67.38px** at the floor and **88.92px** at three lines. CSS lays it
+out; nothing measures it (B113). Band literals render at ×1.10455. The
+14.36px / 400 label hangs below the rule and reserves no height above it.
 
 The title compartment occludes the rule and overhangs by **29px**. Its
-`min-height` is `calc(var(--rule-y) + 29px)` and its padding is
+`min-height` is `calc(100% + 29px)` of the band box and its padding is
 `calc(var(--band-top) + 8px) 16px 16px`; it grows downward with a long title.
 The band grows beneath it.
 
@@ -234,7 +236,7 @@ reduced secondary rung; the title uses the larger rung. The compartment hugs
 the title text with 16px padding, remains centred, and does not exceed the
 sheet minus the side gutters.
 
-**Rulings:** B17, B31, B46, B61, B72.
+**Rulings:** B17, B31, B46, B61, B72, B113.
 
 ### §3.3 The regions
 
@@ -243,11 +245,11 @@ sheet minus the side gutters.
 | Title | the compartment above (§3.2) |
 | Components | two lines: **"Under Construction: Career content, Plants in Rocks content."** / **"Planned future work: Add landing pages"**, at **16.57px/400** in `--ink`, anchored at `--band-top` |
 | Requirements | **"Click the note cards to launch my various pages and work across the web."**, at **16.57px/400** in `--ink`, left-anchored one `--gutter` beyond the title card's right border and hanging from the region top at `--band-top` |
-| Parking Lot | the water field closes the sheet; its height follows measured content from the two-row floor; it holds the contact form (§6) |
+| Parking Lot | the water field closes the sheet; its height is **180px**, capped at half the sheet; it holds the contact form (§6) |
 
 There is **no All Boards rail**; the sheet takes its width.
 
-**Rulings:** B27, B39, B46, B54, B71, B85.
+**Rulings:** B27, B39, B46, B54, B71, B85, B113.
 
 ### §3.4 The door-cards live in the board space
 
@@ -431,15 +433,10 @@ The form renders left-anchored:
   resizable.
 - The form occupies the **right half** of the Parking Lot beside the owner's
   copy in the left half, separated by the vertical divider.
-- The **lot's height follows its measured contents**, with **180px** as the
-  no-JS fallback. It measures rendered rows, floors at the
-  **rescaled two-row shelf** (TheBoards' 122-shelf × 1.10455 = **134.76px**,
-  including the header and 34px `LOT_HEAD` chrome), and caps at half the
-  logical sheet:
-
-  `lot-h = min(max(134.76, 34 + Σ rowHeight), ⌈0.5 × logical-h⌉)`, the section
-  bottom-anchored so it grows **upward** past the shelf floor, with
-  `#lot-items` clips past the half-sheet ceiling.
+- The **lot's height is 180px**, bottom-anchored, capped at half the logical
+  sheet, with `#lot-items` clipping past the ceiling. CSS carries it — there is
+  no `--lot-h` and no no-JS fallback (B113). The section's inner measurements
+  are unchanged: the 34px `LOT_HEAD` chrome, the 1px `--frame` top rule.
 
 - **Captcha:** Formspree's reCAPTCHA — on by default, runs on Formspree's
   side; it adds no third-party script to the page. Never add a second
@@ -451,7 +448,7 @@ The form renders left-anchored:
   when the referrer is missing, which would silently brick the form.
 - The form is the page's **only** network call (PRD §3.4).
 
-**Rulings:** B20, B46, B62, B83, B84.
+**Rulings:** B20, B46, B62, B83, B84, B113.
 
 ### §6.2 The footer's 50/50 split
 
@@ -466,7 +463,7 @@ The Parking Lot is split **50/50** by a vertical divider.
   `#lot-rule` is solid `var(--frame)`.
 - **Right half:** the contact form (§6.1), with `1fr 2fr` tracks.
 - **≤743px:** copy above, horizontal divider at 3/4 width, form below.
-- The lot height follows §6.1's measured-content rule.
+- The lot height is §6.1's 180px, capped at half the sheet.
 
 **Rulings:** B62, B68, B86.
 

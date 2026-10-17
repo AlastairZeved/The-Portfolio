@@ -105,19 +105,27 @@ function ok(label, cond, details = '') {
       });
       // issue #128 (B46): the band, the title card and the Parking Lot size by
       // TheBoards' own laws — band literals RESCALED ×1.10455 (k = 1104.55/1000,
-      // TheBoards' 1000-tall frame mapped into the drawing's 1104.55-tall space),
-      // re-derived here from the same measurements the page's bandRuleY/lotH use.
+      // TheBoards' 1000-tall frame mapped into the drawing's 1104.55-tall space).
+      // issue #308 (B113): the page no longer measures them — CSS lays the band
+      // out and the lot's height is B20's 180px — so the three values this used
+      // to read off custom properties (--rule-y, --lot-h, the title card's
+      // min-height) are read off the RENDERED boxes instead, in logical px. The
+      // laws asserted below are unchanged; only where the number comes from moved.
       const k = 1104.55 / 1000;
       const bandRuleY = () => {
         let lines = 2;
-        for (const n of document.querySelectorAll('.band-zone .anchor'))
-          lines = Math.max(lines, Math.round(n.scrollHeight / (19.5 * k)));
+        for (const n of document.querySelectorAll('.band-zone .anchor')) {
+          // the anchor carries --band-gap as padding-bottom, so subtract it to
+          // get the line boxes the band's height is counted from.
+          const pad = parseFloat(getComputedStyle(n).paddingBottom) || 0;
+          lines = Math.max(lines, Math.round((n.scrollHeight - pad) / (19.5 * k)));
+        }
         return 15.46 + lines * 21.54 + 8.84;
       };
-      const ruleY = parseFloat(getComputedStyle(board).getPropertyValue('--rule-y'));
+      const ruleY = document.getElementById('band').getBoundingClientRect().height / rs;
       const bandTop = getComputedStyle(document.getElementById('band-fill')).getPropertyValue('--band-top');
       const card = document.getElementById('anchor-title');
-      const cardMinH = parseFloat(getComputedStyle(card).minHeight);   // logical px: the var space is unscaled
+      const cardMinH = card.getBoundingClientRect().height / rs;      // logical px: the sheet is scaled by rs
       const cardPad = getComputedStyle(card).padding;
       const lotH = () => {
         const items = document.getElementById('lot-items');
@@ -128,7 +136,7 @@ function ok(label, cond, details = '') {
         return Math.min(Math.max(122 * k, 34 + Math.round(sum)),
                         Math.ceil(board.offsetHeight * 0.5));
       };
-      const lotHval = parseFloat(getComputedStyle(board).getPropertyValue('--lot-h'));
+      const lotHval = document.getElementById('lot').getBoundingClientRect().height / rs;
       const lotItemsClip = getComputedStyle(document.getElementById('lot-items')).overflow;
       let lwMin = Math.max(...[...document.querySelectorAll('.door-card')].map(c => {
         const left = parseFloat(c.style.left) || 0;
@@ -200,8 +208,11 @@ function ok(label, cond, details = '') {
     ok(`${tag}: every card floored at NOTE_MIN_W 132 logical px (× own scale)`,
       r.dims.every(d => d.logicalW >= 132 * d.s - 0.5));
     // issue #128 (B46): the band / title card / lot follow TheBoards' laws
+    /* issue #308 (B113): ruleY is now the band's RENDERED box, not a declared
+       custom property, so it carries Chromium's 1/64px layout unit — 67.38
+       renders as 67.375. 0.01 is the slack that allows and nothing more. */
     ok(`${tag}: band rule-y = 15.46 + max(2, lines) × 21.54 + 8.84 (TheBoards' \`B47\`/\`B76\` × 1.10455)`,
-      Math.abs(r.band.ruleY - r.band.expectedRuleY) < 0.001, JSON.stringify(r.band));
+      Math.abs(r.band.ruleY - r.band.expectedRuleY) < 0.01, JSON.stringify(r.band));
     ok(`${tag}: band-top is 15.46 = 14 × 1.10455 (TheBoards state.js × k)`, r.band.bandTop.trim() === '15.46px');
     ok(`${tag}: title card min-height = rule-y + 29 (B31 STANDS — B46, owner ruling 3)`,
       Math.abs(r.band.cardMinH - (r.band.ruleY + 29)) < 0.5);

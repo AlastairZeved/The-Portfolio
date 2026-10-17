@@ -3342,3 +3342,57 @@ storybook CSP keeps `script-src 'self'`.
 **Source:** the owner's chat on 2026-10-16, quoted verbatim — “The cost is too
 high, JS wins for these components. I'd prefer the animation of the lift and
 turn to be rich and immersive, which HTML/CSS cannot provide.”
+
+### B113. The band and the Parking Lot are laid out by CSS, not measured by JavaScript; the Parking Lot keeps B20's 180px (issue #308)
+
+The owner's issue #308 asked for the second block of `app.js` to be deleted
+and the two sizes it wrote to be carried by CSS layout instead. The owner
+confirmed the record and the mechanism in the pre-implementation alignment of
+2026-10-16.
+
+- **The band is one flow box.** `#band` carries `--band-top` (15.46px) as its
+  `padding-top`; the two zones are its flex items; the band anchor is in flow,
+  with `line-height: 21.54px` and `min-height: 2 × 21.54px + 8.84px`, its own
+  `padding-bottom` carrying the `--band-gap` (8.84px) to the rule. The band's
+  height is therefore `15.46 + max(2, lines) × 21.54 + 8.84` — **67.38px** at
+  the two-line floor, **88.92px** at three lines — and the rule that closes it
+  is the box's own bottom edge. `--rule-y` is gone: there is no custom
+  property and no no-JS fallback, because CSS is the path and not a fallback.
+  The band anchor's `line-height` is the ruled 21.54px literal rather than
+  `1.3 × 16.57 = 21.541px`, so the floor is exact.
+- **B31 stands.** The title compartment hangs from the band box it now sits
+  inside and overhangs it by 29px; its `min-height` is `calc(100% + 29px)`,
+  the `100%` being the band's own height.
+- **The two zones keep the placement they had** — issue #107's `--req-left`
+  still places the Requirements zone, as a margin measured from the Components
+  zone's right edge. Issue #309 replaces that with a flex row and no custom
+  property.
+- **The Parking Lot keeps B20's 180px** as its height, bottom-anchored, capped
+  at half the logical sheet, with `#lot-items` clipping past the ceiling.
+  `--lot-h` is gone. Issue #308's proposal to floor the lot at the rescaled
+  two-row shelf (134.76px) and let it follow its measured contents is
+  **declined** — the owner's answer was to keep 180 everywhere. B46's lot
+  clause (“sized by TheBoards' `B73` measured-content law”) is superseded as a
+  mechanism; the half-sheet ceiling and the clipping stand. B46's band law and
+  the band literals are untouched.
+- **`test/scaling.js` reads the three values off the rendered boxes** instead
+  of the two custom properties and the title card's declared `min-height`.
+  The laws asserted are unchanged; the band-rule tolerance widens from 0.001
+  to 0.01 for Chromium's 1/64px layout unit — a declared 67.38 renders as
+  67.375, and the rendered box was always 67.375.
+
+**Source:** the owner's issue
+[#308](https://github.com/AlastairZeved/The-Portfolio/issues/308), quoted
+verbatim — “The second block of `app.js` (`bandRuleY`, `lotH`,
+`updateBoardGeometry`) measures the DOM and writes `--rule-y` and `--lot-h`.
+It runs on load, on resize, and on `fonts.ready`. Both values are
+content-driven sizes with a floor and a ceiling, and CSS layout does that
+natively. Delete the block.”; “**B46:** states the band/lot *law* (the numbers
+and floors). That stays. Its mechanism (“measured contents”, JS re-derives)
+changes to CSS layout. The no-JS fallbacks noted in `index.html:51–52`
+disappear because CSS becomes the real path, not the fallback.”; “Prefer flow.
+It needs no newer CSS feature.” — and the owner's answers in the Hermes chat
+of 2026-10-16, quoted verbatim: “Yes — record it, quoting issue #308 as the
+source”; “Rewrite those three reads to measure the rendered heights instead”;
+“Keep 180 everywhere — I'll rule the number myself”; “Keep today's exact
+positions and let #309 do the rework”.

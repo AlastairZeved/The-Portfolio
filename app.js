@@ -122,60 +122,6 @@ function cardScale(card) {
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(frame);
 })();
 
-/* ---- Issue #128 (B46): the band and the Parking Lot are TheBoards' sections,
-   sized by their MEASURED contents from a floor — TheBoards' own law ported
-   (geometry.js bandRuleY / lotH; constants state.js), with the band literals
-   RESCALED ×1.10455 (issue #128, B46): TheBoards' literals live in its
-   1000-tall logical frame; this board's logical space is the issue #112
-   drawing's 1104.55-tall frame, so every TheBoards band literal maps through
-   k = 1104.55/1000 = 1.10455 — with the height-anchored landscape scale law
-   above, the band then renders at EXACTLY TheBoards' physical size on every
-   landscape screen (54.9px rule at 1440×900 = 6.1% of vh, both boards).
-
-   The band: rule-y = 15.46 + max(2, lines) × 21.54 + 8.84 — band-top, the
-   tallest zone's line count at 16.57px/1.3, and the gap to the rule (67.38
-   at the two-line floor, 88.92 at three). The Parking Lot: measured from its
-   content from the rescaled two-row shelf (TheBoards `B73`), bottom-anchored so
-   it grows UPWARD, ceiling half the sheet with #lot-items clipping past it.
-   B20's fixed 180px --lot-h is superseded as a mechanism — fallback only.
-   The lot's 34px head literal is kept UNSCALED (TheBoards'
-   chrome is not part of the rescale; noted per the B33 provenance pattern).
-   All px here are board-logical (B30): the sheet is never reflowed, so the
-   line counts and row heights are scale-stable. */
-(function () {
-  var board = document.getElementById('board');
-  var BAND_TOP = 15.46, BAND_LINE = 21.54, BAND_GAP = 8.84;             // state.js × 1.10455
-  var BAND_LINE_FLOOR = 2;
-  var LOT_HEAD = 34, LOT_SHELF = 134.76, LOT_MAX_FRAC = 0.5;            // 34 unscaled; 122-shelf × 1.10455
-  function bandRuleY() {
-    var lines = BAND_LINE_FLOOR;
-    document.querySelectorAll('.band-zone .anchor').forEach(function (node) {
-      // scrollHeight is content only (the band anchor carries no padding), so
-      // it reads as whole line boxes; min-height 44 keeps the floor's answer 2.
-      lines = Math.max(lines, Math.round(node.scrollHeight / BAND_LINE));
-    });
-    return BAND_TOP + lines * BAND_LINE + BAND_GAP; // B106
-  }
-  function lotH() {
-    var sum = 0;
-    var items = document.getElementById('lot-items');
-    if (items) items.querySelectorAll(':scope > *').forEach(function (node) {
-      sum += node.offsetHeight;
-    });
-    // The rescaled two-row shelf (122 × k = 134.76, header included) is the
-    // floor; measured content grows it; half the logical sheet caps it.
-    return Math.min(Math.max(LOT_SHELF, LOT_HEAD + Math.round(sum)),
-                    Math.ceil(board.offsetHeight * LOT_MAX_FRAC));
-  }
-  function updateBoardGeometry() {
-    board.style.setProperty('--rule-y', bandRuleY() + 'px');
-    board.style.setProperty('--lot-h', lotH() + 'px');
-  }
-  updateBoardGeometry();
-  window.addEventListener('resize', updateBoardGeometry);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(updateBoardGeometry);
-})();
-
 /* ---- Entertainment only: drag to move, corner to resize (B7) ----
    No persistence. Nothing is saved; reload restores the authored layout.
 

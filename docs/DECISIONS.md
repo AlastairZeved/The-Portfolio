@@ -3458,3 +3458,17 @@ Principle: Zero cognitive tax.
 Reason: a rendering record that promises what the page does not do on the most common laptop shape costs every later reader a measurement to find out which is true; the floor moves when cards move, so a pinned figure would go stale the next time a card does.
 
 **Source:** the owner's answers in the Claude Code alignment of 2026-10-18 on issue [#325](https://github.com/AlastairZeved/The-Portfolio/issues/325), quoted verbatim — "Fix the doc (Recommended)"; "New B117 ruling (Recommended)"; "Named, not pinned (Recommended)".
+
+### B118. The band label's weight is 600: UIUX §3.2 follows the render and TheBoards (issue #326; keeps B46)
+Principle: The medium is the message.
+- **The record follows the render; nothing rendered changes.** `UIUX §3.2` called the band label "14.36px / 400" while `index.html` has shipped `.band-label` at `font-weight: 600` in every version of `index.html` in this repository's history. The 400 entered the record in the issue-#287 consolidation of `UIUX.md`; the text before it gave the label's size only, as B46 does. `UIUX §3.2` now reads "14.36px / 600". The size, the tab box and the colours (issue #77) are unchanged.
+- **The weight is TheBoards' own.** TheBoards draws its region tabs at 13px/600 (TheBoards' `UIUX §3.1`, which attributes it to TheBoards' `B76`; `.band-label` in TheBoards' `styles.css`); B46 carries the 13px through k to 14.36px, and the weight carries unscaled.
+- **`test/scaling.js` pins it.** Beside its 14.36px size assertion, the suite asserts that both band labels, "Components" and "Requirements", compute `font-weight` 600 at every viewport it checks, so the record and the render cannot drift apart unnoticed again.
+
+**Scale:** holds at every viewport; a weight does not scale.
+
+**Number:** TheBoards' 13px/600 (the 13px from TheBoards' `B54`) → 14.36px/600 here (13 × 1.10455, B46).
+
+Reason: the rendering authority stated a weight the page does not render and the template does not use; the correction that changes no pixel keeps the site in TheBoards' own type, and an unpinned value is how the two drifted.
+
+**Source:** the owner's answers in the Claude Code alignment of 2026-10-18 on issue [#326](https://github.com/AlastairZeved/The-Portfolio/issues/326), quoted verbatim — "600 (Recommended)"; "New B118 ruling (Recommended)"; "Yes, pin it in scaling.js (Recommended)"; and, on this entry, "confirm".

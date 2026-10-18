@@ -54,7 +54,6 @@
      back to. */
   --band-line: 21.54px;  /* 19.5 × 1.10455 (#128/B46) — the band anchor's line box; the band's floor is two of these */
   --band-gap: 8.84px;    /* 8 × 1.10455 (#128/B46) — the gap from the tallest zone to the rule */
-  --req-left: calc(var(--card-l) + var(--card-w) + var(--card-gap));  /* no-JS fallback: the door-column calc (#107) — app.js overrides it from the rendered title card */
 }
 
 /* ---- Ink poles (UIUX §2.3): flip at the surface boundary ---- */
@@ -134,12 +133,11 @@ body {
 /* ---- The two zones: static copy per UIUX §3.3 ---- */
 .band-zone {
   /* issue #308 (B113): the zones are flex items of #band, so the band's height
-     is the tallest of them — no measured --rule-y. They keep the horizontal
-     placement they had as absolutely positioned boxes: the Components zone's
-     width is its old left/right pair as a width, and the Requirements zone's
-     left edge is still --req-left (issue #107) — now a margin measured from
-     the Components zone's right edge, which is --card-l − --card-gap. Issue
-     #309 replaces this with a flex row and no custom property. */
+     is the tallest of them — no measured --rule-y. The Components zone keeps
+     its old width; the Requirements zone's left edge is now set in CSS by
+     anchoring to the title card's rendered right edge + one --gutter (issue
+     #309 / issue #107, B39) — no --req-left custom property, no JS
+     measurement. Behavior is unchanged: one gutter past the card's border. */
   position: relative;
   pointer-events: none;
   z-index: 1;
@@ -147,14 +145,18 @@ body {
 #zone-components   { flex: 0 0 auto;
                      width: calc(var(--card-l) - var(--card-gap) - var(--gutter));
                      margin-left: var(--gutter); }
-/* issue #107: the Requirements zone anchors to the TITLE CARD's rendered right
-   border (see the scale block in app.js, issue #151, B59) — the door-column
-   fallback in :root assumes the card spans the whole --card-w slot, but the
-   card hugs its text (B19), so the calc strand leaves a dead gap between the
-   border and the line. app.js's scale block overrides --req-left from the
-   rendered card; #309 will delete the property outright. */
+/* issue #107 / B39: the Requirements line starts one --gutter past the title
+   card's rendered right border (the card hugs its text, B19). Its left edge is
+   set in CSS via anchor positioning (see #zone-requirements) — no JS, no
+   --req-left. Behavior is unchanged. */
 #zone-requirements { flex: 1 1 auto;
-                     margin-left: calc(var(--req-left) - var(--card-l) + var(--card-gap));
+                     /* issue #309: the zone starts at the title card's rendered
+                        right edge + one --gutter (issue #107 / B39), expressed
+                        in CSS via anchor positioning instead of the deleted
+                        --req-left custom property that app.js used to measure
+                        the card. Behavior is unchanged — one gutter past the
+                        title card's border. */
+                     margin-left: calc(anchor(--title right) + var(--gutter));
                      margin-right: var(--gutter); }
 .band-label {
   position: absolute;
@@ -205,6 +207,7 @@ body {
 #anchor-title {
   position: absolute;
   left: 50%; transform: translateX(-50%);
+  anchor-name: --title;
   /* issue #308 (B113): the card hangs from the band box it now sits in, so
      100% IS the rule's position — the B31 overhang is unchanged at 29px. */
   top: 0; min-height: calc(100% + 29px);

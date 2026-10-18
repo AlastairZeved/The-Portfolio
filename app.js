@@ -110,12 +110,8 @@ function cardScale(card) {
     board.style.setProperty('--rs', rs);
     board.style.setProperty('--logical-w', (vw / rs) + 'px');
     board.style.setProperty('--logical-h', (vh / rs) + 'px');
-    // issue #107: the Requirements zone anchors to the title card's actual
-    // right border (the card hugs its text, B19 — the slot calc leaves dead
-    // space). The card's rendered right edge / rs = logical px, + one gutter.
-    var title = document.getElementById('anchor-title');
-    var gutter = parseFloat(getComputedStyle(board).getPropertyValue('--gutter')) || 16;
-    board.style.setProperty('--req-left', (title.getBoundingClientRect().right / rs + gutter) + 'px');
+    // issue #309 (B114): the Requirements zone follows the title card by CSS
+    // layout — the band is a flex row — so nothing here measures the card.
   }
   frame();
   window.addEventListener('resize', frame);

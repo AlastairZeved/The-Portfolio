@@ -17,6 +17,8 @@ interface, it failed; every pixel earns its place).
 > **Append only.** An entry is superseded by a later ruling, never edited
 > away.
 
+<!-- docket: contract from B119 -->
+
 ---
 
 ### B1. One scene, one ladder binding: To-Do blue
@@ -3472,3 +3474,17 @@ Principle: The medium is the message.
 Reason: the rendering authority stated a weight the page does not render and the template does not use; the correction that changes no pixel keeps the site in TheBoards' own type, and an unpinned value is how the two drifted.
 
 **Source:** the owner's answers in the Claude Code alignment of 2026-10-18 on issue [#326](https://github.com/AlastairZeved/The-Portfolio/issues/326), quoted verbatim — "600 (Recommended)"; "New B118 ruling (Recommended)"; "Yes, pin it in scaling.js (Recommended)"; and, on this entry, "confirm".
+
+### B119. The ledger draws the supersessions its witness could not read, and binds the entry contract from B119 (issue #273; partially supersedes B14 (hover member, by B25); partially supersedes B21 (authored-size reading of 132×80, by B33); partially supersedes B30 (cap clause and REF_W/REF_H, by B44); partially supersedes B37/B38 (weight and copy, by B54); partially supersedes B12 (inline-JS clause, by B59); partially supersedes B19 (one-size clause, by B61); partially supersedes B68 (copy of record, by B70); partially supersedes B37/B54 (Requirements copy, by B71); partially supersedes B17 (eyebrow text, by B72); partially supersedes B70 (copy, by B86); partially supersedes B92/B76 (named clauses, by B95))
+Principle: Zero cognitive tax.
+- **The Docket's map gains the supersessions it could not read; no ruling changes.** Eleven earlier entries say in their own words that they replace part of an earlier ruling, but say it inside code spans, in the passive voice, or as "supersedes the X clause of Bn", so the witness draws no edge for them and `docket governs` shows the older ruling as standing. This entry draws each edge on the earlier entry's behalf, without editing it. Each qualifier names the entry that made the change and the part it changed; the rest of each older ruling stands as its successor left it.
+- **The pairs:** B25 superseded B14's hover member; B33 superseded the reading of B21's parenthetical that treats `132×80` as a floor on authored sizes; B44 superseded B30's cap clause and its `REF_W`/`REF_H` constants; B54 superseded B37's and B38's weight and copy; B59 superseded B12's inline-JS clause; B61 superseded B19's one-size clause; B70 superseded B68's copy of record; B71 superseded B37's and B54's Requirements copy; B72 superseded B17's eyebrow text; B86 superseded B70's copy; B95 superseded the named clauses of B92 and B76.
+- **The entry contract binds from this entry.** The preamble carries `<!-- docket: contract from B119 -->`: from B119 on, every entry carries a meta line with its edges, one `Principle:` line and a `Reason:`. B98–B102, B108 and B114–B118 already take that shape; the line can never be moved or removed once committed.
+
+**Scale:** the ledger only. Nothing rendered, tested or shipped changes; the 14 edges in the heading are the whole of it.
+
+**Number:** 11 superseding entries, 14 edges onto 13 earlier rulings (B12, B14, B17, B19, B21, B30, B37, B38, B54, B68, B70, B76, B92); the contract binds from B119. No measurement is introduced.
+
+Reason: a reader who follows the Docket's map to a ruling should land on the one that governs today; an edge written only in prose sends them to a clause that was replaced, and a contract kept by habit is lost the first time an entry forgets it.
+
+**Source:** the owner's answers in the Claude Code alignment of 2026-10-18 on issue [#273](https://github.com/AlastairZeved/The-Portfolio/issues/273), quoted verbatim — "Record all 12 in one entry"; "Add it, starting at B119".

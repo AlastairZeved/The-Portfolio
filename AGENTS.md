@@ -4,6 +4,11 @@ Guidance for any AI coding agent working in this repository (Hermes, Claude
 Code, Codex, Cursor, …). Humans should read [README.md](README.md) and the
 governing records instead.
 
+**Reader:** an AI coding agent arriving cold. It knows general web and
+Playwright practice. It does not know this site's owner rulings, its
+refusals, or that `docs/` outranks code. **Purpose:** route that agent to the
+governing records and the commands before it changes anything.
+
 ## What this is
 
 The-Portfolio — Robert A. Gregory's portfolio site and the central hub for his

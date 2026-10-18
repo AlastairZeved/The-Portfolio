@@ -442,27 +442,33 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   // B95 (issue #250): two-way glow — the title card whose employer owns the
   // centred role carries the selected glow (TheBoards' `B132` border-color +
   // 0 0 8px 0 bloom, reintroduced), the other two do not.
+  // Issue #329: every glowing card is recorded, so a second glow fails. The
+  // pointer leaves the band first — the Brinker click above left it resting
+  // there, and the #261 hover bloom shares the glow's 103,103,103. Each read
+  // waits for the expected card's 200ms box-shadow transition to settle
+  // rather than sleeping; a timeout falls through to the assertion, which
+  // prints what it saw.
+  const EMPLOYER_OF = ['pnc-bank', 'pnc-bank', 'pnc-bank', 'pnc-private-bank',
+    'pnc-private-bank', 'brinker-capital', 'brinker-capital', 'brinker-capital'];
+  await page.mouse.move(5, 5);
   const glowMap = await (async () => {
     const out = [];
     for (let role = 1; role <= 8; role++) {
       await page.evaluate(r => document.getElementById('role-' + r).click(), role);
-      await page.waitForTimeout(350);   // past the card's 200ms box-shadow transition
-      const glow = await page.evaluate(() => {
-        const o = {};
-        for (const e of ['pnc-bank', 'pnc-private-bank', 'brinker-capital']) {
-          o[e] = getComputedStyle(document.querySelector('.topband__card[data-employer="' + e + '"]')).boxShadow.includes('103, 103, 103');
-        }
-        return o;
-      });
-      out.push(role + ':' + Object.keys(glow).find(e => glow[e]));
+      await page.waitForFunction(e => {
+        const card = document.querySelector('.topband__card[data-employer="' + e + '"]');
+        return card.getAnimations().length === 0 && getComputedStyle(card).boxShadow.includes('103, 103, 103');
+      }, EMPLOYER_OF[role - 1], { timeout: 2000 }).catch(() => {});
+      const glowing = await page.evaluate(() =>
+        ['pnc-bank', 'pnc-private-bank', 'brinker-capital'].filter(e =>
+          getComputedStyle(document.querySelector('.topband__card[data-employer="' + e + '"]')).boxShadow.includes('103, 103, 103')));
+      out.push(role + ':' + glowing.join('+'));
     }
     return out;
   })();
   ok('B95 — the two-way title-card glow tracks the centred role\'s employer',
-    JSON.stringify(glowMap) === JSON.stringify([
-      '1:pnc-bank', '2:pnc-bank', '3:pnc-bank',
-      '4:pnc-private-bank', '5:pnc-private-bank',
-      '6:brinker-capital', '7:brinker-capital', '8:brinker-capital']));
+    JSON.stringify(glowMap) === JSON.stringify(EMPLOYER_OF.map((e, i) => (i + 1) + ':' + e)),
+    JSON.stringify(glowMap));
 
   // B64 (issue #176): three desc cards carry the owner's copy verbatim; the rest stay empty.
   const B64_COPY = {

@@ -225,7 +225,7 @@ function ok(label, cond, details = '') {
     ok(`${tag}: band rule-y = 15.46 + max(2, lines) × 21.54 + 8.84 (TheBoards' \`B47\`/\`B76\` × 1.10455)`,
       Math.abs(r.band.ruleY - r.band.expectedRuleY) < 0.01, JSON.stringify(r.band));
     ok(`${tag}: band-top is 15.46 = 14 × 1.10455 (TheBoards state.js × k)`, r.band.bandTop.trim() === '15.46px');
-    ok(`${tag}: title card min-height = rule-y + 29 (B31 STANDS — B46, owner ruling 3)`,
+    ok(`${tag}: title card rendered height = rule-y + 29 (B31 STANDS — B46, owner ruling 3; B114: no min-height, the row stretches it)`,
       Math.abs(r.band.cardMinH - (r.band.ruleY + 29)) < 0.5);
     ok(`${tag}: title card box = B31's (band-top+8) 16px 16px padding, occluding the rule`,
       r.band.cardPad === `${23.46.toFixed(2)}px 16px 16px` && r.band.cardBottomLogical >= r.band.ruleY + 28);

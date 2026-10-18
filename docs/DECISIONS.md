@@ -3429,3 +3429,18 @@ B114 recorded the owner's first answer in the alignment of 2026-10-18: a symmetr
 Reason: the "Components" tab's place is part of the drawing the owner keeps, and one empty item in the row holds it there with no measurement and no visible change, where B114's symmetric row moved it by 89 to 165 logical px.
 
 **Source:** the owner's chat on 2026-10-18, quoted verbatim, reversing the "A. Symmetric row" answer B114 records after the plain-language explanation that the tab would move — "Give me the uglier code then and nail the tab in place."; and, on the corrected text, "confirm".
+
+### B116. A "Wood - Coming Soon" note joins the board (issue #313; refines B45; extends B28; keeps B26; keeps B44; keeps B52; keeps B78; keeps B80)
+Principle: The medium is the message.
+- **A rest-only note, not a door.** `div.door-card.note-card`, `data-id="wood"`, no `href`, like Music (B26): no hover, click or focus state; it still drags and resizes (B7). Label: **Wood - Coming Soon**, hyphen as the issue typed it.
+- **Size: the Writing card's own box.** Rest scale **1.86**, 132 × 48px outer, label **9.0px** (`.fit-to-writing`), line box 23.8px (B45). Agent-derived (B33) by B80's method with headroom: CI's Chromium set the label ~4% wider than the local one at 9.6px. **B45's fixed-17px font clause is amended for this card, as B80 did for Philly Plant Dads.**
+- **Links: pairs 15 and 16**, Wood ↔ Community and Wood ↔ Plants & Rocks (B28).
+- **Placement: left 3% / top 35.1%.** The centre midpoint of Career and Music (left 25.3% / top 35.1%) put the Community ↔ Plants & Rocks line behind the card (B44); the owner moved it left at the same height, to the left of Community. Seats up and to the right trip B52's width floor and shrink the board to ~67% (B78's seats stand).
+
+**Scale:** holds at every viewport `test/scaling.js` checks: no overlap and no obscured line beyond B78's own; the render scale is unchanged (0.786 at 1440×900).
+
+**Number:** Chromium 141, logical px: Wood's unscaled box 132 × 48 = Writing's; label hug 97.8px against a 104px content box; Career–Music centre midpoint 25.27–25.30% / 35.11–35.13% at 1440×900, 1920×1080, 2880×1650.
+
+Reason: the issue names the card's size by another card's box, and B80 already rules how such a box is kept (the font fits the box, never the reverse); a hidden line is a link the visitor cannot read, so the card moves rather than the law bending.
+
+**Source:** the owner's issue [#313](https://github.com/AlastairZeved/The-Portfolio/issues/313), quoted verbatim — "We need to add one more note card to the board, titled \"Wood - Coming Soon\"."; "For sizing, it should be the same size as the \"Writing\" note card with text obviously scaled/re-sized to fit that card size."; "For placement of the card on the board, position it halfway between \"Career\" and \"Music\" cards both horizontally and vertically."; "For link lines to other cards, this card should have a link line connected to \"Community\" and a link line connected to \"Plants & Rocks\"." — and the owner's answers in the Claude Code alignment of 2026-10-18, quoted verbatim: "No — plain note"; "Wood - Coming Soon"; "Card centres"; "Nudge Wood off the line"; "Seat A: left 15%, same height"; "Nudge it further left. Right now it's directly under Community instead of being to the left of it."; "Further still (~3%)".

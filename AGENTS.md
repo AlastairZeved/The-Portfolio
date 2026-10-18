@@ -4,6 +4,11 @@ Guidance for any AI coding agent working in this repository (Hermes, Claude
 Code, Codex, Cursor, …). Humans should read [README.md](README.md) and the
 governing records instead.
 
+**Reader:** an AI coding agent arriving cold. It knows general web and
+Playwright practice. It does not know this site's owner rulings, its
+refusals, or that `docs/` outranks code. **Purpose:** route that agent to the
+governing records and the commands before it changes anything.
+
 ## What this is
 
 The-Portfolio — Robert A. Gregory's portfolio site and the central hub for his
@@ -93,8 +98,8 @@ worker.
 
 Env overrides (read by the tests): `PORTFOLIO_BASE_URL` (default
 `http://localhost:8000/`; each suite appends its own page, B109),
-`PORTFOLIO_OUT` (screenshot directory for `mobile.js`, `desktop.js`,
-`movable_resizable.js`), `PROOF_DIR` (output directory for `proof.js`,
+`PORTFOLIO_OUT` (screenshot directory: `desktop.js`, `mobile.js` and
+`movable_resizable.js` each write `<suite>.png` into it, issue #320), `PROOF_DIR` (output directory for `proof.js`,
 default `/tmp/portfolio-proof`). There is no lint/build/typecheck command — the project has
 none.
 

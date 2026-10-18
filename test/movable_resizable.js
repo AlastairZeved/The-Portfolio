@@ -51,7 +51,7 @@ const REST_PLACEMENTS = {
   'apple-music': [17.8, 62.7], 'spotify': [5.2, 61.8], 'linkedin': [36.6, 11.5],
   'zeved-boards': [81, 26.7], 'agentic-plugins': [79, 36],
   'plants-poles': [37.7, 73.7], 'plants-in-rocks': [50.2, 73.8],
-  'philly-plant-dads': [59.5, 64.3], 'wood': [15, 35.1]
+  'philly-plant-dads': [59.5, 64.3], 'wood': [3, 35.1]
 };
 
 /* one scenario, run once per viewport; rs is the render scale the page reports */

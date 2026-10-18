@@ -269,7 +269,7 @@ document wins. The cards do **not** live inside Components, Requirements, or
 the Parking Lot. The current placement authority is the owner's issue #189
 drawing: every card's authored `left/top %` follows that drawing (B78). The
 **Philly Plant Dads** note sits at **left 59.5% / top 64.3%** (B80); the
-**Wood - Coming Soon** note sits at **left 15% / top 35.1%** (B116). These
+**Wood - Coming Soon** note sits at **left 3% / top 35.1%** (B116). These
 placements are the only authored card geometry; cards are content-sized
 (§4), with no authored px width or height (B45).
 

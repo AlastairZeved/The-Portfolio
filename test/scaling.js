@@ -181,7 +181,7 @@ function ok(label, cond, details = '') {
       }
       const rulePx = document.getElementById('band-rule').getBoundingClientRect().top - br.top;
       const labelFont = getComputedStyle(document.querySelector('.band-label')).fontSize;
-      /* issue #326: every band label's weight, so UIUX §3.2 and the
+      /* issue #326 (B118): every band label's weight, so UIUX §3.2 and the
          render cannot drift apart again. */
       const labelWeights = [...document.querySelectorAll('.band-label')].map(l => getComputedStyle(l).fontWeight);
       /* issue #309 (B114): the band is a flex row — Components, the title
@@ -254,7 +254,7 @@ function ok(label, cond, details = '') {
       Math.abs(r.band.rulePx - r.band.ruleY * r.rs) < 1, `rule ${r.band.rulePx} vs ${r.band.ruleY * r.rs}`);
     ok(`${tag}: band label font-size is 14.36px (UIUX §3.2; B46: TheBoards' \`B54\` 13px × k)`,
       r.band.labelFont === '14.36px', r.band.labelFont);
-    ok(`${tag}: both band labels render at font-weight 600 (UIUX §3.2; TheBoards' \`UIUX §3.1\` 13px/600)`,
+    ok(`${tag}: both band labels render at font-weight 600 (UIUX §3.2; B118: TheBoards' \`UIUX §3.1\` 13px/600)`,
       r.band.labelWeights.length === 2 && r.band.labelWeights.every(w => w === '600'), r.band.labelWeights.join(','));
     ok(`${tag}: #lot-items clips past the lot ceiling`, r.band.lotItemsClip === 'hidden');
   }

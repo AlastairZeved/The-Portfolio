@@ -191,6 +191,15 @@ function ok(label, cond, details = '') {
       const gutter = parseFloat(getComputedStyle(board).getPropertyValue('--gutter')) || 0;
       const reqGap = (reqRect.left - cardRect.right) / rs;
       const cardCentreDev = ((cardRect.left + cardRect.right) / 2 - (br.left + br.width / 2)) / rs;
+      // The Components zone keeps its door-column edge, --card-l − --card-gap
+      // (B113, kept by B115), so its tab never moves with the title: re-derive
+      // the edge from the :root tokens on the logical sheet width (B30 — the
+      // board's layout px are the logical px) and read the rendered box.
+      const cardGap = parseFloat(getComputedStyle(board).getPropertyValue('--card-gap')) || 0;
+      const lw = board.offsetWidth;
+      const cardWTok = Math.min(0.377778 * lw, lw - 2 * (gutter + 100 + cardGap));
+      const compRightExpected = (lw - cardWTok) / 2 - cardGap;
+      const compRight = (document.getElementById('zone-components').getBoundingClientRect().right - br.left) / rs;
       return {
         rs, lwMin, boardRect: [br.left, br.top, br.width, br.height],
         vw: innerWidth, vh: innerHeight,
@@ -200,7 +209,7 @@ function ok(label, cond, details = '') {
         dims,
         band: { rulePx, labelFont, expectedRuleY: bandRuleY(), ruleY, bandTop, cardMinH, cardPad, lotH: lotH(), lotHval, lotItemsClip,
                 cardBottomLogical: (card.getBoundingClientRect().bottom - br.top) / rs,
-                reqGap, gutter, cardCentreDev }
+                reqGap, gutter, cardCentreDev, compRight, compRightExpected }
       };
     }, { REF_W, REF_H });
 
@@ -232,8 +241,10 @@ function ok(label, cond, details = '') {
     // issue #309 (B114): the row places the zones; nothing measures the card.
     ok(`${tag}: Requirements line starts one --gutter past the title card's rendered right border (issue #107, B39)`,
       Math.abs(r.band.reqGap - r.band.gutter) < 0.5, `gap ${r.band.reqGap} vs gutter ${r.band.gutter}`);
-    ok(`${tag}: title card centred on the sheet by the row's equal zones (B31, B114)`,
+    ok(`${tag}: title card centred on the sheet by the row's balance item (B31, B115)`,
       Math.abs(r.band.cardCentreDev) < 0.5, `centre off by ${r.band.cardCentreDev} logical px`);
+    ok(`${tag}: Components zone keeps its door-column edge, right = --card-l − --card-gap (B113 kept by B115)`,
+      Math.abs(r.band.compRight - r.band.compRightExpected) < 0.5, `right ${r.band.compRight} vs ${r.band.compRightExpected}`);
     ok(`${tag}: lot-h = min(max(134.76 shelf, 34 + Σ rows), ⌈half the sheet⌉) (TheBoards' \`B73\` × k)`,
       Math.abs(r.band.lotHval - r.band.lotH) < 0.5, `lot-h ${r.band.lotHval} vs expected ${r.band.lotH}`);
     ok(`${tag}: band rule renders at rule-y × rs physical px (UIUX §3.2; 6.1% of vh per UIUX §3.1 at floor-inert sizes)`,

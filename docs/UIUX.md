@@ -219,8 +219,9 @@ overhangs the full-width `--frame` rule, has bottom-only corners, is centred,
 and is **not a link or control**; it has no `role`, `tabindex`, or caret.
 
 The band sizes to its tallest zone with a two-line floor. It is one flow box
-— a flex row of the Components zone, the title compartment and the
-Requirements zone, one `--gutter` apart (B114): `--band-top` (15.46px) above,
+— a flex row of the Components zone, an empty balance item, the title
+compartment and the Requirements zone, one `--gutter` apart (B114, B115):
+`--band-top` (15.46px) above,
 the zone's line boxes at **21.54px** a line, and `--band-gap` (8.84px) to the
 rule — `15.46 + max(2, lines) × 21.54 + 8.84`, yielding **67.38px** at the
 floor and **88.92px** at three lines. CSS lays it out; nothing measures it
@@ -230,10 +231,11 @@ the rule, centred under its zone, and reserves no height above it.
 The title compartment occludes the rule and overhangs by **29px**. It is the
 row's middle item, in flow between the two zones: stretched to the row, its
 margins reach `--band-top` up to the band's top edge and **29px** down past the
-rule, and its padding is `calc(var(--band-top) + 8px) 16px 16px`. The zones
-either side grow equally, so it stays centred and the Requirements zone
-follows its rendered right border (B114); it grows downward with a long title,
-and the band grows beneath it.
+rule, and its padding is `calc(var(--band-top) + 8px) 16px 16px`. The balance
+item before it and the Requirements zone after it grow equally, so it stays
+centred and the Requirements zone follows its rendered right border, while
+the Components zone keeps its door-column width (B115); it grows downward
+with a long title, and the band grows beneath it.
 
 Its two lines are **"The Digital Garden of"** at **13.33px / 400 / 1.2** and
 **"Robert Alastair Zeved Gregory"** at **20px / 600**. The first is the
@@ -241,20 +243,20 @@ reduced secondary rung; the title uses the larger rung. The compartment hugs
 the title text with 16px padding, remains centred, and does not exceed the
 sheet minus the side gutters.
 
-**Rulings:** B17, B31, B46, B61, B72, B113, B114.
+**Rulings:** B17, B31, B46, B61, B72, B113, B114, B115.
 
 ### §3.3 The regions
 
 | Region | Render |
 |---|---|
 | Title | the compartment above (§3.2) |
-| Components | two lines: **"Under Construction: Career content, Plants in Rocks content."** / **"Planned future work: Add landing pages"**, at **16.57px/400** in `--ink`, anchored at `--band-top`; the zone runs from one `--gutter` inside the sheet's left edge to one `--gutter` before the title card |
+| Components | two lines: **"Under Construction: Career content, Plants in Rocks content."** / **"Planned future work: Add landing pages"**, at **16.57px/400** in `--ink`, anchored at `--band-top`; the zone runs from one `--gutter` inside the sheet's left edge to the door-column edge, `--card-l − --card-gap`, so its label does not move with the title |
 | Requirements | **"Click the note cards to launch my various pages and work across the web."**, at **16.57px/400** in `--ink`, left-anchored one `--gutter` beyond the title card's right border and hanging from the region top at `--band-top`; the zone runs to one `--gutter` inside the sheet's right edge |
 | Parking Lot | the water field closes the sheet; its height is **180px**, capped at half the sheet; it holds the contact form (§6) |
 
 There is **no All Boards rail**; the sheet takes its width.
 
-**Rulings:** B27, B39, B46, B54, B71, B85, B113, B114.
+**Rulings:** B27, B39, B46, B54, B71, B85, B113, B114, B115.
 
 ### §3.4 The door-cards live in the board space
 
@@ -501,7 +503,7 @@ The Parking Lot is split **50/50** by a vertical divider.
 | card states, region layout, the full-viewport sheet, no rail in the DOM | `test/mobile.js`, `test/desktop.js` |
 | the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L14]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
-| the band / title-card / lot laws (B46): height-anchored landscape scale, ×1.10455 rescale, 29px overhang, B31's (band-top+8) 16px 16px box, rescaled lot shelf, lot clip; the row's one-`--gutter` gap after the title card and the card's centring (B39, B114) | `test/scaling.js` (every viewport) |
+| the band / title-card / lot laws (B46): height-anchored landscape scale, ×1.10455 rescale, 29px overhang, B31's (band-top+8) 16px 16px box, rescaled lot shelf, lot clip; the row's one-`--gutter` gap after the title card, the card's centring and the Components zone's door-column edge (B39, B114, B115) | `test/scaling.js` (every viewport) |
 | card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B78 drawing rest scales and placements per card (B80 for philly-plant-dads, seated by the owner's words), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (B41) | `test/movable_resizable.js` |
 | no service worker | PRD §3, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |

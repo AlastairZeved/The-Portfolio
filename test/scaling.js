@@ -19,7 +19,7 @@ const REF_W = 2560 / Z, REF_H = 1440 / Z;
 const VIEWPORTS = [
   [1080, 600], [1280, 700], [1366, 768], [1440, 750], [1440, 900], [1600, 850],
   [1920, 1080], [1920, 700], [1920, 640], [2560, 1000], [2560, 620], [2560, 1440],
-  [800, 800], [640, 640], [1080, 1080],   // square-ish landscape: B46's width floor binds here (issue #128 edge-probe finding)
+  [800, 800], [640, 640], [1080, 1080],   // square-ish landscape: B46's width floor binds here (issue #128 edge-probe finding) and below ~1.66:1 generally, 16:10 included (B117)
   [768, 900], [390, 844],
 ];
 

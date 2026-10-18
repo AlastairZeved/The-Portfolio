@@ -200,17 +200,23 @@ portrait  (vw <  vh):  rs = min(vw / REF_W, vh / REF_H)   — B30's down-scale
 ```
 
 where `lw_min` is the measured minimum logical width,
-`max(doorCardW / (1 − left%))` over the door-cards. The width floor binds on
-square-ish landscape windows when the height anchor alone would clip the
-cards; at ordinary landscape aspect ratios the floor is inert.
+`max(doorCardW / (1 − left%))` over the door-cards, raised where needed by
+B52's pairwise gap term. The width floor binds on every landscape window
+narrower than about **1.66:1** — 16:10 included (1440×900, 1680×1050,
+2560×1600) — where the height anchor alone would clip the cards; there the
+sheet is width-anchored and the whole scene renders slightly smaller. The
+ratio is the measured floor over `REF_H`, so it moves when a card's seat or
+size moves (B117). At 16:9 and wider the floor is inert.
 
 The authored scene uses `REF_W×REF_H = 2560/z × 1440/z`, where
 `z = 1.3037` and the resulting dimensions are approximately
 `1963.64 × 1104.55`. Landscape is height-anchored; portrait uses the stated
-`min()` formula. The band renders at 6.1% of viewport height on landscape.
-The sheet fills the viewport at every size without reflow or clipping.
+`min()` formula. The band renders at 6.1% of viewport height on landscape
+where the floor is inert, and at a smaller share below the threshold
+(≈5.9% at 16:10). The sheet fills the viewport at every size without reflow
+or clipping.
 
-**Rulings:** B27, B30, B42, B43, B44, B46.
+**Rulings:** B27, B30, B42, B43, B44, B46, B52, B117.
 
 ### §3.2 The band and the title compartment
 

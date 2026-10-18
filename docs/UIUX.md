@@ -231,7 +231,7 @@ compartment and the Requirements zone, one `--gutter` apart (B114, B115):
 the zone's line boxes at **21.54px** a line, and `--band-gap` (8.84px) to the
 rule — `15.46 + max(2, lines) × 21.54 + 8.84`, yielding **67.38px** at the
 floor and **88.92px** at three lines. CSS lays it out; nothing measures it
-(B113). Band literals render at ×1.10455. The 14.36px / 400 label hangs below
+(B113). Band literals render at ×1.10455. The 14.36px / 600 label hangs below
 the rule, centred under its zone, and reserves no height above it.
 
 The title compartment occludes the rule and overhangs by **29px**. It is the

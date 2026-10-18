@@ -293,7 +293,7 @@ visitor's entertainment only; positions are not persisted (B7, B40).
 
 **Font and size.** Note text is 17px / 1.4 / 400 and scales only with its
 card. The Philly Plant Dads label is 11.4px in its one-line Spotify-sized
-box; the Wood - Coming Soon label is 9.6px in its one-line Writing-sized
+box; the Wood - Coming Soon label is 9.0px in its one-line Writing-sized
 box. Both line boxes remain 17 × 1.4 = 23.8px. Cards are content-sized, with
 `width: max-content`, a 132px minimum, and height following wrapped text.
 Their width is capped at the sheet's right edge, divided by the card's own

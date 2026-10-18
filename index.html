@@ -382,10 +382,11 @@ body {
    scaled down to fit (owner, issue #313: "the same size as the \"Writing\"
    note card with text obviously scaled/re-sized to fit that card size").
    The label hugs 185px at 17px, so the linear fit is 17 × 104 / 185 =
-   9.56px; shipped at 9.6px, the largest tenth that keeps the box at
-   132 × 48px exactly (agent-derived, B33, the B80 method). line-height
+   9.56px; shipped at 9.0px (97.8px hug, ~6% headroom) because CI's
+   Chromium sets this label ~4% wider than the local one and widened the
+   box to 136px at 9.6px (agent-derived, B33, the B80 method). line-height
    stays the note's 23.8px line box (17 × 1.4, B45). */
-.door-card.fit-to-writing { font-size: 9.6px; line-height: 23.8px; }
+.door-card.fit-to-writing { font-size: 9.0px; line-height: 23.8px; }
 
 /* ---- The link layer (UIUX §4.3): the lines that join the note cards ----
    TheBoards' link idiom ported verbatim (TheBoards' `UIUX §4.6`, TheBoards' `B91`): a thin

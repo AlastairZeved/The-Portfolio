@@ -53,9 +53,10 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   const tb = await page.locator('#anchor-title').boundingBox();
   ok('title card centred on the full-width sheet', tb && Math.abs((tb.x + tb.width / 2) - VW / 2) < 2);
 
-  // issue #107: the Requirements line anchors to the title card's right border
-  // (the card hugs its text, B19 — so the door-column calc would leave a dead
-  // gap between the border and the line). One --gutter of padding, no more.
+  // issue #107 (B39): the Requirements line starts one --gutter past the title
+  // card's rendered right border (the card hugs its text, B19). Since issue
+  // #309 (B114) the band row places it; nothing measures the card. One
+  // --gutter of padding, no more.
   const reqAnchor = await page.evaluate(() => {
     const board = document.getElementById('board');
     const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;

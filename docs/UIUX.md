@@ -268,7 +268,8 @@ wireframe is committed as an **illustrative reference only**:
 document wins. The cards do **not** live inside Components, Requirements, or
 the Parking Lot. The current placement authority is the owner's issue #189
 drawing: every card's authored `left/top %` follows that drawing (B78). The
-**Philly Plant Dads** note sits at **left 59.5% / top 64.3%** (B80). These
+**Philly Plant Dads** note sits at **left 59.5% / top 64.3%** (B80); the
+**Wood - Coming Soon** note sits at **left 15% / top 35.1%** (B116). These
 placements are the only authored card geometry; cards are content-sized
 (§4), with no authored px width or height (B45).
 
@@ -278,7 +279,7 @@ overflow at 320–1023px. At every viewport size, the #189 arrangement has no
 overlapping cards and no obscured link lines, except the line behind Career
 from Software & AI to Community.
 
-**Rulings:** B2, B30, B43, B45, B78, B80.
+**Rulings:** B2, B30, B43, B45, B78, B80, B116.
 
 ---
 
@@ -292,17 +293,18 @@ visitor's entertainment only; positions are not persisted (B7, B40).
 
 **Font and size.** Note text is 17px / 1.4 / 400 and scales only with its
 card. The Philly Plant Dads label is 11.4px in its one-line Spotify-sized
-box; its line box remains 17 × 1.4 = 23.8px. Cards are content-sized, with
+box; the Wood - Coming Soon label is 9.6px in its one-line Writing-sized
+box. Both line boxes remain 17 × 1.4 = 23.8px. Cards are content-sized, with
 `width: max-content`, a 132px minimum, and height following wrapped text.
 Their width is capped at the sheet's right edge, divided by the card's own
 scale; `--card-max-w` is recalculated after drag or scale changes. (B45, B60,
-B80, B84.)
+B80, B84, B116.)
 
 **Rest scale.** Per-card values: **2.33** community, **2.18** career, **1.86**
 writing, **1.78** software-ai, **2.26** plants-rocks, **1.70** music, **1.01**
 apple-music, **1.19** spotify, **1.06** linkedin, **1.24** zeved-boards,
 **1.19** agentic-plugins, **0.98** plants-poles, **1.02** plants-in-rocks,
-and **1.19** philly-plant-dads. (B78, B80.)
+**1.19** philly-plant-dads, and **1.86** wood. (B78, B80, B116.)
 
 **Resize.** Dragging the corner scales the card uniformly from its top-left
 origin. The scale has a **0.5** floor and a ceiling at the first point the
@@ -317,7 +319,7 @@ including a tap on the handle. The handle's grab box is **28×28**, anchored
 the box's bottom-right corner. Pointer positions are converted to logical
 coordinates by dividing by the render scale `rs`. (B3, B30, B41, B42.)
 
-**Rulings:** B3, B7, B21, B30, B40, B41, B42, B45, B51, B60, B78, B80, B84.
+**Rulings:** B3, B7, B21, B30, B40, B41, B42, B45, B51, B60, B78, B80, B84, B116.
 
 ### §4.1 States
 
@@ -327,11 +329,11 @@ coordinates by dividing by the render scale `rs`. (B3, B30, B41, B42.)
 | **hover** | blue bloom: `--accent-page` `#6d9cb0` at `0 0 32px 4px` / `0.9`; no second shadow layer | the bloom is the elevation |
 | **active (pressed)** | green bloom: `--glow-green` `#b9d2b2` at `0 0 32px 4px` / `0.9`; no elevation layer | **1px inset** — the card presses into the page |
 | **focus-visible** | a focus ring in the surface's ink (never a tint) | the ring is the geometry; keyboard users are never left to colour alone |
-| **rest-only note** (Music and the four B55 sub-cards) | note surface, ink border, no hover, click, or focus ring; it is not a link or control and still drags/resizes | — nothing blooms and nothing moves |
+| **rest-only note** (Music, the four B55 sub-cards, and Wood - Coming Soon, B116) | note surface, ink border, no hover, click, or focus ring; it is not a link or control and still drags/resizes | — nothing blooms and nothing moves |
 
 Transitions use TheBoards' closed motion set: short, quiet, no bounce.
 
-**Rulings:** B7, B14, B25, B26, B29, B55.
+**Rulings:** B7, B14, B25, B26, B29, B55, B116.
 
 ### §4.2 The doors
 
@@ -358,7 +360,8 @@ Plants & Rocks ↔ Community · Plants & Rocks ↔ Writing · Software & AI ↔ 
 Music ↔ Apple Music · Music ↔ Spotify · Career ↔ LinkedIn ·
 Software & AI ↔ Zeved Boards · Software & AI ↔ Agentic Plugins ·
 Plants & Rocks ↔ Plants on Poles · Plants & Rocks ↔ Plants in Rocks ·
-Plants & Rocks ↔ Philly Plant Dads.
+Plants & Rocks ↔ Philly Plant Dads · Wood ↔ Community ·
+Wood ↔ Plants & Rocks.
 
 A link is the card-to-card relationship drawn as the board's own linework:
 a thin straight line between two cards' **centres**, no label, no arrowhead.
@@ -384,7 +387,7 @@ so a line exists for every authored pair, one 1px `--frame` line named by its
 
 The line style follows TheBoards' `UIUX §4.6` / TheBoards' `B91`.
 
-**Rulings:** B28, B34, B55, B80.
+**Rulings:** B28, B34, B55, B80, B116.
 
 ---
 
@@ -504,7 +507,7 @@ The Parking Lot is split **50/50** by a vertical divider.
 | the note links — their pairs, their 1px `--frame` line, their centres | the per-authored-pair mechanism: `test/desktop.js` [L1]–[L14]; `test/mobile.js` pins the endpoints at scale < 1 |
 | one render scale: no clipping + no overflow at every width (320–1023) | `test/mobile.js` — `every door-card fully inside the sheet`, `no horizontal overflow`, `no vertical overflow` |
 | the band / title-card / lot laws (B46): height-anchored landscape scale, ×1.10455 rescale, 29px overhang, B31's (band-top+8) 16px 16px box, rescaled lot shelf, lot clip; the row's one-`--gutter` gap after the title card, the card's centring and the Components zone's door-column edge (B39, B114, B115) | `test/scaling.js` (every viewport) |
-| card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B78 drawing rest scales and placements per card (B80 for philly-plant-dads, seated by the owner's words), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
+| card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B78 drawing rest scales and placements per card (B80 for philly-plant-dads and B116 for wood, seated by the owner's words), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (B41) | `test/movable_resizable.js` |
 | no service worker | PRD §3, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
 | the career page: employer-card shared size/equal gaps, oneliner dates and selection glow; eight-role ring and uniform components; last-role jumps; one-viewport layout, component geometry and in-card scroll; monochrome tokens; filled and blank slots; two-way footer and centred CTA; reduced-motion, touch and glass-legibility behavior | `test/career.js` |

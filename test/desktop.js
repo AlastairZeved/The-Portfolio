@@ -1,6 +1,6 @@
 /* test/desktop.js — desktop grammar: no All Boards rail; the single board
    spans the full viewport, the door-cards re-scale inside it. Card states
-   (hover glow, pressed green, never colour alone). The fourteen note links
+   (hover glow, pressed green, never colour alone). The sixteen note links
    (B28, UIUX §4.3) — pairs, 1px --frame line, card-centre endpoints.
    Black-box Playwright.
    Run: node test/desktop.js   (PORTFOLIO_BASE_URL default http://localhost:8000/) */
@@ -146,30 +146,31 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   ok('all door-cards sit inside the viewport (no clipping)', inside);
 
   // issue #145/B53 + #146/B55: the linked sub cards render plain 400 text;
-  // every note card (all fourteen) renders plain 400 (issue #167/B60, UIUX §4).
+  // every note card (all fifteen) renders plain 400 (issue #167/B60, UIUX §4).
   const weights = await page.evaluate(() => {
     const w = id => { const el = document.querySelector(`.door-card[data-id="${id}"]`); return el ? getComputedStyle(el).fontWeight : null; };
     return {
       sub: ['apple-music', 'spotify', 'linkedin', 'zeved-boards', 'agentic-plugins', 'plants-poles', 'plants-in-rocks', 'philly-plant-dads'].map(w),
-      rest: ['music', 'community', 'career', 'writing', 'software-ai', 'plants-rocks'].map(w),
+      rest: ['music', 'community', 'career', 'writing', 'software-ai', 'plants-rocks', 'wood'].map(w),
     };
   });
   ok('sub cards render plain 400 text (issue #145/B53, #146/B55, #196/B80)',
     weights.sub.length === 8 && weights.sub.every(x => x === '400'));
   ok('every note card renders plain 400 — no bold (issue #167/B60, superseding B53)',
-    weights.rest.length === 6 && weights.rest.every(x => x === '400'));
+    weights.rest.length === 7 && weights.rest.every(x => x === '400'));
 
-  // the fourteen note links (B28, B32, B34, UIUX §4.3): one <line> per owner-named pair
-  // (issue #75, #72, #74, #146 and #196), 1px --frame between the two cards' centres, on a hitless
-  // layer below the notes. [L0] is the layer, [L1]–[L14] the fourteen pairs,
-  // [L15]–[L16] the layer-wide line checks.
+  // the sixteen note links (B28, B32, B34, UIUX §4.3): one <line> per owner-named pair
+  // (issue #75, #72, #74, #146, #196 and #313/B116), 1px --frame between the two cards' centres, on a hitless
+  // layer below the notes. [L0] is the layer, [L1]–[L16] the sixteen pairs,
+  // [L17]–[L20] the layer-wide line checks.
   const WANT = [
     ['music', 'writing'], ['software-ai', 'community'], ['software-ai', 'writing'],
     ['plants-rocks', 'community'], ['plants-rocks', 'writing'], ['software-ai', 'music'],
     ['music', 'apple-music'], ['music', 'spotify'], ['career', 'linkedin'],
     ['software-ai', 'zeved-boards'], ['software-ai', 'agentic-plugins'],
     ['plants-rocks', 'plants-poles'], ['plants-rocks', 'plants-in-rocks'],
-    ['plants-rocks', 'philly-plant-dads']
+    ['plants-rocks', 'philly-plant-dads'],
+    ['wood', 'community'], ['wood', 'plants-rocks']
   ];
   const lk = await page.evaluate(() => {
     const board = document.getElementById('board');
@@ -201,15 +202,15 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     };
   });
   ok('[L0] link layer draws below the notes (z 1 under z 2) and never takes a hit',
-    !!lk && lk.pe === 'none' && lk.z === '1' && lk.noteZ === '2' && lk.lines.length === 14);
+    !!lk && lk.pe === 'none' && lk.z === '1' && lk.noteZ === '2' && lk.lines.length === 16);
   lk.lines.forEach((l, i) => {
     const w = WANT[i] || ['?', '?'];
     ok(`[L${i + 1}] link ${i + 1}: ${w[0]} <-> ${w[1]}`,
       l.from === w[0] && l.to === w[1] && !!l.cA && !!l.cB);
   });
-  ok('[L15] every link is a 1px --frame line (crisp at any scale)',
+  ok('[L17] every link is a 1px --frame line (crisp at any scale)',
     lk.lines.every(l => l.stroke === 'rgb(105, 142, 191)' && l.width === '1px' && l.ve === 'non-scaling-stroke'));
-  ok('[L16] every link runs between its two cards\' centres',
+  ok('[L18] every link runs between its two cards\' centres',
     lk.lines.every(l => l.cA && l.cB &&
       Math.abs(l.x1 - l.cA[0]) < 0.6 && Math.abs(l.y1 - l.cA[1]) < 0.6 &&
       Math.abs(l.x2 - l.cB[0]) < 0.6 && Math.abs(l.y2 - l.cB[1]) < 0.6));
@@ -235,7 +236,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   await page.setViewportSize({ width: 1024, height: VH });
   await page.waitForTimeout(100);
   const resizeEvents = await page.evaluate(() => window.__issue275ResizeEvents);
-  ok('[L17] resize lays out every card before link geometry is read',
+  ok('[L19] resize lays out every card before link geometry is read',
     resizeEvents.capWrites >= 6 && resizeEvents.firstLineWriteAfter === resizeEvents.capWrites);
   const resizedLinks = await page.evaluate(() => {
     const board = document.getElementById('board');
@@ -252,8 +253,8 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
       ];
     });
   });
-  ok('[L18] resize re-lays out cards before redrawing all link endpoints',
-    resizedLinks.length === 14 && resizedLinks.every(p =>
+  ok('[L20] resize re-lays out cards before redrawing all link endpoints',
+    resizedLinks.length === 16 && resizedLinks.every(p =>
       Math.abs(p[0] - p[2]) < 0.6 && Math.abs(p[1] - p[3]) < 0.6 &&
       Math.abs(p[4] - p[6]) < 0.6 && Math.abs(p[5] - p[7]) < 0.6));
 

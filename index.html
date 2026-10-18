@@ -48,8 +48,13 @@
   --card-w: min(37.7778%, 100% - 2 * (var(--gutter) + 100px + var(--card-gap)));
   --card-l: calc((100% - var(--card-w)) / 2);
   --band-top: 15.46px;   /* 14 × 1.10455 (#128/B46 — the band literals are TheBoards' 1000-tall frame mapped into the 1104.55-tall drawing space) */
-  --rule-y: 67.38px;  /* no-JS fallback: the rescaled two-line floor — JS re-derives it (#128/B46) */
-  --lot-h: 180px;    /* no-JS fallback: B20's fixed value — JS re-derives it (#128/B46) */
+  /* issue #308 (B113): --rule-y and --lot-h are gone. The band is a flow box
+     whose height IS the rule's position, and the lot's height is B20's 180px
+     capped at half the sheet — CSS carries both, there is no fallback to fall
+     back to. */
+  --band-line: 21.54px;  /* 19.5 × 1.10455 (#128/B46) — the band anchor's line box; the band's floor is two of these */
+  --band-gap: 8.84px;    /* 8 × 1.10455 (#128/B46) — the gap from the tallest zone to the rule */
+  --req-left: calc(var(--card-l) + var(--card-w) + var(--card-gap));  /* no-JS fallback: the door-column calc (#107) — app.js overrides it from the rendered title card */
 }
 
 /* ---- Ink poles (UIUX §2.3): flip at the surface boundary ---- */
@@ -85,14 +90,16 @@ body {
     linear-gradient(180deg, var(--water-top) 0%, var(--water-mid) 46%, var(--water-bot) 100%);
 }
 #band-fill {
-  top: 0;
-  height: var(--rule-y);
+  top: 0; bottom: 0;      /* the water fills the band's own box, whatever height it takes */
   z-index: 0;
 }
 #lot {
   z-index: 1;
   bottom: 0;
-  height: var(--lot-h);
+  /* issue #308 (B113): B20's 180px is the lot's height, not a fallback; the
+     half-sheet ceiling still caps it and #lot-items still clips past it. */
+  height: 180px;
+  max-height: 50%;
 }
 #band-fill::after, #lot::after { /* the water's dither, at 0.05 */
   content: "";
@@ -101,29 +108,54 @@ body {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='4' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
 }
 #band-rule, #lot-rule {
-  position: absolute; left: 0; right: 0; top: var(--rule-y);
+  position: absolute; left: 0; right: 0; top: 100%;   /* the rule closes the band's own box */
   height: 1px; background: var(--frame);
   z-index: 1;
 }
 #lot-rule { top: 0; }
 
+/* ---- The band box (issue #308, B113) ----
+   The band is a FLOW box: its height is set by its tallest zone, so the rule
+   that closes it needs no measured --rule-y. padding-top is --band-top
+   (15.46px); the anchor's own padding-bottom is --band-gap (8.84px), so the
+   band's height is 15.46 + max(2, lines) × 21.54 + 8.84 — 67.38 at the
+   two-line floor, 88.92 at three (UIUX §3.2, #128/B46). The zones are flex
+   items so the box grows with them; the title card hangs from the box top and
+   overhangs it by 29px (B31). No z-index: the box stays out of the stacking
+   order so its children keep the levels they already had (the title card
+   z-index 2, above the link layer's 1). */
+#band {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  padding-top: var(--band-top);
+}
+
 /* ---- The two zones: static copy per UIUX §3.3 ---- */
 .band-zone {
-  position: absolute;
-  top: 0; height: var(--rule-y);
+  /* issue #308 (B113): the zones are flex items of #band, so the band's height
+     is the tallest of them — no measured --rule-y. They keep the horizontal
+     placement they had as absolutely positioned boxes: the Components zone's
+     width is its old left/right pair as a width, and the Requirements zone's
+     left edge is still --req-left (issue #107) — now a margin measured from
+     the Components zone's right edge, which is --card-l − --card-gap. Issue
+     #309 replaces this with a flex row and no custom property. */
+  position: relative;
   pointer-events: none;
   z-index: 1;
 }
-#zone-components   { left: var(--gutter);
-                     right: calc(100% - var(--card-l) + var(--card-gap)); }
+#zone-components   { flex: 0 0 auto;
+                     width: calc(var(--card-l) - var(--card-gap) - var(--gutter));
+                     margin-left: var(--gutter); }
 /* issue #107: the Requirements zone anchors to the TITLE CARD's rendered right
    border (see the scale block in app.js, issue #151, B59) — the door-column
-   calc below assumes the card spans the whole --card-w slot, but the card
-   hugs its text (B19), so the calc strand leaves a dead gap between the
-   border and the line. Kept as the no-JS fallback; app.js's scale block
-   overrides --req-left from the rendered card. */
-#zone-requirements { left: var(--req-left, calc(var(--card-l) + var(--card-w) + var(--card-gap)));
-                     right: var(--gutter); }
+   fallback in :root assumes the card spans the whole --card-w slot, but the
+   card hugs its text (B19), so the calc strand leaves a dead gap between the
+   border and the line. app.js's scale block overrides --req-left from the
+   rendered card; #309 will delete the property outright. */
+#zone-requirements { flex: 1 1 auto;
+                     margin-left: calc(var(--req-left) - var(--card-l) + var(--card-gap));
+                     margin-right: var(--gutter); }
 .band-label {
   position: absolute;
   top: 100%; left: 50%; transform: translateX(-50%);
@@ -155,9 +187,17 @@ body {
   overflow-wrap: break-word;
 }
 .band-zone .anchor {
-  left: 0; right: 0;
-  top: var(--band-top);
-  min-height: 44px;
+  /* issue #308 (B113): the anchor is IN FLOW, so it is the thing that gives
+     its zone — and through it the band — its height. The box is the line
+     boxes plus --band-gap (the gap to the rule), floored at two lines:
+     min-height is 2 × 21.54 + 8.84 = 51.92px, which under the 15.46px
+     band-top makes the two-line floor 67.38px and three lines 88.92px
+     (UIUX §3.2, #128/B46). line-height is the ruled 21.54px literal rather
+     than 1.3 × 16.57 = 21.541px so the floor is exact. */
+  position: static;
+  min-height: calc(2 * var(--band-line) + var(--band-gap));
+  padding-bottom: var(--band-gap);
+  line-height: var(--band-line);
   font-size: 16.57px; font-weight: 400;   /* 15 × 1.10455 (#128/B46) — keeps the band anchor on the same rescaled rung as the band's own literals; weight plain per issue #147/B54 */
 }
 
@@ -165,7 +205,9 @@ body {
 #anchor-title {
   position: absolute;
   left: 50%; transform: translateX(-50%);
-  top: 0; min-height: calc(var(--rule-y) + 29px);
+  /* issue #308 (B113): the card hangs from the band box it now sits in, so
+     100% IS the rule's position — the B31 overhang is unchanged at 29px. */
+  top: 0; min-height: calc(100% + 29px);
   /* The title card: the +29px overhang, the (band-top + 8px) 16px 16px
      padding and the 20px type stand per B31 (issue #128 / B46); width hugs
      the title text, the borders closing in (issue #59). */
@@ -482,25 +524,30 @@ body {
 <!-- One bounded sheet -->
 <div id="board">
 
-  <div id="band-fill"></div>
-  <div id="band-rule"></div>
+  <!-- issue #308 (B113): the band is one flow box — the water, the rule that
+       closes it, the two zones that size it, and the title card that hangs
+       from it. Nothing measures it; CSS lays it out. -->
+  <div id="band">
+    <div id="band-fill"></div>
+    <div id="band-rule"></div>
 
-  <div id="zone-components" class="band-zone">
-    <span class="band-label on-light">Components</span>
-    <!-- issue #208 / B85: the zone's two-line copy, in the identical anchor
-         grammar (B38/B54 construction); B69's pseudonyms line is replaced;
-         the literal newline renders the issue's line break (pre-wrap). -->
-    <div class="anchor">Under Construction: Career content, Plants in Rocks content.
+    <div id="zone-components" class="band-zone">
+      <span class="band-label on-light">Components</span>
+      <!-- issue #208 / B85: the zone's two-line copy, in the identical anchor
+           grammar (B38/B54 construction); B69's pseudonyms line is replaced;
+           the literal newline renders the issue's line break (pre-wrap). -->
+      <div class="anchor">Under Construction: Career content, Plants in Rocks content.
 Planned future work: Add landing pages</div>
-  </div>
-  <div id="zone-requirements" class="band-zone">
-    <span class="band-label on-light">Requirements</span>
-    <div class="anchor">Click the note cards to launch my various pages and work across the web.</div>
-  </div>
+    </div>
+    <div id="zone-requirements" class="band-zone">
+      <span class="band-label on-light">Requirements</span>
+      <div class="anchor">Click the note cards to launch my various pages and work across the web.</div>
+    </div>
 
-  <div id="anchor-title">
-    <div class="title-eyebrow">The Digital Garden of</div>
-    <div class="title-pinned">Robert Alastair Zeved Gregory</div>
+    <div id="anchor-title">
+      <div class="title-eyebrow">The Digital Garden of</div>
+      <div class="title-pinned">Robert Alastair Zeved Gregory</div>
+    </div>
   </div>
 
   <!-- The door-cards, in the free board space (B2, B3); the Music note is not

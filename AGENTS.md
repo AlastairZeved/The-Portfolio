@@ -93,8 +93,8 @@ worker.
 
 Env overrides (read by the tests): `PORTFOLIO_BASE_URL` (default
 `http://localhost:8000/`; each suite appends its own page, B109),
-`PORTFOLIO_OUT` (screenshot directory for `mobile.js`, `desktop.js`,
-`movable_resizable.js`), `PROOF_DIR` (output directory for `proof.js`,
+`PORTFOLIO_OUT` (screenshot directory: `desktop.js`, `mobile.js` and
+`movable_resizable.js` each write `<suite>.png` into it, issue #320), `PROOF_DIR` (output directory for `proof.js`,
 default `/tmp/portfolio-proof`). There is no lint/build/typecheck command — the project has
 none.
 

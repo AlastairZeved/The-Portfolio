@@ -292,7 +292,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     return (await navigator.serviceWorker.getRegistrations()).length === 0;
   }));
 
-  if (OUT) await page.screenshot({ path: OUT });
+  if (OUT) await page.screenshot({ path: path.join(OUT, 'desktop.png') });
   await browser.close();
   console.log(failures === 0 ? '\nDESKTOP PASS' : `\nDESKTOP FAIL: ${failures}`);
   process.exit(failures === 0 ? 0 : 1);

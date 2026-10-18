@@ -143,7 +143,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   ok('Components zone label', (await page.locator('#zone-components .band-label').innerText()) === 'Components');
   ok('Requirements zone label', (await page.locator('#zone-requirements .band-label').innerText()) === 'Requirements');
 
-  if (OUT) await page.screenshot({ path: OUT });
+  if (OUT) await page.screenshot({ path: path.join(OUT, 'mobile.png') });
   await browser.close();
   console.log(failures === 0 ? '\nMOBILE PASS' : `\nMOBILE FAIL: ${failures}`);
   process.exit(failures === 0 ? 0 : 1);

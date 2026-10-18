@@ -347,7 +347,7 @@ async function runScenario(page, tag, width, height) {
   await runScenario(page, 'desktop', 1440, 900);   // desktop-scale viewport
   await runScenario(page, 'mobile', 390, 844);     // rs < 1 — the issue #87 scale
 
-  if (OUT) await page.screenshot({ path: OUT });
+  if (OUT) await page.screenshot({ path: path.join(OUT, 'movable_resizable.png') });
   await browser.close();
   console.log(failures === 0 ? '\nMOVABLE_RESIZABLE PASS' : `\nMOVABLE_RESIZABLE FAIL: ${failures}`);
   process.exit(failures === 0 ? 0 : 1);

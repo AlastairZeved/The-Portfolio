@@ -143,21 +143,21 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   // B98: a slot's ring angle is read off its computed transform (the
   // rotateY's cosine is the matrix's m11); the front card sits at 0°.
   // The turn is a 500ms transition; wait for it to land rather than trust a
-  // fixed sleep (a loaded runner can still be mid-turn at 600ms).
-  const centered = async () => { await page.waitForFunction(() =>
-    [...document.querySelectorAll('.carousel__slot')]
-      .some(s => Math.abs(new DOMMatrix(getComputedStyle(s).transform).m11 - 1) < 1e-3),
-    null, { timeout: 5000 });
-    return centeredNow(); };
-  const centeredNow = () => page.evaluate(() => {
-    const slot = [...document.querySelectorAll('.carousel__slot')]
-      .find(s => Math.abs(new DOMMatrix(getComputedStyle(s).transform).m11 - 1) < 1e-3);
-    return {
+  // fixed sleep (a loaded runner can still be mid-turn at 600ms). Issue #331:
+  // "landed" is no slot's transform still transitioning — the 8→1 wrap turns
+  // the long way round (B98), so mid-turn slots sweep through 0° — and the
+  // front card is read in that same evaluation, never in a second one.
+  const centered = async () => (await page.waitForFunction(() => {
+    const slots = [...document.querySelectorAll('.carousel__slot')];
+    if (slots.some(s => s.getAnimations().some(a =>
+      a.transitionProperty === 'transform' && a.playState === 'running'))) return null;
+    const slot = slots.find(s => Math.abs(new DOMMatrix(getComputedStyle(s).transform).m11 - 1) < 1e-3);
+    return slot && {
       title: slot.querySelector('.gm-title').childNodes[0].textContent.trim(),
       year: slot.querySelector('.gm-uc').textContent.trim(),
       role: slot.dataset.role,
     };
-  });
+  }, null, { timeout: 5000 })).jsonValue();
   const firstCenter = await centered();
   ok('the centred card is the default role: "Branch Sales & Service Representative" (2017-2018)',
     firstCenter.role === '1' && firstCenter.title === 'Branch Sales & Service Representative' &&

@@ -377,6 +377,17 @@ body {
    font clause is amended for this one card (B80). */
 .door-card.fit-to-spotify { font-size: 11.4px; line-height: 23.8px; }
 
+/* B116 (issue #313): the "Wood - Coming Soon" note is the Writing card's own
+   box — 132 × 48px at the Writing rest scale 1.86 — with the label font
+   scaled down to fit (owner, issue #313: "the same size as the \"Writing\"
+   note card with text obviously scaled/re-sized to fit that card size").
+   The label hugs 185px at 17px, so the linear fit is 17 × 104 / 185 =
+   9.56px; shipped at 9.0px (97.8px hug, ~6% headroom) because CI's
+   Chromium sets this label ~4% wider than the local one and widened the
+   box to 136px at 9.6px (agent-derived, B33, the B80 method). line-height
+   stays the note's 23.8px line box (17 × 1.4, B45). */
+.door-card.fit-to-writing { font-size: 9.0px; line-height: 23.8px; }
+
 /* ---- The link layer (UIUX §4.3): the lines that join the note cards ----
    TheBoards' link idiom ported verbatim (TheBoards' `UIUX §4.6`, TheBoards' `B91`): a thin
    straight 1px line between two cards' centres, in --frame — this page's own
@@ -655,6 +666,19 @@ Planned future work: Add landing pages</div>
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
 
+  <!-- B116 (issue #313): "Wood - Coming Soon" — a rest-only note (no link,
+       like Music) in the Writing card's box, linked to Community and
+       Plants & Rocks. The issue seats it halfway between the Career and
+       Music centres (left 25.3% / top 35.1%), but there the Community ↔
+       Plants & Rocks line runs behind it (B44); the owner ruled it moved
+       left at the same height, to the left of Community — left 3% /
+       top 35.1% (grill, 2026-10-18).
+       Measured at 1440×900, 1920×1080 and 2880×1650 (agent-derived, B33). -->
+  <div class="door-card note-card fit-to-writing" data-id="wood" style="--card-scale: 1.86; left:3%; top:35.1%">
+    Wood - Coming Soon
+    <span class="resize-handle" aria-hidden="true"></span>
+  </div>
+
   <!-- Parking Lot: water field closing the sheet (B6) -->
   <div id="lot">
     <div id="lot-rule"></div>
@@ -714,6 +738,8 @@ Planned future work: Add landing pages</div>
     <line data-link="12" data-from="plants-rocks" data-to="plants-poles"></line>
     <line data-link="13" data-from="plants-rocks" data-to="plants-in-rocks"></line>
     <line data-link="14" data-from="plants-rocks" data-to="philly-plant-dads"></line>
+    <line data-link="15" data-from="wood" data-to="community"></line>
+    <line data-link="16" data-from="wood" data-to="plants-rocks"></line>
   </svg>
 
 </div>

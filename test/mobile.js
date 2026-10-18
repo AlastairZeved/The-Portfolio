@@ -1,6 +1,6 @@
 /* test/mobile.js — mobile render + nine new-tab door-cards + form + the one
    render scale (no clip, no overflow, link endpoints under the scale) and the
-   fourteen note links (B28, B55, B80) (black-box, Playwright).
+   sixteen note links (B28, B55, B80, B116) (black-box, Playwright).
    Run: node test/mobile.js   (PORTFOLIO_BASE_URL default http://localhost:8000/) */
 
 const { chromium } = require('playwright');
@@ -62,7 +62,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   ok('no horizontal overflow (scrollWidth <= innerWidth)', fit.noHOverflow);
   ok('no vertical overflow (scrollHeight <= innerHeight)', fit.noVOverflow);
 
-  // the fourteen note links (B28, B55, B80) hold their endpoints under the same scale: the
+  // the sixteen note links (B28, B55, B80, B116) hold their endpoints under the same scale: the
   // layer's user units are the board's LOGICAL px, so every line must land on
   // the LOGICAL centre of the two cards it joins — measured rects are physical,
   // divided by rs here exactly as app.js's toLogical does (issue #87, B30)
@@ -83,7 +83,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
                       Math.abs(+l.getAttribute('x2') - cb[0]), Math.abs(+l.getAttribute('y2') - cb[1]));
     });
   });
-  ok('all fourteen links land on their card centres at scale < 1', linkFit.length === 14 && linkFit.every(d => d < 1));
+  ok('all sixteen links land on their card centres at scale < 1', linkFit.length === 16 && linkFit.every(d => d < 1));
 
   // nine door-cards, each a real new-tab anchor (B26, B80); the Music card and
   // the four B55 sub cards (issue #146) are plain notes
@@ -107,14 +107,16 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   }
 
   // the Music card is a rest-only note, not a link (B26); B55 (issue #146)
-  // adds four more non-link note sub cards, so five div.door-card.note-card
-  // exist now and Music remains the first
+  // adds four more non-link note sub cards and B116 (issue #313) the Wood
+  // note, so six div.door-card.note-card exist now and Music remains the first
   const musicNotes = page.locator('div.door-card.note-card');
-  ok('Music card is a non-link note (first of five notes — B26, B55)', await musicNotes.count() === 5
+  ok('Music card is a non-link note (first of six notes — B26, B55, B116)', await musicNotes.count() === 6
     && (await musicNotes.first().innerText()).trim().split('\n')[0].trim() === 'Music');
   ok('the four B55 sub cards are non-link notes too', await musicNotes.evaluateAll(els =>
     ['Zeved Boards', 'Agentic Plugins', 'Plants on Poles', 'Plants in Rocks'].every((t, i) =>
       els[i + 1] && els[i + 1].innerText.trim().split('\n')[0].trim() === t && !els[i + 1].hasAttribute('href'))));
+  ok('the B116 Wood note is a non-link note too (issue #313)', await musicNotes.evaluateAll(els =>
+    els[5] && els[5].innerText.trim().split('\n')[0].trim() === 'Wood - Coming Soon' && !els[5].hasAttribute('href')));
   ok('Music note has no href', await musicNotes.first().evaluate(el => !el.hasAttribute('href')));
   ok('Music note carries no hover/click shadow', await musicNotes.first().evaluate(el =>
     getComputedStyle(el).boxShadow === 'none'));

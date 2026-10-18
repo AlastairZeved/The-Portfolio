@@ -141,7 +141,8 @@ function cardScale(card) {
   }
 
   /* B45 (issue #126): the card's own scale transforms its text and size
-     uniformly. The default font is 17px/1.4; `.fit-to-spotify` uses 11.4px (B80). */
+     uniformly. The default font is 17px/1.4; `.fit-to-spotify` uses 11.4px (B80),
+     `.fit-to-writing` 9.0px (B116). */
   var MIN_SCALE = 0.5;                    // TheBoards state.js MIN_SCALE
   var NOTE_MIN_W = 132;                   // TheBoards state.js NOTE_MIN_W; B21's legible floor
   var MOVE_THRESHOLD = 4;                 // B41: physical px before a gesture moves

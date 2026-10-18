@@ -135,11 +135,12 @@ Parking Lot. The sheet fills the whole viewport; there is **no All Boards rail**
 - **Title card:** "The Digital Garden of" / "Robert Alastair Zeved Gregory" —
   two lines (B72 superseding B17's eyebrow text; B17 superseded B5), borders
   that hug the text (B19), the same title card as TheBoards, not a link.
-- **Door-cards** (`DECISIONS.md` B3, B26, B34, B55, B80), each linked card
+- **Door-cards** (`DECISIONS.md` B3, B26, B34, B55, B80, B116), each linked card
   opening in a new tab. Music is a plain parent note for Apple Music and
   Spotify. The LinkedIn note links to the Career note; Zeved Boards and Agentic
   Plugins sit under Software & AI; Plants on Poles and Plants in Rocks sit
-  under Plants & Rocks; and Philly Plant Dads links to Instagram.
+  under Plants & Rocks; Philly Plant Dads links to Instagram; and Wood - Coming
+  Soon is a plain note linked to Community and Plants & Rocks.
 - **Contact form** (`DECISIONS.md` B6): Name (optional), Email (optional),
   Message (required), with Formspree's captcha and bot protections.
 - **Notes that drag and resize** — entertainment only, no persistence

@@ -1,28 +1,12 @@
-/* test/movable_resizable.js — bug #58 regression: door-cards must be
+/* test/movable_resizable.js — issue #58/B21 regression: door-cards must be
    draggable, resizable via the corner handle, clamped to a 1/5-viewport max
    and a legible minimum, with each card's link still opening in a new tab.
    Issue #138/B52 also pins each card's REST scale — the size it renders at
    when the page loads (the gesture bounds are untouched by that pin).
 
-   Since issue #87 (B30) the sheet renders through ONE uniform scale, so this
-   scenario runs at two widths in one pass:
-     desktop 1440x900 — scale = vh/REF_H, height-anchored (issue #121/B44:
-         uncapped; issue #128/B46: height-anchored on landscape) < 1 on this viewport:
-                            the drawing's own space is 2560/z × 1440/z, z = 1.3037,
-                            so 1440×900 renders scaled, un-capped), and
-     narrow  390x844  — scale < 1: every pointer reading must be converted into
-                        the board's LOGICAL space. A dragged card tracks the
-                        pointer 1:1 on screen (physical dx/dy unchanged), the
-                        corner resize changes the card's own scale: floored at
-                        TheBoards' 0.5 (B45) and CEILINGED at the issue
-                        #142/B51 one-fifth-of-the-viewport bound — one uniform
-                        scale, the card stops at the first axis reaching 1/5
-                        of the viewport, superseding the old 2.0 MAX_SCALE.
-                        The NOTE_MIN_W 132 floor is an unscaled logical size
-                        that scales with the sheet.
-   The style.left values are asserted in LOGICAL px directly, so a
-   regression that reads clientX/clientY against card geometry again (the
-   issue #87 review finding) fails here at 390x844.
+   At 1440×900 and 390×844, this scenario verifies scaled pointer readings:
+   cards drag at 1:1 physical speed and resize from the 0.5 floor to the
+   one-fifth viewport cap (B45/B51), with a 132px logical minimum.
 
    Dispatch synthetic pointer events ON the target element so the card's own
    event handlers run with the correct e.target (a Playwright real-mouse drag
@@ -31,10 +15,11 @@
 const { chromium } = require('playwright');
 const path = require('path');
 
-const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/index.html';
+const BASE_URL = process.env.PORTFOLIO_BASE_URL || 'http://localhost:8000/';
+const URL = new globalThis.URL('index.html', BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/').href;
 const OUT = process.env.PORTFOLIO_OUT && path.resolve(process.env.PORTFOLIO_OUT);
 let failures = 0;
-const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
+const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}${!cond && details ? ' :: ' + details : ''}`); };
 
 const DRAG_X = 180, DRAG_Y = 150;   // physical px the pointer travels (6 moves of +30/+25)
 const MIN_SCALE = 0.5;   // TheBoards' note-scale floor (B45); the ceiling is per-card (B51)
@@ -43,27 +28,30 @@ const MIN_SCALE = 0.5;   // TheBoards' note-scale floor (B45); the ceiling is pe
    drawing re-sizes nine cards (community, career, writing, software-ai,
    plants-rocks, apple-music, zeved-boards, agentic-plugins,
    plants-in-rocks) and re-places seven; LinkedIn and Plants on Poles are
-   untouched. B67's #175 list is superseded; the B52 board/sub tier split
-   at scale 1 was superseded at B67. The gesture bounds (0.5 floor,
-   one-fifth ceiling) are untouched; this pins the default rendered size and
-   placement per card only. B80 (issue #196) adds the Philly Plant Dads note
-   — the Spotify card's own box at the Spotify rest scale 1.19 (B80). */
+   untouched. The gesture bounds (0.5 floor, one-fifth ceiling) are
+   untouched; this pins the default rendered size and placement per card
+   only. B80 (issue #196) adds the Philly Plant Dads note — the Spotify
+   card's own box at the Spotify rest scale 1.19 (B80). B116 (issue #313)
+   adds the Wood note — the Writing card's own box at the Writing rest
+   scale 1.86 (B116). */
 const REST_SCALES = {
   'community': 2.33, 'career': 2.18, 'writing': 1.86, 'software-ai': 1.78,
   'plants-rocks': 2.26, 'music': 1.70, 'apple-music': 1.01, 'spotify': 1.19,
   'linkedin': 1.06, 'zeved-boards': 1.24, 'agentic-plugins': 1.19,
-  'plants-poles': 0.98, 'plants-in-rocks': 1.02, 'philly-plant-dads': 1.19
+  'plants-poles': 0.98, 'plants-in-rocks': 1.02, 'philly-plant-dads': 1.19,
+  'wood': 1.86
 };
 /* B78 (issue #189): the drawing's placements, as authored left/top %.
    'philly-plant-dads' is B80's (issue #196) seat — the owner's grill words
-   transcribed at the #189 drawing's reference (agent-derived, B33). */
+   transcribed at the #189 drawing's reference (agent-derived, B33). 'wood'
+   is B116's (issue #313) seat — the owner's grill words, same method. */
 const REST_PLACEMENTS = {
   'community': [13.6, 18.3], 'career': [42.3, 18.5], 'writing': [70.9, 53.9],
   'software-ai': [66, 25.9], 'plants-rocks': [40, 61.5], 'music': [7.7, 51.4],
   'apple-music': [17.8, 62.7], 'spotify': [5.2, 61.8], 'linkedin': [36.6, 11.5],
   'zeved-boards': [81, 26.7], 'agentic-plugins': [79, 36],
   'plants-poles': [37.7, 73.7], 'plants-in-rocks': [50.2, 73.8],
-  'philly-plant-dads': [59.5, 64.3]
+  'philly-plant-dads': [59.5, 64.3], 'wood': [3, 35.1]
 };
 
 /* one scenario, run once per viewport; rs is the render scale the page reports */
@@ -97,11 +85,11 @@ async function runScenario(page, tag, width, height) {
       return rightLogical / (1 - left / 100);
     }));
     let lwMin = lwMin0;
-    const geo = [...document.querySelectorAll('.door-card')].map(c => ({
-      lp: parseFloat(c.style.left) || 0, tp: parseFloat(c.style.top) || 0,
-      w: c.offsetWidth * (parseFloat(c.style.getPropertyValue('--card-scale')) || 1),
-      h: c.offsetHeight * (parseFloat(c.style.getPropertyValue('--card-scale')) || 1)
-    }));
+    const geo = [...document.querySelectorAll('.door-card')].map(c => {
+      const s = parseFloat(c.style.getPropertyValue('--card-scale')) || 1;
+      return { lp: parseFloat(c.style.left) || 0, tp: parseFloat(c.style.top) || 0,
+        s, w: c.offsetWidth * s, h: c.offsetHeight * s };
+    });
     for (let pass = 0; pass < 60; pass++) {
       const rs = innerWidth >= innerHeight
         ? Math.min(innerHeight / REF.REF_H, innerWidth / lwMin)
@@ -116,7 +104,7 @@ async function runScenario(page, tag, width, height) {
           if (dLeft <= 0) continue;
           const aTop = (A.tp / 100) * lh, bTop = (B.tp / 100) * lh;
           if (aTop + A.h <= bTop || bTop + B.h <= aTop) continue;
-          need = Math.max(need, (A.w + 4) / dLeft);
+          need = Math.max(need, (A.w + 4 * A.s) / dLeft);
         }
       if (need <= lwMin + 0.5) break;
       lwMin = need;
@@ -133,9 +121,9 @@ async function runScenario(page, tag, width, height) {
   // bounds are untouched.
   const rest = await page.evaluate(() => {
     const out = {};
+    const rs2 = parseFloat(getComputedStyle(document.querySelector('#board')).getPropertyValue('--rs')) || 1;
     document.querySelectorAll('.door-card').forEach(c => {
       const r = c.getBoundingClientRect();
-      const rs2 = parseFloat(getComputedStyle(document.querySelector('#board')).getPropertyValue('--rs')) || 1;
       out[c.dataset.id] = { scale: parseFloat(c.style.getPropertyValue('--card-scale')) || 1,
         left: parseFloat(c.style.left), top: parseFloat(c.style.top),
         logicalW: r.width / rs2, unscaledW: c.offsetWidth };
@@ -144,8 +132,8 @@ async function runScenario(page, tag, width, height) {
   });
   for (const [id, want] of Object.entries(REST_SCALES)) {
     const got = rest[id];
-    // B80 seats philly-plant-dads by the owner's words, not a drawing
-    const cite = id === 'philly-plant-dads' ? 'B80' : 'B78';
+    // B80 and B116 seat philly-plant-dads and wood by the owner's words, not a drawing
+    const cite = id === 'philly-plant-dads' ? 'B80' : id === 'wood' ? 'B116' : 'B78';
     ok(`${tag}: ${id} rest scale is the ${cite} scale of record ${want} (got ${got && got.scale})`,
        got && Math.abs(got.scale - want) < 1e-9);
     ok(`${tag}: ${id} renders at unscaled × rest × rs (B78)`,
@@ -154,9 +142,17 @@ async function runScenario(page, tag, width, height) {
     ok(`${tag}: ${id} sits at the ${cite} placement ${wl}%/${wt}% (got ${got && got.left}/${got && got.top})`,
        got && Math.abs(got.left - wl) < 1e-9 && Math.abs(got.top - wt) < 1e-9);
   }
-  const boardTier = ['community', 'career', 'writing', 'software-ai', 'plants-rocks', 'music']
+  const boardTier = ['community', 'career', 'writing', 'software-ai', 'plants-rocks', 'music', 'wood']
     .every(id => rest[id].scale > 1);
-  ok(`${tag}: the six board cards still render above 1 (B78)`, boardTier);
+  ok(`${tag}: the seven board cards still render above 1 (B78, B116)`, boardTier);
+  // B116 (issue #313): the Wood note is the Writing card's own box — same
+  // unscaled footprint at the same rest scale, its label fitted inside it
+  const box = await page.evaluate(() => ['wood', 'writing'].map(id => {
+    const c = document.querySelector(`.door-card[data-id="${id}"]`);
+    return [c.offsetWidth, c.offsetHeight];
+  }));
+  ok(`${tag}: the Wood note's box is the Writing card's box (B116; got ${box[0]} vs ${box[1]})`,
+     box[0][0] === box[1][0] && box[0][1] === box[1][1]);
 
   // --- issue #94: the native HTML5 anchor drag is suppressed on door-cards ---
   // A real press-and-move on an <a href> would otherwise fire the browser's
@@ -217,9 +213,7 @@ async function runScenario(page, tag, width, height) {
   // state.js MIN_SCALE) and ceilinged at the issue #142/B51 one-fifth-of-the-
   // viewport bound: one uniform scale, the card stops at the first axis that
   // reaches 0.2 × the board's logical dimensions (the board fills the
-  // viewport, so board-logical == viewport). The old fixed MAX_SCALE 2.0 and
-  // the old B21 1/5-viewport w/h ceiling are superseded by this per-card
-  // ceiling; the 132x80 unscaled floor still stands.
+  // viewport, so board-logical == viewport).
   const grown = await page.evaluate(async () => {
     const board = document.querySelector('#board');
     const c = document.querySelector('a.door-card');
@@ -298,10 +292,8 @@ async function runScenario(page, tag, width, height) {
   // semantics are only trustworthy through a real press-move-release — which is
   // exactly how the bug reproduces. Assert on the tab count, like the B3 check.
   await page.goto(URL, { waitUntil: 'networkidle' });
-  // issue #112 (B43) authored the first door-card 310px wide. B45 removed
-  // the w/h ceiling entirely (scale-based resize); B51 (issue #142) sets the
-  // per-card 1/5-viewport ceiling in its place, so the proof still runs on
-  // the Spotify door, far from the sheet edges.
+  // the resize proof runs on the Spotify door, far from the sheet edges
+  // (B45's scale resize; B51's per-card ceiling, issue #142).
   const resizeCard = page.locator('[data-id="spotify"]');
   const resizeBox = await resizeCard.boundingBox();
   const handleBox = await resizeCard.locator('.resize-handle').boundingBox();
@@ -339,9 +331,7 @@ async function runScenario(page, tag, width, height) {
   const freshCard = page.locator('a.door-card').first();
   const beforePages = (await page.context().pages()).length;
   const bb = await freshCard.boundingBox();
-  // B45: the cards are content-sized now, at mobile widths only a few
-  // physical px tall — a +10px offset lands OUTSIDE the card. Click its
-  // centre, like every other real-mouse proof in this suite.
+  // At mobile widths the content-sized card is small; click its centre.
   await page.mouse.click(bb.x + bb.width / 2, bb.y + bb.height / 2);
   await page.waitForTimeout(1500);
   const pages = page.context().pages();
@@ -354,10 +344,10 @@ async function runScenario(page, tag, width, height) {
   const context = await browser.newContext();
   const page = await context.newPage({ viewport: { width: 1440, height: 900 }, hasTouch: false });
 
-  await runScenario(page, 'desktop', 1440, 900);   // rs ≈ 0.815 — the desktop pin
+  await runScenario(page, 'desktop', 1440, 900);   // desktop-scale viewport
   await runScenario(page, 'mobile', 390, 844);     // rs < 1 — the issue #87 scale
 
-  if (OUT) await page.screenshot({ path: OUT });
+  if (OUT) await page.screenshot({ path: path.join(OUT, 'movable_resizable.png') });
   await browser.close();
   console.log(failures === 0 ? '\nMOVABLE_RESIZABLE PASS' : `\nMOVABLE_RESIZABLE FAIL: ${failures}`);
   process.exit(failures === 0 ? 0 : 1);

@@ -33,7 +33,7 @@ function check(label, actual, expected, tol = 0.0002) {
   console.log(`${ok ? 'PASS' : 'FAIL'} ${label}: got ${actual.toFixed(4)}, want ${expected.toFixed(4)}`);
 }
 
-// §2.2 ladder, To-Do binding (rel. luminance)
+// UIUX §2.2 ladder, To-Do binding (rel. luminance)
 check('--deep luminance', lum(token('deep')), 0.0023);
 check('--card luminance', lum(token('card')), 0.0077);
 check('--water-top luminance', lum(token('water-top')), 0.1237);
@@ -41,14 +41,14 @@ check('--water-bot luminance', lum(token('water-bot')), 0.0325);
 check('--frame luminance', lum(token('frame')), 0.2611);
 check('--note luminance', lum(token('note')), 0.5962);
 
-// §2.3 ink contrast, each at its worst extreme
+// UIUX §2.3 ink contrast, each at its worst extreme
 check('deep/ink-light 18.33', contrast(token('deep'), token('ink-light')), 18.33, 0.05);
 check('card/ink-light 16.62', contrast(token('card'), token('ink-light')), 16.62, 0.05);
 check('water-top/ink-light 5.52', contrast(token('water-top'), token('ink-light')), 5.52, 0.05);
 check('water-bot/ink-light 11.62', contrast(token('water-bot'), token('ink-light')), 11.62, 0.05);
 check('note/ink-dark 11.84', contrast(token('note'), token('ink-dark')), 11.84, 0.05);
 
-// §2.4/§2.5 card-state bindings present as rgb channels
+// UIUX §2.4/§2.5 card-state bindings present as rgb channels
 const blue = token('glow-blue').split(/\s+/).map(Number);
 const green = token('glow-green').split(/\s+/).map(Number);
 if (blue.join(',') !== '109,156,176') { failures++; console.log('FAIL --glow-blue is not #6d9cb0 channels'); }
@@ -56,7 +56,7 @@ else console.log('PASS --glow-blue = #6d9cb0 (109 156 176)');
 if (green.join(',') !== '185,210,178') { failures++; console.log('FAIL --glow-green is not Idea #b9d2b2 channels'); }
 else console.log('PASS --glow-green = Idea --note #b9d2b2 (185 210 178)');
 
-// one file: no external CSS/JS; no service worker
+// inline CSS; external JS is permitted by B59; no service worker
 if (html.includes('serviceWorker') || html.includes('sw.js')) { failures++; console.log('FAIL: service worker present'); }
 else console.log('PASS: no service worker (B13)');
 if (/<link[^>]+rel=["']stylesheet/.test(html)) { failures++; console.log('FAIL: external css file'); }
@@ -66,7 +66,7 @@ else console.log('PASS: css inline (B12)');
 if (/<script(?![^>]*\bsrc=)[^>]*>[^\S<]*\S/.test(html)) { failures++; console.log('FAIL: inline script block (B59 forbids)'); }
 else console.log('PASS: no inline script blocks (B59)');
 const scriptSrcs = [...html.matchAll(/<script[^>]+src=(?:"([^"]+)"|'([^']+)'|([^\s>"']+))/g)].map(m => m[1] || m[2] || m[3]);
-const ALLOWED_JS = new Set(['app.js', 'monstera-storybook.js']);
+const ALLOWED_JS = new Set(['app.js']);
 const bad = scriptSrcs.filter(s => !ALLOWED_JS.has(s));
 if (bad.length) { failures++; console.log('FAIL: unruled external js file: ' + bad.join(', ')); }
 else console.log('PASS: external js files are the ruled set (B59)');

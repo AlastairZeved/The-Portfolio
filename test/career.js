@@ -19,7 +19,7 @@
    the description card as the only scroll container; B76 still renders the
    agentic-plugins source geometry scaled uniformly by the plate's own width.
    Single file, zero script; only the B63 favicon links. Black-box Playwright.
-   Run: node test/career.js   (PORTFOLIO_URL default http://localhost:8000/career.html)
+   Run: node test/career.js   (PORTFOLIO_BASE_URL default http://localhost:8000/)
    Viewport note: the desktop run is at the page's own design canvas
    (REF_H ≈ 1104.55 → rs ≈ 1), because the band's literals render at the B46
    scale (--rs). The carousel's card geometry scales by the plate's own width
@@ -28,9 +28,10 @@
 
 const { chromium } = require('playwright');
 
-const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/career.html';
+const BASE_URL = process.env.PORTFOLIO_BASE_URL || 'http://localhost:8000/';
+const URL = new globalThis.URL('career.html', BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/').href;
 let failures = 0;
-const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
+const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}${!cond && details ? ' :: ' + details : ''}`); };
 
 (async () => {
   const browser = await chromium.launch();
@@ -56,7 +57,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('no external network requests beyond the page itself', await page.evaluate(() => performance.getEntriesByType('resource')
     .every(r => r.name.startsWith('data:') || r.name.startsWith(location.origin))));
 
-  // §1: three employer cards, chronological order
+  // issue #133 §1: three employer cards, chronological order
   const names = await page.locator('.topband__card .topband__wordmark').allInnerTexts();
   ok('three employer cards', names.length === 3);
   ok('chronological order PNC Bank → PNC Private Bank → Brinker Capital',
@@ -142,21 +143,21 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   // B98: a slot's ring angle is read off its computed transform (the
   // rotateY's cosine is the matrix's m11); the front card sits at 0°.
   // The turn is a 500ms transition; wait for it to land rather than trust a
-  // fixed sleep (a loaded runner can still be mid-turn at 600ms).
-  const centered = async () => { await page.waitForFunction(() =>
-    [...document.querySelectorAll('.carousel__slot')]
-      .some(s => Math.abs(new DOMMatrix(getComputedStyle(s).transform).m11 - 1) < 1e-3),
-    null, { timeout: 5000 });
-    return centeredNow(); };
-  const centeredNow = () => page.evaluate(() => {
-    const slot = [...document.querySelectorAll('.carousel__slot')]
-      .find(s => Math.abs(new DOMMatrix(getComputedStyle(s).transform).m11 - 1) < 1e-3);
-    return {
+  // fixed sleep (a loaded runner can still be mid-turn at 600ms). Issue #331:
+  // "landed" is no slot's transform still transitioning — the 8→1 wrap turns
+  // the long way round (B98), so mid-turn slots sweep through 0° — and the
+  // front card is read in that same evaluation, never in a second one.
+  const centered = async () => (await page.waitForFunction(() => {
+    const slots = [...document.querySelectorAll('.carousel__slot')];
+    if (slots.some(s => s.getAnimations().some(a =>
+      a.transitionProperty === 'transform' && a.playState === 'running'))) return null;
+    const slot = slots.find(s => Math.abs(new DOMMatrix(getComputedStyle(s).transform).m11 - 1) < 1e-3);
+    return slot && {
       title: slot.querySelector('.gm-title').childNodes[0].textContent.trim(),
       year: slot.querySelector('.gm-uc').textContent.trim(),
       role: slot.dataset.role,
     };
-  });
+  }, null, { timeout: 5000 })).jsonValue();
   const firstCenter = await centered();
   ok('the centred card is the default role: "Branch Sales & Service Representative" (2017-2018)',
     firstCenter.role === '1' && firstCenter.title === 'Branch Sales & Service Representative' &&
@@ -441,27 +442,33 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   // B95 (issue #250): two-way glow — the title card whose employer owns the
   // centred role carries the selected glow (TheBoards' `B132` border-color +
   // 0 0 8px 0 bloom, reintroduced), the other two do not.
+  // Issue #329: every glowing card is recorded, so a second glow fails. The
+  // pointer leaves the band first — the Brinker click above left it resting
+  // there, and the #261 hover bloom shares the glow's 103,103,103. Each read
+  // waits for the expected card's 200ms box-shadow transition to settle
+  // rather than sleeping; a timeout falls through to the assertion, which
+  // prints what it saw.
+  const EMPLOYER_OF = ['pnc-bank', 'pnc-bank', 'pnc-bank', 'pnc-private-bank',
+    'pnc-private-bank', 'brinker-capital', 'brinker-capital', 'brinker-capital'];
+  await page.mouse.move(5, 5);
   const glowMap = await (async () => {
     const out = [];
     for (let role = 1; role <= 8; role++) {
       await page.evaluate(r => document.getElementById('role-' + r).click(), role);
-      await page.waitForTimeout(350);   // past the card's 200ms box-shadow transition
-      const glow = await page.evaluate(() => {
-        const o = {};
-        for (const e of ['pnc-bank', 'pnc-private-bank', 'brinker-capital']) {
-          o[e] = getComputedStyle(document.querySelector('.topband__card[data-employer="' + e + '"]')).boxShadow.includes('103, 103, 103');
-        }
-        return o;
-      });
-      out.push(role + ':' + Object.keys(glow).find(e => glow[e]));
+      await page.waitForFunction(e => {
+        const card = document.querySelector('.topband__card[data-employer="' + e + '"]');
+        return card.getAnimations().length === 0 && getComputedStyle(card).boxShadow.includes('103, 103, 103');
+      }, EMPLOYER_OF[role - 1], { timeout: 2000 }).catch(() => {});
+      const glowing = await page.evaluate(() =>
+        ['pnc-bank', 'pnc-private-bank', 'brinker-capital'].filter(e =>
+          getComputedStyle(document.querySelector('.topband__card[data-employer="' + e + '"]')).boxShadow.includes('103, 103, 103')));
+      out.push(role + ':' + glowing.join('+'));
     }
     return out;
   })();
   ok('B95 — the two-way title-card glow tracks the centred role\'s employer',
-    JSON.stringify(glowMap) === JSON.stringify([
-      '1:pnc-bank', '2:pnc-bank', '3:pnc-bank',
-      '4:pnc-private-bank', '5:pnc-private-bank',
-      '6:brinker-capital', '7:brinker-capital', '8:brinker-capital']));
+    JSON.stringify(glowMap) === JSON.stringify(EMPLOYER_OF.map((e, i) => (i + 1) + ':' + e)),
+    JSON.stringify(glowMap));
 
   // B64 (issue #176): three desc cards carry the owner's copy verbatim; the rest stay empty.
   const B64_COPY = {
@@ -594,7 +601,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   await page.evaluate(() => document.getElementById('role-1').click());
   await page.waitForTimeout(300);
 
-  // §3/§4 footer + tokens (unchanged by the carousel ruling)
+  // issue #133 §3 and UIUX §10: footer and tokens
   ok('footer has two content sections with one CTA',
     await page.locator('.parking-lot__facts').count() === 2 &&
     await page.locator('.parking-lot .cta').count() === 1);
@@ -623,7 +630,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     (await page.locator('.parking-lot .cta').innerText()).trim() === 'Learn More about Rob' &&
     (await page.locator('.parking-lot .cta').getAttribute('href')) === 'https://razgregory.com/');
 
-  // §4: the B73 monochrome ladder (unchanged)
+  // UIUX §10: the B73 monochrome ladder
   const tokens = await page.evaluate(() => {
     const cs = getComputedStyle(document.documentElement);
     return { deep: cs.getPropertyValue('--deep').trim(), card: cs.getPropertyValue('--card').trim(),
@@ -648,10 +655,27 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       document.querySelector('h1').classList.contains('visually-hidden') &&
       document.querySelectorAll('h2.topband__wordmark').length === 3 &&
       document.querySelector('.carousel[role="radiogroup"]')?.getAttribute('aria-label') === 'Choose a role'));
-  ok('transitions collapse under prefers-reduced-motion', await page.evaluate(() => {
-    const sheet = [...document.styleSheets].find(s => s.ownerNode && !s.href);
-    return [...sheet.cssRules].some(r => r.media && r.media.mediaText.includes('prefers-reduced-motion'));
-  }));
+  await page.locator('#role-1').check({ force: true });
+  ok('unselected employer cards use dim italic ink while the selected card stays regular',
+    await page.evaluate(() => {
+      const selected = getComputedStyle(document.querySelector('.topband__card[data-employer="pnc-bank"]'));
+      const unselected = getComputedStyle(document.querySelector('.topband__card[data-employer="pnc-private-bank"]'));
+      return selected.fontStyle === 'normal' && selected.color === 'rgb(244, 245, 241)' &&
+        unselected.fontStyle === 'italic' && unselected.color === 'rgba(244, 245, 241, 0.55)';
+    }));
+  const normalCarouselMotion = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.carousel__slot')).transitionDuration);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const reducedCarouselMotion = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.carousel__slot')).transitionDuration);
+  const transitionMs = value => value.split(',').map(part => {
+    const n = parseFloat(part);
+    return part.trim().endsWith('ms') ? n : n * 1000;
+  });
+  ok('reduced motion collapses carousel transitions to 0.01ms',
+    Math.max(...transitionMs(normalCarouselMotion)) > 0.01 &&
+    transitionMs(reducedCarouselMotion).every(ms => ms <= 0.01),
+    `normal=${normalCarouselMotion}; reduced=${reducedCarouselMotion}`);
 
   // B98 (issue #257): on a phone the ring is the same ring, scaled down —
   // the B95 clip wrapper collapsed to 0px tall here before.
@@ -674,6 +698,46 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         .find(l => getComputedStyle(l).display !== 'none').getBoundingClientRect();
       return n.top >= back.bottom - 1 && n.height > 0;
     }));
+
+  // B120 (issue #259): where the slot is narrow enough that the title's type
+  // sits on B76's 11px floor, the title card takes the description card's
+  // width and grows to fit the longest title, so every title and year shows
+  // in full and all 8 title cards keep one height (B95). Above the floor the
+  // card keeps its 427u source width.
+  const titleFit = pg => pg.evaluate(() => {
+    const slots = [...document.querySelectorAll('.carousel__slot')];
+    const rows = slots.map(s => {
+      const t = s.querySelector('.gm-title');
+      // drawn ink, not scrollHeight: above the floor the year may run into
+      // the card's bottom padding, which cuts nothing
+      const y = t.querySelector('.gm-uc').getBoundingClientRect();
+      const inside = y.bottom <= t.getBoundingClientRect().bottom - t.clientTop;
+      return { fits: t.scrollHeight <= t.clientHeight, inside, h: t.offsetHeight,
+               w: t.offsetWidth, descW: s.querySelector('.gm-desc').offsetWidth,
+               slotW: s.offsetWidth, title: t.childNodes[0].textContent.trim() };
+    });
+    const fit = getComputedStyle(document.querySelector('.gregorian-mode'))
+      .getPropertyValue('--gm-fit').trim().replace(/^"|"$/g, '');
+    return { rows, fit, floor: rows[0].slotW < 830 * 11 / 28 };
+  });
+  for (const [w, h] of [[390, 844], [320, 568], [744, 1000]]) {
+    const pg = w === 390 ? phone : await browser.newPage({ viewport: { width: w, height: h } });
+    if (pg !== phone) { await pg.goto(URL, { waitUntil: 'networkidle' }); await arrived(pg); }
+    const f = await titleFit(pg);
+    ok(`B120 — at ${w}×${h} the title type is on its 11px floor`, f.floor);
+    ok(`B120 — at ${w}×${h} every role's full title and year show on its title card`,
+      f.rows.every(r => r.fits && r.inside), JSON.stringify(f.rows.map(r => r.title + ':' + r.fits)));
+    ok(`B120 — at ${w}×${h} all 8 title cards keep one height and take the desc card's width`,
+      f.rows.every(r => r.h === f.rows[0].h && Math.abs(r.w - r.descW) <= 1),
+      JSON.stringify(f.rows.map(r => [r.h, r.w, r.descW])));
+    if (pg !== phone) await pg.close();
+  }
+  const desk = await titleFit(page);
+  ok('B120 — the fit title is role 1\'s, the longest', desk.fit === desk.rows[0].title);
+  ok('B120 — above the floor the title card keeps its 427u source width',
+    !desk.floor && desk.rows.every(r => Math.abs(r.w - 427 * r.slotW / 830) <= 1));
+  ok('B120 — above the floor every role\'s year still sits inside its title card',
+    desk.rows.every(r => r.inside));
 
   // Issue #261: reduced motion drops motion only -- no arrival, no glimmer,
   // no hover rise -- while the light, glass, shadows and grain stay.
@@ -704,6 +768,30 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       return Math.abs(new DOMMatrix(getComputedStyle(s).transform).m42 - y) < 0.5 &&
         getComputedStyle(s).getPropertyValue('--lift').trim() === '1';
     }, y0));
+  const nextHit = await still.evaluate(() => {
+    const el = [...document.querySelectorAll('.carousel__nav--next .carousel__nav-hit')]
+      .find(node => getComputedStyle(node).display !== 'none');
+    const rect = el.getBoundingClientRect();
+    return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+  });
+  const nextArrow = () => still.evaluate(() => {
+    const el = [...document.querySelectorAll('.carousel__nav--next .carousel__nav-hit')]
+      .find(node => getComputedStyle(node).display !== 'none');
+    const css = getComputedStyle(el, '::before');
+    return { color: css.borderTopColor, transform: css.transform };
+  });
+  const arrowRest = await nextArrow();
+  await still.mouse.move(nextHit.x, nextHit.y);
+  await still.waitForTimeout(50);
+  const arrowHover = await nextArrow();
+  ok('#261 — reduced motion: the arrow brightens but its 3px hover nudge is removed',
+    arrowHover.color === 'rgb(244, 245, 241)' && arrowHover.transform === arrowRest.transform);
+  await still.mouse.down();
+  const arrowPressed = await nextArrow();
+  ok('#261 — reduced motion removes the arrow press scale',
+    arrowPressed.transform === arrowHover.transform);
+  await still.mouse.up();
+
 
   // Issue #261: phones get everything except hover; a tap turns the ring.
   const touch = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
@@ -720,6 +808,6 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     !t2.hover && await tp.locator('#role-2').isChecked());
 
   await browser.close();
-  console.log(failures === 0 ? '\nAll career checks passed.' : `\n${failures} failure(s).`);
+  console.log(failures === 0 ? '\nCAREER PASS' : `\nCAREER FAIL: ${failures}`);
   process.exit(failures === 0 ? 0 : 1);
-})();
+})().catch(e => { console.error('ERROR', e); process.exit(2); });

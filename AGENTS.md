@@ -4,6 +4,11 @@ Guidance for any AI coding agent working in this repository (Hermes, Claude
 Code, Codex, Cursor, …). Humans should read [README.md](README.md) and the
 governing records instead.
 
+**Reader:** an AI coding agent arriving cold. It knows general web and
+Playwright practice. It does not know this site's owner rulings, its
+refusals, or that `docs/` outranks code. **Purpose:** route that agent to the
+governing records and the commands before it changes anything.
+
 ## What this is
 
 The-Portfolio — Robert A. Gregory's portfolio site and the central hub for his
@@ -25,7 +30,7 @@ persisted, nothing is computed, the page holds no state.
 Keep it that way. The site refuses: accounts, sync, sharing, tags, folders,
 search, filters, rich text, images, snapping, reminders, a theme switch,
 **and additionally** a blog/CMS, analytics, comments, and a newsletter signup
-(owner ruling). Each refusal is argued in `docs/PRD.md`'s out-of-scope table.
+(B9; owner ruling). Each refusal is argued in `docs/PRD.md`'s out-of-scope table.
 
 ## Read before you change anything
 
@@ -45,7 +50,7 @@ asked to add one.
 **Cite with the document prefix** (`UIUX §3`, not bare `§3`) — the numbering
 spaces overlap between records.
 
-**Quote TheBoards' numbers; never cite them bare.** TheBoards' record uses
+**Quote TheBoards' numbers; never cite them bare (B90).** TheBoards' record uses
 the same `B` prefix and the same `UIUX §` numbering as this one. A bare
 `B91` or `UIUX §4.6` in this repository means *this* repository's ruling or
 heading — and when that number does not exist yet, it will the day the
@@ -91,10 +96,10 @@ There is **no `test/sw-update.js`** — the site ships **no service worker**
 `CACHE` string) does not exist here. Do not add it. Do not add a service
 worker.
 
-Env overrides (read by the tests): `PORTFOLIO_URL` (default
-`http://localhost:8000/index.html`; `career.js` and `plantsandrocks.js` default to
-their own pages on `:8000`), `PORTFOLIO_OUT` (screenshot directory for `mobile.js`,
-`desktop.js`, `movable_resizable.js`), `PROOF_DIR` (output directory for `proof.js`,
+Env overrides (read by the tests): `PORTFOLIO_BASE_URL` (default
+`http://localhost:8000/`; each suite appends its own page, B109),
+`PORTFOLIO_OUT` (screenshot directory: `desktop.js`, `mobile.js` and
+`movable_resizable.js` each write `<suite>.png` into it, issue #320), `PROOF_DIR` (output directory for `proof.js`,
 default `/tmp/portfolio-proof`). There is no lint/build/typecheck command — the project has
 none.
 
@@ -108,7 +113,8 @@ none.
    owner ruling. The typeface (Montserrat Alternates, self-hosted,
    no CDN) may be embedded in the CSS as a data URI if the build requires it
    to stay single-file; that is the Earp-Street-Park precedent, not a new
-   dependency.
+   dependency. Read `docs/DECISIONS.md` B110 before adding or growing shipped
+   JavaScript.
 2. **No persistence, no state.** The page renders its content as literals in
    the HTML. Note drag/resize is visual entertainment only: positions are not
    stored, nothing survives reload, there is no undo, no import/export, no
@@ -121,13 +127,7 @@ none.
    Requirements, or Parking Lot regions (owner ruling, `DECISIONS.md` B2).
 4. **The contact form is the one network call.** The Parking Lot holds a
    Formspree form: Name (optional), Email (optional), Message (required).
-   reCAPTCHA is on by default at Formspree — never add a second captcha and
-   never claim adding reCAPTCHA adds a third-party script to the page. The
-   honeypot is the standard `_gotcha` field (`type="text"`, visually hidden,
-   NOT `type="hidden"`). Never set `Referrer-Policy: no-referrer` or
-   `same-origin` on the site — Formspree files every submission as spam when
-   the referrer is missing, and a `no-referrer` policy would brick the form
-   silently.
+   Form protections and referrer requirements are specified in UIUX §6.1.
 5. **One scene.** The site wears exactly ONE binding of TheBoards' design
    ladder: the To-Do blue (`UIUX §2.1`, owner ruling `DECISIONS.md` B1). The
    ladder does not rotate — a portfolio is not five board types.

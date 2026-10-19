@@ -1,89 +1,42 @@
-# The Portfolio of Robert Alastair Zeved Gregory
+# razgregory.com
 
-The central hub for Robert A. Gregory's scattered pseudonyms and websites —
-one page, built literally on TheBoards as the template. A static
-HTML page that wears TheBoards' own design system and is itself a functional
-advertisement for it: six door-cards in the free board space, each a real
-link opening in a new tab, and a contact form in the Parking Lot.
+The front door to everything Robert Alastair Zeved Gregory makes.
 
-## Records
+You will find one page here, and only one. It is a dark board holding a handful
+of cards, and each card is a door to somewhere else — a different site, a
+different corner of the internet, a different thing he makes. You can drag the
+cards around the board and stretch them to whatever size suits you. Nothing you
+do is saved: reload the page and the board sits exactly as it did before. That
+is deliberate. Nothing here asks you to sign up, log in, or wait for a page to
+load.
 
-Agents: read [AGENTS.md](AGENTS.md) first. The three governing records
-outrank code comments:
+The page lives at [razgregory.com](https://razgregory.com/).
 
-| File | Answers | Wins on | Cited as |
-|---|---|---|---|
-| [docs/PRD.md](docs/PRD.md) | what the site is, who for, why | product intent | `PRD §x` |
-| [docs/UIUX.md](docs/UIUX.md) | what it renders, and in what values | **rendering** | `UIUX §x` |
-| [docs/DECISIONS.md](docs/DECISIONS.md) | every owner ruling, in order | the later ruling wins | `B ` |
+## The doors
 
-Grep `DECISIONS.md` first — a prior ruling has likely already answered your
-question. The governing issue of record is
-[#51](https://github.com/AlastairZeved/The-Portfolio/issues/51).
+| Card | Where it takes you |
+|---|---|
+| Community | [Earp Street Park](https://earp-street-park.netlify.app) |
+| Career | [The career page](https://razgregory.com/career) — the work history, sorted by employer |
+| Writing | [Substack](https://substack.com/@theaboveaveragerob) |
+| Software & AI | [alastairzeved.com](https://alastairzeved.com) |
+| Plants & Rocks | [Plants and rocks](https://razgregory.com/plantsandrocks) |
+| Music | A note rather than a door — Apple Music and Spotify sit beneath it |
 
-## The site
+Smaller notes sit around those cards: a second way into the music, a way to
+LinkedIn, notes for the plant projects, and a woodworking page that is still to
+come.
 
-- **Title card:** "The Portfolio of" / "Robert Alastair Zeved Gregory" — two
-  lines (B17, superseding B5), the same title card as TheBoards, never a link.
-- **Six doors**, all new tab:
-  | Card | Dest |
-  |---|---|
-  | Community | earp-street-park.netlify.app |
-  | Professional | razgregory.com/career — the employer-selector career page (B47) |
-  | Writing | substack.com/@theaboveaveragerob |
-  | Software & AI | alastairzeved.com |
-  | Plants & Rocks | razgregory.com/plantsandrocks (stub) |
-  | Music | open.spotify.com/artist/5R4lXpHs3OObGTFxdltrxZ |
-- **Parking Lot:** Formspree contact form — Name (optional), Email
-  (optional), Message (required).
-- **One binding:** the To-Do blue of TheBoards' design ladder. No calendar
-  rail, no All Boards rail, no hero, no service worker. The sheet fills the
-  whole viewport (#71, B27) and renders through **one render scale** (B30,
-  issue #87): on narrow viewports the whole scene shrinks as one, so the
-  door-cards never clip and nothing overflows the one viewport.
+## What this page is built from
 
-## How to use
+The page is built from TheBoards — the same design system, the same regions,
+the same typeface — and works as a working advertisement for it: a static board
+that behaves like the real thing without ever storing a thing.
 
-Open `index.html` in a browser, or:
+---
 
-```
-python3 -m http.server 8000   # then visit http://localhost:8000
-```
+If you are an AI agent working in this repository, read
+[AGENTS.md](AGENTS.md) before you change anything.
 
-It is a static page. There is no backend, no build, no package manager, no
-state — notes drag and resize for delight, nothing persists.
-
-## Tests
-
-The suites, and the order CI runs them in, are listed once, in
-[AGENTS.md](AGENTS.md#commands) — the same list as `.github/workflows/ci.yml`.
-
-There is deliberately no `test/sw-update.js` — the site ships no service
-worker (B13).
-
-## Contributing
-
-Questions and proposals go to the GitHub issues — that is where design
-questions are settled: a ruling made on an issue describes itself in the
-issue thread and lands in `docs/DECISIONS.md` with a `Source:` line.
-
-Pull requests are accepted. Requirements:
-
-- **Behavior changes resolve against the governing records.** A PR that
-  changes card, layout, region, form, or link behavior without a `B ` entry
-  will be asked to add one.
-- **Every test suite CI runs must pass**, and a change that pins what a suite
-  asserts rewrites that assertion deliberately — say so in the commit
-  message.
-- **No invented design values.** A diff hunk introducing a token, hex, ratio,
-  px, ms, or state absent from `UIUX.md` is a FAIL.
-
-## Deployment
-
-Netlify production = the `deploy` branch (B16); `main` publishes by
-deliberate promotion to `deploy`. Docs-only changes do not redeploy.
-
-## License
-
-© Robert A. Gregory. The name of the site, the design (derived from Zeved
-Boards), and the governing records remain the work of their author.
+© Robert A. Gregory. The name of the site, the design, and the governing
+records remain the work of their author.

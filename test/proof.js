@@ -1,7 +1,8 @@
 /* proof.js — capture the shipped page at desktop + mobile for visual review. */
 const { chromium } = require('playwright');
 const path = require('path');
-const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/index.html';
+const BASE_URL = process.env.PORTFOLIO_BASE_URL || 'http://localhost:8000/';
+const URL = new globalThis.URL('index.html', BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/').href;
 const OUT = process.env.PROOF_DIR || '/tmp/portfolio-proof';
 
 (async () => {

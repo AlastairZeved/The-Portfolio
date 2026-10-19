@@ -8,21 +8,32 @@
    logical px — renders at the same fraction of the viewport height at every
    landscape size, exactly as TheBoards' band renders 61/1000 = 6.1% of vh.
    Portrait keeps B30's down-scale min(vw/REF_W, vh/REF_H), the only way the
-   wide drawing fits a narrow screen. This supersedes B44's min() formula
-   clause for landscape viewports only (B46). Above and below the reference
+   wide drawing fits a narrow screen. Above and below the reference
    space the sheet scales as one: the authored geometry stands, nothing
    reflows, nothing clips (issue #121, B44). Logical width/height are set so
    the scaled sheet always fills the viewport edge to edge. (TheBoards
    AGENTS.md architecture point 1; LOGICAL_W/H and --rs/--logical-w/h.) */
+function renderScale(board) {
+  var rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs'));
+  return (isFinite(rs) && rs > 0) ? rs : 1;
+}
+
+function cardScale(card) {
+  var scale = parseFloat(card.style.getPropertyValue('--card-scale'));
+  return (isFinite(scale) && scale > 0) ? scale : 1;
+}
+
 (function () {
   var board = document.getElementById('board');
+  var MAX_LAYOUT_PASSES = 60;
+  var CONVERGENCE_TOLERANCE = 0.5;
+  var RESIZE_HANDLE_OVERHANG = 4;
   /* The reference space is the owner's issue #112 drawing's own coordinate
      space (B43: the 2560×1440 screenshot, measured through the calibration
-     z = 1.3037 — 2560/z × 1440/z). The B43 authored geometry (left/top % and
-     px width/height) is exact in THIS space, so rendering the scene here and
+     z = 1.3037 — 2560/z × 1440/z). The B43 authored geometry (left/top %)
+     is exact in THIS space, so rendering the scene here and
      scaling it uniformly reproduces the drawing at every viewport (issue
-     #121, B44). The old 1080×600 constants predate the #112 geometry rebuild
-     and clipped that geometry's spacing at widths the cap held the scale at. */
+     #121, B44). */
   var REF_W = 2560 / 1.3037;   // 1963.64 — the #112 drawing's own logical width
   var REF_H = 1440 / 1.3037;   // 1104.55 — the #112 drawing's own logical height
   function frame() {
@@ -37,12 +48,17 @@
        branch's own edge-probe finding). lw_min = max(cardW / (1 − left%)) is
        the narrowest logical width at which no door-card overflows; it only
        binds at square-ish aspects and leaves every ordinary screen untouched. */
-    var rs = (vw >= vh) ? (vh / REF_H) : Math.min(vw / REF_W, vh / REF_H);
-    if (vw >= vh) {
-      var rsPrev = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
+    var landscape = vw >= vh;
+    var rs = landscape ? (vh / REF_H) : Math.min(vw / REF_W, vh / REF_H);
+    if (landscape) {
+      var rsPrev = renderScale(board);
       var lwMin = 0;
+      var geo = [];
       document.querySelectorAll('.door-card').forEach(function (card) {
         var left = parseFloat(card.style.left) || 0;          // authored percentage (B45)
+        var top = parseFloat(card.style.top) || 0;
+        var scale = cardScale(card);
+        geo.push({ lp: left, tp: top, s: scale, w: card.offsetWidth * scale, h: card.offsetHeight * scale });
         if (left >= 100) return;
         /* the card's rightmost content in logical px — its own box PLUS any
            child that sticks out of it (the resize handle sits 2px past the
@@ -60,23 +76,16 @@
       /* B52 (issue #138): the cards' drawing rest scales widen the cards, so
          at square-ish landscape aspects the pure height anchor compresses the
          % horizontal spread until two cards OVERLAP — breaking B44's
-         no-overlap law. Extend the measured width floor above (same
-         agent-derived provenance as B46's lw_min, per the B33/B43 pattern)
-         with the pairwise gap term: for every pair of cards whose rendered
+         no-overlap law. Extend the measured width floor above with the pairwise
+         gap term: for every pair of cards whose rendered
          vertical ranges overlap, the left card's right edge must clear the
          right card's left edge — lw >= aW / (bLeft% − aLeft%). The logical
          height (vh/rs) grows as the floor widens the sheet, so the % tops
          spread and vertical overlaps only shrink: re-measure until the floor
          is stable (it converges monotonically). */
-      for (var pass = 0; pass < 60; pass++) {
+      for (var pass = 0; pass < MAX_LAYOUT_PASSES; pass++) {
         var lh = vh / rs;
         var need = lwMin;
-        var geo = [];
-        document.querySelectorAll('.door-card').forEach(function (card) {
-          var lp = parseFloat(card.style.left) || 0, tp = parseFloat(card.style.top) || 0;
-          var s = parseFloat(card.style.getPropertyValue('--card-scale')) || 1;
-          geo.push({ lp: lp, tp: tp, w: card.offsetWidth * s, h: card.offsetHeight * s });
-        });
         for (var i = 0; i < geo.length; i++) for (var j = i + 1; j < geo.length; j++) {
           var A = geo[i], B = geo[j];
           if (A.lp > B.lp) { var T = A; A = B; B = T; }
@@ -84,14 +93,15 @@
           if (dLeft <= 0) continue;
           var aTop = (A.tp / 100) * lh, bTop = (B.tp / 100) * lh;   // top is authored in % (B45)
           if (aTop + A.h <= bTop || bTop + B.h <= aTop) continue;   // vertically clear
-          /* +4: the resize-handle ring's grab box sits 4px past the card's
-             padding-box right edge (right: -4px, inside the 2px border) —
-             2px past the card's outer right border (issue #108's grab area) —
-             and must not reach the neighbour either */
-          var w = (A.w + 4) / dLeft;
+          /* The resize-handle ring's grab box extends 4px past the card's
+             padding-box right edge (right: -4px, inside the 2px border). It is
+             a child of the scaled card, so its board-logical overhang is
+             4 × that card's --card-scale; keep the whole grab area clear of
+             the neighbour too (issue #253, preserving B44's no-overlap law). */
+          var w = (A.w + RESIZE_HANDLE_OVERHANG * A.s) / dLeft;
           if (w > need) need = w;
         }
-        if (need <= lwMin + 0.5) break;
+        if (need <= lwMin + CONVERGENCE_TOLERANCE) break;
         lwMin = need;
         rs = Math.min(rs, vw / lwMin);
       }
@@ -100,69 +110,12 @@
     board.style.setProperty('--rs', rs);
     board.style.setProperty('--logical-w', (vw / rs) + 'px');
     board.style.setProperty('--logical-h', (vh / rs) + 'px');
-    // issue #107: the Requirements zone anchors to the title card's actual
-    // right border (the card hugs its text, B19 — the slot calc leaves dead
-    // space). The card's rendered right edge / rs = logical px, + one gutter.
-    var title = document.getElementById('anchor-title');
-    var gutter = parseFloat(getComputedStyle(board).getPropertyValue('--gutter')) || 16;
-    board.style.setProperty('--req-left', (title.getBoundingClientRect().right / rs + gutter) + 'px');
+    // issue #309 (B114): the Requirements zone follows the title card by CSS
+    // layout — the band is a flex row — so nothing here measures the card.
   }
   frame();
   window.addEventListener('resize', frame);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(frame);
-})();
-
-/* ---- Issue #128 (B46): the band and the Parking Lot are TheBoards' sections,
-   sized by their MEASURED contents from a floor — TheBoards' own law ported
-   (geometry.js bandRuleY / lotH; constants state.js), with the band literals
-   RESCALED ×1.10455 (issue #128, B46): TheBoards' literals live in its
-   1000-tall logical frame; this board's logical space is the issue #112
-   drawing's 1104.55-tall frame, so every TheBoards band literal maps through
-   k = 1104.55/1000 = 1.10455 — with the height-anchored landscape scale law
-   above, the band then renders at EXACTLY TheBoards' physical size on every
-   landscape screen (54.9px rule at 1440×900 = 6.1% of vh, both boards).
-
-   The band: rule-y = 15.46 + max(2, lines) × 21.54 + 8.84 — band-top, the
-   tallest zone's line count at 16.57px/1.3, and the gap to the rule (67.38
-   at the two-line floor, 88.92 at three). The Parking Lot: measured from its
-   content from the rescaled two-row shelf (TheBoards `B73`), bottom-anchored so
-   it grows UPWARD, ceiling half the sheet with #lot-items clipping past it.
-   B18's fixed 180px --lot-h is superseded as a mechanism — fallback only.
-   The lot's 34px head and 8px base literal are kept UNSCALED (TheBoards'
-   chrome is not part of the rescale; noted per the B33 provenance pattern).
-   All px here are board-logical (B30): the sheet is never reflowed, so the
-   line counts and row heights are scale-stable. */
-(function () {
-  var board = document.getElementById('board');
-  var BAND_TOP = 15.46, BAND_LINE = 21.54, BAND_GAP = 8.84;             // state.js × 1.10455
-  var LOT_HEAD = 34, LOT_SHELF = 134.76, LOT_MAX_FRAC = 0.5;            // 34 unscaled; 122-shelf × 1.10455
-  function bandRuleY() {
-    var lines = 2;                       // the two-line floor
-    document.querySelectorAll('.band-zone .anchor').forEach(function (node) {
-      // scrollHeight is content only (the band anchor carries no padding), so
-      // it reads as whole line boxes; min-height 44 keeps the floor's answer 2.
-      lines = Math.max(lines, Math.round(node.scrollHeight / BAND_LINE));
-    });
-    return Math.round(BAND_TOP + lines * BAND_LINE + BAND_GAP);
-  }
-  function lotH() {
-    var sum = 0;
-    var items = document.getElementById('lot-items');
-    if (items) items.querySelectorAll(':scope > *').forEach(function (node) {
-      sum += node.offsetHeight;
-    });
-    // The rescaled two-row shelf (122 × k = 134.76, header included) is the
-    // floor; measured content grows it; half the logical sheet caps it.
-    return Math.min(Math.max(LOT_SHELF, LOT_HEAD + Math.round(sum)),
-                    Math.ceil(board.offsetHeight * LOT_MAX_FRAC));
-  }
-  function updateBoardGeometry() {
-    board.style.setProperty('--rule-y', bandRuleY() + 'px');
-    board.style.setProperty('--lot-h', lotH() + 'px');
-  }
-  updateBoardGeometry();
-  window.addEventListener('resize', updateBoardGeometry);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(updateBoardGeometry);
 })();
 
 /* ---- Entertainment only: drag to move, corner to resize (B7) ----
@@ -182,28 +135,19 @@
   var cards = Array.prototype.slice.call(document.querySelectorAll('.door-card'));
   var drag = null, resizing = null;
 
-  // The scale the transform itself consumes is the single source of truth —
-  // read it, never keep a copy that could drift from what is rendered.
-  function renderScale() {
-    var rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs'));
-    return (isFinite(rs) && rs > 0) ? rs : 1;
+  // Pointer and rendered geometry meet in the sheet's logical coordinates.
+  function toLogical(px, scale) {
+    return px / (scale === undefined ? renderScale(board) : scale);
   }
-  function toLogical(px) { return px / renderScale(); }
 
-  /* ---- B45 (issue #126): TheBoards' note sizing + scale mechanics, ported ----
-     TheBoards state.js: NOTE_MIN_W = 132, MIN_SCALE = 0.5 (MAX_SCALE 2.0
-     superseded by B51 — see gestureScale).
-     The card's own scale factor (a uniform transform: scale, origin top
-     left) is the ONLY text/size scaling: the font is a fixed 17px/1.4 and
-     the transform scales the card. This replaces the old height-driven
-     --card-fs updater (B40, superseded by B45). */
+  /* B45 (issue #126): the card's own scale transforms its text and size
+     uniformly. The default font is 17px/1.4; `.fit-to-spotify` uses 11.4px (B80),
+     `.fit-to-writing` 9.0px (B116). */
   var MIN_SCALE = 0.5;                    // TheBoards state.js MIN_SCALE
-  var NOTE_MIN_W = 132;                   // TheBoards state.js NOTE_MIN_W
+  var NOTE_MIN_W = 132;                   // TheBoards state.js NOTE_MIN_W; B21's legible floor
+  var MOVE_THRESHOLD = 4;                 // B41: physical px before a gesture moves
+  var MAX_VIEW_FRAC = 0.2;                // issue #142 / B51: one fifth of the viewport
 
-  function cardScale(card) {
-    var s = parseFloat(card.style.getPropertyValue('--card-scale'));
-    return (isFinite(s) && s > 0) ? s : 1;
-  }
   /* TheBoards geometry.js noteMaxW: the cap is the distance from the card's
      left edge to the sheet's right edge, divided by the card's own scale,
      floored at NOTE_MIN_W. The board's layout px ARE the logical px (B30),
@@ -232,16 +176,7 @@
     drawLinks();
   }
 
-  /* ---- The link layer (UIUX §4.3, B28): fourteen straight 1px --frame lines
-     between card centres, one per pair authored in the markup. The pairing
-     is authored; the geometry is computed, so a line stays true while a
-     card is dragged or resized (TheBoards' link idiom, TheBoards' `UIUX §4.6` / `B91` —
-     endpoints are plain board-logical centres, recomputed on every path
-     that moves a note). The SVG's user units ARE the board's logical px, so
-     a measured rect — which is physical — is converted with toLogical()
-     before it is written: under the one render scale (B30) an unconverted
-     centre would place the line at 1/rs of the card's distance from the
-     board's origin. */
+  /* Link endpoints for the authored pairs in #link-layer (UIUX §4.3, B28). */
   var linkLayer = document.getElementById('link-layer');
   var links = linkLayer ? Array.prototype.slice.call(linkLayer.querySelectorAll('line')) : [];
 
@@ -269,12 +204,14 @@
   }
 
   // B45: seed each card's content-width cap from its authored left/top (the
-  // owner's placements, B43 — the only inline geometry left). The cap is
+  // owner's placements, B78 (+B80) — the only inline geometry left). The cap is
   // logical px like every authored size: it scales with the sheet (B30).
   layoutAllCards();
-  // the percentage-authored layout re-scales with the viewport: recompute
-  window.addEventListener('resize', drawLinks);
-  window.addEventListener('resize', layoutAllCards);
+  // B109: on resize, lay out cards before redrawing the note links.
+  window.addEventListener('resize', function () {
+    layoutAllCards();
+    drawLinks();
+  });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
     layoutAllCards();
     drawLinks();
@@ -318,6 +255,8 @@
     capturePointer(card, e);
     var rect = board.getBoundingClientRect();
     var cr = card.getBoundingClientRect();
+    var scale = renderScale(board);
+    var left = toLogical(cr.left - rect.left, scale), top = toLogical(cr.top - rect.top, scale);
     if (handle) {
       // B45: the corner gesture is TheBoards' frame-drag scale resize
       // (interactions.js startResize) — scale from the pointer's distance
@@ -325,70 +264,66 @@
       // .resizing suppresses the transform transition so the scale applies
       // instantly, as TheBoards' does (see the CSS note).
       card.classList.add('resizing');
-      var ox = toLogical(cr.left - rect.left), oy = toLogical(cr.top - rect.top);
-      var gpx = toLogical(e.clientX - rect.left), gpy = toLogical(e.clientY - rect.top);
+      var gpx = toLogical(e.clientX - rect.left, scale), gpy = toLogical(e.clientY - rect.top, scale);
       resizing = {
         card: card,
         startX: e.clientX, startY: e.clientY,          // physical, for the 4px moved test (B41)
-        originX: ox, originY: oy,
-        grabDist: Math.hypot(gpx - ox, gpy - oy) || 1,
+        originX: left, originY: top,
+        grabDist: Math.hypot(gpx - left, gpy - top) || 1,
         startScale: cardScale(card),
         moved: false
       };
-    } else if (e.target === card || card.contains(e.target)) {
+    } else {
       // don't hijack the link's own click; only move on real drag
-      drag = { card: card, startX: e.clientX, startY: e.clientY, left: toLogical(cr.left - rect.left), top: toLogical(cr.top - rect.top), moved: false };
+      drag = { card: card, startX: e.clientX, startY: e.clientY, left: left, top: top, moved: false };
     }
   });
 
   /* TheBoards interactions.js gestureScale: the clamp bounds admit the start
      value, so a scale outside [MIN_SCALE, ceiling] never snaps at gesture
      start — yet it can always be scaled back into the authored range.
-     issue #142 / B51: the fixed MAX_SCALE 2.0 ceiling is superseded by a
-     per-card ceiling derived from the 1/5-viewport bound — one uniform
-     scale, so the card stops at the FIRST axis reaching one fifth of the
-     viewport. The board's layout px ARE the logical px (B30), and a
-     transform's offsetWidth/offsetHeight read the UNSCALED content, so the
-     ceiling is min(0.2·boardW / unscaledW, 0.2·boardH / unscaledH). It is
-     computed fresh on every move: growing the card rewraps its unscaled
-     size, which moves the ceiling with it. */
+     issue #142 / B51: a per-card ceiling derived from the 1/5-viewport
+     bound — one uniform scale, so the card stops at the FIRST axis reaching
+     one fifth of the viewport. A transform's offsetWidth/offsetHeight read
+     the UNSCALED content (B30), so the ceiling is
+     min(0.2·boardW / unscaledW, 0.2·boardH / unscaledH). It is computed
+     fresh on every move: growing the card rewraps its unscaled size, which
+     moves the ceiling with it. */
   function gestureScale(start, f, ceiling) {
     return Math.min(Math.max(start * f, Math.min(MIN_SCALE, start)), Math.max(ceiling, start));
   }
 
   window.addEventListener('pointermove', function (e) {
     if (!drag && !resizing) return;
-    var rs = renderScale();
+    var scale = renderScale(board);
     if (resizing) {
       var r = resizing;
       var radx = e.clientX - r.startX, rady = e.clientY - r.startY;   // physical
-      if (Math.abs(radx) + Math.abs(rady) > 4) r.moved = true;       // 4 physical px — same gesture as the drag (B41)
+      if (Math.abs(radx) + Math.abs(rady) > MOVE_THRESHOLD) r.moved = true;
       // TheBoards updateResize: scale from the pointer's distance to the
       // card's top-left origin, in the board's logical space (÷ rs, B30).
       var rect = board.getBoundingClientRect();
-      var d = Math.hypot(toLogical(e.clientX - rect.left) - r.originX,
-                         toLogical(e.clientY - rect.top) - r.originY);
-      // issue #142 / B51: the ceiling is per-card and per-axis — see
-      // gestureScale. offsetWidth/offsetHeight read unscaled (B30: layout
-      // px are logical px; the scale is a transform).
-      var ceiling = Math.min(0.2 * board.offsetWidth / r.card.offsetWidth,
-                             0.2 * board.offsetHeight / r.card.offsetHeight);
+      var distance = Math.hypot(toLogical(e.clientX - rect.left, scale) - r.originX,
+                                toLogical(e.clientY - rect.top, scale) - r.originY);
+      // issue #142 / B51: the ceiling is per-card and per-axis — see gestureScale.
+      var widthCeiling = MAX_VIEW_FRAC * board.offsetWidth / r.card.offsetWidth;
+      var heightCeiling = MAX_VIEW_FRAC * board.offsetHeight / r.card.offsetHeight;
       // guard as in renderScale()/cardScale(): if the card measures 0 or
       // non-finite on an axis, don't let that axis' ratio poison the min —
       // fall back to the other axis so the ceiling is never Infinity.
-      if (!(r.card.offsetWidth > 0)) ceiling = 0.2 * board.offsetHeight / r.card.offsetHeight;
-      if (!(r.card.offsetHeight > 0)) ceiling = 0.2 * board.offsetWidth / r.card.offsetWidth;
-      applyCardScale(r.card, gestureScale(r.startScale, d / r.grabDist, ceiling));
+      if (!(r.card.offsetWidth > 0)) widthCeiling = heightCeiling;
+      if (!(r.card.offsetHeight > 0)) heightCeiling = widthCeiling;
+      var ceiling = Math.min(widthCeiling, heightCeiling);
+      applyCardScale(r.card, gestureScale(r.startScale, distance / r.grabDist, ceiling));
       // drawLinks is applyCardScale's own tail — no second call here.
     } else {
-      var d = drag;
-      var adx = e.clientX - d.startX, ady = e.clientY - d.startY;   // physical
-      if (Math.abs(adx) + Math.abs(ady) > 4) d.moved = true;        // 4 physical px — the same gesture as before the scale
-      if (d.moved) {
+      var adx = e.clientX - drag.startX, ady = e.clientY - drag.startY;   // physical
+      if (Math.abs(adx) + Math.abs(ady) > MOVE_THRESHOLD) drag.moved = true;
+      if (drag.moved) {
         // the card tracks the pointer 1:1 on screen: logical + physical/scale
-        d.card.style.left = (d.left + adx / rs) + 'px';
-        d.card.style.top = (d.top + ady / rs) + 'px';
-        applyCardMaxW(d.card);   // B45: the cap follows the card's new left edge
+        drag.card.style.left = (drag.left + toLogical(adx, scale)) + 'px';
+        drag.card.style.top = (drag.top + toLogical(ady, scale)) + 'px';
+        applyCardMaxW(drag.card);   // B45: the cap follows the card's new left edge
         // the moved card drags its links with it (UIUX §4.3)
         drawLinks();
       }
@@ -396,13 +331,7 @@
   });
 
   function endDrag() {
-    // A gesture that MOVED is not a click and must never navigate (issue #109).
-    // The resize handle is a span inside the <a>, so releasing a resize fires
-    // the anchor's own click and navigates away mid-gesture — the resize branch
-    // carries the same `moved` flag the drag branch already had, so both
-    // gestures route through one guard and one test.
-    // A press that never crossed the 4px threshold is still a click and must
-    // still open the door (B3) — including a tap squarely on the handle.
+    // A gesture past MOVE_THRESHOLD is not a click (B41); a press under it still opens the door (B3).
     var gesture = (drag && drag.moved) ? drag : (resizing && resizing.moved ? resizing : null);
     if (gesture) {
       gesture.card.addEventListener('click', function (e) { e.preventDefault(); }, { once: true, capture: true });

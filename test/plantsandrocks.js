@@ -1,32 +1,35 @@
 /* test/plantsandrocks.js — the Plants & Rocks page (issue #134, B48):
-   two-page selector over the band rule, TheBoards' `B132` glow mechanism on the selected
+   two-page selector over the band rule, TheBoards' `B132` glow on the selected
    card, the poles reader rendering the shipped monstera-storybook.html
-   iframe (issue #156, B57 — deliberate rewrite of the blank-body pin) while
+   iframe (issue #156, B57) while
    the rocks reader stays empty, two-section parking lot with one divider, a
    Download PDF anchor (live on poles, inert on rocks) plus a live
    "Back to the Garden" anchor, and the literal TheBoards
    idea-board green palette (byte-exact, NOT a re-hue). Single file, zero
    script on plantsandrocks.html itself; only the B63 favicon links.
    Black-box Playwright, career.js's harness.
-   Run: node test/plantsandrocks.js   (PORTFOLIO_URL default http://localhost:8000/plantsandrocks.html) */
+   Run: node test/plantsandrocks.js   (PORTFOLIO_BASE_URL default http://localhost:8000/) */
 
 const { chromium } = require('playwright');
 
-const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/plantsandrocks.html';
+const BASE_URL = process.env.PORTFOLIO_BASE_URL || 'http://localhost:8000/';
+const URL = new globalThis.URL('plantsandrocks.html', BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/').href;
 let failures = 0;
-const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
+const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}${!cond && details ? ' :: ' + details : ''}`); };
 
 (async () => {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const pageAssetRequests = new Set();
+  page.on('request', request => {
+    const path = new globalThis.URL(request.url()).pathname;
+    if (/^\/storybook\/p\d{2}\.webp$/.test(path)) pageAssetRequests.add(path);
+  });
   await page.goto(URL, { waitUntil: 'networkidle' });
 
   // Single-file law: no scripts, no stylesheets, no deps
   ok('no <script> elements', await page.locator('script').count() === 0);
-  // issue #168/B63: favicons ship as same-origin <link rel="icon"> on every
-  // page — the single-file law forbids stylesheets and off-origin refs, not
-  // the site's own favicon links (the resource-origin guard below still
-  // holds that line; this assertion rewrite is deliberate).
+  // Only same-origin favicon links are allowed.
   ok('no stylesheets or off-origin links — only the B63 favicon links',
     await page.locator('link').evaluateAll(ls => ls.every(l =>
       ['icon', 'apple-touch-icon', 'shortcut icon'].includes(l.rel) &&
@@ -34,7 +37,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('no external network requests beyond the page itself', await page.evaluate(() => performance.getEntriesByType('resource')
     .every(r => r.name.startsWith('data:') || r.name.startsWith(location.origin))));
 
-  // §1: two title cards, one per page, over the band rule
+  // issue #134 §1: two title cards, one per page, over the band rule
   const names = await page.locator('.topband__card .topband__wordmark').allInnerTexts();
   ok('two page cards', names.length === 2);
   ok('cards are "Plants on Poles" and "Plants in Rocks"',
@@ -57,7 +60,6 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   // B50 (issue #140): the band, cards and lot render at B49's landing-page
   // conventions — B46's height-anchored scale (rs = vh/1104.55), B31's card
   // box, the lot's two-row-shelf floor — re-tokened to the idea-green block.
-  // (Deliberate rewrite: the old pin asserted the -14px margin mechanism.)
   const b50 = await page.evaluate(() => {
     const band = document.querySelector('.topband').getBoundingClientRect();
     const card = document.querySelector('.topband__card');
@@ -76,8 +78,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('card type is the 20px logical rung: font-size = 20 × rs (B31/B50)',
     Math.abs(parseFloat(b50.font) - 20 * b50.rs) < 0.5);
   ok('card is the B31 box: border-top 0, radius only on the bottom corners, content-sized',
-    // content-sized hug: ~250px at 1440×900 (the B48 oneliner copy is long);
-    // <400 is a sanity bound against regression to the old full-width cell (~690px)
+    // Content-sized hug: ~250px at 1440×900; below 400px is the sanity bound.
     b50.borderTop === '0px' && parseFloat(b50.radius) > 0 && b50.cardW < 400);
   ok('lot is floored at the rescaled two-row shelf: 134.76 × rs (B46/B73/B50)',
     b50.lotH >= 134.76 * b50.rs - 1);
@@ -87,12 +88,17 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   const glow = await page.evaluate(() => {
     const card = document.querySelector('.topband__card');
     const s = getComputedStyle(card);
-    return { borderColor: s.borderColor, shadow: s.boxShadow };
+    return {
+      borderWidths: [s.borderTopWidth, s.borderRightWidth, s.borderBottomWidth, s.borderLeftWidth],
+      borderColors: [s.borderRightColor, s.borderBottomColor, s.borderLeftColor],
+      shadow: s.boxShadow,
+    };
   });
   ok('default selection is Plants on Poles',
     await page.locator('#page-poles').isChecked());
   ok('selected card glows: border-color + 0 0 8px 0 bloom, one token (--frame #52997f)',
-    glow.borderColor === 'rgb(82, 153, 127)' &&
+    glow.borderWidths[0] === '0px' &&
+    glow.borderColors.every(color => color === 'rgb(82, 153, 127)') &&
     glow.shadow === 'rgb(82, 153, 127) 0px 0px 8px 0px');
 
   // Unselected cards carry no glow
@@ -100,10 +106,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     getComputedStyle(document.querySelectorAll('.topband__card')[1]).boxShadow);
   ok('unselected cards carry no bloom', !unselectedGlow.includes('rgb(82, 153, 127)'));
 
-  // §2: the readers (B57, issue #156 — deliberate rewrite of B48's
-  // blank-body pin): the Plants on Poles reader renders the shipped
-  // monstera-storybook.html in an iframe filling the body edge-to-edge;
-  // the Plants in Rocks reader stays empty.
+  // issue #134 §2: the poles reader embeds the storybook; the rocks reader is empty.
   ok('the poles reader renders the storybook iframe: src, title, fills the width',
     await page.evaluate(() => {
       const reader = document.querySelector('.reader--poles');
@@ -121,6 +124,68 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     await page.evaluate(() =>
       document.querySelector('.reader--poles iframe').contentDocument &&
       document.querySelector('.reader--poles iframe').contentDocument.body.scrollHeight > 0));
+  // Issue #274: a stale fallback from one flip must not corrupt the next
+  // spread after two turns roughly one second apart.
+  const storybook = page.frameLocator('.reader--poles iframe');
+  ok('the storybook declares all 24 pages as lazy WebP images in its HTML',
+    await storybook.locator('#page-assets img').evaluateAll(imgs =>
+      imgs.length === 24 && imgs.every((img, i) =>
+        img.getAttribute('src') === `storybook/p${String(i + 1).padStart(2, '0')}.webp` &&
+        img.loading === 'lazy' && img.alt === '')));
+  ok('the desktop storybook renders a two-half spread with a decoded page image',
+    await storybook.locator('#stage > .spread').evaluate(spread =>
+      spread.querySelectorAll('.half').length === 2 &&
+      spread.querySelectorAll('img').length === 1 &&
+      spread.querySelector('img').complete && spread.querySelector('img').naturalWidth > 0));
+  ok('initial page load fetches only the cover image',
+    pageAssetRequests.size === 1 && pageAssetRequests.has('/storybook/p01.webp'),
+    [...pageAssetRequests].join(', '));
+  await storybook.locator('#next').click();
+  await page.waitForTimeout(850);
+  ok('turning to the next spread fetches its images on demand',
+    pageAssetRequests.has('/storybook/p02.webp') && pageAssetRequests.has('/storybook/p03.webp'),
+    [...pageAssetRequests].join(', '));
+  await storybook.locator('#next').click();
+  await page.waitForTimeout(1100);
+  await storybook.locator('#next').click();
+  ok('the storybook still starts a third page turn after two turns one second apart',
+    await storybook.locator('.turn').count() === 1);
+  await page.waitForTimeout(900);
+  ok('the third page turn settles to one spread',
+    await storybook.locator('#stage > .spread').count() === 1 &&
+    await storybook.locator('.turn').count() === 0);
+  await storybook.locator('#next').click();
+  ok('the storybook pager remains usable after the third page turn',
+    await storybook.locator('.turn').count() === 1);
+  await page.waitForTimeout(900);
+
+  // Headless Chromium keeps tabs visible, so simulate the hidden-to-visible transition.
+  const beforeBackgroundTurns = await storybook.locator('body').evaluate(() => idx);
+  await storybook.locator('#next').click();
+  await storybook.locator('body').evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.waitForTimeout(900);
+  await storybook.locator('body').evaluate(() => document.getElementById('next').click());
+  const hiddenTurnState = await storybook.locator('body').evaluate(() => ({
+    idx,
+    turns: document.querySelectorAll('.turn').length,
+  }));
+  ok('a second turn starts about a second later while the storybook is hidden',
+    hiddenTurnState.idx === beforeBackgroundTurns + 2 && hiddenTurnState.turns === 1);
+  await storybook.locator('body').evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  ok('returning to the visible state settles the in-flight turn',
+    await storybook.locator('.turn').count() === 0 &&
+    await storybook.locator('#stage > .spread').count() === 1);
+  await storybook.locator('#next').click();
+  ok('the storybook pager remains usable after the background turns',
+    await storybook.locator('.turn').count() === 1);
+  await page.waitForTimeout(900);
+
   ok('the storybook document wears Montserrat Alternates (issue #160, UIUX §2.9)',
     await page.evaluate(() => {
       const doc = document.querySelector('.reader--poles iframe').contentDocument;
@@ -162,16 +227,19 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         getComputedStyle(poles).display === 'none';
     }));
 
-  // §3: the footer is the parking-lot grammar, two sections, one divider
+  // issue #134 §3: two parking-lot sections and one divider
   ok('footer has two sections and one divider bar',
     await page.locator('.parking-lot__facts').count() === 2 &&
     await page.locator('.parking-lot__divider').count() === 1);
   ok('the divider is 1px wide and 3/4 of the section length', await page.evaluate(() => {
     const d = document.querySelector('.parking-lot__divider');
     const bar = parseFloat(getComputedStyle(d, '::before').height);
-    const lot = document.querySelector('.parking-lot').getBoundingClientRect();
+    const lot = document.querySelector('.parking-lot');
+    const lotHeight = lot.getBoundingClientRect().height;
+    const lotStyle = getComputedStyle(lot);
+    const padding = parseFloat(lotStyle.paddingTop) + parseFloat(lotStyle.paddingBottom);
     return getComputedStyle(d, '::before').width === '1px' &&
-      Math.abs(bar - 0.75 * (lot.height - 24)) < 6;
+      Math.abs(bar - 0.75 * (lotHeight - padding)) < 6;
   }));
 
   // Two .cta controls. The Download is a PDF anchor (B58, issue #157), live
@@ -205,11 +273,10 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     await downloadCta.count() === 1 &&
     (await downloadCta.innerText()).trim() === 'Download' &&
     (await downloadCta.getAttribute('href')) === 'Flattened-Monstera-Division.pdf' &&
-    (await downloadCta.getAttribute('download')) !== null);
-  ok('the Download control has no script handler (the page has no script)',
+    (await downloadCta.getAttribute('download')) !== null &&
     (await downloadCta.getAttribute('onclick')) === null);
   ok('on the poles tab both controls are live, the Download not dimmed', await (async () => {
-    // re-select Plants on Poles: the §2 swap step above left Plants in Rocks checked
+    // re-select Plants on Poles after the issue #134 §2 swap check
     await page.locator('.topband__card-hit[for="page-poles"]').click();
     return await page.evaluate(() => {
       const dl = getComputedStyle(document.querySelector('.parking-lot .cta[download]'));
@@ -228,7 +295,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     });
   })());
 
-  // §4: the palette is the LITERAL idea-board green block (byte-exact)
+  // issue #134 §4: the palette is the byte-exact idea-board green block
   const tokens = await page.evaluate(() => {
     const cs = getComputedStyle(document.documentElement);
     return {
@@ -252,14 +319,23 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('the ink neutrals come from TheBoards :root verbatim',
     tokens.inkLight === '#f4f5f1' && tokens.inkDark === '#031019');
 
-  // ≤743px: the band stacks to one column, the lot stacks
+  // ≤743px: the band stacks to one column, the footer becomes a vertical stack.
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(200);
-  ok('at 390px the band stacks to one column and the lot stacks, no overflow',
+  ok('at 390px the band stacks to one column with no overflow',
     await page.evaluate(() => {
       const band = getComputedStyle(document.querySelector('.topband')).gridTemplateColumns;
       const overflow = document.documentElement.scrollWidth > document.documentElement.clientWidth;
       return !band.includes(' ') && !overflow;
+    }));
+  ok('at 390px the footer stacks copy, divider and download section vertically',
+    await page.evaluate(() => {
+      const lot = document.querySelector('.parking-lot');
+      const back = document.querySelector('.parking-lot__facts--back').getBoundingClientRect();
+      const divider = document.querySelector('.parking-lot__divider').getBoundingClientRect();
+      const download = document.querySelector('.parking-lot__facts:not(.parking-lot__facts--back)').getBoundingClientRect();
+      return getComputedStyle(lot).flexDirection === 'column' &&
+        back.top <= divider.top && divider.top <= download.top && divider.height <= 1;
     }));
   ok('at 390px the poles reader still renders the storybook iframe full-width, below the cards',
     await (async () => {
@@ -274,6 +350,11 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
         return Math.abs(r.width - innerWidth) < 1 && r.top >= card.bottom - 1;
       });
     })());
+  ok('at 390px the storybook renders one decoded page in a single half',
+    await storybook.locator('#stage > .spread').evaluate(spread =>
+      spread.querySelectorAll('.half').length === 1 &&
+      spread.querySelectorAll('img').length === 1 &&
+      spread.querySelector('img').complete && spread.querySelector('img').naturalWidth > 0));
 
   // a11y: the selector is a named radio group; one off-canvas h1
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -284,12 +365,21 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
       document.querySelector('h1').classList.contains('visually-hidden') &&
       document.querySelector('h1').innerText.trim() === 'Plants & Rocks' &&
       document.querySelectorAll('h2.topband__wordmark').length === 2));
-  ok('transitions collapse under prefers-reduced-motion', await page.evaluate(() => {
-    const sheet = [...document.styleSheets].find(s => s.ownerNode && !s.href);
-    return [...sheet.cssRules].some(r => r.media && r.media.mediaText.includes('prefers-reduced-motion'));
-  }));
+  const normalFooterMotion = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.parking-lot .cta')).transitionDuration);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const reducedFooterMotion = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.parking-lot .cta')).transitionDuration);
+  const transitionMs = value => value.split(',').map(part => {
+    const n = parseFloat(part);
+    return part.trim().endsWith('ms') ? n : n * 1000;
+  });
+  ok('reduced motion collapses the footer CTA transition to 0.01ms',
+    Math.max(...transitionMs(normalFooterMotion)) > 0.01 &&
+    transitionMs(reducedFooterMotion).every(ms => ms <= 0.01),
+    `normal=${normalFooterMotion}; reduced=${reducedFooterMotion}`);
 
   await browser.close();
-  console.log(failures === 0 ? '\nAll plantsandrocks checks passed.' : `\n${failures} failure(s).`);
+  console.log(failures === 0 ? '\nPLANTSANDROCKS PASS' : `\nPLANTSANDROCKS FAIL: ${failures}`);
   process.exit(failures === 0 ? 0 : 1);
-})();
+})().catch(e => { console.error('ERROR', e); process.exit(2); });

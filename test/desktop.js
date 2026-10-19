@@ -1,18 +1,19 @@
 /* test/desktop.js — desktop grammar: no All Boards rail; the single board
    spans the full viewport, the door-cards re-scale inside it. Card states
-   (hover glow, pressed green, never colour alone). The fourteen note links
+   (hover glow, pressed green, never colour alone). The sixteen note links
    (B28, UIUX §4.3) — pairs, 1px --frame line, card-centre endpoints.
    Black-box Playwright.
-   Run: node test/desktop.js   (PORTFOLIO_URL default http://localhost:8000/index.html) */
+   Run: node test/desktop.js   (PORTFOLIO_BASE_URL default http://localhost:8000/) */
 
 const { chromium } = require('playwright');
 const path = require('path');
 
-const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/index.html';
+const BASE_URL = process.env.PORTFOLIO_BASE_URL || 'http://localhost:8000/';
+const URL = new globalThis.URL('index.html', BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/').href;
 const OUT = process.env.PORTFOLIO_OUT && path.resolve(process.env.PORTFOLIO_OUT);
 const VW = 1440, VH = 900;
 let failures = 0;
-const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
+const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}${!cond && details ? ' :: ' + details : ''}`); };
 
 (async () => {
   const browser = await chromium.launch();
@@ -52,9 +53,10 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   const tb = await page.locator('#anchor-title').boundingBox();
   ok('title card centred on the full-width sheet', tb && Math.abs((tb.x + tb.width / 2) - VW / 2) < 2);
 
-  // issue #107: the Requirements line anchors to the title card's right border
-  // (the card hugs its text, B19 — so the door-column calc would leave a dead
-  // gap between the border and the line). One --gutter of padding, no more.
+  // issue #107 (B39): the Requirements line starts one --gutter past the title
+  // card's rendered right border (the card hugs its text, B19). Since issue
+  // #309 (B114) the band row places it; nothing measures the card. One
+  // --gutter of padding, no more.
   const reqAnchor = await page.evaluate(() => {
     const board = document.getElementById('board');
     const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
@@ -71,11 +73,11 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('Components zone label', (await page.locator('#zone-components .band-label').innerText()) === 'Components');
   ok('Requirements zone label', (await page.locator('#zone-requirements .band-label').innerText()) === 'Requirements');
   ok('Parking Lot header', (await page.locator('#lot-header').innerText()) === 'Parking Lot');
+  ok('contact-form note includes the required indicator and reCAPTCHA copy',
+    (await page.locator('#form-note').innerText()) === '✱ required — protected by reCAPTCHA');
 
-  // issue #174/B68 removed the prior Components line; issue #185/B69 added the
-  // pseudonyms line; issue #208/B85 replaces it with two lines — the issue's
-  // literal line break. Requirements keeps the anchor grammar; issue
-  // #183/B71 replaced its copy.
+  // the Components zone renders its two-line copy (issue #208/B85); the
+  // Requirements anchor renders its copy (issue #183/B71).
   const bandCopy = await page.evaluate(() => {
     const g = sel => { const el = document.querySelector(sel); return el ? { text: el.textContent.trim(), weight: getComputedStyle(el).fontWeight } : null; };
     return {
@@ -143,41 +145,40 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   }), { w: VW, h: VH });
   ok('all door-cards sit inside the viewport (no clipping)', inside);
 
-  // issue #145/B53 + #146/B55: the eight linked sub cards render plain (400)
-  // text — and issue #167/B60 supersedes B53's 600 clause: every note card
-  // (all fourteen) renders plain 400 — UIUX §4's weight clause
+  // issue #145/B53 + #146/B55: the linked sub cards render plain 400 text;
+  // every note card (all fifteen) renders plain 400 (issue #167/B60, UIUX §4).
   const weights = await page.evaluate(() => {
     const w = id => { const el = document.querySelector(`.door-card[data-id="${id}"]`); return el ? getComputedStyle(el).fontWeight : null; };
     return {
       sub: ['apple-music', 'spotify', 'linkedin', 'zeved-boards', 'agentic-plugins', 'plants-poles', 'plants-in-rocks', 'philly-plant-dads'].map(w),
-      rest: ['music', 'community', 'career', 'writing', 'software-ai', 'plants-rocks'].map(w),
+      rest: ['music', 'community', 'career', 'writing', 'software-ai', 'plants-rocks', 'wood'].map(w),
     };
   });
   ok('sub cards render plain 400 text (issue #145/B53, #146/B55, #196/B80)',
     weights.sub.length === 8 && weights.sub.every(x => x === '400'));
   ok('every note card renders plain 400 — no bold (issue #167/B60, superseding B53)',
-    weights.rest.length === 6 && weights.rest.every(x => x === '400'));
+    weights.rest.length === 7 && weights.rest.every(x => x === '400'));
 
-  // the fourteen note links (B28, UIUX §4.3): one <line> per owner-named pair
-  // (issue #75, #72, #74, #146 and #196), 1px --frame between the two cards' centres, on a hitless
-  // layer below the notes. [L0] is the layer, [L1]–[L14] the fourteen pairs,
-  // [L15]–[L16] the layer-wide line checks.
+  // the sixteen note links (B28, B32, B34, UIUX §4.3): one <line> per owner-named pair
+  // (issue #75, #72, #74, #146, #196 and #313/B116), 1px --frame between the two cards' centres, on a hitless
+  // layer below the notes. [L0] is the layer, [L1]–[L16] the sixteen pairs,
+  // [L17]–[L20] the layer-wide line checks.
   const WANT = [
     ['music', 'writing'], ['software-ai', 'community'], ['software-ai', 'writing'],
     ['plants-rocks', 'community'], ['plants-rocks', 'writing'], ['software-ai', 'music'],
     ['music', 'apple-music'], ['music', 'spotify'], ['career', 'linkedin'],
     ['software-ai', 'zeved-boards'], ['software-ai', 'agentic-plugins'],
     ['plants-rocks', 'plants-poles'], ['plants-rocks', 'plants-in-rocks'],
-    ['plants-rocks', 'philly-plant-dads']
+    ['plants-rocks', 'philly-plant-dads'],
+    ['wood', 'community'], ['wood', 'plants-rocks']
   ];
   const lk = await page.evaluate(() => {
     const board = document.getElementById('board');
     const layer = document.getElementById('link-layer');
     if (!layer) return null;
     const br = board.getBoundingClientRect();
-    /* measured rects arrive PHYSICAL px; the line attrs are LOGICAL (B30's
-       ÷ rs conversion — issue #121/B44 renders the desktop below REF too,
-       where rs ≠ 1, so the conversion is no longer the identity). */
+    /* rs ≠ 1 at desktop sizes too (B44): measured rects are physical px;
+       line attrs are logical px, so divide by rs. */
     const RS = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
     const note = document.querySelector('.door-card');
     return {
@@ -201,18 +202,61 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
     };
   });
   ok('[L0] link layer draws below the notes (z 1 under z 2) and never takes a hit',
-    !!lk && lk.pe === 'none' && lk.z === '1' && lk.noteZ === '2' && lk.lines.length === 14);
+    !!lk && lk.pe === 'none' && lk.z === '1' && lk.noteZ === '2' && lk.lines.length === 16);
   lk.lines.forEach((l, i) => {
     const w = WANT[i] || ['?', '?'];
     ok(`[L${i + 1}] link ${i + 1}: ${w[0]} <-> ${w[1]}`,
       l.from === w[0] && l.to === w[1] && !!l.cA && !!l.cB);
   });
-  ok('[L15] every link is a 1px --frame line (crisp at any scale)',
+  ok('[L17] every link is a 1px --frame line (crisp at any scale)',
     lk.lines.every(l => l.stroke === 'rgb(105, 142, 191)' && l.width === '1px' && l.ve === 'non-scaling-stroke'));
-  ok('[L16] every link runs between its two cards\' centres',
+  ok('[L18] every link runs between its two cards\' centres',
     lk.lines.every(l => l.cA && l.cB &&
       Math.abs(l.x1 - l.cA[0]) < 0.6 && Math.abs(l.y1 - l.cA[1]) < 0.6 &&
       Math.abs(l.x2 - l.cB[0]) < 0.6 && Math.abs(l.y2 - l.cB[1]) < 0.6));
+
+  // issue #275: assert resize writes every card's new max-width before
+  // drawLinks reads any card geometry; the order matters when a cap rewraps.
+  await page.evaluate(() => {
+    const events = { capWrites: 0, firstLineWriteAfter: null };
+    const setProperty = CSSStyleDeclaration.prototype.setProperty;
+    const setAttribute = Element.prototype.setAttribute;
+    CSSStyleDeclaration.prototype.setProperty = function (name, ...args) {
+      if (name === '--card-max-w') events.capWrites++;
+      return setProperty.call(this, name, ...args);
+    };
+    Element.prototype.setAttribute = function (name, ...args) {
+      if (this.tagName === 'line' && name === 'x1' && events.firstLineWriteAfter === null) {
+        events.firstLineWriteAfter = events.capWrites;
+      }
+      return setAttribute.call(this, name, ...args);
+    };
+    window.__issue275ResizeEvents = events;
+  });
+  await page.setViewportSize({ width: 1024, height: VH });
+  await page.waitForTimeout(100);
+  const resizeEvents = await page.evaluate(() => window.__issue275ResizeEvents);
+  ok('[L19] resize lays out every card before link geometry is read',
+    resizeEvents.capWrites >= 6 && resizeEvents.firstLineWriteAfter === resizeEvents.capWrites);
+  const resizedLinks = await page.evaluate(() => {
+    const board = document.getElementById('board');
+    const br = board.getBoundingClientRect();
+    const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
+    return [...document.querySelectorAll('#link-layer line')].map(l => {
+      const a = board.querySelector('[data-id="' + l.dataset.from + '"]').getBoundingClientRect();
+      const b = board.querySelector('[data-id="' + l.dataset.to + '"]').getBoundingClientRect();
+      return [
+        +l.getAttribute('x1'), +l.getAttribute('y1'),
+        (a.left - br.left + a.width / 2) / rs, (a.top - br.top + a.height / 2) / rs,
+        +l.getAttribute('x2'), +l.getAttribute('y2'),
+        (b.left - br.left + b.width / 2) / rs, (b.top - br.top + b.height / 2) / rs
+      ];
+    });
+  });
+  ok('[L20] resize re-lays out cards before redrawing all link endpoints',
+    resizedLinks.length === 16 && resizedLinks.every(p =>
+      Math.abs(p[0] - p[2]) < 0.6 && Math.abs(p[1] - p[3]) < 0.6 &&
+      Math.abs(p[4] - p[6]) < 0.6 && Math.abs(p[5] - p[7]) < 0.6));
 
   // card states (B14) on the first door-card
   const first = page.locator('a.door-card').first();
@@ -223,24 +267,32 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
 
   // pressed: 1px inset transforms + green glow (Idea #b9d2b2 = rgb(185, 210, 178))
   await page.mouse.down();
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(250);   // allow the active green glow to settle
   const pressedTransform = await first.evaluate(el => getComputedStyle(el).transform);
   ok('active presses 1px inset', pressedTransform.includes('1px') || (pressedTransform !== 'none' && !pressedTransform.includes('0, 0, 0, 1)')));
+  const pressedShadow = await first.evaluate(el => getComputedStyle(el).boxShadow);
+  ok('active state uses the Idea green glow', /rgba?\(185, 210, 178(?:,|\))/.test(pressedShadow), pressedShadow);
   await page.mouse.up();
 
   // focus ring for keyboard (never colour alone)
   await page.keyboard.press('Tab');
   await page.waitForTimeout(80);
-  const css = await page.evaluate(() => {
-    const s = [...document.styleSheets].map(sh => { try { return [...sh.cssRules].map(r => r.cssText).join('\n'); } catch (e) { return ''; } }).join('\n');
-    return { hasFocusRing: s.includes(':focus-visible') && s.includes('outline'), hasTransition: s.includes('transition') };
+  const focus = await page.evaluate(() => {
+    const el = document.activeElement;
+    const style = getComputedStyle(el);
+    return { isDoor: el.matches('a.door-card'), outlineStyle: style.outlineStyle, outlineWidth: parseFloat(style.outlineWidth) };
   });
-  ok('CSS rules for focus ring + motion present', css.hasFocusRing && css.hasTransition);
+  ok('Tab focuses a door-card with a visible focus ring',
+    focus.isDoor && focus.outlineStyle !== 'none' && focus.outlineWidth > 0,
+    JSON.stringify(focus));
 
-  // no service worker script in the page
-  ok('no service worker', await page.evaluate(() => !('serviceWorker' in navigator) || navigator.serviceWorker === undefined || !('getRegistrations' in navigator.serviceWorker) || true));
+  // no service worker registrations (B13)
+  ok('no service worker', await page.evaluate(async () => {
+    if (!('serviceWorker' in navigator) || !navigator.serviceWorker || typeof navigator.serviceWorker.getRegistrations !== 'function') return true;
+    return (await navigator.serviceWorker.getRegistrations()).length === 0;
+  }));
 
-  if (OUT) await page.screenshot({ path: OUT });
+  if (OUT) await page.screenshot({ path: path.join(OUT, 'desktop.png') });
   await browser.close();
   console.log(failures === 0 ? '\nDESKTOP PASS' : `\nDESKTOP FAIL: ${failures}`);
   process.exit(failures === 0 ? 0 : 1);

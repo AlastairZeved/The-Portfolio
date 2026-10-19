@@ -17,6 +17,8 @@ interface, it failed; every pixel earns its place).
 > **Append only.** An entry is superseded by a later ruling, never edited
 > away.
 
+<!-- docket: contract from B119 -->
+
 ---
 
 ### B1. One scene, one ladder binding: To-Do blue
@@ -3241,3 +3243,265 @@ Scale: holds at every viewport width.
 Number: 2 of 16 sweeps animate at any time (the front card's title card and back card), on the unchanged 6s clock and 0.3s offset; asserted by test/career.js.
 
 Source: the owner's issue [#261](https://github.com/AlastairZeved/The-Portfolio/issues/261) and the owner's chat answers (2026-10-13), multiple choice as selected — "Front card only"; the /rule intake answer (Q3 "Zero cognitive tax") and the owner's confirm.
+
+### B103. The eight UIUX §10.6 values named by issue #272 remain as shipped
+
+The values for **Click any card**, **Hover: side card**, **Hover: employer card**, **Arrows**, **Grounding**, **Ambient**, **Footer**, and **Phones** in `UIUX §10.6` are affirmed as shipped. Their current values stand unchanged.
+
+**Source:** the owner's chat answer (2026-10-14), quoted verbatim and preserved in [issue #272](https://github.com/AlastairZeved/The-Portfolio/issues/272#issuecomment-6177703861) — "Ruled shipped as-is for each."
+
+### B104. P1 allows bounded sub-pages but no nested pages (issue #272)
+
+The **One page, one scene** principle permits sub-pages. Each page is a single bounded sheet; pages stand alone and do not nest. The bolded principle name stands unchanged. This is the P1 text and violation boundary of `PRD §1` and `PRD §1.2`.
+
+**Source:** the owner's chat answer (2026-10-14), quoted verbatim and preserved in [issue #272](https://github.com/AlastairZeved/The-Portfolio/issues/272#issuecomment-6177703861) — "Allow sub-pages. The intent is that each page is bounded without nested pages within them. There is no razgregory.com/career/ABC, only razgregory.com/career or any other landing page for something we may make. But they won't have nested pages." The owner confirmed the proposed PRD wording with "Aligned."
+
+### B105. The career UIUX record follows the owner's specified code/spec direction (issue #272)
+
+- The unselected employer cards render dim and italic in `--ink-dim`; the selected card remains regular.
+- The employer header has no `role="radiogroup"`; the `.carousel` is the radio group labelled `Choose a role`.
+- B98's "Description coming soon" placeholder applies to empty role-description cards; B47's no-marker rule stands for the other blank slots.
+- The `.cta` retains its shipped 50px `min-height`, `2px 21px` padding, 14px/600 type, 3px radius, and resting, hover, and focus shadows. The `.gm-card` retains its 2.1px `--ink` border under B56's source-component port.
+- The footer facts remain 0.85rem; the section gap remains 2rem above 743px and 1rem at or below 743px. The `.split` retains `padding: 1.5rem clamp(1.5rem, 5vw, 4rem)`, with zero inline padding at or below 743px.
+- The arrows retain a 2.5rem square box, a 0.85rem square chevron with 3px top/left strokes, 200ms hover transitions, a 3px hover nudge, and an 0.85 press scale over 80ms. The contact shadow remains at `bottom: 62u`.
+- Under reduced motion, the arrow press scale is removed but its hover nudge remains. The CTA's 2px `:active` translation remains for keyboard activation; while hovered, the reduced-motion hover reset keeps it still.
+
+`UIUX §10.2`, `UIUX §10.3`, `UIUX §10.5`, and `UIUX §10.6` carry the rendering record.
+
+**Source:** the owner's chat answer (2026-10-14), quoted verbatim and preserved in [issue #272](https://github.com/AlastairZeved/The-Portfolio/issues/272#issuecomment-6177703861) — "The code should follow the existing spec ruling for (a), th docs should follow the shipped code for (b), the code should follow existing spec/ruling for (c), the docs should follow the code for (d), the code should follow the existing ruling/spec for (e), the code should follow the docs for (f), the docs should follow the code for (g), the docs should follow the shipped code for (h), (i), (j), (k), and (l)"; "Retain the shipped values for now."
+
+### B106. The landing band and contact-note values match the UIUX record (issue #272)
+
+`app.js` computes `--rule-y` without rounding: `15.46 + max(2, lines) × 21.54 + 8.84`, yielding `67.38px` at two lines and `88.92px` at three, matching the no-JS and `UIUX` values. The contact-form note reads **"✱ required — protected by reCAPTCHA"** as specified in `UIUX §6.1`.
+
+**Source:** the owner's chat answer (2026-10-14), quoted verbatim and preserved in [issue #272](https://github.com/AlastairZeved/The-Portfolio/issues/272#issuecomment-6177703861) — "(a) the values need to be updates to UIUX/no-JS values. (b)Yes the form note should change to include it."
+
+### B107. Reduced-motion arrow hover removes both the nudge and the press scale (issue #272)
+
+Under reduced motion, the arrows' 3px hover nudge and 0.85 press scale are both removed. This supersedes only B105's clause that the arrow hover nudge stays; its press-scale clause stands. `UIUX §10.6` records both behaviors.
+
+**Source:** the owner's R3 chat answer (2026-10-14), quoted verbatim and preserved in [issue #272](https://github.com/AlastairZeved/The-Portfolio/issues/272#issuecomment-6177703861) — "the docs should follow the shipped code for (h), (i), (j), (k), and (l)".
+
+### B108. The ledger retires B97 and corrects B46's Parking Lot reference (issue #273; retires B97; corrects B46)
+Principle: Zero cognitive tax.
+B97 is retired. B98 is the confirmed successor; its edge predates B97's unconfirmed addendum, so this later entry retires B97.
+
+For B46's reference to the fixed `180px` `--lot-h` ruling, the intended ruling is B20 (Parking Lot), not B18 (All Boards rail). This clarifies the reference without editing B46.
+
+Scale: This entry applies only to B97's pending addendum and B46's fixed `180px` `--lot-h` reference.
+Number: The relevant rulings are B97, B98, B46, B20 and B18; B46's cited value is `180px`. No new measurement is introduced.
+Reason: B98's "`replaces B97`" was committed 3 minutes before the addendum, so it doesn't count. When B46 was written, the Parking Lot ruling was numbered B18. After the 2026-10-06 renumber it is B20, and B18 is now the All Boards rail.
+
+**Source:** the owner's issue [#273](https://github.com/AlastairZeved/The-Portfolio/issues/273), quoted verbatim — "Only an entry that retires B97 clears it."; "B98's `replaces B97` was committed 3 minutes before the addendum, so it doesn't count."; "When B46 was written, the Parking Lot ruling was numbered B18. After the 2026-10-06 renumber it is B20, and B18 is now the All Boards rail."
+
+### B109. Resize redraws links after laying out cards; test URLs share one base (issue #275)
+
+On viewport resize, lay out the cards before redrawing their note links. Test suites share `PORTFOLIO_BASE_URL` and append the page each suite exercises. The storybook's `frame-ancestors 'self'` allows any same-origin page to frame it; its comment describes that accurately. No CSP policy change is made.
+
+**Source:** the owner's issue [#275](https://github.com/AlastairZeved/The-Portfolio/issues/275), quoted verbatim — "If confirmed, swap the two calls."; "a base-URL variable that each suite joins with its own page. This changes the env interface, so update AGENTS.md's Commands section in the same PR."; "In fact `frame-ancestors 'self'` means any same-origin page may frame it. Reword it."
+
+### B110. Shipped JavaScript is a last resort (issue #304)
+
+Shipped JS is a last resort: a change that adds or grows JS must state in the
+PR why HTML/CSS cannot do it.
+
+This applies to shipped JS only — `app.js`, `monstera-storybook.js`, and any
+JS loaded by a page. It does not apply to `test/*.js`, the dev-only Playwright
+suites that are never shipped. This table is the baseline: it covers the JS
+left in `app.js` once issues #308 and #309 land, and records the owner's
+2026-10-15 review of #310, #311 and #312 (closed as not planned).
+
+| JS (in `app.js`) | Why HTML/CSS cannot do it | Ruling it serves |
+|---|---|---|
+| **Drag to move** (`pointerdown/move/up`, `toLogical`, pointer capture, `dragstart` suppression, click suppression after a drag) | CSS has no way to move an element by pointer. The suppressions exist only because the cards are real `<a>` links being dragged. | B7, B41, B3 |
+| **Corner resize** (`gestureScale`, the one-fifth-viewport ceiling, `applyCardScale`) | CSS `resize` changes a box's width and height through the browser's own grip. It cannot scale the card and its text uniformly from the custom handle, which has the enlarged grab area. | B45, B51, B42 |
+| **`drawLinks()`** (the 14 note links) | The links follow cards that JS drags and resizes. Drawing them in CSS would mean rewriting the drag code, replacing the SVG `<line>`s, and accepting a lag during the 80ms scale ease (#312). | B28, `UIUX §4.3`, B109 |
+| **`frame()` render scale and width floor** (`--rs`, `--logical-w/h`, `lwMin`, the B52 overlap loop) | Cards are content-sized (B45), so the width floor depends on rendered text width, which CSS cannot read into a calculation. Fixing card sizes to remove this would add permanent upkeep and overturn B45 (#310, #311). | B30, B44, B46, B52, B45, B42 |
+| **`applyCardMaxW`** (the cap that keeps a card's text from running off the sheet's right edge) | It depends on where the card currently sits, which changes when it is dragged. | B45 |
+
+This supersedes nothing; it adds a burden of proof on top of B12 and B59.
+
+**Source:** owner chat, 2026-10-15, quoted verbatim in [issue #304](https://github.com/AlastairZeved/The-Portfolio/issues/304) — "Shipped JS is a last resort: a change that adds or grows JS must state in the PR why HTML/CSS cannot do it". Context from the same message: "A vanilla HTML/CSS site was the goal and at some point my agent introduced JS aggressively. I realize it may be needed somewhere for something, but it shouldn't be the default as my Hermes agent, Stromboli, seems to be treating it."
+
+### B111. The storybook's 24 page images are separate WebP files (issue #306)
+
+The 24 page images ship as separate files in `storybook/` and are referenced
+by `<img>` elements in `monstera-storybook.html`. B57's “committed verbatim”
+clause is superseded only for these images. The HTML document and current
+JavaScript pager remain. The storybook-specific CSP permits `img-src 'self'`;
+`font-src 'self' data:` remains.
+
+**Source:** the owner's issue [#306](https://github.com/AlastairZeved/The-Portfolio/issues/306), quoted verbatim — “Move them to files, e.g. `storybook/p01.webp` … `p24.webp`, and reference them from markup as `<img>` elements in `monstera-storybook.html`.”; and the owner's pre-implementation ruling, quoted verbatim — “I rule that B57’s “committed verbatim” clause is superseded only for the 24 page images: ship them as separate WebP files referenced by `<img>` elements in the storybook HTML; leave the HTML document and current JavaScript pager in place.”; “Yes—remove `data:` from the storybook-specific `img-src` only.”
+
+### B112. The storybook pager stays JavaScript; the CSS-only conversion is declined (issue #307)
+
+`monstera-storybook.html` keeps its shipped `monstera-storybook.js` (B59). The
+owner declines the CSS-only radio/`:has` pager proposed in issue #307: the lift
+and turn of the page must stay rich and immersive, which HTML/CSS cannot
+provide. B110's last-resort rule continues to permit this script, and the
+storybook CSP keeps `script-src 'self'`.
+
+**Source:** the owner's chat on 2026-10-16, quoted verbatim — “The cost is too
+high, JS wins for these components. I'd prefer the animation of the lift and
+turn to be rich and immersive, which HTML/CSS cannot provide.”
+
+### B113. The band and the Parking Lot are laid out by CSS, not measured by JavaScript; the Parking Lot keeps B20's 180px (issue #308)
+
+The owner's issue #308 asked for the second block of `app.js` to be deleted
+and the two sizes it wrote to be carried by CSS layout instead. The owner
+confirmed the record and the mechanism in the pre-implementation alignment of
+2026-10-16.
+
+- **The band is one flow box.** `#band` carries `--band-top` (15.46px) as its
+  `padding-top`; the two zones are its flex items; the band anchor is in flow,
+  with `line-height: 21.54px` and `min-height: 2 × 21.54px + 8.84px`, its own
+  `padding-bottom` carrying the `--band-gap` (8.84px) to the rule. The band's
+  height is therefore `15.46 + max(2, lines) × 21.54 + 8.84` — **67.38px** at
+  the two-line floor, **88.92px** at three lines — and the rule that closes it
+  is the box's own bottom edge. `--rule-y` is gone: there is no custom
+  property and no no-JS fallback, because CSS is the path and not a fallback.
+  The band anchor's `line-height` is the ruled 21.54px literal rather than
+  `1.3 × 16.57 = 21.541px`, so the floor is exact.
+- **B31 stands.** The title compartment hangs from the band box it now sits
+  inside and overhangs it by 29px; its `min-height` is `calc(100% + 29px)`,
+  the `100%` being the band's own height.
+- **The two zones keep the placement they had** — issue #107's `--req-left`
+  still places the Requirements zone, as a margin measured from the Components
+  zone's right edge. Issue #309 replaces that with a flex row and no custom
+  property.
+- **The Parking Lot keeps B20's 180px** as its height, bottom-anchored, capped
+  at half the logical sheet, with `#lot-items` clipping past the ceiling.
+  `--lot-h` is gone. Issue #308's proposal to floor the lot at the rescaled
+  two-row shelf (134.76px) and let it follow its measured contents is
+  **declined** — the owner's answer was to keep 180 everywhere. B46's lot
+  clause (“sized by TheBoards' `B73` measured-content law”) is superseded as a
+  mechanism; the half-sheet ceiling and the clipping stand. B46's band law and
+  the band literals are untouched.
+- **`test/scaling.js` reads the three values off the rendered boxes** instead
+  of the two custom properties and the title card's declared `min-height`.
+  The laws asserted are unchanged; the band-rule tolerance widens from 0.001
+  to 0.01 for Chromium's 1/64px layout unit — a declared 67.38 renders as
+  67.375, and the rendered box was always 67.375.
+
+**Source:** the owner's issue
+[#308](https://github.com/AlastairZeved/The-Portfolio/issues/308), quoted
+verbatim — “The second block of `app.js` (`bandRuleY`, `lotH`,
+`updateBoardGeometry`) measures the DOM and writes `--rule-y` and `--lot-h`.
+It runs on load, on resize, and on `fonts.ready`. Both values are
+content-driven sizes with a floor and a ceiling, and CSS layout does that
+natively. Delete the block.”; “**B46:** states the band/lot *law* (the numbers
+and floors). That stays. Its mechanism (“measured contents”, JS re-derives)
+changes to CSS layout. The no-JS fallbacks noted in `index.html:51–52`
+disappear because CSS becomes the real path, not the fallback.”; “Prefer flow.
+It needs no newer CSS feature.” — and the owner's answers in the Hermes chat
+of 2026-10-16, quoted verbatim: “Yes — record it, quoting issue #308 as the
+source”; “Rewrite those three reads to measure the rendered heights instead”;
+“Keep 180 everywhere — I'll rule the number myself”; “Keep today's exact
+positions and let #309 do the rework”.
+
+### B114. The band is one flex row: the Requirements zone follows the title card in CSS and `--req-left` is gone (issue #309; supersedes B113; keeps B19; keeps B31; keeps B39; keeps B46; keeps B110)
+Principle: The medium is the message.
+The owner's issue #309 asked that the Requirements zone be placed after the title card by CSS layout, and that `frame()` in `app.js` stop measuring `#anchor-title` and writing `--req-left`. In the pre-implementation alignment of 2026-10-18 the owner chose the symmetric row over a spacer that would have kept the Components zone's old edge.
+
+- **The band is one flex row.** `#band` lays out three siblings in order — `#zone-components`, `#anchor-title`, `#zone-requirements` — with `gap: var(--gutter)`; the title card's markup moves between the two zones, so the band reads as it renders. Both zones take `flex: 1 1 0`, so the content-sized title card (B19) is centred by the row itself and the Requirements zone starts exactly one `--gutter` past the card's rendered right border (B39, issue #107). `--req-left` is gone from `:root` and from `frame()`: there is no custom property and no no-JS fallback. The render scale and width floor in `frame()` stay, as B110's table records.
+- **The title card hangs as a flex item.** It is in flow, `flex: 0 0 auto`, `align-self: stretch`, with `margin-top: calc(-1 * var(--band-top))` and `margin-bottom: -29px`, so it is drawn from the band's top edge to 29px below the rule while the band's height still comes from the zones alone — its margin box is shorter than theirs. This supersedes B113 in part — its `min-height: calc(100% + 29px)` mechanism — and replaces the `position: absolute` / `left: 50%` / `translateX(-50%)` centring B31 listed; B31's box stands — the 20px type, the `calc(var(--band-top) + 8px) 16px 16px` padding, the 29px overhang, the hug-the-text width, the 2px `--frame` border with bottom-only corners.
+- **The Components zone mirrors the Requirements zone.** Its right edge is one gutter before the title card instead of the old door-column edge (`--card-l − --card-gap`), so its "Components" label, centred under the zone, moves right: +88.83 logical px on the 1831.18px logical sheet (1440×900, 800×800, 1024×768, where B46's width floor binds), +101.35 on the 1963.64px sheet (2560×1440, 1920×1080, 390×844 portrait), +165.10 on the 2638.64px sheet (3440×1440). This supersedes B113 in part — its clause that "the two zones keep the placement they had"; B113's band law stands. The Requirements zone's edges, the band's height and the title card's box do not move. What the change preserves is TheBoards' band read as structure: the title held centred between its two regions, each region one gutter from it.
+- **B46's band law and literals are untouched**: `--band-top` 15.46px stays the band's `padding-top`, the anchor's line box 21.54px and `--band-gap` 8.84px stand, the two-line floor stands.
+
+**Scale:** holds at every viewport. The logical sheet is floored at 1831.18px by B46's width floor on landscape and is 1963.64px in portrait, and the Components copy keeps its two lines there and at every wider sheet, so the band's height is unchanged at every size.
+
+**Number:** measured in Chromium 141, in logical px, before and after: the title card is 352.45 wide and 96.37 tall, the band 67.37, the Requirements line's left edge − the card's right border = 16.00 and the card's centre error 0.00 at 1440×900, 2560×1440, 800×800, 390×844, 1920×1080, 3440×1440 and 1024×768; the Components label's shift above is the only changed value. `anchor()` is not valid in a margin and `anchor-size()` resolves to 0 on an in-flow box, so anchor positioning cannot place an in-flow zone — which is why PR #323 failed desktop.js's issue #107 assertion.
+
+Reason: positioning one box after another is CSS layout's own job; a custom property re-measured on load, resize and `fonts.ready` is shipped JavaScript doing what a flex row does with no script, and the band of TheBoards is a structure — a title between two regions — not a measurement.
+
+**Source:** the owner's issue [#309](https://github.com/AlastairZeved/The-Portfolio/issues/309), quoted verbatim — "Preferred: the components zone, the title card, and the Requirements zone become siblings in one flex row inside the band, with `gap: var(--gutter)`. The Requirements zone then starts after the title card wherever its text ends. No measuring, no custom property."; "Delete the `--req-left` lines from `frame()`, and the `calc(...)` fallback at `index.html:125` that only covered the no-JS case."; "**Issue #107:** the behavior is unchanged (one gutter after the card's real edge). Only the mechanism moves to CSS. Name #107 in the PR. A ruling is needed only if the layout visibly changes."; "**B19** (title card hugs its text) and **B31** (title card box): unchanged." — and the owner's answers in the Claude Code alignment of 2026-10-18, quoted verbatim: to the layout question, "A. Symmetric row"; to the title-card question (in flow, stretched, negative margins replacing `min-height: calc(100% + 29px)`, markup moved between the zones), "Yes, move the markup"; to the ruling question, "Yes, draft B114 for confirm"; to the tests question, "Yes, pin both in scaling.js".
+
+### B115. The Components zone keeps its edge: a balance item centres the title card in the band row (issue #309; supersedes B114; keeps B113; keeps B31; keeps B39)
+Principle: The medium is the message.
+B114 recorded the owner's first answer in the alignment of 2026-10-18: a symmetric row in which the Components zone widens to meet the title card and its "Components" label moves right. Told in plain words that the tab would move, the owner reversed that answer before the PR merged. This entry carries the reversal.
+
+- **The Components zone keeps the placement it had.** It stays `flex: 0 0 auto` at `width: calc(var(--card-l) − var(--card-gap) − var(--gutter))`, one `--gutter` in from the sheet's edge, with `order: -1`; its right edge is the door-column edge, `--card-l − --card-gap`, and its "Components" label, centred under the zone, does not move. This supersedes B114's clause "The Components zone mirrors the Requirements zone" and restores B113's placement clause for the Components zone; B114's `flex: 1 1 0` now applies to the Requirements zone only.
+- **A balance item centres the card.** An empty `#band::before` sits between the Components zone and the title card, takes the Requirements zone's `flex: 1 1 0`, and carries `margin-left: calc(var(--card-gap) − var(--card-l))`, which cancels the Components zone's box and the gap after it, so the free space either side of the content-sized card is equal: the card is centred by the row and the Requirements zone still starts one `--gutter` past its rendered right border (B39, issue #107). It draws nothing and takes no hits. That one empty item is the cost of keeping the tab where it is, which the owner chose.
+- **Everything else in B114 stands**: the flex row, the title card in flow with its negative margins and B31's box, the deleted `--req-left`, B46's band law and literals, B110's table.
+
+**Scale:** holds at every viewport. The logical sheet is floored at 1831.18px on landscape and is 1963.64px in portrait; the Components zone's width and both zones' line counts are what they were at every size, so nothing visible moves anywhere.
+
+**Number:** measured in Chromium 141, in logical px: the Components zone's right edge is 545.69 / 586.91 / 796.91 and its label's centre 280.84 / 301.45 / 406.45 on the 1831.18 / 1963.64 / 2638.64px sheets — identical to the page before B114; the title card stays 352.45 wide and 96.37 tall, the band 67.37, the Requirements gap 16.00, the card's centre error 0.00 at 1440×900, 2560×1440, 800×800, 390×844, 1920×1080, 3440×1440 and 1024×768. `test/scaling.js` pins the edge at every viewport.
+
+Reason: the "Components" tab's place is part of the drawing the owner keeps, and one empty item in the row holds it there with no measurement and no visible change, where B114's symmetric row moved it by 89 to 165 logical px.
+
+**Source:** the owner's chat on 2026-10-18, quoted verbatim, reversing the "A. Symmetric row" answer B114 records after the plain-language explanation that the tab would move — "Give me the uglier code then and nail the tab in place."; and, on the corrected text, "confirm".
+
+### B116. A "Wood - Coming Soon" note joins the board (issue #313; refines B45; extends B28; keeps B26; keeps B44; keeps B52; keeps B78; keeps B80)
+Principle: The medium is the message.
+- **A rest-only note, not a door.** `div.door-card.note-card`, `data-id="wood"`, no `href`, like Music (B26): no hover, click or focus state; it still drags and resizes (B7). Label: **Wood - Coming Soon**, hyphen as the issue typed it.
+- **Size: the Writing card's own box.** Rest scale **1.86**, 132 × 48px outer, label **9.0px** (`.fit-to-writing`), line box 23.8px (B45). Agent-derived (B33) by B80's method with headroom: CI's Chromium set the label ~4% wider than the local one at 9.6px. **B45's fixed-17px font clause is amended for this card, as B80 did for Philly Plant Dads.**
+- **Links: pairs 15 and 16**, Wood ↔ Community and Wood ↔ Plants & Rocks (B28).
+- **Placement: left 3% / top 35.1%.** The centre midpoint of Career and Music (left 25.3% / top 35.1%) put the Community ↔ Plants & Rocks line behind the card (B44); the owner moved it left at the same height, to the left of Community. Seats up and to the right trip B52's width floor and shrink the board to ~67% (B78's seats stand).
+
+**Scale:** holds at every viewport `test/scaling.js` checks: no overlap and no obscured line beyond B78's own; the render scale is unchanged (0.786 at 1440×900).
+
+**Number:** Chromium 141, logical px: Wood's unscaled box 132 × 48 = Writing's; label hug 97.8px against a 104px content box; Career–Music centre midpoint 25.27–25.30% / 35.11–35.13% at 1440×900, 1920×1080, 2880×1650.
+
+Reason: the issue names the card's size by another card's box, and B80 already rules how such a box is kept (the font fits the box, never the reverse); a hidden line is a link the visitor cannot read, so the card moves rather than the law bending.
+
+**Source:** the owner's issue [#313](https://github.com/AlastairZeved/The-Portfolio/issues/313), quoted verbatim — "We need to add one more note card to the board, titled \"Wood - Coming Soon\"."; "For sizing, it should be the same size as the \"Writing\" note card with text obviously scaled/re-sized to fit that card size."; "For placement of the card on the board, position it halfway between \"Career\" and \"Music\" cards both horizontally and vertically."; "For link lines to other cards, this card should have a link line connected to \"Community\" and a link line connected to \"Plants & Rocks\"." — and the owner's answers in the Claude Code alignment of 2026-10-18, quoted verbatim: "No — plain note"; "Wood - Coming Soon"; "Card centres"; "Nudge Wood off the line"; "Seat A: left 15%, same height"; "Nudge it further left. Right now it's directly under Community instead of being to the left of it."; "Further still (~3%)".
+
+### B117. UIUX §3.1 states where B46's width floor binds: below about 1.66:1, 16:10 included (issue #325; corrects B46; keeps B30; keeps B44; keeps B52; keeps B78; keeps B80)
+Principle: Zero cognitive tax.
+- **The record follows the render; nothing rendered changes.** B46 said its measured width floor is "inert at every ordinary aspect" and binds "only on square-ish windows", and `UIUX §3.1` said the band renders at 6.1% of viewport height on landscape. B67, B78 and B80 each noted afterwards that the floor binds at 1440×900; neither the B46 clause nor `UIUX §3.1` was corrected. This entry corrects B46's clause in part, without editing B46: the floor binds on every landscape window narrower than the floor's logical width over the sheet's 1104.55 logical height — about 1.66:1 today — and that includes 16:10, the shape of most laptop panels. There the sheet is width-anchored and the band, the title card and the cards render slightly smaller than the height anchor alone would draw them. B46's band law — the 6.1% of viewport height in its owner quote — holds where the floor is inert, which is at 16:9 and wider.
+- **The threshold is named, not pinned.** The floor is measured from live card geometry (B42), so it moves whenever a card's seat or size moves: it has been 1794.8 (B78), about 1805 (B80) and 1831.18 logical px. `UIUX §3.1` gives the approximate ratio, names 16:10 as on the bound side, and says the figure moves with the cards; it does not carry the logical-px floor as a constant.
+- **Everything else stands**: B30's portrait formula, B44's no-overlap law, B52's pairwise gap term, B78's and B80's seats and rest scales, and the floor mechanism B110's table keeps.
+
+**Scale:** every landscape viewport. Below the threshold the band is a smaller share of viewport height (5.89% at 16:10, 4.91% at 4:3); at and above it, 6.10%. Portrait is unaffected.
+
+**Number:** measured in Chromium (Playwright 1.56), logical px: the floor is 1831.18, so the threshold is 1831.18 / 1104.55 = 1.658. At 1440×900, 1680×1050, 1920×1200 and 2560×1600 the render scale is 0.964 of the height anchor (0.7864 against 0.8148 at 1440×900) and the band is 5.89% of viewport height; at 1024×768 it is 4.91%; at 1920×1080 and 2560×1440 the scale equals the height anchor and the band is 6.10%.
+
+Reason: a rendering record that promises what the page does not do on the most common laptop shape costs every later reader a measurement to find out which is true; the floor moves when cards move, so a pinned figure would go stale the next time a card does.
+
+**Source:** the owner's answers in the Claude Code alignment of 2026-10-18 on issue [#325](https://github.com/AlastairZeved/The-Portfolio/issues/325), quoted verbatim — "Fix the doc (Recommended)"; "New B117 ruling (Recommended)"; "Named, not pinned (Recommended)".
+
+### B118. The band label's weight is 600: UIUX §3.2 follows the render and TheBoards (issue #326; keeps B46)
+Principle: The medium is the message.
+- **The record follows the render; nothing rendered changes.** `UIUX §3.2` called the band label "14.36px / 400" while `index.html` has shipped `.band-label` at `font-weight: 600` in every version of `index.html` in this repository's history. The 400 entered the record in the issue-#287 consolidation of `UIUX.md`; the text before it gave the label's size only, as B46 does. `UIUX §3.2` now reads "14.36px / 600". The size, the tab box and the colours (issue #77) are unchanged.
+- **The weight is TheBoards' own.** TheBoards draws its region tabs at 13px/600 (TheBoards' `UIUX §3.1`, which attributes it to TheBoards' `B76`; `.band-label` in TheBoards' `styles.css`); B46 carries the 13px through k to 14.36px, and the weight carries unscaled.
+- **`test/scaling.js` pins it.** Beside its 14.36px size assertion, the suite asserts that both band labels, "Components" and "Requirements", compute `font-weight` 600 at every viewport it checks, so the record and the render cannot drift apart unnoticed again.
+
+**Scale:** holds at every viewport; a weight does not scale.
+
+**Number:** TheBoards' 13px/600 (the 13px from TheBoards' `B54`) → 14.36px/600 here (13 × 1.10455, B46).
+
+Reason: the rendering authority stated a weight the page does not render and the template does not use; the correction that changes no pixel keeps the site in TheBoards' own type, and an unpinned value is how the two drifted.
+
+**Source:** the owner's answers in the Claude Code alignment of 2026-10-18 on issue [#326](https://github.com/AlastairZeved/The-Portfolio/issues/326), quoted verbatim — "600 (Recommended)"; "New B118 ruling (Recommended)"; "Yes, pin it in scaling.js (Recommended)"; and, on this entry, "confirm".
+
+### B119. The ledger draws the supersessions its witness could not read, and binds the entry contract from B119 (issue #273; partially supersedes B14 (hover member, by B25); partially supersedes B21 (authored-size reading of 132×80, by B33); partially supersedes B30 (cap clause and REF_W/REF_H, by B44); partially supersedes B37/B38 (weight and copy, by B54); partially supersedes B12 (inline-JS clause, by B59); partially supersedes B19 (one-size clause, by B61); partially supersedes B68 (copy of record, by B70); partially supersedes B37/B54 (Requirements copy, by B71); partially supersedes B17 (eyebrow text, by B72); partially supersedes B70 (copy, by B86); partially supersedes B92/B76 (named clauses, by B95))
+Principle: Zero cognitive tax.
+- **The Docket's map gains the supersessions it could not read; no ruling changes.** Eleven earlier entries say in their own words that they replace part of an earlier ruling, but say it inside code spans, in the passive voice, or as "supersedes the X clause of Bn", so the witness draws no edge for them and `docket governs` shows the older ruling as standing. This entry draws each edge on the earlier entry's behalf, without editing it. Each qualifier names the entry that made the change and the part it changed; the rest of each older ruling stands as its successor left it.
+- **The pairs:** B25 superseded B14's hover member; B33 superseded the reading of B21's parenthetical that treats `132×80` as a floor on authored sizes; B44 superseded B30's cap clause and its `REF_W`/`REF_H` constants; B54 superseded B37's and B38's weight and copy; B59 superseded B12's inline-JS clause; B61 superseded B19's one-size clause; B70 superseded B68's copy of record; B71 superseded B37's and B54's Requirements copy; B72 superseded B17's eyebrow text; B86 superseded B70's copy; B95 superseded the named clauses of B92 and B76.
+- **The entry contract binds from this entry.** The preamble carries `<!-- docket: contract from B119 -->`: from B119 on, every entry carries a meta line with its edges, one `Principle:` line and a `Reason:`. B98–B102, B108 and B114–B118 already take that shape; the line can never be moved or removed once committed.
+
+**Scale:** the ledger only. Nothing rendered, tested or shipped changes; the 14 edges in the heading are the whole of it.
+
+**Number:** 11 superseding entries, 14 edges onto 13 earlier rulings (B12, B14, B17, B19, B21, B30, B37, B38, B54, B68, B70, B76, B92); the contract binds from B119. No measurement is introduced.
+
+Reason: a reader who follows the Docket's map to a ruling should land on the one that governs today; an edge written only in prose sends them to a clause that was replaced, and a contract kept by habit is lost the first time an entry forgets it.
+
+**Source:** the owner's answers in the Claude Code alignment of 2026-10-18 on issue [#273](https://github.com/AlastairZeved/The-Portfolio/issues/273), quoted verbatim — "Record all 12 in one entry"; "Add it, starting at B119".
+
+### B120. The career title card widens and grows to the longest title where its type is on the 11px floor (issue #259; partially supersedes B76; partially supersedes B95; keeps B87; keeps B98)
+Principle: Zero cognitive tax.
+Where a career role component is small enough that its title type sits on B76's 11px readable floor, the type stops shrinking while B76's 427u × 180u title box keeps shrinking with the component, so on phones and tablets 7 of the 8 titles were cut off (issue #259). Asked to choose, the owner ruled the box wider and taller, every box matched to the longest title, wherever the type is on the floor.
+
+- **Wider.** On the floor the title card takes the description card's width (600u, B76's existing ratio) in place of its 427u source width. Taller alone was tried and split long words mid-word ("REPRESENTA / TIVE").
+- **Taller, to the longest title.** The title card grows to the height of the longest role title (role 1's, "Branch Sales & Service Representative") plus the year's line, so all 8 title cards — and so all 8 components — keep one size (B95). A hidden copy of that title sizes every card; it is never drawn and never read aloud. This partially supersedes B95's clause that "no piece of the component individually scales on any viewport size" for the title card on the floor only; B95's uniform size stands.
+- **Where.** The switch sits exactly where the title's 28u type meets the 11px floor: a slot narrower than 830 × 11 / 28 ≈ 326.07px. Above it — every desktop window — B76's 427u × 180u box renders unchanged. No new design value is introduced: 600u, 28u, 11px, 14u and 4u are B76's.
+- **Rejected, with measurements:** a 9px floor still cut 7 of 8 titles at 390 × 844; abbreviation cannot work because even "Branch Banker" was cut; a wider ring is capped by the phone's stage height and still cut 5 of 8.
+
+**Scale:** every viewport where the ring's slot is narrower than 830 × 11 / 28 px — phones and portrait tablets (measured from 240 × 500 up to 744 × 1000); desktop and landscape tablet windows are untouched.
+
+**Number:** measured in Chromium, before → after, how far the most-cut role's year runs past its title card's inner edge (+ is cut off): +47.2px → −3.1px at 390 × 844, +53.3 → −2.4 at 320 × 568, +6.2 → −4.1 at 744 × 1000; 1440 × 900 unchanged at −13.4. One title-card height across all 8 roles at every measured width (68px at 390 × 844). Asserted by test/career.js at 390 × 844, 320 × 568 and 744 × 1000.
+
+Reason: a title the visitor cannot read asks them to guess which job a card is, and the 11px floor exists so the text stays readable — the box has to give way where the type no longer can.
+
+**Source:** the owner's answers in the Claude Code alignment of 2026-10-18 on issue [#259](https://github.com/AlastairZeved/The-Portfolio/issues/259), quoted verbatim — to the fix question, "Wider + taller (Recommended)"; to the same-size question, "All match the longest"; to the where question, "Wherever text hits 11px (Recommended)".

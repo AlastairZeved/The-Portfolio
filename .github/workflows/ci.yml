@@ -1,12 +1,4 @@
-# Run the existing regression suite before merge.
-#
-# The repo has no package.json and no dependencies (AGENTS.md law), so until
-# now nothing ran the tests automatically — only a human remembering to,
-# locally, after the fact. This runs every suite on every PR and on push to
-# main, before a bad change can reach the Netlify deploy (see _headers).
-#
-# Shape ported from AlastairZeved/TheBoards' .github/workflows/ci.yml, the
-# owner-designated reference for issue #149.
+# Run the regression suite on every pull request and push to main.
 name: CI
 
 on:
@@ -64,7 +56,7 @@ jobs:
       - name: security.js
         run: node test/security.js
 
-      # records.js is the second browserless suite: it guards DECISIONS.md's
+      # records.js is the third browserless suite: it guards DECISIONS.md's
       # `### B<n>` citation space — no duplicate number, ascending in file
       # order (issue #149, ported from TheBoards' test/records.js). Also
       # first, for the same reason: a broken record fails before Chromium.
@@ -98,11 +90,6 @@ jobs:
         run: node test/plantsandrocks.js
 
       - name: proof.js
-        # The only suite that needs the pin: its built-in default is a
-        # placeholder host. career.js and plantsandrocks.js keep their own
-        # defaults (career.html / plantsandrocks.html on :8000).
-        env:
-          PORTFOLIO_URL: http://localhost:8000/index.html
         run: node test/proof.js
 
       - name: scaling.js

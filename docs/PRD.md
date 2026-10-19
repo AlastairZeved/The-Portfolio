@@ -2,8 +2,7 @@
 
 **Status:** v1, written from the owner's rulings of 2026-09-29 (governing
 issue: [The-Portfolio #51](https://github.com/AlastairZeved/The-Portfolio/issues/51)),
-before the first build. The site does not exist yet; this document is the
-specification it will be built against, not a reconstruction.
+before the first build; since reconciled with the rulings through B104.
 
 **How to read this with the other records.** `docs/DECISIONS.md` is the
 binding, cumulative record of every owner ruling. Where this document and
@@ -15,7 +14,7 @@ is *for*, so that a new ruling has something to resolve against.
 every value the site draws with. This document holds positions; where a value
 appears here it is quoted from `UIUX.md`, never authored here.
 
-Sections are numbered so decisions can cite `PRD §x`.
+Sections are numbered so decisions can cite PRD §x.
 
 ---
 
@@ -24,9 +23,9 @@ Sections are numbered so decisions can cite `PRD §x`.
 Five product principles. Every ruling in `DECISIONS.md` resolves against
 these.
 
-1. **One page, one scene.** The site is a single bounded sheet — an HTML page
-   like TheBoards, with no calendar rail. Everything reachable lives on that
-   one sheet; there is nothing behind it.
+1. **One page, one scene.** Each page is a single bounded sheet. The site may
+   have sub-pages, but each page stands alone; pages do not nest
+   (`DECISIONS.md` B104).
 2. **A card is a door.** Every door-card is a real link that opens in a new
    tab. Nothing that looks actionable is inert, and the one inert element
    (the title card) does not look actionable: it is the same title card as
@@ -46,6 +45,8 @@ And the governing design law, which `UIUX.md` implements:
 
 > **If you have to think about the interface, it failed. Every pixel earns
 > its place.**
+>
+> **Ruling:** DECISIONS.md B10.
 
 ### §1.1 Emotional identity
 
@@ -57,7 +58,7 @@ depth and at dusk.** The palette is dark, and that is deliberate. Deep water
 is peaceful; a bright white hub page is not. The page reads top to bottom as
 one scene — water closing each end of the sheet, the deep between — and the
 door-cards are the lit things on the deep, like the notes on a board (owner
-ruling, `DECISIONS.md` B8: the site wears the To-Do ladder's one blue
+ruling, `DECISIONS.md` B1: the site wears the To-Do ladder's one blue
 binding).
 
 This identity does **not** license decoration. Peace is produced by
@@ -70,7 +71,7 @@ violation that would break it:
 
 | # | Principle | Example violation |
 |---|---|---|
-| P1 | **One page, one scene** | A second page, a calendar rail, a hero, a scroll-driven narrative, routing |
+| P1 | **One page, one scene** | A nested page, a calendar rail, a hero, a scroll-driven narrative, routing (B104) |
 | P2 | **A card is a door** | A card that is not a link; a card that navigates the same tab; an inert element styled like a card |
 | P3 | **The medium is the message** | A new token, new component, or stylization that TheBoards does not have — absent an owner ruling |
 | P4 | **Zero cognitive tax** | Settings, menus, onboarding, a theme switch, an empty state that asks to be interpreted |
@@ -104,8 +105,8 @@ correctness:
 | Decision | Choice | Rationale |
 |---|---|---|
 | Theme | **Dark only.** One identity, no choice to make | P4 forbids the setting |
-| The cards' colour | The brightest surface on the page (TheBoards' `--note` rung, To-Do binding) | They are the only things the visitor *uses* |
-| Destructive colour | `--danger` is carried from TheBoards but the site has no destructive action | It is not drawn until a ruling gives it a job |
+| The cards' colour | The brightest surface on the page (TheBoards' `--note` rung, To-Do binding; UIUX §2.2) | They are the only things the visitor *uses* |
+| Destructive colour | `--danger` is carried from TheBoards but the site has no destructive action (UIUX §2.2) | It is not drawn until a ruling gives it a job |
 | Symbols | Drawn or text per TheBoards' own grammar; never a new mark invented here | P3 |
 | Motion | A closed set of transitions from TheBoards; it does not grow | Nothing else has earned its place |
 
@@ -123,7 +124,7 @@ door.
 
 ### §2.2 In scope
 
-A single static `index.html` (all CSS inline, JS as external .js files per
+A static `index.html` (CSS inline, JS in external .js files per
 the issue-#151 ruling — B59, superseding B12's inline-JS clause) that renders
 TheBoards' four regions — **Title,
 Components, Requirements, Parking Lot** — with door-cards in the free board
@@ -131,12 +132,15 @@ space linking out to the owner's sites, and a Formspree contact form in the
 Parking Lot. The sheet fills the whole viewport; there is **no All Boards rail**
 (#71, B27).
 
-- **Title card:** "The Portfolio of" / "Robert Alastair Zeved Gregory" — two
-  lines (B17, superseding B5), one font size, borders that hug the text
-  (B19), the same title card as TheBoards, not a link.
-- **Door-cards** (`DECISIONS.md` B3, B26), each a real link opening in a new
-  tab. The **Music** card is not a link — it is the plain parent note the
-  Apple Music and Spotify doors hang under (B26).
+- **Title card:** "The Digital Garden of" / "Robert Alastair Zeved Gregory" —
+  two lines (B72 superseding B17's eyebrow text; B17 superseded B5), borders
+  that hug the text (B19), the same title card as TheBoards, not a link.
+- **Door-cards** (`DECISIONS.md` B3, B26, B34, B55, B80, B116), each linked card
+  opening in a new tab. Music is a plain parent note for Apple Music and
+  Spotify. The LinkedIn note links to the Career note; Zeved Boards and Agentic
+  Plugins sit under Software & AI; Plants on Poles and Plants in Rocks sit
+  under Plants & Rocks; Philly Plant Dads links to Instagram; and Wood - Coming
+  Soon is a plain note linked to Community and Plants & Rocks.
 - **Contact form** (`DECISIONS.md` B6): Name (optional), Email (optional),
   Message (required), with Formspree's captcha and bot protections.
 - **Notes that drag and resize** — entertainment only, no persistence
@@ -152,60 +156,38 @@ argued here — boundedness is a feature of this site, not a gap.
 | Accounts, sync, sharing, collaboration | There is no backend; adding one changes what the site is |
 | Tags, folders, search, filters, auto-grouping | P2, P4 — the cards are the whole index |
 | Rich text, images, attachments, drawing | P5 — static is the point; and TheBoards refuses them too |
-| A blog / CMS | Owner ruling (issue #51) — Writing is a door to Substack, not a feature here |
-| Analytics / tracking | Owner ruling (issue #51) — this page asks for nothing and reports nothing |
-| Comments | Owner ruling (issue #51) |
-| Newsletter signup | Owner ruling (issue #51) |
+| A blog / CMS | Owner ruling (B9, issue #51) — Writing is a door to Substack, not a feature here |
+| Analytics / tracking | Owner ruling (B9, issue #51) — this page asks for nothing and reports nothing |
+| Comments | Owner ruling (B9, issue #51) |
+| Newsletter signup | Owner ruling (B9, issue #51) |
 | Snap, alignment guides, auto-layout | Notes overlap freely; the visitor places them, entertained |
 | Due dates, reminders, streaks, recurring anything | TheBoards' refusal, carried; no calendar rail (owner ruling) |
 | Infinite canvas, pan, zoom | Boundedness is the feature — one page you can see all of |
-| A framework, bundler, package manager, dependency | One file, inline, no build (owner ruling) |
+| A framework, bundler, package manager, dependency | Inline CSS, external JS files per B59; no build |
 | Settings, preferences, a theme switch | P4 — one identity, no choice to make |
 | A service worker, PWA manifest, offline caching | Owner ruling (issue #51): no service worker, just a static page |
 | Import/export, a "New Boards" affordance, a note-card edit row, undo | Owner ruling (issue #51): the site is not the app; it advertises the app |
 
 ### §2.4 Success
 
-The site succeeds if a visitor who lands on it can reach every one of the
-owner's doors in a single glance, understands without instruction that each
-linked card is a door, and leaves with the sense that the page itself is
-evidence of the tool it advertises. Everything else is secondary.
+The site succeeds when:
 
-### §2.5 Deferred, with reason
+- A visitor can reach every one of the owner's doors in a single glance and
+  understands without instruction that each linked card is a door.
+- The page itself is evidence of the tool it advertises.
+- Every rendered token resolves in `UIUX.md`; no design values are invented.
+- The repository's test suites pass; there is deliberately no `sw-update.js`
+  (no service worker, B13).
+- The deployed `deploy` branch serves byte-identical content to `main` at
+  the promoted sha.
 
-| Deferred | Why it is not here |
-|---|---|
-| `razgregory.com/career` and `razgregory.com/plantsandrocks` destinations | Owner ruling (issue #51): "they just need to be stubbed for now — we build those only after the landing page is finished." The cards exist and link to stubs |
-| All Boards rail | **Removed** (issue #71, B27): the pane is deleted and the board spans the full viewport. Earlier rulings deferred it (issue #51: "a future problem") then scoped it (B24); the owner then cut it entirely |
+### §2.5 Resolved
+
+The career and plants-and-rocks pages are built (B47, B48), and the All Boards rail was removed (B27).
 
 ### §2.6 Not yet ruled — do not invent
 
-The following were **not** ruled by the owner and therefore have **no law
-yet**. Agents must not fill them by invention; they are open questions to be
-resolved by ruling before or during the build:
-
-- **The contents of the Components and Requirements regions.** The owner ruled
-  the regions exist and that the door-cards do **not** live inside them (they
-  live in the free board space, `B2`); he did not rule what the regions
-  themselves hold, and rendered them as TheBoards renders them — furniture
-  present, contents absent — until he did. He has since directed the two
-  region lines: **Requirements** holds "Click around, explore!" (issue
-  [#92](https://github.com/AlastairZeved/The-Portfolio/issues/92)) and
-  **Components** holds "All cards open their pages in a new tab" (issue
-  [#93](https://github.com/AlastairZeved/The-Portfolio/issues/93), the second
-  line's historical provenance). Issue
-  [#147](https://github.com/AlastairZeved/The-Portfolio/issues/147) (`B54`)
-  later revised the copy of record: **Components** reads "Each card links to
-  a page housing my work in that domain." and **Requirements** reads "Click
-  around to explore my works!", both lines rendered plain (weight 400). Each
-  line is ported from TheBoards' own section-text mechanism (`theboards styles.css .anchor /.band-zone .anchor`),
-  rendered static here — no contenteditable, no editing affordance — because
-  this site registers no state and refuses editing (B7/B13, PRD §5).
-- **The exact hover/click treatment of the door-cards beyond the owner's
-  words.** The family rule is ruled (`B14`); both member bindings are settled
-  — the hover glow is `--accent-page` `#6d9cb0` (`B25`) and the click-state
-  green is `--note` `#b9d2b2`, **ruled final** (`B29`, issue #78), both
-  transcribed in `UIUX.md §4`. Do not invent a third.
+None open.
 
 ---
 
@@ -227,47 +209,37 @@ deliberate promotion to `deploy`. The repository root is the publish root.
 ### §3.3 Dependencies
 
 None. No frameworks, no bundler, no package manager, no runtime
-dependencies, no service worker. The typeface (Montserrat Alternates) is
-self-hosted, no CDN, per TheBoards' own dependency rule; if single-file purity
-requires it, the font may be embedded as a data URI (the Earp-Street-Park
-precedent, `AGENTS.md`).
+dependencies, no service worker. CSS is inline; JavaScript ships in the
+external .js files ruled by B59. The typeface (Montserrat Alternates) is
+self-hosted, no CDN, per TheBoards' own dependency rule.
 
 ### §3.4 Network calls
 
 Exactly one: the contact form's POST to Formspree. Nothing else leaves the
-page. (Formspree reCAPTCHA is on by default; the form uses the standard
-`_gotcha` honeypot; and the site must never set a `no-referrer` /
-`same-origin` referrer policy, which would make Formspree file every
-submission as spam.)
+page. See UIUX §6.1 for its protection requirements.
 
 ---
 
 ## §4 The regions
 
-1. **Title** — the title card: "The Portfolio of" / "Robert Alastair Zeved
-   Gregory", two lines (B17), one font size, borders hugging the text
-   (B19), same title card as TheBoards, never a link (B5 superseded).
-2. **Components** — a TheBoards region, present in the scene (§2.6 —
-   contents not yet ruled; open question).
-3. **Requirements** — a TheBoards region, present in the scene (§2.6 —
-   contents not yet ruled; open question).
-4. **Parking Lot** — closes the sheet; holds the Formspree contact form
-   (B6).
+1. **Title** — the title card as specified in UIUX §3.2.
+2. **Components** — the region and its current copy as specified in UIUX §3.3.
+3. **Requirements** — the region and its current copy as specified in UIUX §3.3.
+4. **Parking Lot** — as specified in UIUX §6.
 
 There is no fifth region: the All Boards rail is removed (#71, B27) and the
 sheet spans the full viewport.
 
 The door-cards sit **in the free board space** — the empty canvas
 between the regions — never inside Components, Requirements or the Parking
-Lot (B2). The **Music** note is the plain parent the Apple Music and Spotify
-doors hang under (B26, `UIUX §4.2`).
+Lot (B2). Card content and rendering are specified in UIUX §4.
 
 ---
 
 ## §5 Behavior
 
 - **Door-cards:** real anchors, `target="_blank"`, open the owner's sites in
-  a new tab (B3). Rest / hover / active states per `UIUX.md §4` (B14).
+  a new tab (B3). Rest / hover / active states per UIUX.md §4 (B14).
 - **Notes (for entertainment):** draggable and resizable on the canvas;
   positions are not stored; nothing persists on reload; no undo; no menu
   (B7).
@@ -275,14 +247,3 @@ doors hang under (B26, `UIUX §4.2`).
   submits to Formspree with captcha and bot protections (B6).
 - **Nothing else.** No capture, no completion, no scratch-out, no export, no
   boards list, no navigation. The OS back button has nothing to go back to.
-
----
-
-## §6 Success is measured by
-
-- All doors reachable in one glance and one click each.
-- Zero invented design values: every rendered token resolves in `UIUX.md`.
-- The three suites (`test/tokens.js`, `test/mobile.js`, `test/desktop.js`)
-  pass; there is deliberately no `sw-update.js` (no service worker, B13).
-- The deployed `deploy` branch serves byte-identical content to `main` at
-  the promoted sha.

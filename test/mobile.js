@@ -1,31 +1,27 @@
 /* test/mobile.js — mobile render + nine new-tab door-cards + form + the one
    render scale (no clip, no overflow, link endpoints under the scale) and the
-   fourteen note links (B28, B55, B80) (black-box, Playwright).
-   Run: node test/mobile.js   (PORTFOLIO_URL default http://localhost:8000/index.html) */
+   sixteen note links (B28, B55, B80, B116) (black-box, Playwright).
+   Run: node test/mobile.js   (PORTFOLIO_BASE_URL default http://localhost:8000/) */
 
 const { chromium } = require('playwright');
-const fs = require('fs');
 const path = require('path');
 
-const URL = process.env.PORTFOLIO_URL || 'http://localhost:8000/index.html';
+const BASE_URL = process.env.PORTFOLIO_BASE_URL || 'http://localhost:8000/';
+const URL = new globalThis.URL('index.html', BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/').href;
 const OUT = process.env.PORTFOLIO_OUT && path.resolve(process.env.PORTFOLIO_OUT);
 let failures = 0;
-const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}`); };
+const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}${!cond && details ? ' :: ' + details : ''}`); };
 
 (async () => {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.goto(URL, { waitUntil: 'networkidle' });
 
-  // title card, B17/B19 text
+  // Title card copy and two-rung type (B17/B19/B61/B72).
   const title = await page.locator('#anchor-title').innerText();
   ok('title card line 1 "The Digital Garden of" (issue #188/B72)', title.includes('The Digital Garden of'));
   ok('title card line 2 name', title.includes('Robert Alastair Zeved Gregory'));
 
-  // title card, B17 text; B19's hug-the-text borders; B61's two-rung type
-  // (issue #170: the eyebrow renders on TheBoards' reduced secondary rung —
-  // 13.33px/400 — under the 20px/600 title rung; supersedes the single-size
-  // clause of B19 for this line)
   const titleSizes = await page.locator('#anchor-title .title-eyebrow, #anchor-title .title-pinned')
     .evaluateAll(els => els.map(el => getComputedStyle(el)));
   ok('title card two rungs: eyebrow reduced 13.33px/400, name 20px/600 (issue #170/B61)',
@@ -66,10 +62,10 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('no horizontal overflow (scrollWidth <= innerWidth)', fit.noHOverflow);
   ok('no vertical overflow (scrollHeight <= innerHeight)', fit.noVOverflow);
 
-  // the fourteen note links (B28, B55, B80) hold their endpoints under the same scale: the
+  // the sixteen note links (B28, B55, B80, B116) hold their endpoints under the same scale: the
   // layer's user units are the board's LOGICAL px, so every line must land on
   // the LOGICAL centre of the two cards it joins — measured rects are physical,
-  // divided by rs here exactly as index.html's toLogical does (issue #87, B30)
+  // divided by rs here exactly as app.js's toLogical does (issue #87, B30)
   const linkFit = await page.evaluate(() => {
     const board = document.querySelector('#board');
     const rs = parseFloat(getComputedStyle(board).getPropertyValue('--rs')) || 1;
@@ -87,7 +83,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
                       Math.abs(+l.getAttribute('x2') - cb[0]), Math.abs(+l.getAttribute('y2') - cb[1]));
     });
   });
-  ok('all fourteen links land on their card centres at scale < 1', linkFit.length === 14 && linkFit.every(d => d < 1));
+  ok('all sixteen links land on their card centres at scale < 1', linkFit.length === 16 && linkFit.every(d => d < 1));
 
   // nine door-cards, each a real new-tab anchor (B26, B80); the Music card and
   // the four B55 sub cards (issue #146) are plain notes
@@ -111,14 +107,16 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   }
 
   // the Music card is a rest-only note, not a link (B26); B55 (issue #146)
-  // adds four more non-link note sub cards, so five div.door-card.note-card
-  // exist now and Music remains the first
+  // adds four more non-link note sub cards and B116 (issue #313) the Wood
+  // note, so six div.door-card.note-card exist now and Music remains the first
   const musicNotes = page.locator('div.door-card.note-card');
-  ok('Music card is a non-link note (first of five notes — B26, B55)', await musicNotes.count() === 5
+  ok('Music card is a non-link note (first of six notes — B26, B55, B116)', await musicNotes.count() === 6
     && (await musicNotes.first().innerText()).trim().split('\n')[0].trim() === 'Music');
   ok('the four B55 sub cards are non-link notes too', await musicNotes.evaluateAll(els =>
     ['Zeved Boards', 'Agentic Plugins', 'Plants on Poles', 'Plants in Rocks'].every((t, i) =>
       els[i + 1] && els[i + 1].innerText.trim().split('\n')[0].trim() === t && !els[i + 1].hasAttribute('href'))));
+  ok('the B116 Wood note is a non-link note too (issue #313)', await musicNotes.evaluateAll(els =>
+    els[5] && els[5].innerText.trim().split('\n')[0].trim() === 'Wood - Coming Soon' && !els[5].hasAttribute('href')));
   ok('Music note has no href', await musicNotes.first().evaluate(el => !el.hasAttribute('href')));
   ok('Music note carries no hover/click shadow', await musicNotes.first().evaluate(el =>
     getComputedStyle(el).boxShadow === 'none'));
@@ -145,7 +143,7 @@ const ok = (label, cond) => { if (!cond) failures++; console.log(`${cond ? 'PASS
   ok('Components zone label', (await page.locator('#zone-components .band-label').innerText()) === 'Components');
   ok('Requirements zone label', (await page.locator('#zone-requirements .band-label').innerText()) === 'Requirements');
 
-  if (OUT) await page.screenshot({ path: OUT });
+  if (OUT) await page.screenshot({ path: path.join(OUT, 'mobile.png') });
   await browser.close();
   console.log(failures === 0 ? '\nMOBILE PASS' : `\nMOBILE FAIL: ${failures}`);
   process.exit(failures === 0 ? 0 : 1);

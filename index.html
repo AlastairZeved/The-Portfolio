@@ -6,8 +6,7 @@
 <title>The Portfolio of Robert Alastair Zeved Gregory</title>
 <style>
 /* ============================================================
-   The-Portfolio — landing page, CSS inline (B12, B16, B17);
-   JS external in app.js (issue #151, B59)
+   The-Portfolio — landing page, CSS inline (B12); JS external app.js (B59)
    Rendering authority: docs/UIUX.md. One binding: To-Do blue.
    ============================================================ */
 
@@ -49,12 +48,15 @@
   --card-w: min(37.7778%, 100% - 2 * (var(--gutter) + 100px + var(--card-gap)));
   --card-l: calc((100% - var(--card-w)) / 2);
   --band-top: 15.46px;   /* 14 × 1.10455 (#128/B46 — the band literals are TheBoards' 1000-tall frame mapped into the 1104.55-tall drawing space) */
-  --rule-y: 67.38px;  /* no-JS fallback: the rescaled two-line floor — JS re-derives it (#128/B46) */
-  --lot-h: 180px;    /* no-JS fallback: B18's fixed value — JS re-derives it (#128/B46) */
+  /* issue #308 (B113): --rule-y and --lot-h are gone. The band is a flow box
+     whose height IS the rule's position, and the lot's height is B20's 180px
+     capped at half the sheet — CSS carries both, there is no fallback to fall
+     back to. */
+  --band-line: 21.54px;  /* 19.5 × 1.10455 (#128/B46) — the band anchor's line box; the band's floor is two of these */
+  --band-gap: 8.84px;    /* 8 × 1.10455 (#128/B46) — the gap from the tallest zone to the rule */
 }
 
 /* ---- Ink poles (UIUX §2.3): flip at the surface boundary ---- */
-.on-dark  { --ink: var(--ink-light); --ink-a: 244 245 241; }
 .on-light { --ink: var(--ink-dark);  --ink-a: 3 16 25; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -79,44 +81,95 @@ body {
 }
 
 /* ---- The band: water closing the top (UIUX §3.2, TheBoards `B58`) ---- */
-#band-fill {
+#band-fill, #lot {
   position: absolute;
-  left: 0; right: 0; top: 0;
-  height: var(--rule-y);
+  left: 0; right: 0;
   background:
     radial-gradient(118% 76% at 50% 24%, rgb(0 0 0 / 0) 32%, rgb(var(--water-bot-a) / 0.72) 128%),
     linear-gradient(180deg, var(--water-top) 0%, var(--water-mid) 46%, var(--water-bot) 100%);
+}
+#band-fill {
+  top: 0; bottom: 0;      /* the water fills the band's own box, whatever height it takes */
   z-index: 0;
 }
-#band-fill::after {           /* the water's dither, at 0.05 */
+#lot {
+  z-index: 1;
+  bottom: 0;
+  /* issue #308 (B113): B20's 180px is the lot's height, not a fallback; the
+     half-sheet ceiling still caps it and #lot-items still clips past it. */
+  height: 180px;
+  max-height: 50%;
+}
+#band-fill::after, #lot::after { /* the water's dither, at 0.05 */
   content: "";
   position: absolute; inset: 0; z-index: 0;
   opacity: 0.05; pointer-events: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='4' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
 }
-#band-rule {
-  position: absolute; left: 0; right: 0; top: var(--rule-y);
+#band-rule, #lot-rule {
+  position: absolute; left: 0; right: 0; top: 100%;   /* the rule closes the band's own box */
   height: 1px; background: var(--frame);
   z-index: 1;
 }
+#lot-rule { top: 0; }
 
-/* ---- The two zones: furniture present, contents absent (PRD §2.6) ---- */
+/* ---- The band box (issue #308, B113; issue #309, B114) ----
+   The band is a FLOW box: its height is set by its tallest zone, so the rule
+   that closes it needs no measured --rule-y. padding-top is --band-top
+   (15.46px); the anchor's own padding-bottom is --band-gap (8.84px), so the
+   band's height is 15.46 + max(2, lines) × 21.54 + 8.84 — 67.38 at the
+   two-line floor, 88.92 at three (UIUX §3.2, #128/B46). It is one flex ROW
+   (B114, B115): the Components zone, an empty balance item, the title card and the
+   Requirements zone, in that order, one --gutter apart. The balance item and
+   the Requirements zone grow equally, so the content-sized title card sits
+   centred and the Requirements zone starts one gutter past the card's
+   rendered right border (issue #107, B39) — nothing measures the card — while
+   the Components zone keeps its own width. The zones give the box its
+   height; the title card hangs from the box top and overhangs it by 29px
+   (B31). No z-index: the box stays out of the stacking order so its children
+   keep the levels they already had (the title card z-index 2, above the link
+   layer's 1). */
+#band {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gutter);
+  padding-top: var(--band-top);
+}
+/* issue #309 (B115): the row's balance item. The Components zone keeps its
+   door-column width (B113) so its "Components" tab stays put, which means
+   the row cannot centre the title card by equal zones alone. This empty
+   item sits between the Components zone and the card, takes the same flex
+   as the Requirements zone, and its negative margin cancels the Components
+   zone's box and the gap after it — so the free space either side of the
+   card is equal, the card is centred, and the Requirements zone starts one
+   gutter past it. It draws nothing and takes no hits. */
+#band::before {
+  content: "";
+  flex: 1 1 0;
+  margin-left: calc(var(--card-gap) - var(--card-l));
+  pointer-events: none;
+}
+
+/* ---- The two zones: static copy per UIUX §3.3 ---- */
 .band-zone {
-  position: absolute;
-  top: 0; height: var(--rule-y);
+  /* issue #308 (B113): the zones are flex items of #band, so the band's height
+     is the tallest of them — no measured --rule-y. issue #309 (B114, B115): the
+     Components zone keeps its B113 box — the door-column width, one --gutter
+     in from the sheet's edge — so its "Components" tab stays put; the
+     Requirements zone takes the row's remaining flex, so its left edge IS the
+     title card's rendered right border + one gutter (issue #107, B39) — no
+     measured --req-left, no door-column fallback. */
+  position: relative;
   pointer-events: none;
   z-index: 1;
 }
-#zone-components   { left: var(--gutter);
-                     right: calc(100% - var(--card-l) + var(--card-gap)); }
-/* issue #107: the Requirements zone anchors to the TITLE CARD's rendered right
-   border (see the scale block in app.js, issue #151, B59) — the door-column
-   calc below assumes the card spans the whole --card-w slot, but the card
-   hugs its text (B19), so the calc strand leaves a dead gap between the
-   border and the line. Kept as the no-JS fallback; app.js's scale block
-   overrides --req-left from the rendered card. */
-#zone-requirements { left: var(--req-left, calc(var(--card-l) + var(--card-w) + var(--card-gap)));
-                     right: var(--gutter); }
+#zone-components   { order: -1;   /* ahead of the balance item (#band::before) */
+                     flex: 0 0 auto;
+                     width: calc(var(--card-l) - var(--card-gap) - var(--gutter));
+                     margin-left: var(--gutter); }
+#zone-requirements { flex: 1 1 0;
+                     margin-right: var(--gutter); }
 .band-label {
   position: absolute;
   top: 100%; left: 50%; transform: translateX(-50%);
@@ -133,10 +186,10 @@ body {
 /* ---- The Requirements section line (issue #92) ----------------------------
    Ported from TheBoards' section-text mechanism (TheBoards styles.css .anchor
    / .band-zone .anchor). TheBoards' anchors are contenteditable textboxes
-   because TheBoards is the app; this site is static (B5/B7/B13, PRD §2.6 — no
+   because TheBoards is the app; this site is static (B7/B13, UIUX §4.1 — no
    state, no persistence, editing refused), so only the RENDERED format and
    placement are ported: the line hangs from the zone top at --band-top, in
-   --ink at 15px/600, above the rule the band-label tab sits under.  The zone
+   --ink at 16.57px/400 (UIUX §3.3), above the rule the band-label tab sits under.  The zone
    keeps pointer-events:none — static text takes no hits and drag gestures pass
    through, exactly as the empty zone behaved. */
 .anchor {
@@ -148,26 +201,38 @@ body {
   overflow-wrap: break-word;
 }
 .band-zone .anchor {
-  left: 0; right: 0;
-  top: var(--band-top);
-  width: auto;
-  min-height: 44px;
-  padding: 0;
+  /* issue #308 (B113): the anchor is IN FLOW, so it is the thing that gives
+     its zone — and through it the band — its height. The box is the line
+     boxes plus --band-gap (the gap to the rule), floored at two lines:
+     min-height is 2 × 21.54 + 8.84 = 51.92px, which under the 15.46px
+     band-top makes the two-line floor 67.38px and three lines 88.92px
+     (UIUX §3.2, #128/B46). line-height is the ruled 21.54px literal rather
+     than 1.3 × 16.57 = 21.541px so the floor is exact. */
+  position: static;
+  min-height: calc(2 * var(--band-line) + var(--band-gap));
+  padding-bottom: var(--band-gap);
+  line-height: var(--band-line);
   font-size: 16.57px; font-weight: 400;   /* 15 × 1.10455 (#128/B46) — keeps the band anchor on the same rescaled rung as the band's own literals; weight plain per issue #147/B54 */
 }
 
 /* ---- The title compartment (UIUX §3.2, B17; TheBoards #anchor-title) ---- */
 #anchor-title {
-  position: absolute;
-  left: 50%; transform: translateX(-50%);
-  top: 0; min-height: calc(var(--rule-y) + 29px);
-  /* issue #128 (B46): the owner ruled B31 STANDS — this box (the +29px
-     overhang, the (band-top + 8px) 16px 16px padding, the 20px type) is
-     untouched. The band literals beneath it are rescaled and the height
-     grows around the box; the card itself keeps B31's law. Width still
-     hugs the title text (issue #59). */
-  /* issue #59: hug the title text — the borders close in instead of
-    spanning the full card width, staying centred and comfortably padded */
+  /* issue #309 (B114): the card is the band row's middle item, IN FLOW, so
+     the zones either side can follow its rendered edges: it keeps its content
+     width (flex-shrink 0), and the balance item before it and the
+     Requirements zone after it take equal flex, so the row centres it — no
+     left: 50% / translateX. It hangs from the band's top edge and overhangs the rule by
+     B31's 29px through the row's own cross axis: stretched to the row's
+     height, its negative margins reach up through --band-top and 29px down
+     past the rule. Its margin box is shorter than the zones, so the band's
+     height still comes from the zones alone (B113). */
+  flex: 0 0 auto;
+  align-self: stretch;
+  margin-top: calc(-1 * var(--band-top));
+  margin-bottom: -29px;
+  /* The title card: the +29px overhang, the (band-top + 8px) 16px 16px
+     padding and the 20px type stand per B31 (issue #128 / B46); width hugs
+     the title text, the borders closing in (issue #59). */
   width: max-content;
   max-width: calc(100% - 2 * var(--gutter));
   display: flex;
@@ -184,10 +249,7 @@ body {
   /* issue #170 / B61: the eyebrow renders on the reduced secondary rung of
      TheBoards' title-card convention (#anchor-title .title-date: 10px/400
      under a 15px/600 title — a 2/3 ratio), scaled to this page's 20px title
-     rung: 20 × 2/3 = 13.33px. The agent-derived arithmetic transcribes the
-     owner's convention per the B33 provenance pattern. Supersedes the
-     single-size clause of B19 for this line only (#59's history: B31 raised
-     both lines to 20px; B61 restores the two-rung render). */
+     rung: 20 × 2/3 = 13.33px (B33). */
   font-size: 13.33px; font-weight: 400; line-height: 1.2;
   color: var(--ink);
 }
@@ -198,39 +260,27 @@ body {
 
 /* ---- The door-cards (UIUX §4): notes that are doors ---- */
 /* Sizing per B45 (issue #126): TheBoards' own note mechanics, ported whole
-   (TheBoards styles.css §4 .note/.note-text). A card is CONTENT-SIZED:
+   (TheBoards' `UIUX §4`; styles.css .note/.note-text). A card is CONTENT-SIZED:
    width: max-content floored at min-width 132px (= TheBoards' NOTE_MIN_W,
-   state.js / styles.css .note-text, TheBoards' `UIUX §4.5` `B84`), height following the
+   state.js / styles.css .note-text, TheBoards' `UIUX §4.5`, TheBoards' `B84`), height following the
    wrapped text — no authored px footprint. Its own scale factor — the var
    --card-scale, floored at MIN_SCALE 0.5 (TheBoards state.js) and ceilinged
-   at one fifth of the viewport (issue #142 / B51 — supersedes the old fixed
-   MAX_SCALE 2.0 wherever it binds first) — is the ONLY thing that sizes the
-   text: the font is
-   17px / line-height 1.4 (TheBoards .note-text) and the transform scales
-   the whole card uniformly, transform-origin top left (.note §4.1 — the
-   stored left/top stays truthful). This supersedes B40's height-driven
-   --card-fs law; the owner's authored left/top placements stand (B43).
-   The card's rest scale is the owner's drawing scale of record
-   (issue #138 / B52 — every card ships its own inline --card-scale).
-   B67 (issue #175) superseded B52's board/sub tier split at scale 1
-   and its list; B78 (issue #189) supersedes B67's list in turn —
-   2.33 community, 2.18 career, 1.86 writing, 1.78 software-ai, 2.26
-   plants-rocks, 1.70 music, 1.01 apple-music, 1.19 spotify, 1.06
-   linkedin, 1.24 zeved-boards, 1.19 agentic-plugins, 0.98
-   plants-poles, 1.02 plants-in-rocks — the owner's #189 drawing
-   sizes every card — plus 1.19 philly-plant-dads, the Spotify scale by
-   the owner's grill words (B80, issue #196). The gesture
-   still moves the scale from there (B45/B51 bounds unchanged). */
+   at one fifth of the viewport (issue #142 / B51) — is the ONLY thing that
+   sizes the text: the font is 17px / line-height 1.4 (TheBoards .note-text)
+   and the transform scales the whole card uniformly, transform-origin top
+   left (TheBoards' `UIUX §4.1` — the stored left/top stays truthful). The owner's
+   authored placements stand (B78, B80). The rest scales are inline per
+   card (B78, B80). The gesture moves the scale from there (B45/B51). */
 .door-card {
   position: absolute;
   width: max-content;
   min-width: 132px;                 /* = NOTE_MIN_W (TheBoards' `UIUX §4.5`) */
   max-width: var(--card-max-w, none); /* set per card in JS: the distance
      from the card's left edge to the sheet's right edge, divided by the
-     card's own scale — TheBoards geometry.js noteMaxW, issue #53 / B39 */
+     card's own scale — TheBoards geometry.js noteMaxW, B45 */
   background: var(--note);
   color: var(--ink-dark);
-  /* TheBoards' note grammar (TheBoards UIUX §4, ported whole): the note
+  /* TheBoards' note grammar (TheBoards' `UIUX §4`, ported whole): the note
      carries a 2px border in its own ink — dark on this surface — and the
      border is what makes the 3px radius read near-square. The reference demo
      card in TheBoards states it: "See how this card has a border and is
@@ -240,8 +290,7 @@ body {
   padding: 10px 12px;
   /* B45: 17px / 1.4 like TheBoards' .note-text, fixed — the card's own
      scale factor (below) is the only text scaling; no --card-fs.
-     Weight: 400 per B60 (issue #167) — no note card renders bold;
-     supersedes B53's "six door-cards keep 600" clause. */
+     Weight: 400 per B60 (issue #167) — no note card renders bold. */
   font-size: 17px; font-weight: 400; line-height: 1.4;
   text-align: center;
   overflow-wrap: break-word;
@@ -252,8 +301,7 @@ body {
   transition: box-shadow 150ms ease-out, transform 80ms ease-out;
   /* rest: no shadow, no glow (UIUX §1 — cards are ON the page) */
   box-shadow: none;
-  /* TheBoards .note: the card's own scale lives on the transform,
-     transform-origin top left so the authored left/top stays truthful. */
+  /* The card's own scale lives on the transform. */
   transform: scale(var(--card-scale, 1));
   transform-origin: top left;
 }
@@ -264,7 +312,7 @@ body {
    settled rect). Suppress just the transform member; the shadow keeps its
    150ms. */
 .door-card.resizing {
-  transition: box-shadow 150ms ease-out;
+  transition-property: box-shadow;
 }
 /* hover: the blue bloom — --accent-page's channels, wide enough to register (B14 hover member; #67) */
 .door-card:hover {
@@ -285,12 +333,9 @@ body {
   /* issue #108: this box is the GRAB AREA, not the glyph. It is anchored
      2px OUTSIDE the card's outer corner — a 2px padding ring around the
      corner, half of it off the note — so the whole bottom-right corner plus
-     a 2px margin beyond it resizes. (The old 4px inset left the outer 6px
-     ungrabbable, and flush-at-the-corner still left nothing to grab outside
-     the note.) The grip lines are pinned 9px inside the box's bottom-right
-     corner, which is exactly where they already sat, so the visible grip
-     does not move. 28x28 sits inside the 132px min-width card (B45/TheBoards
-     NOTE_MIN_W). Agent-derived (B42). */
+     a 2px margin beyond it resizes. The grip lines are pinned 9px inside the
+     box's bottom-right corner. 28x28 sits inside the 132px min-width card
+     (B45/TheBoards NOTE_MIN_W). Agent-derived (B42). */
   right: -4px; bottom: -4px;
   width: 28px; height: 28px;
   cursor: nwse-resize;
@@ -313,8 +358,7 @@ body {
    state and no click state — rest surface only (B26). It is still a note, so
    it drags and resizes like the rest (B7). */
 .door-card.note-card:hover,
-.door-card.note-card:active,
-.door-card.note-card:focus-visible {
+.door-card.note-card:active {
   box-shadow: none;
   transform: scale(var(--card-scale, 1));   /* B45: the note's own scale stands under hover */
   outline: none;
@@ -333,10 +377,21 @@ body {
    font clause is amended for this one card (B80). */
 .door-card.fit-to-spotify { font-size: 11.4px; line-height: 23.8px; }
 
+/* B116 (issue #313): the "Wood - Coming Soon" note is the Writing card's own
+   box — 132 × 48px at the Writing rest scale 1.86 — with the label font
+   scaled down to fit (owner, issue #313: "the same size as the \"Writing\"
+   note card with text obviously scaled/re-sized to fit that card size").
+   The label hugs 185px at 17px, so the linear fit is 17 × 104 / 185 =
+   9.56px; shipped at 9.0px (97.8px hug, ~6% headroom) because CI's
+   Chromium sets this label ~4% wider than the local one and widened the
+   box to 136px at 9.6px (agent-derived, B33, the B80 method). line-height
+   stays the note's 23.8px line box (17 × 1.4, B45). */
+.door-card.fit-to-writing { font-size: 9.0px; line-height: 23.8px; }
+
 /* ---- The link layer (UIUX §4.3): the lines that join the note cards ----
-   TheBoards' link idiom ported verbatim (TheBoards' `UIUX §4.6` / `B91`): a thin
+   TheBoards' link idiom ported verbatim (TheBoards' `UIUX §4.6`, TheBoards' `B91`): a thin
    straight 1px line between two cards' centres, in --frame — this page's own
-   linework blue (§2.2) — with no fill, no cap decoration and no marker, held
+   linework blue (UIUX §2.2) — with no fill, no cap decoration and no marker, held
    to a crisp 1px at any render scale by non-scaling-stroke. It draws BELOW
    the notes and ABOVE the board furniture: z-index 1, the door-cards being
    z-index 2, with DOM order after the furniture. The layer never takes a hit
@@ -358,26 +413,6 @@ body {
 }
 
 /* ---- The Parking Lot: water closing the foot (UIUX §6) ---- */
-#lot {
-  position: absolute;
-  z-index: 1;
-  left: 0; right: 0; bottom: 0;
-  height: var(--lot-h);
-  background:
-    radial-gradient(118% 76% at 50% 24%, rgb(0 0 0 / 0) 32%, rgb(var(--water-bot-a) / 0.72) 128%),
-    linear-gradient(180deg, var(--water-top) 0%, var(--water-mid) 46%, var(--water-bot) 100%);
-}
-#lot::after {
-  content: "";
-  position: absolute; inset: 0; z-index: 0;
-  opacity: 0.05; pointer-events: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='4' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
-}
-#lot-rule {
-  position: absolute; left: 0; right: 0; top: 0;
-  height: 1px; background: var(--frame);
-  z-index: 1;
-}
 #lot-header {
   position: absolute; left: var(--gutter); top: 8px;
   font-size: 16.57px; font-weight: 600; color: var(--ink);   /* 15 × 1.10455 (#128/B46) — same rescaled rung as the band anchors */
@@ -398,12 +433,10 @@ body {
    half, the contact form in the right half — closed by a vertical divider
    bar: the divider grammar career.html ships (.parking-lot__divider — 1px
    wide, 3/4 of the section's inner height, centred), re-tokened to this
-   page's own To-Do blue tokens (color-mix --frame 45%, the same mix the
-   #lot-rule and career's bars already render). Both halves are flex 1 1 0
+   page's own To-Do blue tokens (color-mix --frame 45%, as career's bars
+   render). The #lot-rule is solid --frame. Both halves are flex 1 1 0
    over the same 50% share; the form's tracks are fr units so everything
-   scales with any viewport, per the issue. Issue #174/B68 amends the COPY'S
-   TEXT only: the left half carries the issue-#174 edited version, verbatim;
-   layout, split and divider stand unchanged. */
+   scales with any viewport. */
 .lot-split {
   display: flex;
   align-items: center;
@@ -442,7 +475,7 @@ body {
    ≤743px breakpoint is the repo's own (career.html's mobile block). */
 @media (max-width: 743px) {
   .lot-split { flex-direction: column; align-items: stretch; gap: 12px; }
-  .lot-divider { width: auto; flex: 0 0 1px; align-self: stretch; }
+  .lot-divider { width: auto; }
   .lot-divider::before { width: 75%; height: 1px; }
 }
 #contact-form {
@@ -453,7 +486,6 @@ body {
   grid-template-columns: 1fr 2fr;
   gap: 12px;
   align-items: start;
-  justify-content: start;           /* anchored left; right side of the pane stays free */
   width: 100%;
 }
 #contact-form .left-column {
@@ -491,9 +523,8 @@ body {
   font-size: 14px;
   min-height: 34px;
 }
+/* B84 (issue #210 follow-up): Message textarea height. */
 #contact-form textarea { min-height: 98px; resize: vertical; }
-/* B84 (issue #210 follow-up): the Send button's former vertical footprint
-   (34px) is given back to the Message textarea — 64px floor + 34px = 98px. */
 #contact-form input::placeholder,
 #contact-form textarea::placeholder { color: var(--ink); opacity: 0.55; }
 #contact-form button[type="submit"] {
@@ -511,8 +542,8 @@ body {
 #contact-form button[type="submit"]:hover { filter: brightness(1.1); }
 #contact-form button[type="submit"]:active { filter: brightness(0.92); }
 #contact-form .gotcha {
-  position: absolute !important;
-  left: -9999px !important;
+  position: absolute;
+  left: -9999px;
   width: 1px; height: 1px; overflow: hidden;
 }
 #form-note {
@@ -526,25 +557,33 @@ body {
 <!-- One bounded sheet -->
 <div id="board">
 
-  <div id="band-fill"></div>
-  <div id="band-rule"></div>
+  <!-- issue #308 (B113): the band is one flow box — the water, the rule that
+       closes it, the two zones that size it, and the title card that hangs
+       from it. Nothing measures it; CSS lays it out. issue #309 (B114): it is
+       one row, read as rendered — Components, the title card, Requirements —
+       so the Requirements zone follows the card's own edge. -->
+  <div id="band">
+    <div id="band-fill"></div>
+    <div id="band-rule"></div>
 
-  <div id="zone-components" class="band-zone">
-    <span class="band-label on-light">Components</span>
-    <!-- issue #208 / B85: the zone's two-line copy, in the identical anchor
-         grammar (B38/B54 construction); B69's pseudonyms line is replaced;
-         the literal newline renders the issue's line break (pre-wrap). -->
-    <div class="anchor">Under Construction: Career content, Plants in Rocks content.
+    <div id="zone-components" class="band-zone">
+      <span class="band-label on-light">Components</span>
+      <!-- issue #208 / B85: the zone's two-line copy, in the identical anchor
+           grammar (B38/B54 construction); B69's pseudonyms line is replaced;
+           the literal newline renders the issue's line break (pre-wrap). -->
+      <div class="anchor">Under Construction: Career content, Plants in Rocks content.
 Planned future work: Add landing pages</div>
-  </div>
-  <div id="zone-requirements" class="band-zone">
-    <span class="band-label on-light">Requirements</span>
-    <div class="anchor">Click the note cards to launch my various pages and work across the web.</div>
-  </div>
+    </div>
 
-  <div id="anchor-title">
-    <div class="title-eyebrow">The Digital Garden of</div>
-    <div class="title-pinned">Robert Alastair Zeved Gregory</div>
+    <div id="anchor-title">
+      <div class="title-eyebrow">The Digital Garden of</div>
+      <div class="title-pinned">Robert Alastair Zeved Gregory</div>
+    </div>
+
+    <div id="zone-requirements" class="band-zone">
+      <span class="band-label on-light">Requirements</span>
+      <div class="anchor">Click the note cards to launch my various pages and work across the web.</div>
+    </div>
   </div>
 
   <!-- The door-cards, in the free board space (B2, B3); the Music note is not
@@ -552,14 +591,10 @@ Planned future work: Add landing pages</div>
        card carries a data-id: the link layer below names its pairs by it
        (B28), so both ends of every link are greppable and readable. B45
        (issue #126): the authored inline geometry is the owner's left/top
-       placement only (B43) — the cards are content-sized with their own
-       scale factor, TheBoards' note mechanics. B52 (issue #138): each
-       card also carries its drawing scale of record inline (--card-scale).
-       B67 (issue #175) re-sized and re-placed nine cards from the owner's
-       #175 drawing and superseded the old board/sub tier split at scale 1.
-       B78 (issue #189): the sizes and placements are the owner's #189
-       drawing — seven cards re-placed and nine re-sized; LinkedIn and
-       Plants on Poles are untouched. -->
+       placement only (B78, B80) — the cards are content-sized with their own
+       scale factor, TheBoards' note mechanics. B78 (+B80): each card
+       carries its drawing scale of record inline (--card-scale); sizes and
+       placements are inline per card (B78). -->
   <a class="door-card" data-id="community" style="--card-scale: 2.33; left:13.6%; top:18.3%" href="https://earp-street-park.netlify.app" target="_blank" rel="noopener noreferrer">
     Community
     <span class="resize-handle" aria-hidden="true"></span>
@@ -599,10 +634,8 @@ Planned future work: Add landing pages</div>
 
   <!-- B55 (issue #146): four linked sub cards. They are NOTE cards,
        not doors — the owner ruled no links, like the Music note — so they
-       take the note-card rest-only class and no href. B67 (issue #175)
-       drew their sizes and placements from the owner's #175 drawing;
-       B78 (issue #189) supersedes it with the owner's #189 drawing,
-       like every other card on the board. -->
+       take the note-card rest-only class and no href. Sizes and placements
+       are inline per card (B78). -->
   <div class="door-card note-card sub-card" data-id="zeved-boards" style="--card-scale: 1.24; left:81%; top:26.7%">
     Zeved Boards
     <span class="resize-handle" aria-hidden="true"></span>
@@ -633,24 +666,29 @@ Planned future work: Add landing pages</div>
     <span class="resize-handle" aria-hidden="true"></span>
   </a>
 
+  <!-- B116 (issue #313): "Wood - Coming Soon" — a rest-only note (no link,
+       like Music) in the Writing card's box, linked to Community and
+       Plants & Rocks. The issue seats it halfway between the Career and
+       Music centres (left 25.3% / top 35.1%), but there the Community ↔
+       Plants & Rocks line runs behind it (B44); the owner ruled it moved
+       left at the same height, to the left of Community — left 3% /
+       top 35.1% (grill, 2026-10-18).
+       Measured at 1440×900, 1920×1080 and 2880×1650 (agent-derived, B33). -->
+  <div class="door-card note-card fit-to-writing" data-id="wood" style="--card-scale: 1.86; left:3%; top:35.1%">
+    Wood - Coming Soon
+    <span class="resize-handle" aria-hidden="true"></span>
+  </div>
+
   <!-- Parking Lot: water field closing the sheet (B6) -->
   <div id="lot">
     <div id="lot-rule"></div>
     <div id="lot-header">Parking Lot</div>
     <div id="lot-items">
-      <!-- issue #174/B68: the Components line is removed entirely (the zone
-           keeps its label); the garden copy stays in the LEFT half — its
-           text is the issue-#174 edited version, verbatim — the Formspree
-           form keeps the right half, split and divider per B62. -->
+      <!-- issue #174/B68: the garden copy stays in the LEFT half; the
+           Formspree form keeps the right half, split and divider per B62. -->
       <div class="lot-split">
         <div class="lot-copy">
-          <!-- issue #209 / B86: the footer's copy of record, two lines (line
-               1 replaced, line 2 kept verbatim), no gap — .lot-copy p
-               { margin: 0 }. The closing phrase renders italic (B68's
-               italic phrase stands), spelled "curiouser" per the owner's
-               correction. The copy scales up to the 16.57px band-anchor
-               rung (15 × 1.10455, B46); weight 400, no bold; footer bar
-               size and height unchanged. -->
+          <!-- issue #209 / B86: footer copy. -->
           <p>Welcome to Rob's digital garden.</p>
           <p>All it takes to flex one's curiosity is to ask a question, then keep asking questions and always strive to be <em>curiouser and curiouser.</em></p>
         </div>
@@ -674,7 +712,7 @@ Planned future work: Add landing pages</div>
               <textarea id="cf-message" name="message" placeholder="Say hello." required></textarea>
               <button type="submit">Send</button>
             </div>
-            <div id="form-note" role="note">protected by reCAPTCHA</div>
+            <div id="form-note" role="note">✱ required — protected by reCAPTCHA</div> <!-- B106 -->
           </div>
           <input type="text" name="_gotcha" class="gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
         </div>
@@ -684,14 +722,7 @@ Planned future work: Add landing pages</div>
     </div>
   </div>
 
-  <!-- The link layer (UIUX §4.3, B28): the fourteen straight 1px --frame
-       lines that join the note cards, one `<line>` per pair the owner names
-       in issue #75, #72, #74, #146 and #196. TheBoards' link idiom ported verbatim
-       (TheBoards' `UIUX §4.6` / `B91`) — a line between two cards' centres,
-       below the notes,
-       never a hit target. Endpoints are computed from live card geometry
-       in app.js (issue #151, B59), so a line follows a card that is dragged
-       or resized; only the pairing is authored here. -->
+  <!-- Link pairings are authored here; app.js computes endpoints (UIUX §4.3, B28, B32, B34). -->
   <svg id="link-layer" aria-hidden="true" focusable="false">
     <line data-link="1" data-from="music" data-to="writing"></line>
     <line data-link="2" data-from="software-ai" data-to="community"></line>
@@ -707,6 +738,8 @@ Planned future work: Add landing pages</div>
     <line data-link="12" data-from="plants-rocks" data-to="plants-poles"></line>
     <line data-link="13" data-from="plants-rocks" data-to="plants-in-rocks"></line>
     <line data-link="14" data-from="plants-rocks" data-to="philly-plant-dads"></line>
+    <line data-link="15" data-from="wood" data-to="community"></line>
+    <line data-link="16" data-from="wood" data-to="plants-rocks"></line>
   </svg>
 
 </div>

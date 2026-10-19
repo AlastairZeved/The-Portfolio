@@ -3488,3 +3488,20 @@ Principle: Zero cognitive tax.
 Reason: a reader who follows the Docket's map to a ruling should land on the one that governs today; an edge written only in prose sends them to a clause that was replaced, and a contract kept by habit is lost the first time an entry forgets it.
 
 **Source:** the owner's answers in the Claude Code alignment of 2026-10-18 on issue [#273](https://github.com/AlastairZeved/The-Portfolio/issues/273), quoted verbatim — "Record all 12 in one entry"; "Add it, starting at B119".
+
+### B120. The career title card widens and grows to the longest title where its type is on the 11px floor (issue #259; partially supersedes B76; partially supersedes B95; keeps B87; keeps B98)
+Principle: Zero cognitive tax.
+Where a career role component is small enough that its title type sits on B76's 11px readable floor, the type stops shrinking while B76's 427u × 180u title box keeps shrinking with the component, so on phones and tablets 7 of the 8 titles were cut off (issue #259). Asked to choose, the owner ruled the box wider and taller, every box matched to the longest title, wherever the type is on the floor.
+
+- **Wider.** On the floor the title card takes the description card's width (600u, B76's existing ratio) in place of its 427u source width. Taller alone was tried and split long words mid-word ("REPRESENTA / TIVE").
+- **Taller, to the longest title.** The title card grows to the height of the longest role title (role 1's, "Branch Sales & Service Representative") plus the year's line, so all 8 title cards — and so all 8 components — keep one size (B95). A hidden copy of that title sizes every card; it is never drawn and never read aloud. This partially supersedes B95's clause that "no piece of the component individually scales on any viewport size" for the title card on the floor only; B95's uniform size stands.
+- **Where.** The switch sits exactly where the title's 28u type meets the 11px floor: a slot narrower than 830 × 11 / 28 ≈ 326.07px. Above it — every desktop window — B76's 427u × 180u box renders unchanged. No new design value is introduced: 600u, 28u, 11px, 14u and 4u are B76's.
+- **Rejected, with measurements:** a 9px floor still cut 7 of 8 titles at 390 × 844; abbreviation cannot work because even "Branch Banker" was cut; a wider ring is capped by the phone's stage height and still cut 5 of 8.
+
+**Scale:** every viewport where the ring's slot is narrower than 830 × 11 / 28 px — phones and portrait tablets (measured from 240 × 500 up to 744 × 1000); desktop and landscape tablet windows are untouched.
+
+**Number:** measured in Chromium, before → after, how far the most-cut role's year runs past its title card's inner edge (+ is cut off): +47.2px → −3.1px at 390 × 844, +53.3 → −2.4 at 320 × 568, +6.2 → −4.1 at 744 × 1000; 1440 × 900 unchanged at −13.4. One title-card height across all 8 roles at every measured width (68px at 390 × 844). Asserted by test/career.js at 390 × 844, 320 × 568 and 744 × 1000.
+
+Reason: a title the visitor cannot read asks them to guess which job a card is, and the 11px floor exists so the text stays readable — the box has to give way where the type no longer can.
+
+**Source:** the owner's answers in the Claude Code alignment of 2026-10-18 on issue [#259](https://github.com/AlastairZeved/The-Portfolio/issues/259), quoted verbatim — to the fix question, "Wider + taller (Recommended)"; to the same-size question, "All match the longest"; to the where question, "Wherever text hits 11px (Recommended)".

@@ -699,6 +699,46 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
       return n.top >= back.bottom - 1 && n.height > 0;
     }));
 
+  // B120 (issue #259): where the slot is narrow enough that the title's type
+  // sits on B76's 11px floor, the title card takes the description card's
+  // width and grows to fit the longest title, so every title and year shows
+  // in full and all 8 title cards keep one height (B95). Above the floor the
+  // card keeps its 427u source width.
+  const titleFit = pg => pg.evaluate(() => {
+    const slots = [...document.querySelectorAll('.carousel__slot')];
+    const rows = slots.map(s => {
+      const t = s.querySelector('.gm-title');
+      // drawn ink, not scrollHeight: above the floor the year may run into
+      // the card's bottom padding, which cuts nothing
+      const y = t.querySelector('.gm-uc').getBoundingClientRect();
+      const inside = y.bottom <= t.getBoundingClientRect().bottom - t.clientTop;
+      return { fits: t.scrollHeight <= t.clientHeight, inside, h: t.offsetHeight,
+               w: t.offsetWidth, descW: s.querySelector('.gm-desc').offsetWidth,
+               slotW: s.offsetWidth, title: t.childNodes[0].textContent.trim() };
+    });
+    const fit = getComputedStyle(document.querySelector('.gregorian-mode'))
+      .getPropertyValue('--gm-fit').trim().replace(/^"|"$/g, '');
+    return { rows, fit, floor: rows[0].slotW < 830 * 11 / 28 };
+  });
+  for (const [w, h] of [[390, 844], [320, 568], [744, 1000]]) {
+    const pg = w === 390 ? phone : await browser.newPage({ viewport: { width: w, height: h } });
+    if (pg !== phone) { await pg.goto(URL, { waitUntil: 'networkidle' }); await arrived(pg); }
+    const f = await titleFit(pg);
+    ok(`B120 — at ${w}×${h} the title type is on its 11px floor`, f.floor);
+    ok(`B120 — at ${w}×${h} every role's full title and year show on its title card`,
+      f.rows.every(r => r.fits && r.inside), JSON.stringify(f.rows.map(r => r.title + ':' + r.fits)));
+    ok(`B120 — at ${w}×${h} all 8 title cards keep one height and take the desc card's width`,
+      f.rows.every(r => r.h === f.rows[0].h && Math.abs(r.w - r.descW) <= 1),
+      JSON.stringify(f.rows.map(r => [r.h, r.w, r.descW])));
+    if (pg !== phone) await pg.close();
+  }
+  const desk = await titleFit(page);
+  ok('B120 — the fit title is role 1\'s, the longest', desk.fit === desk.rows[0].title);
+  ok('B120 — above the floor the title card keeps its 427u source width',
+    !desk.floor && desk.rows.every(r => Math.abs(r.w - 427 * r.slotW / 830) <= 1));
+  ok('B120 — above the floor every role\'s year still sits inside its title card',
+    desk.rows.every(r => r.inside));
+
   // Issue #261: reduced motion drops motion only -- no arrival, no glimmer,
   // no hover rise -- while the light, glass, shadows and grain stay.
   const still = await browser.newPage({ viewport: { width: 1440, height: 1110 }, reducedMotion: 'reduce' });

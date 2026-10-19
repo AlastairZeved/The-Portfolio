@@ -579,6 +579,9 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
 .gregorian-mode {
   --ink: var(--deep);           /* the .gm-card border ink; descriptions use --glass-ink */
   --glass-ink: var(--ink-light); /* issue #261: the smoked-glass desc card's light ink */
+  /* B120 (issue #259): the longest role title (role 1's), which sizes every
+     title card at the 11px floor; test/career.js pins it to role 1's copy. */
+  --gm-fit: "Branch Sales & Service Representative";
   position: relative;
   box-sizing: border-box;
   /* The component fills its slot and stacks title, year, and description. */
@@ -658,6 +661,30 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
   flex: 0 1 calc(180 * var(--u));
   box-shadow: var(--elevation);
   overflow: hidden;
+}
+/* B120 (issue #259): once the slot is narrow enough that the title's 28u type
+   sits on B76's 11px floor (slot < 830 × 11 / 28 px), the type stops shrinking
+   but its 427u × 180u box would not, and 7 of 8 titles were cut off on
+   phones and tablets. There the title card takes the description card's 600u
+   width and grows to fit the LONGEST title: a hidden ::before carries that
+   title (--gm-fit) plus the year's line, and the card's overflow: hidden
+   (a new block formatting context) wraps the float, so all 8 cards keep one
+   height (B95) at every width. The float's -100% right margin gives it no
+   width in the line, so the real title wraps across the full card. */
+@container (width < calc(830 * 11px / 28)) {
+  .gm-title {
+    width: calc(600 * var(--u));   /* the description card's width */
+    flex: 0 0 auto;
+  }
+  .gm-title::before {
+    content: var(--gm-fit);
+    float: left;
+    width: 100%;
+    margin-right: -100%;
+    /* the year's line under the fit title: .gm-uc's top gap and 1.0 line */
+    padding-bottom: calc(4 * var(--u) + max(calc(14 * var(--u)), 11px));
+    visibility: hidden;            /* sizes only: never drawn, never read aloud */
+  }
 }
 @keyframes gm-marquee {
   0%   { background-position: 130% 0; }

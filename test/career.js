@@ -1,5 +1,5 @@
 /* test/career.js — the career page (issue #133, B47): three employer cards,
-   the monochrome token ladder (B73), the plugin components (B56/B64/B76), and
+   the teal-and-amber token ladder (B121), the plugin components (B56/B64/B76), and
    — B98 (issue #257, superseding B92's coverflow fan) — the 3D RING of all 8
    role components, since B95 (issue #250) spanning the WHOLE body.
    One role radio group drives the centred card via CSS :has; the ← / →
@@ -12,8 +12,8 @@
    card glow, the arrows below the front card, ~500ms rotation, snap under
    reduced motion. Issue #261 polishes it for quiet wonder: a one-turn
    arrival on load, click any visible card to turn to it, hover answers on
-   side cards / employer cards / arrows / CTA, contact shadows, a cool
-   moonlit pool, a smoked-glass description card, the glimmer on the front
+   side cards / employer cards / arrows / CTA, contact shadows, an
+   amber-lit pool (B121), a smoked-glass description card, the glimmer on the front
    card only, a static film grain, and reduced motion that drops motion but
    keeps the light. B74 still bounds the page to one viewport with
    the description card as the only scroll container; B76 still renders the
@@ -249,7 +249,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
       const pool = document.querySelector('.carousel__pool');
       return pool && !pool.closest('.carousel') &&
         getComputedStyle(pool).backgroundImage.startsWith('radial-gradient') &&
-        [...document.querySelectorAll('.gm-back')].every(k => !getComputedStyle(k).boxShadow.includes('103, 103, 103'));
+        [...document.querySelectorAll('.gm-back')].every(k => !getComputedStyle(k).boxShadow.includes('230, 168, 42'));
     }));
   ok('B98 — the pool dips on each turn: every role names its own copy of the dip',
     await page.evaluate(() => getComputedStyle(document.querySelector('.carousel__pool')).animationName === 'pool-dip-1'));
@@ -259,18 +259,20 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     arrival.length === 8 && arrival.every(a => a.dur === 2000 && a.iter === 1 && a.target === 'carousel__slot') &&
     await page.evaluate(() => [...document.querySelectorAll('.carousel__slot')]
       .every(s => getComputedStyle(s).getPropertyValue('--spin').trim() === '0deg')));
-  ok('#261 — the light pool is faint cool moonlight; the ladder tokens stay zero-hue',
+  ok('B121 — the light pool is lit amber (--glow-amber-a); B99\'s cool moonlight is gone',
     await page.evaluate(() => {
       const bg = getComputedStyle(document.querySelector('.carousel__pool')).backgroundImage;
-      const moon = getComputedStyle(document.documentElement).getPropertyValue('--moon-a').trim();
-      return moon === '148 163 189' && bg.includes('rgba(148, 163, 189') && !bg.includes('103, 103, 103');
+      const root = getComputedStyle(document.documentElement);
+      return root.getPropertyValue('--glow-amber-a').trim() === '230 168 42' && bg.includes('rgba(230, 168, 42') &&
+        root.getPropertyValue('--moon-a').trim() === '';
     }));
   const glass = await page.evaluate(() => {
     const d = document.querySelector('.carousel__slot[data-role="1"] .gm-desc');
     const cs = getComputedStyle(d);
     const root = getComputedStyle(document.documentElement);
     return { bg: cs.backgroundColor, color: cs.color, top: cs.borderTopColor,
-             water: root.getPropertyValue('--water-top').trim(), filter: cs.backdropFilter };
+             water: root.getPropertyValue('--water-top').trim(), filter: cs.backdropFilter,
+             ph: parseFloat(getComputedStyle(d, '::before').opacity) };
   });
   const rgba = c => { const n = c.match(/[\d.]+/g).map(Number);
     // color(srgb r g b / a) is 0..1; rgb()/rgba() is 0..255
@@ -285,11 +287,19 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     const over = k => bg[k] * bg.a + under[k] * (1 - bg.a);   // the glass over the brightest thing behind it
     const comp = { r: over('r'), g: over('g'), b: over('b') };
     const ratio = (relLum(ink) + 0.05) / (relLum(comp) + 0.05);
-    ok('#261 — the front card is smoked glass: translucent, no backdrop-filter, light ink, a lit top edge',
-      bg.a > 0.5 && bg.a < 0.95 && relLum(bg) < 0.02 && relLum(ink) > 0.8 &&
-      (glass.filter === 'none' || !glass.filter) && rgba(glass.top).b > rgba(glass.top).r);
+    // B121: the placeholder's light ink at its own opacity (role 1 is empty), over that same glass
+    const mix = k => ink[k] * glass.ph + comp[k] * (1 - glass.ph);
+    const ph = { r: mix('r'), g: mix('g'), b: mix('b') };
+    const phRatio = (relLum(ph) + 0.05) / (relLum(comp) + 0.05);
+    // B121: the glass fill is --card (0.033), so the darkness bound is 0.05, not B73's 0.02;
+    // the lit top edge is amber, so red leads blue (it was the moonlight's blue)
+    ok('#261 — the front card is smoked glass: translucent, no backdrop-filter, light ink, an amber-lit top edge',
+      bg.a > 0.5 && bg.a < 0.95 && relLum(bg) < 0.05 && relLum(ink) > 0.8 &&
+      (glass.filter === 'none' || !glass.filter) && rgba(glass.top).r > rgba(glass.top).b);
     ok(`#261 — glass legibility: light text over the glass over --water-top holds ≥ 7:1 (${ratio.toFixed(1)}:1)`,
       ratio >= 7);
+    ok(`B121 — the placeholder over the glass over --water-top clears AA, ≥ 4.5:1 (${phRatio.toFixed(2)}:1)`,
+      glass.ph > 0 && glass.ph < 1 && phRatio >= 4.5);
   }
   ok('#261 — the glimmer runs on the front card only (2 sweeps: its title and back card)',
     await page.evaluate(() => {
@@ -302,11 +312,11 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
       const b = getComputedStyle(s, '::before');
       return b.content === '""' && b.backgroundImage.startsWith('radial-gradient') && b.backgroundImage.includes('rgba(0, 0, 0');
     })));
-  ok('#261 — a fine, static, desaturated film grain sits over the black',
+  ok('#261 — a fine, static, desaturated film grain sits over the deep (B121: deep teal)',
     await page.evaluate(() => {
       const bi = getComputedStyle(document.body).backgroundImage;
       return bi.includes('feTurbulence') && bi.includes('saturate') &&
-        getComputedStyle(document.body).backgroundColor === 'rgb(8, 8, 8)' &&
+        getComputedStyle(document.body).backgroundColor === 'rgb(3, 53, 50)' &&
         !document.getAnimations().some(a => a.effect.target === document.body);
     }));
   ok('#261 — every card carries a label for its own role; the front card\'s is removed',
@@ -356,7 +366,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     await page.evaluate(() => {
       const sh = getComputedStyle(document.querySelector('.topband__card[data-employer="brinker-capital"]')).boxShadow;
       const blur = parseFloat((sh.match(/\)\s+[-\d.]+px\s+[-\d.]+px\s+([\d.]+)px/) || [])[1]);
-      return sh.includes('103, 103, 103') && blur > 20;
+      return sh.includes('230, 168, 42') && blur > 20;
     }));
   const nextBox = await page.evaluate(() => {
     const l = [...document.querySelectorAll('.carousel__nav--next .carousel__nav-hit')].find(e => getComputedStyle(e).display !== 'none');
@@ -377,11 +387,11 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   await page.mouse.move(cta.x + cta.width / 2, cta.y + cta.height / 2);
   await page.waitForTimeout(300);
   ok('#261 — the CTA holds the light at rest and lifts on hover',
-    ctaRest.includes('103, 103, 103') &&
+    ctaRest.includes('230, 168, 42') &&
     await page.evaluate(() => new DOMMatrix(getComputedStyle(document.querySelector('.cta')).transform).m42 < -1));
   ok('#261 — the tools and education lines sit a step quieter than the facts (--ink-dim)',
     await page.evaluate(() => [...document.querySelectorAll('.parking-lot__tools')]
-      .every(t => getComputedStyle(t).color === 'rgba(244, 245, 241, 0.55)')));
+      .every(t => getComputedStyle(t).color === 'rgba(244, 245, 241, 0.65)')));   // B121: --ink-dim 0.55 -> 0.65
   await page.mouse.move(5, 5);
 
   // Navigation: the ← / → labels step one role per click with wrap-around.
@@ -444,7 +454,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
   // 0 0 8px 0 bloom, reintroduced), the other two do not.
   // Issue #329: every glowing card is recorded, so a second glow fails. The
   // pointer leaves the band first — the Brinker click above left it resting
-  // there, and the #261 hover bloom shares the glow's 103,103,103. Each read
+  // there, and the #261 hover bloom shares the glow's 230,168,42. Each read
   // waits for the expected card's 200ms box-shadow transition to settle
   // rather than sleeping; a timeout falls through to the assertion, which
   // prints what it saw.
@@ -457,11 +467,11 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
       await page.evaluate(r => document.getElementById('role-' + r).click(), role);
       await page.waitForFunction(e => {
         const card = document.querySelector('.topband__card[data-employer="' + e + '"]');
-        return card.getAnimations().length === 0 && getComputedStyle(card).boxShadow.includes('103, 103, 103');
+        return card.getAnimations().length === 0 && getComputedStyle(card).boxShadow.includes('230, 168, 42');
       }, EMPLOYER_OF[role - 1], { timeout: 2000 }).catch(() => {});
       const glowing = await page.evaluate(() =>
         ['pnc-bank', 'pnc-private-bank', 'brinker-capital'].filter(e =>
-          getComputedStyle(document.querySelector('.topband__card[data-employer="' + e + '"]')).boxShadow.includes('103, 103, 103')));
+          getComputedStyle(document.querySelector('.topband__card[data-employer="' + e + '"]')).boxShadow.includes('230, 168, 42')));
       out.push(role + ':' + glowing.join('+'));
     }
     return out;
@@ -630,23 +640,60 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     (await page.locator('.parking-lot .cta').innerText()).trim() === 'Learn More about Rob' &&
     (await page.locator('.parking-lot .cta').getAttribute('href')) === 'https://razgregory.com/');
 
-  // UIUX §10: the B73 monochrome ladder
+  // UIUX §10.1: the B121 teal-and-amber ladder (supersedes B73's gray)
   const tokens = await page.evaluate(() => {
     const cs = getComputedStyle(document.documentElement);
     return { deep: cs.getPropertyValue('--deep').trim(), card: cs.getPropertyValue('--card').trim(),
              frame: cs.getPropertyValue('--frame').trim(), note: cs.getPropertyValue('--note').trim(),
-             glow: cs.getPropertyValue('--glow-gray').trim() };
+             glow: cs.getPropertyValue('--glow-amber').trim(), gray: cs.getPropertyValue('--glow-gray').trim() };
   });
-  ok('the ladder is monochrome gray, at the landing palette luminance rungs',
-    tokens.deep === '#080808' && tokens.card === '#151515' && tokens.frame === '#8c8c8c' && tokens.note === '#cbcbcb');
+  ok('the ladder is deep teal lit by amber (B121); no value ships under the gray glow\'s name',
+    tokens.deep === '#033532' && tokens.card === '#013a36' && tokens.frame === '#559791' &&
+    tokens.note === '#eec57e' && tokens.glow === '#e6a82a' && tokens.gray === '');
   const lum = hex => {
     const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
       .map(c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   };
-  ok('luminance ladder holds: card one step above deep, glow one rung below frame (TheBoards `B132` rule)',
+  ok('luminance ladder holds: card one step above deep; the amber glow is the light, above frame (B121)',
     lum(tokens.card) > lum(tokens.deep) && lum(tokens.card) / lum(tokens.deep) < 4 &&
-    lum(tokens.glow) < lum(tokens.frame));
+    lum(tokens.glow) > lum(tokens.frame));
+  // B121: --deep and --card rose, so the quiet text (--ink-dim) is read against its two grounds.
+  const inkDim = rgba(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--ink-dim').trim()));
+  const dimOver = ground => ({ r: inkDim.r * inkDim.a + ground.r * (1 - inkDim.a),
+    g: inkDim.g * inkDim.a + ground.g * (1 - inkDim.a), b: inkDim.b * inkDim.a + ground.b * (1 - inkDim.a) });
+  {
+    const card = { r: parseInt(tokens.card.slice(1, 3), 16), g: parseInt(tokens.card.slice(3, 5), 16), b: parseInt(tokens.card.slice(5, 7), 16) };
+    const ratio = (relLum(dimOver(card)) + 0.05) / (relLum(card) + 0.05);
+    ok(`B121 — the unselected employers' dim ink on --card clears AA, ≥ 4.5:1 (${ratio.toFixed(2)}:1)`, ratio >= 4.5);
+  }
+  // The lot is a gradient, so its ground is read from the render: the lines are hidden, the
+  // pixels under them sampled, and the dim ink is checked against the lightest of them.
+  for (const [w, h] of [[1440, 900], [390, 844]]) {
+    // not reducedMotion: there every property runs a 0.01ms transition, and a capture can beat it
+    const lot = await browser.newPage({ viewport: { width: w, height: h } });
+    await lot.goto(URL, { waitUntil: 'networkidle' });
+    const boxes = await lot.evaluate(() => [...document.querySelectorAll('.parking-lot__tools')]
+      .map(t => { const r = t.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; }));
+    const png = (await lot.screenshot({ style: '.parking-lot__tools, .parking-lot__tools * { visibility: hidden !important; }' })).toString('base64');
+    const grounds = await lot.evaluate(async ({ png, boxes }) => {
+      const img = new Image(); img.src = 'data:image/png;base64,' + png; await img.decode();
+      const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+      const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+      const out = [];
+      for (const [bx, by, bw, bh] of boxes) for (const fy of [0.1, 0.5, 0.9]) for (const fx of [0.05, 0.5, 0.95]) {
+        const d = x.getImageData(Math.round(bx + bw * fx), Math.round(by + bh * fy), 1, 1).data;
+        out.push({ r: d[0], g: d[1], b: d[2] });
+      }
+      return out;
+    }, { png, boxes });
+    const ratios = grounds.map(gr => (relLum(dimOver(gr)) + 0.05) / (relLum(gr) + 0.05));
+    const worst = Math.min(...ratios);
+    ok(`B121 — at ${w}×${h} the footer's tools and education lines (--ink-dim) clear AA on the lot, ≥ 4.5:1 (${worst.toFixed(2)}:1)`,
+      boxes.length === 2 && worst >= 4.5,
+      JSON.stringify({ boxes: boxes.map(b => b.map(Math.round)), ground: grounds[ratios.indexOf(worst)] }));
+    await lot.close();
+  }
 
   // a11y + reduced motion
   ok('one off-canvas h1; three h2 wordmarks; the role ring is the named radio group',
@@ -661,7 +708,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
       const selected = getComputedStyle(document.querySelector('.topband__card[data-employer="pnc-bank"]'));
       const unselected = getComputedStyle(document.querySelector('.topband__card[data-employer="pnc-private-bank"]'));
       return selected.fontStyle === 'normal' && selected.color === 'rgb(244, 245, 241)' &&
-        unselected.fontStyle === 'italic' && unselected.color === 'rgba(244, 245, 241, 0.55)';
+        unselected.fontStyle === 'italic' && unselected.color === 'rgba(244, 245, 241, 0.65)';   // B121: --ink-dim 0.55 -> 0.65
     }));
   const normalCarouselMotion = await page.evaluate(() =>
     getComputedStyle(document.querySelector('.carousel__slot')).transitionDuration);
@@ -748,13 +795,13 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     glimmer: [...document.querySelectorAll('.gm-title, .gm-back')].filter(e => getComputedStyle(e, '::after').content !== 'none').length,
     glass: getComputedStyle(document.querySelector('.gm-desc')).backgroundColor,
     grain: getComputedStyle(document.body).backgroundImage.includes('feTurbulence'),
-    pool: getComputedStyle(document.querySelector('.carousel__pool')).backgroundImage.includes('148, 163, 189'),
+    pool: getComputedStyle(document.querySelector('.carousel__pool')).backgroundImage.includes('230, 168, 42'),
     frontM11: new DOMMatrix(getComputedStyle(document.querySelector('.carousel__slot[data-role="1"]')).transform).m11,
   }));
   ok('#261 — reduced motion: no arrival turn and no glimmer; the ring is settled at once',
     rm.arrive === 0 && rm.glimmer === 0 && Math.abs(rm.frontM11 - 1) < 1e-3);
   ok('#261 — reduced motion keeps the light, the glass and the grain',
-    rm.grain && rm.pool && !rm.glass.includes('203'));
+    rm.grain && rm.pool && rgba(rm.glass).a < 0.95);
   const s3 = await still.evaluate(() => {
     const b = document.querySelector('.carousel__slot[data-role="2"] .carousel__slot-hit').getBoundingClientRect();
     return { x: b.x + b.width / 2, y: b.y + b.height / 2 };

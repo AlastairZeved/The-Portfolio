@@ -516,7 +516,7 @@ The Parking Lot is split **50/50** by a vertical divider.
 | card drag + scale-based resize (B45: own scale floored 0.5, ceilinged at B51's one-fifth-of-viewport bound, content-sized floor NOTE_MIN_W 132) + the B78 drawing rest scales and placements per card (B80 for philly-plant-dads and B116 for wood, seated by the owner's words), link still opens a new tab — run at desktop (scale 1) **and** at 390×844 (scale < 1: the gesture is pinned in the logical space) | `test/movable_resizable.js` |
 | releasing a resize navigates nothing; a tap on the handle still opens the door (B41) | `test/movable_resizable.js` |
 | no service worker | PRD §3, `DECISIONS.md` B13 — and the deliberate absence of `test/sw-update.js` |
-| the career page: employer-card shared size/equal gaps, oneliner dates and selection glow; eight-role ring and uniform components; last-role jumps; one-viewport layout, component geometry and in-card scroll; monochrome tokens; filled and blank slots; two-way footer and centred CTA; reduced-motion, touch and glass-legibility behavior | `test/career.js` |
+| the career page: employer-card shared size/equal gaps, oneliner dates and selection glow; eight-role ring and uniform components; last-role jumps; one-viewport layout, component geometry and in-card scroll; teal-and-amber tokens and their contrast floor; filled and blank slots; two-way footer and centred CTA; reduced-motion, touch and glass-legibility behavior | `test/career.js` |
 | the Plants & Rocks page: selector mechanics and `--frame` glow; storybook iframe and empty rocks reader; two-section lot; B58 Download (live on poles, inert on rocks) and B82 Back-to-the-Garden anchors (live on both tabs); idea-green tokens; single-file page and B50 landing-convention band/card/lot | `test/plantsandrocks.js` |
 
 ---
@@ -551,33 +551,66 @@ driven by `:has`.
 
 **Rulings:** B47.
 
-### §10.1 Tokens — the monochrome binding
+### §10.1 Tokens — the deep teal and amber binding
 
-TheBoards' token ladder is re-derived as a pure neutral gray scale at the
-landing palette's relative-luminance rungs. The token relationships are
-preserved role for role.
+TheBoards' token ladder is re-derived in **deep teal, lit by amber**: teal
+is the room, amber is the light. The token relationships are preserved role
+for role. The water ladder, `--frame` and `--note` keep the landing
+palette's relative-luminance rungs; `--deep` and `--card` rise so the middle
+of the page reads as teal rather than near-black. Amber appears only where
+something is lit or chosen: the selected and hovered employer glow, the light
+pool behind the front card, the glass card's lit edge, the CTA's bloom and
+the arrows. The amber glow sits above `--frame`; TheBoards' `B132`
+one-rung-down glow rule does not bind on this page.
 
 | Token | Hex | Role | Relative luminance |
 |---|---|---|---|
-| `--deep` | `#080808` | page canvas | 0.0023 |
-| `--card` | `#151515` | band and card fill | 0.0077 |
-| `--frame` | `#8c8c8c` | borders and full-width rules | 0.2611 |
-| `--note` | `#cbcbcb` | brightest ink on the deep | 0.5962 |
-| `--water-top` | `#636363` | gradient ladder, header band | 0.1237 |
-| `--water-mid` | `#4d4d4d` | gradient ladder mid stop | 0.0737 |
-| `--water-bot` | `#333333` | gradient ladder foot | 0.0325 |
+| `--deep` | `#033532` | page canvas — deep teal | 0.0280 |
+| `--card` | `#013a36` | band and card fill, one step above the deep | 0.0330 |
+| `--frame` | `#559791` | borders and full-width rules | 0.2611 |
+| `--note` | `#eec57e` | pale amber — the arrows, the brightest ink on the deep | 0.5962 |
+| `--water-top` | `#2c6d63` | gradient ladder, header band | 0.1237 |
+| `--water-mid` | `#1e5551` | gradient ladder mid stop | 0.0737 |
+| `--water-bot` | `#003a32` | gradient ladder foot | 0.0326 |
 | `--ink-light` | `#f4f5f1` | light ink pole | — |
-| `--ink-dim` | `rgb(244 245 241 / 0.55)` | unselected-card ink | — |
-| `--glow-gray` | `#676767` | selected-card glow | 0.1356 |
-| `--moon-a` | `148 163 189` | cool moonlight channels | 0.36 |
+| `--ink-dim` | `rgb(244 245 241 / 0.65)` | unselected-card and footer-line ink | — |
+| `--glow-amber` | `#e6a82a` | the light: selected and hovered glow, light pool, glass edge, CTA bloom | 0.4500 |
 
-`--water-bot-a` is `51 51 51`, the channels of `--water-bot`.
-`--glow-gray-a` is `103 103 103`, the channels of `--glow-gray`.
+`--water-bot-a` is `0 58 50`, the channels of `--water-bot`.
+`--glow-amber-a` is `230 168 42`, the channels of `--glow-amber`; every
+bloom, the light pool and the glass card's lit edge use it.
 
-**Rulings:** B73, B81, B99.
-**Agent-derived:** `--water-bot-a` and `--glow-gray-a` reuse their source
-colors' RGB channels; the luminance figures are the corresponding token
-measurements.
+`--ink-dim` is `0.65` here, up from `0.55`: on the teal grounds `0.55` left
+the footer's tools and education lines at about 4.2:1, and `0.65` returns
+both quiet texts to the contrast they had on the gray page.
+
+Verified contrast on this page, each at the worst extreme of its range. The
+grounds are named in words because the landing page (§2.2) and the Plants &
+Rocks page (§11.1) declare tokens of the same names at other values.
+
+| Ground | Ink | Ratio | Level |
+|---|---|---|---|
+| deep `#033532` | light ink `#f4f5f1` | 12.30:1 | AAA |
+| card `#013a36` | light ink | 11.55:1 | AAA |
+| card `#013a36` | dim ink (light ink at 0.65) | 5.78:1 | AA |
+| the lot, lightest point under the footer lines (measured, 390×844) | dim ink | 5.16:1 | AA |
+| water, lightest stop `#2c6d63` | light ink | 5.52:1 | AA |
+| water, darkest stop `#003a32` | light ink | 11.61:1 | AAA |
+| glass (card at 78%) over water's lightest stop | light ink | 9.87:1 | AAA |
+| glass (card at 78%) over water's lightest stop | placeholder (light ink at 0.6) | 4.63:1 | AA |
+| deep `#033532` | frame `#559791` (borders, non-text) | 3.99:1 | ≥ 3:1 |
+| deep `#033532` | pale amber `#eec57e` (arrows, non-text) | 8.29:1 | ≥ 3:1 |
+
+The placeholder over the glass is the tightest pair; `--card` may not rise
+further without taking it below 4.5:1. `test/career.js` asserts the dim ink
+on the card, the footer lines on the rendered lot (at 1440×900 and 390×844),
+the glass and the placeholder.
+
+**Rulings:** B73, B81, B99, B121.
+**Agent-derived:** `--water-bot-a` and `--glow-amber-a` reuse their source
+colors' RGB channels; the luminance and contrast figures are the
+corresponding token measurements. The hexes are the owner's sign-off of a
+rendered set (B121).
 
 ### §10.2 Regions
 
@@ -586,7 +619,7 @@ measurements.
   share one size, hug the widest employer label, and have equal gaps. Each
   carries its tenure as the italic `13.33px × --rs` date line. Unselected
   cards are dim and italic; the employer of the centred role uses the
-  `--glow-gray` border and `0 0 8px 0` bloom. PNC Bank is selected by default.
+  `--glow-amber` border and `0 0 8px 0` bloom. PNC Bank is selected by default.
   The page's sole `h1` ("Career") is visually hidden.
 - **Body (per-employer detail):** one full-width role carousel in the body
   content area, bounded by an `overflow: clip` wrapper. The `.carousel` is
@@ -610,12 +643,12 @@ measurements.
   743px. The CTA keeps `min-height: 50px`, `padding: 2px 21px`, 14px/600 type,
   and a 3px radius, along with its resting, hover and focus
   shadows: resting `var(--elevation), 0 0 6px 0 var(--frame), 0 0 18px 2px
-  rgb(var(--glow-gray-a) / 0.55)`; hover `var(--elevation), 0 0 12px 2px
+  rgb(var(--glow-amber-a) / 0.55)`; hover `var(--elevation), 0 0 12px 2px
   var(--frame), 0 0 24px 4px var(--frame)`; focus `var(--elevation), 0 0
   12px 2px var(--frame), 0 0 0 4px var(--deep)`. The region grows with its
   content beyond its floor.
 
-**Rulings:** B31, B46, B49, B56, B61, B65, B73, B74, B76, B77, B79, B87, B88, B95, B98, B100, B102, B105.
+**Rulings:** B31, B46, B49, B56, B61, B65, B73, B74, B76, B77, B79, B87, B88, B95, B98, B100, B102, B105, B121.
 The CSS `:has` selectors connect the checked role to its employer card and
 the displayed ring state.
 
@@ -676,26 +709,26 @@ the component scales uniformly through `--u`.
 
 ### §10.6 Quiet wonder
 
-The ring's motion and light answer interaction while the gray page remains
-quiet. Values below describe the current rendering.
+The ring's motion and amber light answer interaction while the teal page
+remains quiet. Values below describe the current rendering.
 
 | Area | Current rendering |
 |---|---|
-| Light pool (B99) | Cool moonlight behind the front card, outside the 3D context. Existing `--moon-a` channels; pool alphas `0.15 / 0.09 / 0.03 / 0` at `0 / 30 / 60 / 90%`, over `2.4 × 1.7` card widths. It dims to `0.45` at the midpoint of a 500ms turn, once on load. |
+| Light pool (B99, B121) | Amber light behind the front card, outside the 3D context. `--glow-amber-a` channels (B121; B99's cool moonlight is retired); pool alphas `0.15 / 0.09 / 0.03 / 0` at `0 / 30 / 60 / 90%`, over `2.4 × 1.7` card widths. It dims to `0.45` at the midpoint of a 500ms turn, once on load. |
 | Floor light (B99) | Ellipse `46% × 7%` at 79%, alpha `0.12 → 0.04 → 0`. |
 | Click any card | Each visible side card has a label hit-area for its role radio; the front card's hit-area is hidden. |
 | Hover: side card | Brightness increases by `0.2`; the card rises by `0.025 × --ring-w` without moving in front of the centre card. |
-| Hover: employer card | `0 0 32px 4px` × `--rs` in `--glow-gray-a` at 0.9; 200ms shadow, filter and transform transitions. |
-| Arrows | `2.5rem` square box; `0.85rem` chevron with 3px top/left strokes; light ink with `drop-shadow(0 0 4px)`. Hover nudge 3px; active scale 0.85 over 80ms. |
+| Hover: employer card | `0 0 32px 4px` × `--rs` in `--glow-amber-a` at 0.9; 200ms shadow, filter and transform transitions. |
+| Arrows | `2.5rem` square box; `0.85rem` chevron with 3px top/left strokes in pale amber `--note` at rest (B121); on hover light ink with an amber `drop-shadow(0 0 4px)`. Hover nudge 3px; active scale 0.85 over 80ms. |
 | Grounding | Per-slot `::before`, at `bottom: 62u`; `640 × 56u` radial black `0.85 → 0.45 → 0`. |
-| Description card (B100) | `--card` fill at 78%, `--ink-light` text, `--frame` rim at 35%, moonlit top edge at 0.6 and inset line at 0.22; thumb `--frame`. The placeholder uses `--ink-light` at 0.6. The text-over-glass contrast is asserted by `test/career.js`. |
+| Description card (B100) | `--card` fill at 78%, `--ink-light` text, `--frame` rim at 35%, amber-lit top edge at 0.6 and inset line at 0.22; thumb `--frame`. The placeholder uses `--ink-light` at 0.6. The text-over-glass contrast is asserted by `test/career.js`. |
 | Glimmer (B102) | `gm-marquee` on the checked/front card only, on `.gm-title` and `.gm-back` pseudo-elements. |
 | Ambient | Static desaturated film grain on the page canvas; it never moves. |
 | Footer | The CTA carries a resting `0 0 18px 2px` glow at 0.55 and a 2px hover lift; tools and education lines use `--ink-dim`. Transitions are 200ms. |
 | Reduced motion | No arrival turn, glimmer, side-card rise, arrow hover nudge or arrow press scale, or CTA hover lift. The CTA's 2px active translation remains. Light, glass, shadows, grain and hover brightening remain. |
 | Touch | Hover effects are limited to hover-capable devices; tapping a visible side card turns the ring. |
 
-**Rulings:** B99, B100, B101, B102, B103, B105, B107.
+**Rulings:** B99, B100, B101, B102, B103, B105, B107, B121.
 **Agent-derived:** the pool dip keyframes are named per role so selecting a
 role restarts the dip; the ambient grain is an SVG filter embedded in the CSS.
 

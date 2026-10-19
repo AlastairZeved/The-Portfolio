@@ -651,6 +651,7 @@ smoked-glass treatment in §10.6.
 |---|---|
 | Cards | All eight; one front card, the others fan behind it. |
 | Card size | One standardized size and height for all roles. |
+| Title card at the 11px floor (B120) | Where the slot is narrower than `830 × 11 / 28` px (the title's 28u type on B76's 11px floor), the title card takes the description card's `600u` width and grows to the longest role title plus the year's line; all 8 title cards keep one height. Above that width it keeps its `427u` width and `180u` basis. |
 | Position | The front card is at z = 0; every other card's nearest edge is behind it. |
 | Ring radius | `1.6 × --ring-w` desktop; `1.25 × --ring-w` at ≤743px. |
 | Perspective | `3.6 × --ring-w`; camera origin `50% -12%`. |
@@ -668,7 +669,7 @@ The checked role starts at role 1. On load, the ring makes one full turn over
 about two seconds and settles on role 1 (§10.6). The employer cards act as
 role-jump labels.
 
-**Rulings:** B92, B93, B95, B98, B101.
+**Rulings:** B92, B93, B95, B98, B101, B120.
 **Agent-derived:** angle, spread and depth literals implement the ruled ring
 relationships. The ring uses the checked role radio and CSS `:has` selectors;
 the component scales uniformly through `--u`.

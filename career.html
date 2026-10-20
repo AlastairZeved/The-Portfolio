@@ -747,29 +747,12 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
 }
 /* B95 (issue #250): the 8 description cards are UNIFORM — one standardized
    height and width. The uniform height is sized from the longest copies:
-   roles 3 and 5 fit inside it without scrolling; role 8 (the longest)
-   scrolls — the FILLED card's styled in-card bar stays ALWAYS visible (B76),
-   the thumb rendering when the content overflows. The empty card keeps the
-   same uniform box as the filled ones, bare of the scroll region. Width is
-   the B76 source ratio (600 of 830). */
+   roles 3 and 5 fit inside it without scrolling; roles 1 and 8 (the longest,
+   B122) scroll — the FILLED card's styled in-card bar stays ALWAYS visible
+   (B76), the thumb rendering when the content overflows. Width is the B76
+   source ratio (600 of 830). B122 (issue #347): every role carries copy, and
+   B98's "Description coming soon" placeholder is removed. */
 .gm-desc { flex: 0 1 calc(450 * var(--u)); }
-
-/* B98 (issue #257): a role whose copy is not written yet shows a quiet
-   placeholder instead of a blank slab -- the landing page's dim-italic
-   grammar, in the card's own ink at reduced strength (issue #261: the glass
-   card's light ink at 0.6, ~4.6:1 on the glass over --water-top, B121). It
-   fades with the description text on the side cards. The card stays
-   :empty, so the copy checks still read it as empty. */
-.gm-desc:empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.gm-desc:empty::before {
-  content: "Description coming soon";
-  font-style: italic;
-  opacity: 0.6;
-}
 .gm-desc:not(:empty) { overflow-y: scroll; }
 /* The bar is a real, visible, in-card scroll bar (B75, carried into B76):
    ::-webkit-scrollbar forces the classic (non-overlay) bar Chromium and
@@ -1012,7 +995,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
           <h3 class="gm-card gm-title">Branch Sales &amp; Service Representative<span class="gm-uc">2017-2018</span></h3>
-        <p class="gm-card gm-desc"></p>
+        <p class="gm-card gm-desc">Delivered a unique customer experience aimed at improving customer financial wellbeing and creating loyalty while increasing share of wallet.<br><br>Identified sales opportunities through meaningful conversations while servicing customers, making appropriate referrals to branch staff.<br><br>Ensured teller and branch daily operations and maintenance transactions are completed in an efficient and accurate manner.<br><br>Supported proactive sales conversations through internal and outbound interactions with a defined sales process including service to sales, teller interactions, and effective lobby engagement.</p>
         </div>
       </div>
       <div class="carousel__slot" data-role="2" style="--i: 2">
@@ -1020,7 +1003,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
           <h3 class="gm-card gm-title">Branch Sales &amp; Service Associate<span class="gm-uc">2018-2019</span></h3>
-        <p class="gm-card gm-desc"></p>
+        <p class="gm-card gm-desc">Educated customers on options for managing financial transactions by leveraging technology, tools and resources, identifying banking opportunities during the customer interaction and referring to internal partners where appropriate.<br><br>Built and developed client relationships through meaningful, value-adding conversations that uncover financial needs while solving complex issues through multichannel engagement, lobby engagement, external events, and business relationships.</p>
         </div>
       </div>
       <div class="carousel__slot" data-role="3" style="--i: 3">
@@ -1036,7 +1019,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
           <h3 class="gm-card gm-title">Client Service Associate<span class="gm-uc">2020-2021</span></h3>
-        <p class="gm-card gm-desc"></p>
+        <p class="gm-card gm-desc">Supported the fiduciary team in day-to-day trust administration services.<br><br>Provided exceptional client service and flawless execution on client requests, inquiries, and transaction needs for grantors, trustees, beneficiaries and interested parties.<br><br>Acted as the escalation point for complex administration issues, collaborating with internal and external parties while ensuring compliance with all legal and fiduciary regulations, policies and procedures.</p>
         </div>
       </div>
       <div class="carousel__slot" data-role="5" style="--i: 5">
@@ -1052,7 +1035,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
           <h3 class="gm-card gm-title">Trader<span class="gm-uc">2022-2023</span></h3>
-        <p class="gm-card gm-desc"></p>
+        <p class="gm-card gm-desc">Managed trading activity of routine operations for client accounts, such as liquidity, allocation changes, rebalancing, cash movement, etc. for SMA and UMA portfolios.<br><br>Monitored assigned trading queues and portfolios for exceptions, model and allocation drift, illiquid assets, etc.<br><br>Worked with developers to test and improve system enhancements and process changes.</p>
         </div>
       </div>
       <div class="carousel__slot" data-role="7" style="--i: 7">
@@ -1060,7 +1043,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
         <div class="gregorian-mode">
           <div class="gm-card gm-back" role="presentation"></div>
           <h3 class="gm-card gm-title">Portfolio Specialist<span class="gm-uc">2023</span></h3>
-        <p class="gm-card gm-desc"></p>
+        <p class="gm-card gm-desc">Developed exception monitoring tools and data models for ensuring portfolio adherence to client objectives and model allocations.</p>
         </div>
       </div>
       <div class="carousel__slot" data-role="8" style="--i: 8">

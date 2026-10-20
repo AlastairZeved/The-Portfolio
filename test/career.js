@@ -227,12 +227,9 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
       const d = r => getComputedStyle(document.querySelector(`.carousel__slot[data-role="${r}"] .gm-desc`)).color;
       return d('1') !== 'rgba(0, 0, 0, 0)' && d('3') === 'rgba(0, 0, 0, 0)' && d('8') === 'rgba(0, 0, 0, 0)';
     }));
-  ok('B98 — an empty role shows the quiet "Description coming soon" placeholder',
-    await page.evaluate(() => {
-      const d = document.querySelector('.carousel__slot[data-role="1"] .gm-desc');
-      const b = getComputedStyle(d, '::before');
-      return d.matches(':empty') && b.content === '"Description coming soon"' && b.fontStyle === 'italic';
-    }));
+  ok('B122 — B98\'s "Description coming soon" placeholder is gone: no desc card is empty or draws one',
+    await page.evaluate(() => [...document.querySelectorAll('.gm-desc')].every(d =>
+      !d.matches(':empty') && getComputedStyle(d, '::before').content === 'none')));
   ok('B98 — the arrows sit below the front card, previous left of next, nothing over them',
     await page.evaluate(() => {
       const vis = d => [...document.querySelectorAll(`.carousel__nav--${d} .carousel__nav-hit`)]
@@ -271,8 +268,7 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     const cs = getComputedStyle(d);
     const root = getComputedStyle(document.documentElement);
     return { bg: cs.backgroundColor, color: cs.color, top: cs.borderTopColor,
-             water: root.getPropertyValue('--water-top').trim(), filter: cs.backdropFilter,
-             ph: parseFloat(getComputedStyle(d, '::before').opacity) };
+             water: root.getPropertyValue('--water-top').trim(), filter: cs.backdropFilter };
   });
   const rgba = c => { const n = c.match(/[\d.]+/g).map(Number);
     // color(srgb r g b / a) is 0..1; rgb()/rgba() is 0..255
@@ -287,10 +283,6 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     const over = k => bg[k] * bg.a + under[k] * (1 - bg.a);   // the glass over the brightest thing behind it
     const comp = { r: over('r'), g: over('g'), b: over('b') };
     const ratio = (relLum(ink) + 0.05) / (relLum(comp) + 0.05);
-    // B121: the placeholder's light ink at its own opacity (role 1 is empty), over that same glass
-    const mix = k => ink[k] * glass.ph + comp[k] * (1 - glass.ph);
-    const ph = { r: mix('r'), g: mix('g'), b: mix('b') };
-    const phRatio = (relLum(ph) + 0.05) / (relLum(comp) + 0.05);
     // B121: the glass fill is --card (0.033), so the darkness bound is 0.05, not B73's 0.02;
     // the lit top edge is amber, so red leads blue (it was the moonlight's blue)
     ok('#261 — the front card is smoked glass: translucent, no backdrop-filter, light ink, an amber-lit top edge',
@@ -298,8 +290,6 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
       (glass.filter === 'none' || !glass.filter) && rgba(glass.top).r > rgba(glass.top).b);
     ok(`#261 — glass legibility: light text over the glass over --water-top holds ≥ 7:1 (${ratio.toFixed(1)}:1)`,
       ratio >= 7);
-    ok(`B121 — the placeholder over the glass over --water-top clears AA, ≥ 4.5:1 (${phRatio.toFixed(2)}:1)`,
-      glass.ph > 0 && glass.ph < 1 && phRatio >= 4.5);
   }
   ok('#261 — the glimmer runs on the front card only (2 sweeps: its title and back card)',
     await page.evaluate(() => {
@@ -480,8 +470,32 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     JSON.stringify(glowMap) === JSON.stringify(EMPLOYER_OF.map((e, i) => (i + 1) + ':' + e)),
     JSON.stringify(glowMap));
 
-  // B64 (issue #176): three desc cards carry the owner's copy verbatim; the rest stay empty.
-  const B64_COPY = {
+  // B64 (issue #176) and B122 (issue #347): every desc card carries the owner's copy —
+  // B64's three verbatim, B122's five with the four slips the owner chose to fix.
+  const DESC_COPY = {
+    'Branch Sales & Service Representative': [
+      'Delivered a unique customer experience aimed at improving customer financial wellbeing and creating loyalty while increasing share of wallet.',
+      'Identified sales opportunities through meaningful conversations while servicing customers, making appropriate referrals to branch staff.',
+      'Ensured teller and branch daily operations and maintenance transactions are completed in an efficient and accurate manner.',
+      'Supported proactive sales conversations through internal and outbound interactions with a defined sales process including service to sales, teller interactions, and effective lobby engagement.',
+    ],
+    'Branch Sales & Service Associate': [
+      'Educated customers on options for managing financial transactions by leveraging technology, tools and resources, identifying banking opportunities during the customer interaction and referring to internal partners where appropriate.',
+      'Built and developed client relationships through meaningful, value-adding conversations that uncover financial needs while solving complex issues through multichannel engagement, lobby engagement, external events, and business relationships.',
+    ],
+    'Client Service Associate': [
+      'Supported the fiduciary team in day-to-day trust administration services.',
+      'Provided exceptional client service and flawless execution on client requests, inquiries, and transaction needs for grantors, trustees, beneficiaries and interested parties.',
+      'Acted as the escalation point for complex administration issues, collaborating with internal and external parties while ensuring compliance with all legal and fiduciary regulations, policies and procedures.',
+    ],
+    'Trader': [
+      'Managed trading activity of routine operations for client accounts, such as liquidity, allocation changes, rebalancing, cash movement, etc. for SMA and UMA portfolios.',
+      'Monitored assigned trading queues and portfolios for exceptions, model and allocation drift, illiquid assets, etc.',
+      'Worked with developers to test and improve system enhancements and process changes.',
+    ],
+    'Portfolio Specialist': [
+      'Developed exception monitoring tools and data models for ensuring portfolio adherence to client objectives and model allocations.',
+    ],
     'Branch Banker': [
       'Completed the PNC Leadership Development Program, a high-performer program focused on preparing associates for advancement into specialized financial roles.',
       'Deployed across the PDSJ region to onboard and coach Branch Relationship Managers on multi-channel client-book development.',
@@ -516,18 +530,22 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     });
     return JSON.stringify(rows) === JSON.stringify(want);
   }, titlesYears));
-  ok('three desc cards render the owner\'s copy verbatim; the other five stay empty', await page.evaluate(copy => {
+  ok('all 8 desc cards render the owner\'s copy, one paragraph per <br><br> break', await page.evaluate(copy => {
     const nrm = x => x.replace(/\s+/g, ' ').trim();
     const slots = [...document.querySelectorAll('.carousel__slot')];
-    let filled = 0, empty = 0, wrong = 0;
+    let filled = 0, wrong = 0;
     for (const s of slots) {
       const t = s.querySelector('.gm-title').childNodes[0].textContent.trim();
-      const d = nrm(s.querySelector('.gm-desc').innerText);
-      if (copy[t]) { filled++; if (d !== nrm(copy[t].join(' '))) wrong++; }
-      else { empty++; if (d !== '') wrong++; }
+      const d = s.querySelector('.gm-desc');
+      if (copy[t]) {
+        filled++;
+        const text = html => { const t = document.createElement('div'); t.innerHTML = html; return nrm(t.textContent); };
+        const paras = d.innerHTML.split('<br><br>').map(text);
+        if (JSON.stringify(paras) !== JSON.stringify(copy[t].map(nrm))) wrong++;
+      }
     }
-    return filled === 3 && empty === 5 && wrong === 0;
-  }, B64_COPY));
+    return filled === 8 && wrong === 0;
+  }, DESC_COPY));
 
   // B87 (issue #218): each role's year is nested inside its title card.
   ok('B87 — each of the 8 role years is nested inside its title card',
@@ -537,8 +555,8 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
 
   // B95 (issue #250): uniform components — all 8 plates render at one
   // standardized size (the desc and title cards at one uniform footprint),
-  // scaled together by the slot's single --u; only the longest copy
-  // (role 8, the issue's stated exception) scrolls.
+  // scaled together by the slot's single --u; only the longest copies
+  // (roles 1 and 8, B95's stated exception; role 1 since B122) scroll.
   const b95uniform = await page.evaluate(() => {
     const rows = [...document.querySelectorAll('.carousel__slot')].map(s => {
       const gm = s.querySelector('.gregorian-mode');
@@ -546,19 +564,19 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
       const t = s.querySelector('.gm-title');
       return { plateW: gm.clientWidth, plateH: gm.offsetHeight,
                descW: d.clientWidth, descH: d.offsetHeight, titleH: t.offsetHeight,
-               scrollable: d.scrollHeight > d.clientHeight + 1 };
+               role: s.dataset.role, scrollable: d.scrollHeight > d.clientHeight + 1 };
     });
     return {
       onePlate: rows.every(r => r.plateW === rows[0].plateW && r.plateH === rows[0].plateH),
       oneDesc: rows.every(r => r.descW === rows[0].descW && r.descH === rows[0].descH),
       oneTitle: rows.every(r => r.titleH === rows[0].titleH),
-      scrollRoles: rows.filter(r => r.scrollable).length,
+      scrollRoles: rows.filter(r => r.scrollable).map(r => r.role).join(','),
     };
   });
   ok('B95 — all 8 components render at one standardized plate size',
     b95uniform.onePlate && b95uniform.oneTitle && b95uniform.oneDesc);
-  ok('B95 — only the longest copy (role 8) scrolls inside the uniform desc card',
-    b95uniform.scrollRoles === 1);
+  ok('B95/B122 — only the longest copies (roles 1 and 8) scroll inside the uniform desc card',
+    b95uniform.scrollRoles === '1,8', b95uniform.scrollRoles);
 
   // B76 (issue #194) geometry, on a filled card (role-8, "Sr. Portfolio Specialist").
   const b76 = await (async () => {

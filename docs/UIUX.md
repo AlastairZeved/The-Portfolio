@@ -597,16 +597,14 @@ Rocks page (§11.1) declare tokens of the same names at other values.
 | water, lightest stop `#2c6d63` | light ink | 5.52:1 | AA |
 | water, darkest stop `#003a32` | light ink | 11.61:1 | AAA |
 | glass (card at 78%) over water's lightest stop | light ink | 9.87:1 | AAA |
-| glass (card at 78%) over water's lightest stop | placeholder (light ink at 0.6) | 4.63:1 | AA |
 | deep `#033532` | frame `#559791` (borders, non-text) | 3.99:1 | ≥ 3:1 |
 | deep `#033532` | pale amber `#eec57e` (arrows, non-text) | 8.29:1 | ≥ 3:1 |
 
-The placeholder over the glass is the tightest pair; `--card` may not rise
-further without taking it below 4.5:1. `test/career.js` asserts the dim ink
-on the card, the footer lines on the rendered lot (at 1440×900 and 390×844),
-the glass and the placeholder.
+`test/career.js` asserts the dim ink on the card, the footer lines on the
+rendered lot (at 1440×900 and 390×844) and the glass. B122 removed the
+placeholder, and its 4.63:1 pair with it.
 
-**Rulings:** B73, B81, B99, B121.
+**Rulings:** B73, B81, B99, B121, B122.
 **Agent-derived:** `--water-bot-a` and `--glow-amber-a` reuse their source
 colors' RGB channels; the luminance and contrast figures are the
 corresponding token measurements. The hexes are the owner's sign-off of a
@@ -630,8 +628,8 @@ rendered set (B121).
   4rem)` above 743px and zero inline padding at or below 743px. The page stays
   within one viewport; the filled description card is its only scroll
   container. Components use the source geometry scaled uniformly to the
-  plate width; filled descriptions size to their content, while the empty
-  placeholder uses the ruled floor. The card has a 2.1px `--ink` border and a
+  plate width; every description card shares B95's one size, and the
+  longest copies scroll inside it. The card has a 2.1px `--ink` border and a
   keyboard focus ring.
 - **Footer:** the Parking Lot convention follows §9, split 50/50. The left
   half carries the tools line "Orion Technology \| Factset \| Morningstar \|
@@ -648,21 +646,19 @@ rendered set (B121).
   12px 2px var(--frame), 0 0 0 4px var(--deep)`. The region grows with its
   content beyond its floor.
 
-**Rulings:** B31, B46, B49, B56, B61, B65, B73, B74, B76, B77, B79, B87, B88, B95, B98, B100, B102, B105, B121.
+**Rulings:** B31, B46, B49, B56, B61, B65, B73, B74, B76, B77, B79, B87, B88, B95, B98, B100, B102, B105, B121, B122.
 The CSS `:has` selectors connect the checked role to its employer card and
 the displayed ring state.
 
 ### §10.3 Blank slots
 
-The three filled role descriptions are Branch Banker, Portfolio & Trust
-Administrator, and Sr. Portfolio Specialist. The other five role descriptions
-display "Description coming soon" in their cards. The unfilled
+All eight role descriptions carry the owner's copy (B64, B122); B98's
+"Description coming soon" placeholder is removed (B122). The unfilled
 professional-blurb and contact-info footer slots render nothing. Other empty
 blocks have no styled container, heading, filler text or marker.
 
-**Rulings:** B47, B56, B64, B98, B105.
-**Agent-derived:** the empty role-description placeholder is confined to
-`.gm-desc`; the other unfilled slots remain absent from the rendered page.
+**Rulings:** B47, B56, B64, B98, B105, B122.
+**Agent-derived:** the unfilled slots remain absent from the rendered page.
 
 ### §10.4 The role coverflow carousel
 
@@ -696,13 +692,12 @@ smoked-glass treatment in §10.6.
 | Employer jumps | PNC Bank → role 3; PNC Private Bank → role 5; Brinker Capital → role 8. The employer card for the centred role glows. |
 | Edges | The ring's projected span is clipped within the body. |
 | Mobile | Same ring, full-bleed body; `.clip` is `96vw` high and the ring scales against it. |
-| Empty roles | "Description coming soon" in italic light ink at 0.6 opacity. |
 
 The checked role starts at role 1. On load, the ring makes one full turn over
 about two seconds and settles on role 1 (§10.6). The employer cards act as
 role-jump labels.
 
-**Rulings:** B92, B93, B95, B98, B101, B120.
+**Rulings:** B92, B93, B95, B98, B101, B120, B122.
 **Agent-derived:** angle, spread and depth literals implement the ruled ring
 relationships. The ring uses the checked role radio and CSS `:has` selectors;
 the component scales uniformly through `--u`.
@@ -721,14 +716,14 @@ remains quiet. Values below describe the current rendering.
 | Hover: employer card | `0 0 32px 4px` × `--rs` in `--glow-amber-a` at 0.9; 200ms shadow, filter and transform transitions. |
 | Arrows | `2.5rem` square box; `0.85rem` chevron with 3px top/left strokes in pale amber `--note` at rest (B121); on hover light ink with an amber `drop-shadow(0 0 4px)`. Hover nudge 3px; active scale 0.85 over 80ms. |
 | Grounding | Per-slot `::before`, at `bottom: 62u`; `640 × 56u` radial black `0.85 → 0.45 → 0`. |
-| Description card (B100) | `--card` fill at 78%, `--ink-light` text, `--frame` rim at 35%, amber-lit top edge at 0.6 and inset line at 0.22; thumb `--frame`. The placeholder uses `--ink-light` at 0.6. The text-over-glass contrast is asserted by `test/career.js`. |
+| Description card (B100) | `--card` fill at 78%, `--ink-light` text, `--frame` rim at 35%, amber-lit top edge at 0.6 and inset line at 0.22; thumb `--frame`. The text-over-glass contrast is asserted by `test/career.js`. |
 | Glimmer (B102) | `gm-marquee` on the checked/front card only, on `.gm-title` and `.gm-back` pseudo-elements. |
 | Ambient | Static desaturated film grain on the page canvas; it never moves. |
 | Footer | The CTA carries a resting `0 0 18px 2px` glow at 0.55 and a 2px hover lift; tools and education lines use `--ink-dim`. Transitions are 200ms. |
 | Reduced motion | No arrival turn, glimmer, side-card rise, arrow hover nudge or arrow press scale, or CTA hover lift. The CTA's 2px active translation remains. Light, glass, shadows, grain and hover brightening remain. |
 | Touch | Hover effects are limited to hover-capable devices; tapping a visible side card turns the ring. |
 
-**Rulings:** B99, B100, B101, B102, B103, B105, B107, B121.
+**Rulings:** B99, B100, B101, B102, B103, B105, B107, B121, B122.
 **Agent-derived:** the pool dip keyframes are named per role so selecting a
 role restarts the dip; the ambient grain is an SVG filter embedded in the CSS.
 

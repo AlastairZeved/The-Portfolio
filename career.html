@@ -273,7 +273,8 @@ main { flex: 1 1 auto; display: flex; }
 /* ---- B98 (issue #257): the role ring. The 8 role components stand in one
    closed ring, 45deg apart, turning around a vertical axis. The checked role
    is nearest; back cards face outward and fade with distance. Each slot's
-   angle is its offset from the checked role, --a = (i - n) x 45deg; the depth
+   angle is its offset from the checked role, --a = (n - i) x 45deg (B124:
+   mirrored, so the next-older role stands on the right); the depth
    cue is cos(--a). The unnormalized angle keeps the ring rigid, so wraparound
    and some employer jumps take the longer route. The geometry scales with the
    .clip container; rendering values are recorded in UIUX §10.5. ---- */
@@ -339,7 +340,7 @@ body:has(#role-8:checked) .carousel { --n: 8; }
   /* Issue #261: --spin is the arrival turn (below), 0 once the ring settles;
      the fallback keeps a browser without @property on a still ring (its
      discrete 360deg -> 0 flip is a full turn, so nothing visibly jumps). */
-  --a: calc((var(--i) - var(--n)) * 45deg + var(--spin, 0deg));
+  --a: calc((var(--n) - var(--i)) * 45deg + var(--spin, 0deg));   /* B124: older roles on the right */
   --c: calc((1 + cos(var(--a))) / 2);             /* 1 front .. 0 back */
   /* Issue #261: --lift is 1 while the pointer is on a side card -- it rises a
      little and lifts out of the dark. The rise is a world-Y move made before
@@ -487,7 +488,10 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] {
    (inside it, the ring painted over them whatever their z-index). Two
    chevrons drawn in --note, each a stack of per-state labels -- a pure-CSS
    "step one role with wrap" has no native "next", so each state reveals the
-   label that points at its successor / predecessor via :has. No script. */
+   label that points at its successor / predecessor via :has. No script.
+   B124 (issue #346): "Next" steps back in time, to the next-older role
+   (role n -> n - 1, wrapping from role 1 to role 8); "Previous" steps
+   forward (n -> n + 1, wrapping from role 8 to role 1). */
 .carousel__controls {
   position: relative;
   z-index: 2;               /* above the front component's own lower inset, which hangs past the stage floor */
@@ -539,22 +543,22 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] {
 }
 .carousel__nav-hit:active::before { transition-duration: 80ms; }
 .carousel__nav-hit:active::before { --press: 0.85; }
-body:has(#role-1:checked) .carousel__nav--next .carousel__nav-hit[for="role-2"] { display:block; }
-body:has(#role-1:checked) .carousel__nav--prev .carousel__nav-hit[for="role-8"] { display:block; }
-body:has(#role-2:checked) .carousel__nav--next .carousel__nav-hit[for="role-3"] { display:block; }
-body:has(#role-2:checked) .carousel__nav--prev .carousel__nav-hit[for="role-1"] { display:block; }
-body:has(#role-3:checked) .carousel__nav--next .carousel__nav-hit[for="role-4"] { display:block; }
-body:has(#role-3:checked) .carousel__nav--prev .carousel__nav-hit[for="role-2"] { display:block; }
-body:has(#role-4:checked) .carousel__nav--next .carousel__nav-hit[for="role-5"] { display:block; }
-body:has(#role-4:checked) .carousel__nav--prev .carousel__nav-hit[for="role-3"] { display:block; }
-body:has(#role-5:checked) .carousel__nav--next .carousel__nav-hit[for="role-6"] { display:block; }
-body:has(#role-5:checked) .carousel__nav--prev .carousel__nav-hit[for="role-4"] { display:block; }
-body:has(#role-6:checked) .carousel__nav--next .carousel__nav-hit[for="role-7"] { display:block; }
-body:has(#role-6:checked) .carousel__nav--prev .carousel__nav-hit[for="role-5"] { display:block; }
-body:has(#role-7:checked) .carousel__nav--next .carousel__nav-hit[for="role-8"] { display:block; }
-body:has(#role-7:checked) .carousel__nav--prev .carousel__nav-hit[for="role-6"] { display:block; }
-body:has(#role-8:checked) .carousel__nav--next .carousel__nav-hit[for="role-1"] { display:block; }
-body:has(#role-8:checked) .carousel__nav--prev .carousel__nav-hit[for="role-7"] { display:block; }
+body:has(#role-1:checked) .carousel__nav--prev .carousel__nav-hit[for="role-2"] { display:block; }
+body:has(#role-1:checked) .carousel__nav--next .carousel__nav-hit[for="role-8"] { display:block; }
+body:has(#role-2:checked) .carousel__nav--prev .carousel__nav-hit[for="role-3"] { display:block; }
+body:has(#role-2:checked) .carousel__nav--next .carousel__nav-hit[for="role-1"] { display:block; }
+body:has(#role-3:checked) .carousel__nav--prev .carousel__nav-hit[for="role-4"] { display:block; }
+body:has(#role-3:checked) .carousel__nav--next .carousel__nav-hit[for="role-2"] { display:block; }
+body:has(#role-4:checked) .carousel__nav--prev .carousel__nav-hit[for="role-5"] { display:block; }
+body:has(#role-4:checked) .carousel__nav--next .carousel__nav-hit[for="role-3"] { display:block; }
+body:has(#role-5:checked) .carousel__nav--prev .carousel__nav-hit[for="role-6"] { display:block; }
+body:has(#role-5:checked) .carousel__nav--next .carousel__nav-hit[for="role-4"] { display:block; }
+body:has(#role-6:checked) .carousel__nav--prev .carousel__nav-hit[for="role-7"] { display:block; }
+body:has(#role-6:checked) .carousel__nav--next .carousel__nav-hit[for="role-5"] { display:block; }
+body:has(#role-7:checked) .carousel__nav--prev .carousel__nav-hit[for="role-8"] { display:block; }
+body:has(#role-7:checked) .carousel__nav--next .carousel__nav-hit[for="role-6"] { display:block; }
+body:has(#role-8:checked) .carousel__nav--prev .carousel__nav-hit[for="role-1"] { display:block; }
+body:has(#role-8:checked) .carousel__nav--next .carousel__nav-hit[for="role-7"] { display:block; }
 
 body:has(#role-1:focus-visible) .carousel__slot[data-role="1"] .gregorian-mode,
 body:has(#role-2:focus-visible) .carousel__slot[data-role="2"] .gregorian-mode,
@@ -1061,24 +1065,24 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
          ring's 3D context. -->
     <div class="carousel__controls">
       <div class="carousel__nav carousel__nav--next">
+        <label class="carousel__nav-hit" for="role-8" aria-label="Next role"></label>
+        <label class="carousel__nav-hit" for="role-1" aria-label="Next role"></label>
         <label class="carousel__nav-hit" for="role-2" aria-label="Next role"></label>
         <label class="carousel__nav-hit" for="role-3" aria-label="Next role"></label>
         <label class="carousel__nav-hit" for="role-4" aria-label="Next role"></label>
         <label class="carousel__nav-hit" for="role-5" aria-label="Next role"></label>
         <label class="carousel__nav-hit" for="role-6" aria-label="Next role"></label>
         <label class="carousel__nav-hit" for="role-7" aria-label="Next role"></label>
-        <label class="carousel__nav-hit" for="role-8" aria-label="Next role"></label>
-        <label class="carousel__nav-hit" for="role-1" aria-label="Next role"></label>
       </div>
       <div class="carousel__nav carousel__nav--prev">
-        <label class="carousel__nav-hit" for="role-8" aria-label="Previous role"></label>
-        <label class="carousel__nav-hit" for="role-1" aria-label="Previous role"></label>
         <label class="carousel__nav-hit" for="role-2" aria-label="Previous role"></label>
         <label class="carousel__nav-hit" for="role-3" aria-label="Previous role"></label>
         <label class="carousel__nav-hit" for="role-4" aria-label="Previous role"></label>
         <label class="carousel__nav-hit" for="role-5" aria-label="Previous role"></label>
         <label class="carousel__nav-hit" for="role-6" aria-label="Previous role"></label>
         <label class="carousel__nav-hit" for="role-7" aria-label="Previous role"></label>
+        <label class="carousel__nav-hit" for="role-8" aria-label="Previous role"></label>
+        <label class="carousel__nav-hit" for="role-1" aria-label="Previous role"></label>
       </div>
     </div>
     </div>

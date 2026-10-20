@@ -401,26 +401,48 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     if (vis) vis.click();
     return vis ? vis.getAttribute('for') : null;
   }, dir);
-  ok('the next arrow targets the successor of the checked role',
-    (await clickNav('next')) === 'role-2');
-  await page.waitForTimeout(600);
-  ok('clicking next centres the second role',
-    (await centered()).title === 'Branch Sales & Service Associate');
-
-  // Wrap: select the last role, then next wraps to the first.
+  // B124 (issue #346): the history reads newest to oldest. From the page's
+  // starting role, Sr. Portfolio Specialist, "next" steps back in time to
+  // the next-older role, which stands to the right of the front card.
   await page.evaluate(() => document.getElementById('role-8').click());
   await page.waitForTimeout(600);
   ok('selecting role-8 centres "Sr. Portfolio Specialist"',
     (await centered()).role === '8');
-  const nextAfter8 = await page.evaluate(() => {
+  ok('B124 — the next-older role (role 7) stands to the right of the front card, the next-newer (role 1, by wrap) to its left',
+    await page.evaluate(() => {
+      const x = r => { const b = document.querySelector(`.carousel__slot[data-role="${r}"] .gm-back`).getBoundingClientRect();
+        return b.left + b.width / 2; };
+      return x('7') > x('8') + 20 && x('1') < x('8') - 20;
+    }));
+  ok('B124 — the next arrow targets the next-older role (role-8 → role-7)',
+    (await clickNav('next')) === 'role-7');
+  await page.waitForTimeout(600);
+  ok('B124 — clicking next from Sr. Portfolio Specialist centres "Portfolio Specialist"',
+    (await centered()).title === 'Portfolio Specialist');
+  ok('B124 — the previous arrow steps forward in time (role-7 → role-8)',
+    (await clickNav('prev')) === 'role-8');
+  await page.waitForTimeout(600);
+  ok('B124 — clicking previous returns to "Sr. Portfolio Specialist"',
+    (await centered()).role === '8');
+
+  // Wrap: at the oldest role, next loops back to the newest; previous from
+  // the newest loops to the oldest.
+  await page.evaluate(() => document.getElementById('role-1').click());
+  await page.waitForTimeout(600);
+  const nextAfter1 = await page.evaluate(() => {
     const vis = [...document.querySelectorAll('.carousel__nav--next .carousel__nav-hit')]
       .find(l => getComputedStyle(l).display !== 'none');
     return vis && vis.getAttribute('for');
   });
-  ok('the next arrow wraps from role-8 back to role-1', nextAfter8 === 'role-1');
+  ok('B124 — the next arrow wraps from the oldest role (role-1) to the newest (role-8)', nextAfter1 === 'role-8');
   await clickNav('next');
   await page.waitForTimeout(600);
-  ok('clicking next at the last role wraps to the first',
+  ok('B124 — clicking next at the oldest role wraps to "Sr. Portfolio Specialist"',
+    (await centered()).role === '8');
+  ok('B124 — the previous arrow wraps from the newest role (role-8) to the oldest (role-1)',
+    (await clickNav('prev')) === 'role-1');
+  await page.waitForTimeout(600);
+  ok('B124 — clicking previous at the newest role wraps to the oldest',
     (await centered()).role === '1');
 
   // B95 (issue #250): the body is one full-width cell — the divider bar and

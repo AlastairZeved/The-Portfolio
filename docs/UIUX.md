@@ -679,7 +679,7 @@ smoked-glass treatment in §10.6.
 
 | Value | Current rendering |
 |---|---|
-| Cards | All eight; one front card, the others fan behind it. |
+| Cards | All eight; one front card, the others fan behind it. Older roles stand to the front card's right, newer roles to its left (B124). |
 | Card size | One standardized size and height for all roles. |
 | Title card at the 11px floor (B120) | Where the slot is narrower than `830 × 11 / 28` px (the title's 28u type on B76's 11px floor), the title card takes the description card's `600u` width and grows to the longest role title plus the year's line; all 8 title cards keep one height. Above that width it keeps its `427u` width and `180u` basis. |
 | Position | The front card is at z = 0; every other card's nearest edge is behind it. |
@@ -689,7 +689,7 @@ smoked-glass treatment in §10.6.
 | Side-card text | Description text is transparent except on the front card and fades during a turn. |
 | Turn | One role per click, wrapping at either end; ~500ms on `--ease`. CSS-only; some wrap and employer jumps turn the long way. |
 | Reduced motion | Ring turns snap to the selected role. |
-| Arrows | Outside the 3D context below the front card; previous on the left, next on the right. |
+| Arrows | Outside the 3D context below the front card; previous on the left, next on the right. Next steps to the next-older role (role n → n − 1; from role 1 it loops to role 8); previous steps to the next-newer role (n → n + 1; from role 8 it loops to role 1) (B124). |
 | Employer jumps | PNC Bank → role 3; PNC Private Bank → role 5; Brinker Capital → role 8. The employer card for the centred role glows. |
 | Edges | The ring's projected span is clipped within the body. |
 | Mobile | Same ring, full-bleed body; `.clip` is `96vw` high and the ring scales against it. |
@@ -699,7 +699,7 @@ the ring makes one full turn over about one second and settles on role 8
 (§10.6). The employer cards act as
 role-jump labels.
 
-**Rulings:** B92, B93, B95, B98, B101, B120, B122, B123.
+**Rulings:** B92, B93, B95, B98, B101, B120, B122, B123, B124.
 **Agent-derived:** angle, spread and depth literals implement the ruled ring
 relationships. The ring uses the checked role radio and CSS `:has` selectors;
 the component scales uniformly through `--u`.
@@ -722,7 +722,7 @@ remains quiet. Values below describe the current rendering.
 | Glimmer (B102) | `gm-marquee` on the checked/front card only, on `.gm-title` and `.gm-back` pseudo-elements. |
 | Ambient | Static desaturated film grain on the page canvas; it never moves. |
 | Footer | The CTA carries a resting `0 0 18px 2px` glow at 0.55 and a 2px hover lift; tools and education lines use `--ink-dim`. Transitions are 200ms. |
-| Arrival (B101, B123) | One full turn in the "next" direction, 1000ms on `--ease`, once per load; it settles on role 8. |
+| Arrival (B101, B123, B124) | One full turn in the "next" direction (B124's next), 1000ms on `--ease`, once per load; it settles on role 8. |
 | Reduced motion | No arrival turn, glimmer, side-card rise, arrow hover nudge or arrow press scale, or CTA hover lift. The CTA's 2px active translation remains. Light, glass, shadows, grain and hover brightening remain. |
 | Touch | Hover effects are limited to hover-capable devices; tapping a visible side card turns the ring. |
 

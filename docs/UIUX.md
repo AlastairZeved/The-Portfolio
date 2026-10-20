@@ -408,7 +408,7 @@ is costume and comes out.
 
 | Page | Motion | Ruling |
 |---|---|---|
-| Career (`career.html`) | the light pool dims once on load; the role ring turns once on load; `gm-marquee` glimmers on the front card only | B98, B101, B102; no arrival or glimmer under `prefers-reduced-motion` |
+| Career (`career.html`) | the light pool dims once on load; the role ring turns once on load; `gm-marquee` glimmers on the front card only | B98, B101, B102, B123; no arrival or glimmer under `prefers-reduced-motion` |
 
 **Rulings:** B98, B101, B102.
 
@@ -693,11 +693,12 @@ smoked-glass treatment in §10.6.
 | Edges | The ring's projected span is clipped within the body. |
 | Mobile | Same ring, full-bleed body; `.clip` is `96vw` high and the ring scales against it. |
 
-The checked role starts at role 1. On load, the ring makes one full turn over
-about two seconds and settles on role 1 (§10.6). The employer cards act as
+The checked role starts at role 8, Sr. Portfolio Specialist (B123). On load,
+the ring makes one full turn over about one second and settles on role 8
+(§10.6). The employer cards act as
 role-jump labels.
 
-**Rulings:** B92, B93, B95, B98, B101, B120, B122.
+**Rulings:** B92, B93, B95, B98, B101, B120, B122, B123.
 **Agent-derived:** angle, spread and depth literals implement the ruled ring
 relationships. The ring uses the checked role radio and CSS `:has` selectors;
 the component scales uniformly through `--u`.

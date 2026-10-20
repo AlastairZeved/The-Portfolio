@@ -3536,3 +3536,18 @@ Principle: Zero cognitive tax.
 Reason: a visitor turning the career ring should find what each job was, not a promise of it; a placeholder that can never appear is a rule kept for nothing.
 
 **Source:** the owner's issue [#347](https://github.com/AlastairZeved/The-Portfolio/issues/347), 2026-10-20 — "For the below roles, add the below copy to its description card:", followed by the copy for "Trader", "Portfolio Specialist", "Client Service Associate", "Branch Sales and Service Representative" and "Branch Sales and Service Associate", now transcribed into `career.html` — and the owner's answers in the Claude Code alignment of 2026-10-20 on that issue, quoted verbatim: on the four slips, "Fix all four (Recommended)"; on the longest card, "Let it scroll (Recommended)"; on the placeholder, "Remove it"; on recording the change, "Yes, add an entry (Recommended)"; and, on this entry, "confirm".
+
+### B123. On load the career role ring makes one full turn over ~1s and settles on Sr. Portfolio Specialist (issue #346; partially supersedes B101; keeps B95; keeps B98)
+Principle: Zero cognitive tax.
+- **It lands on Sr. Portfolio Specialist.** The page now opens on role 8 (Sr. Portfolio Specialist, Brinker Capital) instead of role 1 (Branch Sales & Service Representative). This supersedes B101's "settles with role 1 at the front".
+- **The turn is faster.** It is still one full turn in the "next" direction on the page's --ease, but it takes about 1 second instead of 2. This supersedes B101's "over about two seconds".
+- **Brinker Capital glows on load.** The employer card follows the front role (B95), so Brinker Capital is lit on arrival instead of PNC Bank.
+- **Everything else in B101 stands.** The turn runs once per load and is CSS-only; the ring answers clicks while it turns; under prefers-reduced-motion there is no turn and the ring simply sits on Sr. Portfolio Specialist.
+
+**Scale:** the career page, at every viewport width, once per page load.
+
+**Number:** 360° over 1000ms, one iteration, timing --ease; measured by test/career.js — eight animations, one per card, 1000ms, one iteration, and none under reduced motion. UIUX §5 and §10.5 record it.
+
+Reason: a visitor should first see the role Rob holds today, not the one he started in, and a shorter turn shows the ring's shape without holding them up.
+
+**Source:** the owner's issue [#346](https://github.com/AlastairZeved/The-Portfolio/issues/346), 2026-10-20 — "The carousel is supposed to display Sr. Portfolio Specialist upon loading the page, with a short spin of the carousel. Currently it displays Branch Banker first, which is incorrect." — and the owner's answers in the Claude Code alignment of 2026-10-20 on that issue, quoted verbatim: on the repository, "Yes, The-Portfolio (Recommended)"; on the spin, "Full turn, but faster (~1s)"; on the employer glow, "Yes, Brinker glows (Recommended)"; on recording the change, "Yes, add an entry (Recommended)"; and, on this entry, "confirm".

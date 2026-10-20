@@ -323,7 +323,7 @@ body:has(#role-8:checked) .carousel { --n: 8; }
 .carousel__slot {
   position: absolute;
   left: 50%;
-  animation: ring-arrive 2s var(--ease) both;
+  animation: ring-arrive 1s var(--ease) both;   /* B123: ~1s */
   /* The component's own box runs 90 source px below its back card (B76's
      plate inset); dropping it by that much puts the back card's foot on the
      stage floor, so the arrows sit just under the front card. */
@@ -363,7 +363,8 @@ body:has(#role-8:checked) .carousel { --n: 8; }
 }
 
 /* B101 (issue #261): the arrival. On load the ring makes ONE full turn and settles
-   on role 1 -- the same direction as "next", over ~2s on the page's own
+   on role 8, Sr. Portfolio Specialist (B123, issue #346) -- the same direction
+   as "next", over ~1s (B123) on the page's own
    --ease, so it slows into place. --spin is a registered angle so the
    browser can animate it; every slot reads it through --a, so position,
    darkness and see-through all turn together. It animates on each SLOT, not
@@ -952,7 +953,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
 <h1 class="visually-hidden">Career</h1>
 
 <header class="topband">
-  <!-- Selector card 1 of 3: PNC Bank (default selection) -->
+  <!-- Selector card 1 of 3: PNC Bank -->
   <div class="topband__card" data-employer="pnc-bank">
     <h2 class="topband__wordmark">PNC Bank</h2>
     <p class="topband__oneliner">2017-2020</p>
@@ -964,7 +965,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
     <p class="topband__oneliner">2020-2022</p>
     <label class="topband__card-hit" for="role-5" aria-label="PNC Private Bank roles"></label>
   </div>
-  <!-- Selector card 3 of 3: Brinker Capital -->
+  <!-- Selector card 3 of 3: Brinker Capital (default selection, B123) -->
   <div class="topband__card" data-employer="brinker-capital">
     <h2 class="topband__wordmark">Brinker Capital</h2>
     <p class="topband__oneliner">2022-Present</p>
@@ -981,14 +982,14 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
       <!-- B95 (issue #250): the carousel spans the whole body content area.
            Each employer title card jumps to that employer's last role; the
            selected title card follows the centred role. CSS :has only. -->
-      <input class="carousel__radio" type="radio" name="role" id="role-1" checked aria-label="Branch Sales &amp; Service Representative">
+      <input class="carousel__radio" type="radio" name="role" id="role-1" aria-label="Branch Sales &amp; Service Representative">
       <input class="carousel__radio" type="radio" name="role" id="role-2" aria-label="Branch Sales &amp; Service Associate">
       <input class="carousel__radio" type="radio" name="role" id="role-3" aria-label="Branch Banker">
       <input class="carousel__radio" type="radio" name="role" id="role-4" aria-label="Client Service Associate">
       <input class="carousel__radio" type="radio" name="role" id="role-5" aria-label="Portfolio &amp; Trust Administrator">
       <input class="carousel__radio" type="radio" name="role" id="role-6" aria-label="Trader">
       <input class="carousel__radio" type="radio" name="role" id="role-7" aria-label="Portfolio Specialist">
-      <input class="carousel__radio" type="radio" name="role" id="role-8" aria-label="Sr. Portfolio Specialist">
+      <input class="carousel__radio" type="radio" name="role" id="role-8" checked aria-label="Sr. Portfolio Specialist">
 
       <div class="carousel__slot" data-role="1" style="--i: 1">
         <label class="carousel__slot-hit" for="role-1" aria-hidden="true"></label>

@@ -768,7 +768,8 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     }));
   ok('B98 — at 390px the front card is the nearest and the arrows sit below it',
     await phone.evaluate(() => {
-      const back = document.querySelector('.carousel__slot[data-role="1"] .gm-back').getBoundingClientRect();
+      // B123: the phone page loads on role 8, so role 8 is the front card.
+      const back = document.querySelector('.carousel__slot[data-role="8"] .gm-back').getBoundingClientRect();
       const n = [...document.querySelectorAll('.carousel__nav--next .carousel__nav-hit')]
         .find(l => getComputedStyle(l).display !== 'none').getBoundingClientRect();
       return n.top >= back.bottom - 1 && n.height > 0;

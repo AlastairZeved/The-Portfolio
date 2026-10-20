@@ -408,9 +408,9 @@ is costume and comes out.
 
 | Page | Motion | Ruling |
 |---|---|---|
-| Career (`career.html`) | the light pool dims once on load; the role ring turns once on load; `gm-marquee` glimmers on the front card only | B98, B101, B102, B123; no arrival or glimmer under `prefers-reduced-motion` |
+| Career (`career.html`) | the light pool dims once on load; the role ring turns once on load (one full turn, ~1s, B123); `gm-marquee` glimmers on the front card only | B98, B101, B102, B123; no arrival or glimmer under `prefers-reduced-motion` |
 
-**Rulings:** B98, B101, B102.
+**Rulings:** B98, B101, B102, B123.
 
 ---
 
@@ -617,7 +617,8 @@ rendered set (B121).
   share one size, hug the widest employer label, and have equal gaps. Each
   carries its tenure as the italic `13.33px × --rs` date line. Unselected
   cards are dim and italic; the employer of the centred role uses the
-  `--glow-amber` border and `0 0 8px 0` bloom. PNC Bank is selected by default.
+  `--glow-amber` border and `0 0 8px 0` bloom. Brinker Capital is selected by
+  default (B123).
   The page's sole `h1` ("Career") is visually hidden.
 - **Body (per-employer detail):** one full-width role carousel in the body
   content area, bounded by an `overflow: clip` wrapper. The `.carousel` is
@@ -721,10 +722,11 @@ remains quiet. Values below describe the current rendering.
 | Glimmer (B102) | `gm-marquee` on the checked/front card only, on `.gm-title` and `.gm-back` pseudo-elements. |
 | Ambient | Static desaturated film grain on the page canvas; it never moves. |
 | Footer | The CTA carries a resting `0 0 18px 2px` glow at 0.55 and a 2px hover lift; tools and education lines use `--ink-dim`. Transitions are 200ms. |
+| Arrival (B101, B123) | One full turn in the "next" direction, 1000ms on `--ease`, once per load; it settles on role 8. |
 | Reduced motion | No arrival turn, glimmer, side-card rise, arrow hover nudge or arrow press scale, or CTA hover lift. The CTA's 2px active translation remains. Light, glass, shadows, grain and hover brightening remain. |
 | Touch | Hover effects are limited to hover-capable devices; tapping a visible side card turns the ring. |
 
-**Rulings:** B99, B100, B101, B102, B103, B105, B107, B121, B122.
+**Rulings:** B99, B100, B101, B102, B103, B105, B107, B121, B122, B123.
 **Agent-derived:** the pool dip keyframes are named per role so selecting a
 role restarts the dip; the ambient grain is an SVG filter embedded in the CSS.
 

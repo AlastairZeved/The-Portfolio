@@ -273,7 +273,8 @@ main { flex: 1 1 auto; display: flex; }
 /* ---- B98 (issue #257): the role ring. The 8 role components stand in one
    closed ring, 45deg apart, turning around a vertical axis. The checked role
    is nearest; back cards face outward and fade with distance. Each slot's
-   angle is its offset from the checked role, --a = (i - n) x 45deg; the depth
+   angle is its offset from the checked role, --a = (n - i) x 45deg (B124:
+   mirrored, so the next-older role stands on the right); the depth
    cue is cos(--a). The unnormalized angle keeps the ring rigid, so wraparound
    and some employer jumps take the longer route. The geometry scales with the
    .clip container; rendering values are recorded in UIUX §10.5. ---- */
@@ -323,7 +324,7 @@ body:has(#role-8:checked) .carousel { --n: 8; }
 .carousel__slot {
   position: absolute;
   left: 50%;
-  animation: ring-arrive 2s var(--ease) both;
+  animation: ring-arrive 1s var(--ease) both;   /* B123: ~1s */
   /* The component's own box runs 90 source px below its back card (B76's
      plate inset); dropping it by that much puts the back card's foot on the
      stage floor, so the arrows sit just under the front card. */
@@ -339,7 +340,7 @@ body:has(#role-8:checked) .carousel { --n: 8; }
   /* Issue #261: --spin is the arrival turn (below), 0 once the ring settles;
      the fallback keeps a browser without @property on a still ring (its
      discrete 360deg -> 0 flip is a full turn, so nothing visibly jumps). */
-  --a: calc((var(--i) - var(--n)) * 45deg + var(--spin, 0deg));
+  --a: calc((var(--n) - var(--i)) * 45deg + var(--spin, 0deg));   /* B124: older roles on the right */
   --c: calc((1 + cos(var(--a))) / 2);             /* 1 front .. 0 back */
   /* Issue #261: --lift is 1 while the pointer is on a side card -- it rises a
      little and lifts out of the dark. The rise is a world-Y move made before
@@ -363,7 +364,8 @@ body:has(#role-8:checked) .carousel { --n: 8; }
 }
 
 /* B101 (issue #261): the arrival. On load the ring makes ONE full turn and settles
-   on role 1 -- the same direction as "next", over ~2s on the page's own
+   on role 8, Sr. Portfolio Specialist (B123, issue #346) -- the same direction
+   as "next", over ~1s (B123) on the page's own
    --ease, so it slows into place. --spin is a registered angle so the
    browser can animate it; every slot reads it through --a, so position,
    darkness and see-through all turn together. It animates on each SLOT, not
@@ -486,7 +488,10 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] {
    (inside it, the ring painted over them whatever their z-index). Two
    chevrons drawn in --note, each a stack of per-state labels -- a pure-CSS
    "step one role with wrap" has no native "next", so each state reveals the
-   label that points at its successor / predecessor via :has. No script. */
+   label that points at its successor / predecessor via :has. No script.
+   B124 (issue #346): "Next" steps back in time, to the next-older role
+   (role n -> n - 1, wrapping from role 1 to role 8); "Previous" steps
+   forward (n -> n + 1, wrapping from role 8 to role 1). */
 .carousel__controls {
   position: relative;
   z-index: 2;               /* above the front component's own lower inset, which hangs past the stage floor */
@@ -538,22 +543,22 @@ body:has(#role-8:checked) .carousel__slot[data-role="8"] {
 }
 .carousel__nav-hit:active::before { transition-duration: 80ms; }
 .carousel__nav-hit:active::before { --press: 0.85; }
-body:has(#role-1:checked) .carousel__nav--next .carousel__nav-hit[for="role-2"] { display:block; }
-body:has(#role-1:checked) .carousel__nav--prev .carousel__nav-hit[for="role-8"] { display:block; }
-body:has(#role-2:checked) .carousel__nav--next .carousel__nav-hit[for="role-3"] { display:block; }
-body:has(#role-2:checked) .carousel__nav--prev .carousel__nav-hit[for="role-1"] { display:block; }
-body:has(#role-3:checked) .carousel__nav--next .carousel__nav-hit[for="role-4"] { display:block; }
-body:has(#role-3:checked) .carousel__nav--prev .carousel__nav-hit[for="role-2"] { display:block; }
-body:has(#role-4:checked) .carousel__nav--next .carousel__nav-hit[for="role-5"] { display:block; }
-body:has(#role-4:checked) .carousel__nav--prev .carousel__nav-hit[for="role-3"] { display:block; }
-body:has(#role-5:checked) .carousel__nav--next .carousel__nav-hit[for="role-6"] { display:block; }
-body:has(#role-5:checked) .carousel__nav--prev .carousel__nav-hit[for="role-4"] { display:block; }
-body:has(#role-6:checked) .carousel__nav--next .carousel__nav-hit[for="role-7"] { display:block; }
-body:has(#role-6:checked) .carousel__nav--prev .carousel__nav-hit[for="role-5"] { display:block; }
-body:has(#role-7:checked) .carousel__nav--next .carousel__nav-hit[for="role-8"] { display:block; }
-body:has(#role-7:checked) .carousel__nav--prev .carousel__nav-hit[for="role-6"] { display:block; }
-body:has(#role-8:checked) .carousel__nav--next .carousel__nav-hit[for="role-1"] { display:block; }
-body:has(#role-8:checked) .carousel__nav--prev .carousel__nav-hit[for="role-7"] { display:block; }
+body:has(#role-1:checked) .carousel__nav--prev .carousel__nav-hit[for="role-2"] { display:block; }
+body:has(#role-1:checked) .carousel__nav--next .carousel__nav-hit[for="role-8"] { display:block; }
+body:has(#role-2:checked) .carousel__nav--prev .carousel__nav-hit[for="role-3"] { display:block; }
+body:has(#role-2:checked) .carousel__nav--next .carousel__nav-hit[for="role-1"] { display:block; }
+body:has(#role-3:checked) .carousel__nav--prev .carousel__nav-hit[for="role-4"] { display:block; }
+body:has(#role-3:checked) .carousel__nav--next .carousel__nav-hit[for="role-2"] { display:block; }
+body:has(#role-4:checked) .carousel__nav--prev .carousel__nav-hit[for="role-5"] { display:block; }
+body:has(#role-4:checked) .carousel__nav--next .carousel__nav-hit[for="role-3"] { display:block; }
+body:has(#role-5:checked) .carousel__nav--prev .carousel__nav-hit[for="role-6"] { display:block; }
+body:has(#role-5:checked) .carousel__nav--next .carousel__nav-hit[for="role-4"] { display:block; }
+body:has(#role-6:checked) .carousel__nav--prev .carousel__nav-hit[for="role-7"] { display:block; }
+body:has(#role-6:checked) .carousel__nav--next .carousel__nav-hit[for="role-5"] { display:block; }
+body:has(#role-7:checked) .carousel__nav--prev .carousel__nav-hit[for="role-8"] { display:block; }
+body:has(#role-7:checked) .carousel__nav--next .carousel__nav-hit[for="role-6"] { display:block; }
+body:has(#role-8:checked) .carousel__nav--prev .carousel__nav-hit[for="role-1"] { display:block; }
+body:has(#role-8:checked) .carousel__nav--next .carousel__nav-hit[for="role-7"] { display:block; }
 
 body:has(#role-1:focus-visible) .carousel__slot[data-role="1"] .gregorian-mode,
 body:has(#role-2:focus-visible) .carousel__slot[data-role="2"] .gregorian-mode,
@@ -952,7 +957,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
 <h1 class="visually-hidden">Career</h1>
 
 <header class="topband">
-  <!-- Selector card 1 of 3: PNC Bank (default selection) -->
+  <!-- Selector card 1 of 3: PNC Bank -->
   <div class="topband__card" data-employer="pnc-bank">
     <h2 class="topband__wordmark">PNC Bank</h2>
     <p class="topband__oneliner">2017-2020</p>
@@ -964,7 +969,7 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
     <p class="topband__oneliner">2020-2022</p>
     <label class="topband__card-hit" for="role-5" aria-label="PNC Private Bank roles"></label>
   </div>
-  <!-- Selector card 3 of 3: Brinker Capital -->
+  <!-- Selector card 3 of 3: Brinker Capital (default selection, B123) -->
   <div class="topband__card" data-employer="brinker-capital">
     <h2 class="topband__wordmark">Brinker Capital</h2>
     <p class="topband__oneliner">2022-Present</p>
@@ -981,14 +986,14 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
       <!-- B95 (issue #250): the carousel spans the whole body content area.
            Each employer title card jumps to that employer's last role; the
            selected title card follows the centred role. CSS :has only. -->
-      <input class="carousel__radio" type="radio" name="role" id="role-1" checked aria-label="Branch Sales &amp; Service Representative">
+      <input class="carousel__radio" type="radio" name="role" id="role-1" aria-label="Branch Sales &amp; Service Representative">
       <input class="carousel__radio" type="radio" name="role" id="role-2" aria-label="Branch Sales &amp; Service Associate">
       <input class="carousel__radio" type="radio" name="role" id="role-3" aria-label="Branch Banker">
       <input class="carousel__radio" type="radio" name="role" id="role-4" aria-label="Client Service Associate">
       <input class="carousel__radio" type="radio" name="role" id="role-5" aria-label="Portfolio &amp; Trust Administrator">
       <input class="carousel__radio" type="radio" name="role" id="role-6" aria-label="Trader">
       <input class="carousel__radio" type="radio" name="role" id="role-7" aria-label="Portfolio Specialist">
-      <input class="carousel__radio" type="radio" name="role" id="role-8" aria-label="Sr. Portfolio Specialist">
+      <input class="carousel__radio" type="radio" name="role" id="role-8" checked aria-label="Sr. Portfolio Specialist">
 
       <div class="carousel__slot" data-role="1" style="--i: 1">
         <label class="carousel__slot-hit" for="role-1" aria-hidden="true"></label>
@@ -1060,24 +1065,24 @@ body:has(#role-8:focus-visible) .carousel__slot[data-role="8"] .gregorian-mode {
          ring's 3D context. -->
     <div class="carousel__controls">
       <div class="carousel__nav carousel__nav--next">
+        <label class="carousel__nav-hit" for="role-8" aria-label="Next role"></label>
+        <label class="carousel__nav-hit" for="role-1" aria-label="Next role"></label>
         <label class="carousel__nav-hit" for="role-2" aria-label="Next role"></label>
         <label class="carousel__nav-hit" for="role-3" aria-label="Next role"></label>
         <label class="carousel__nav-hit" for="role-4" aria-label="Next role"></label>
         <label class="carousel__nav-hit" for="role-5" aria-label="Next role"></label>
         <label class="carousel__nav-hit" for="role-6" aria-label="Next role"></label>
         <label class="carousel__nav-hit" for="role-7" aria-label="Next role"></label>
-        <label class="carousel__nav-hit" for="role-8" aria-label="Next role"></label>
-        <label class="carousel__nav-hit" for="role-1" aria-label="Next role"></label>
       </div>
       <div class="carousel__nav carousel__nav--prev">
-        <label class="carousel__nav-hit" for="role-8" aria-label="Previous role"></label>
-        <label class="carousel__nav-hit" for="role-1" aria-label="Previous role"></label>
         <label class="carousel__nav-hit" for="role-2" aria-label="Previous role"></label>
         <label class="carousel__nav-hit" for="role-3" aria-label="Previous role"></label>
         <label class="carousel__nav-hit" for="role-4" aria-label="Previous role"></label>
         <label class="carousel__nav-hit" for="role-5" aria-label="Previous role"></label>
         <label class="carousel__nav-hit" for="role-6" aria-label="Previous role"></label>
         <label class="carousel__nav-hit" for="role-7" aria-label="Previous role"></label>
+        <label class="carousel__nav-hit" for="role-8" aria-label="Previous role"></label>
+        <label class="carousel__nav-hit" for="role-1" aria-label="Previous role"></label>
       </div>
     </div>
     </div>

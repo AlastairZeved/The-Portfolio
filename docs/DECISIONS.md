@@ -3536,3 +3536,33 @@ Principle: Zero cognitive tax.
 Reason: a visitor turning the career ring should find what each job was, not a promise of it; a placeholder that can never appear is a rule kept for nothing.
 
 **Source:** the owner's issue [#347](https://github.com/AlastairZeved/The-Portfolio/issues/347), 2026-10-20 — "For the below roles, add the below copy to its description card:", followed by the copy for "Trader", "Portfolio Specialist", "Client Service Associate", "Branch Sales and Service Representative" and "Branch Sales and Service Associate", now transcribed into `career.html` — and the owner's answers in the Claude Code alignment of 2026-10-20 on that issue, quoted verbatim: on the four slips, "Fix all four (Recommended)"; on the longest card, "Let it scroll (Recommended)"; on the placeholder, "Remove it"; on recording the change, "Yes, add an entry (Recommended)"; and, on this entry, "confirm".
+
+### B123. On load the career role ring makes one full turn over ~1s and settles on Sr. Portfolio Specialist (issue #346; partially supersedes B101; keeps B95; keeps B98)
+Principle: Zero cognitive tax.
+- **It lands on Sr. Portfolio Specialist.** The page now opens on role 8 (Sr. Portfolio Specialist, Brinker Capital) instead of role 1 (Branch Sales & Service Representative). This supersedes B101's "settles with role 1 at the front".
+- **The turn is faster.** It is still one full turn in the "next" direction on the page's --ease, but it takes about 1 second instead of 2. This supersedes B101's "over about two seconds".
+- **Brinker Capital glows on load.** The employer card follows the front role (B95), so Brinker Capital is lit on arrival instead of PNC Bank.
+- **Everything else in B101 stands.** The turn runs once per load and is CSS-only; the ring answers clicks while it turns; under prefers-reduced-motion there is no turn and the ring simply sits on Sr. Portfolio Specialist.
+
+**Scale:** the career page, at every viewport width, once per page load.
+
+**Number:** 360° over 1000ms, one iteration, timing --ease; measured by test/career.js — eight animations, one per card, 1000ms, one iteration, and none under reduced motion. UIUX §5 and §10.5 record it.
+
+Reason: a visitor should first see the role Rob holds today, not the one he started in, and a shorter turn shows the ring's shape without holding them up.
+
+**Source:** the owner's issue [#346](https://github.com/AlastairZeved/The-Portfolio/issues/346), 2026-10-20 — "The carousel is supposed to display Sr. Portfolio Specialist upon loading the page, with a short spin of the carousel. Currently it displays Branch Banker first, which is incorrect." — and the owner's answers in the Claude Code alignment of 2026-10-20 on that issue, quoted verbatim: on the repository, "Yes, The-Portfolio (Recommended)"; on the spin, "Full turn, but faster (~1s)"; on the employer glow, "Yes, Brinker glows (Recommended)"; on recording the change, "Yes, add an entry (Recommended)"; and, on this entry, "confirm".
+
+### B124. The career ring reads newest to oldest: "Next" steps to the next-older role, and older roles stand on the right (issue #346; refines B98; keeps B101 (spin direction); keeps B123)
+Principle: Zero cognitive tax.
+- **Next goes back in time.** From Sr. Portfolio Specialist, "Next" brings Portfolio Specialist, then Trader, and on down to Branch Sales & Service Representative (role n → n − 1). "Previous" goes forward in time (n → n + 1).
+- **Older roles on the right.** The ring is mirrored — each card's angle is (n − i) × 45° — so the next-older role stands to the right of the front card, beside the Next arrow, and pressing Next brings in the card the visitor can see on that side.
+- **The history loops.** Next on the oldest role brings Sr. Portfolio Specialist back to the front; Previous on Sr. Portfolio Specialist goes to the oldest role. Only these two loop steps swing the ring the long way.
+- **The load spin turns the same way as Next,** as B101 says; mirroring the ring keeps that true without changing the spin.
+
+**Scale:** the career page, at every viewport width.
+
+**Number:** each arrow press turns the ring one card (45°) except the loop at either end (315°); measured by test/career.js — Next from role 8 lands on role 7, which stands to the front card's right; Previous returns to role 8; Next from role 1 loops to role 8 and Previous from role 8 loops to role 1. UIUX §10.5 records it.
+
+Reason: the page opens on the role Rob holds today, so the natural next card is the one before it in his history, not his first job.
+
+**Source:** the owner's message in the Claude Code session of 2026-10-20 on issue [#346](https://github.com/AlastairZeved/The-Portfolio/issues/346), quoted verbatim — "When a visitor hits 'Next' it should take them to the next role, the previous role in my job history which is certainly not a full circle to my first role." — and the owner's answers there, quoted verbatim: on the card layout, "Older roles on the right (Recommended)"; at the end of the history, "Loop to Sr. Portfolio Specialist"; on the load spin, "Same way as Next (Recommended)"; on where the fix goes, "Into PR #351 (Recommended)"; and, on this entry, "confirm".

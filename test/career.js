@@ -136,8 +136,8 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
         new Set(rs.map(r => r.name)).size === 1 && rs[0].name === 'role';
     }));
   ok('8 slots, one per role', await page.locator('.carousel__slot').count() === 8);
-  ok('default selection is the first role (role-1)',
-    await page.locator('#role-1').isChecked());
+  ok('B123 (issue #346) — default selection is the last role (role-8)',
+    await page.locator('#role-8').isChecked() && !(await page.locator('#role-1').isChecked()));
 
   // The centred card is the checked radio's slot, at zero rotation.
   // B98: a slot's ring angle is read off its computed transform (the
@@ -159,9 +159,19 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     };
   }, null, { timeout: 5000 })).jsonValue();
   const firstCenter = await centered();
-  ok('the centred card is the default role: "Branch Sales & Service Representative" (2017-2018)',
-    firstCenter.role === '1' && firstCenter.title === 'Branch Sales & Service Representative' &&
-    firstCenter.year === '2017-2018');
+  ok('B123 — the centred card on load is "Sr. Portfolio Specialist" (2023-2025)',
+    firstCenter.role === '8' && firstCenter.title === 'Sr. Portfolio Specialist' &&
+    firstCenter.year === '2023-2025');
+  ok('B123 — on load the Brinker Capital employer card is the selected (glowing) one',
+    await page.evaluate(() => {
+      const glow = e => getComputedStyle(document.querySelector(`.topband__card[data-employer="${e}"]`)).boxShadow;
+      return glow('brinker-capital').includes('230, 168, 42') &&
+        !glow('pnc-bank').includes('230, 168, 42') && !glow('pnc-private-bank').includes('230, 168, 42');
+    }));
+  // The ring checks below were written against role 1 at the front; select
+  // it and let the turn land, so they read the ring exactly as before B123.
+  await page.evaluate(() => document.getElementById('role-1').click());
+  await centered();
 
   // B98 (issue #257): the ring. Eight cards, 45° apart; the front card is
   // the nearest object; the camera sits above; flatter than B92's 800px.
@@ -252,8 +262,8 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     await page.evaluate(() => getComputedStyle(document.querySelector('.carousel__pool')).animationName === 'pool-dip-1'));
 
   // Issue #261: quiet wonder.
-  ok('#261 — on load the ring makes ONE turn (~2s, once, every card together) and settles on role 1',
-    arrival.length === 8 && arrival.every(a => a.dur === 2000 && a.iter === 1 && a.target === 'carousel__slot') &&
+  ok('#261/B123 — on load the ring makes ONE turn (~1s, once, every card together) and settles',
+    arrival.length === 8 && arrival.every(a => a.dur === 1000 && a.iter === 1 && a.target === 'carousel__slot') &&
     await page.evaluate(() => [...document.querySelectorAll('.carousel__slot')]
       .every(s => getComputedStyle(s).getPropertyValue('--spin').trim() === '0deg')));
   ok('B121 — the light pool is lit amber (--glow-amber-a); B99\'s cool moonlight is gone',
@@ -391,26 +401,48 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     if (vis) vis.click();
     return vis ? vis.getAttribute('for') : null;
   }, dir);
-  ok('the next arrow targets the successor of the checked role',
-    (await clickNav('next')) === 'role-2');
-  await page.waitForTimeout(600);
-  ok('clicking next centres the second role',
-    (await centered()).title === 'Branch Sales & Service Associate');
-
-  // Wrap: select the last role, then next wraps to the first.
+  // B124 (issue #346): the history reads newest to oldest. From the page's
+  // starting role, Sr. Portfolio Specialist, "next" steps back in time to
+  // the next-older role, which stands to the right of the front card.
   await page.evaluate(() => document.getElementById('role-8').click());
   await page.waitForTimeout(600);
   ok('selecting role-8 centres "Sr. Portfolio Specialist"',
     (await centered()).role === '8');
-  const nextAfter8 = await page.evaluate(() => {
+  ok('B124 — the next-older role (role 7) stands to the right of the front card, the next-newer (role 1, by wrap) to its left',
+    await page.evaluate(() => {
+      const x = r => { const b = document.querySelector(`.carousel__slot[data-role="${r}"] .gm-back`).getBoundingClientRect();
+        return b.left + b.width / 2; };
+      return x('7') > x('8') + 20 && x('1') < x('8') - 20;
+    }));
+  ok('B124 — the next arrow targets the next-older role (role-8 → role-7)',
+    (await clickNav('next')) === 'role-7');
+  await page.waitForTimeout(600);
+  ok('B124 — clicking next from Sr. Portfolio Specialist centres "Portfolio Specialist"',
+    (await centered()).title === 'Portfolio Specialist');
+  ok('B124 — the previous arrow steps forward in time (role-7 → role-8)',
+    (await clickNav('prev')) === 'role-8');
+  await page.waitForTimeout(600);
+  ok('B124 — clicking previous returns to "Sr. Portfolio Specialist"',
+    (await centered()).role === '8');
+
+  // Wrap: at the oldest role, next loops back to the newest; previous from
+  // the newest loops to the oldest.
+  await page.evaluate(() => document.getElementById('role-1').click());
+  await page.waitForTimeout(600);
+  const nextAfter1 = await page.evaluate(() => {
     const vis = [...document.querySelectorAll('.carousel__nav--next .carousel__nav-hit')]
       .find(l => getComputedStyle(l).display !== 'none');
     return vis && vis.getAttribute('for');
   });
-  ok('the next arrow wraps from role-8 back to role-1', nextAfter8 === 'role-1');
+  ok('B124 — the next arrow wraps from the oldest role (role-1) to the newest (role-8)', nextAfter1 === 'role-8');
   await clickNav('next');
   await page.waitForTimeout(600);
-  ok('clicking next at the last role wraps to the first',
+  ok('B124 — clicking next at the oldest role wraps to "Sr. Portfolio Specialist"',
+    (await centered()).role === '8');
+  ok('B124 — the previous arrow wraps from the newest role (role-8) to the oldest (role-1)',
+    (await clickNav('prev')) === 'role-1');
+  await page.waitForTimeout(600);
+  ok('B124 — clicking previous at the newest role wraps to the oldest',
     (await centered()).role === '1');
 
   // B95 (issue #250): the body is one full-width cell — the divider bar and
@@ -758,7 +790,8 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     }));
   ok('B98 — at 390px the front card is the nearest and the arrows sit below it',
     await phone.evaluate(() => {
-      const back = document.querySelector('.carousel__slot[data-role="1"] .gm-back').getBoundingClientRect();
+      // B123: the phone page loads on role 8, so role 8 is the front card.
+      const back = document.querySelector('.carousel__slot[data-role="8"] .gm-back').getBoundingClientRect();
       const n = [...document.querySelectorAll('.carousel__nav--next .carousel__nav-hit')]
         .find(l => getComputedStyle(l).display !== 'none').getBoundingClientRect();
       return n.top >= back.bottom - 1 && n.height > 0;
@@ -814,22 +847,22 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
     glass: getComputedStyle(document.querySelector('.gm-desc')).backgroundColor,
     grain: getComputedStyle(document.body).backgroundImage.includes('feTurbulence'),
     pool: getComputedStyle(document.querySelector('.carousel__pool')).backgroundImage.includes('230, 168, 42'),
-    frontM11: new DOMMatrix(getComputedStyle(document.querySelector('.carousel__slot[data-role="1"]')).transform).m11,
+    frontM11: new DOMMatrix(getComputedStyle(document.querySelector('.carousel__slot[data-role="8"]')).transform).m11,
   }));
   ok('#261 — reduced motion: no arrival turn and no glimmer; the ring is settled at once',
     rm.arrive === 0 && rm.glimmer === 0 && Math.abs(rm.frontM11 - 1) < 1e-3);
   ok('#261 — reduced motion keeps the light, the glass and the grain',
     rm.grain && rm.pool && rgba(rm.glass).a < 0.95);
   const s3 = await still.evaluate(() => {
-    const b = document.querySelector('.carousel__slot[data-role="2"] .carousel__slot-hit').getBoundingClientRect();
+    const b = document.querySelector('.carousel__slot[data-role="7"] .carousel__slot-hit').getBoundingClientRect();
     return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
   });
-  const y0 = await still.evaluate(() => new DOMMatrix(getComputedStyle(document.querySelector('.carousel__slot[data-role="2"]')).transform).m42);
+  const y0 = await still.evaluate(() => new DOMMatrix(getComputedStyle(document.querySelector('.carousel__slot[data-role="7"]')).transform).m42);
   await still.mouse.move(s3.x, s3.y);
   await still.waitForTimeout(100);
   ok('#261 — reduced motion: a hovered side card brightens but does not rise',
     await still.evaluate(y => {
-      const s = document.querySelector('.carousel__slot[data-role="2"]');
+      const s = document.querySelector('.carousel__slot[data-role="7"]');
       return Math.abs(new DOMMatrix(getComputedStyle(s).transform).m42 - y) < 0.5 &&
         getComputedStyle(s).getPropertyValue('--lift').trim() === '1';
     }, y0));
@@ -859,18 +892,19 @@ const ok = (label, cond, details = '') => { if (!cond) failures++; console.log(`
 
 
   // Issue #261: phones get everything except hover; a tap turns the ring.
+  // B123: the ring lands on role 8, so its visible neighbour is role 7.
   const touch = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const tp = await touch.newPage();
   await tp.goto(URL, { waitUntil: 'networkidle' });
   await arrived(tp);
   const t2 = await tp.evaluate(() => {
-    const b = document.querySelector('.carousel__slot[data-role="2"] .carousel__slot-hit').getBoundingClientRect();
+    const b = document.querySelector('.carousel__slot[data-role="7"] .carousel__slot-hit').getBoundingClientRect();
     return { x: b.x + b.width / 2, y: b.y + b.height / 2, hover: matchMedia('(hover: hover)').matches };
   });
   await tp.tap('body', { position: { x: t2.x, y: t2.y } });
   await tp.waitForTimeout(650);
   ok('#261 — on a phone (no hover) tapping a side card turns the ring to it',
-    !t2.hover && await tp.locator('#role-2').isChecked());
+    !t2.hover && await tp.locator('#role-7').isChecked());
 
   await browser.close();
   console.log(failures === 0 ? '\nCAREER PASS' : `\nCAREER FAIL: ${failures}`);
